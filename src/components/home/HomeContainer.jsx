@@ -7,20 +7,28 @@ function HomeContainer(props) {
     return (
         <section className="main-container">
             <article className="main-container-top-row">
-                <ul>
-                    {
-                        menu.map(
-                            (menuItem, i) => (
-                                <li key={menuItem.name} style={{ fontWeight: props.selectedIndex === i ? 'bold' : 'initial' }} onClick={() => props.selectIndex(i)}>
-                                    <img src={menuItem.asset.default} alt="" height={30} />
-                                    <span>{menuItem.name}</span>
-                                </li>
+                <div className="container pre-main-container-section">
+                    <ul>
+                        {
+                            menu.map(
+                                (menuItem, i) => (
+                                    <li key={menuItem.name} style={{ fontWeight: props.selectedIndex === i ? 'bold' : 'initial' }} onClick={() => props.selectIndex(i)}>
+                                        <img src={menuItem.asset.default} alt="" height={30} />
+                                        <span>{menuItem.name}</span>
+                                    </li>
+                                )
                             )
-                        )
-                    } 
-                </ul>
-                <div className="main-container-section">
-
+                        } 
+                    </ul>
+                    <div className="main-container-section">
+                        <div className="main-container-section-content">
+                            <div className="main-container-section-content-description">
+                                <h1><b>{menu[props.selectedIndex].name}</b></h1>
+                                <p>{ menu[props.selectedIndex].description }</p>
+                            </div>
+                            <img className="main-container-section-content-image" src={menu[props.selectedIndex].descriptionAsset.default} alt="" height={400} width={302} />
+                        </div>
+                    </div>
                 </div>
             </article>
             <article className="main-container-top-row">

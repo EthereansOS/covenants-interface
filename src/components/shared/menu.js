@@ -1,42 +1,50 @@
 export const menu = [
     {
         name: 'Farm',
-        description: '',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Itaque fuga corrupti voluptate ea aperiam autem fugit necessitatibus earum, debitis natus voluptates magni. Libero repellendus eligendi quidem maiores ut reiciendis. Repellendus?',
+        descriptionAsset: require('../../assets/images/dragon.png'),
         asset: require('../../assets/images/coin.svg'),
     },
     {
         name: 'Inflation',
-        description: '',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Itaque fuga corrupti voluptate ea aperiam autem fugit necessitatibus earum, debitis natus voluptates magni. Libero repellendus eligendi quidem maiores ut reiciendis. Repellendus?',
+        descriptionAsset: require('../../assets/images/dragon.png'),
         asset: require('../../assets/images/coin.svg'),
     },
     {
         name: 'USD',
-        description: '',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Itaque fuga corrupti voluptate ea aperiam autem fugit necessitatibus earum, debitis natus voluptates magni. Libero repellendus eligendi quidem maiores ut reiciendis. Repellendus?',
+        descriptionAsset: require('../../assets/images/dragon.png'),
         asset: require('../../assets/images/coin.svg'),
     },
     {
         name: 'Index',
-        description: '',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Itaque fuga corrupti voluptate ea aperiam autem fugit necessitatibus earum, debitis natus voluptates magni. Libero repellendus eligendi quidem maiores ut reiciendis. Repellendus?',
+        descriptionAsset: require('../../assets/images/dragon.png'),
         asset: require('../../assets/images/coin.svg'),
     },
     {
         name: 'Bazar',
-        description: '',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Itaque fuga corrupti voluptate ea aperiam autem fugit necessitatibus earum, debitis natus voluptates magni. Libero repellendus eligendi quidem maiores ut reiciendis. Repellendus?',
+        descriptionAsset: require('../../assets/images/dragon.png'),
         asset: require('../../assets/images/coin.svg'),
     },
     {
         name: 'Crafting',
-        description: '',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Itaque fuga corrupti voluptate ea aperiam autem fugit necessitatibus earum, debitis natus voluptates magni. Libero repellendus eligendi quidem maiores ut reiciendis. Repellendus?',
+        descriptionAsset: require('../../assets/images/dragon.png'),
         asset: require('../../assets/images/coin.svg'),
     },
     {
         name: 'Grimoire',
-        description: '',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Itaque fuga corrupti voluptate ea aperiam autem fugit necessitatibus earum, debitis natus voluptates magni. Libero repellendus eligendi quidem maiores ut reiciendis. Repellendus?',
+        descriptionAsset: require('../../assets/images/dragon.png'),
         asset: require('../../assets/images/coin.svg'),
     },
     {
         name: 'Github',
-        description: '',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Itaque fuga corrupti voluptate ea aperiam autem fugit necessitatibus earum, debitis natus voluptates magni. Libero repellendus eligendi quidem maiores ut reiciendis. Repellendus?',
+        descriptionAsset: require('../../assets/images/dragon.png'),
         asset: require('../../assets/images/coin.svg'),
     }
 ]
