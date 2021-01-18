@@ -1,0 +1,120 @@
+body {
+    background-image: linear-gradient(rgba(226, 128, 233, 0.3), rgba(241, 212, 109, 0.3));
+}
+
+/* main header style */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 1rem 1rem 1rem;
+}
+
+.main-header-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.main-header-logo h2 {
+    margin-left: 1rem;
+}
+
+.main-header-connect {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.main-header-connect button {
+    margin-left: 1.5rem;
+    margin-right: 1.5rem;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.5rem;
+    border-color: transparent;
+    background-color: rgba(226, 128, 233, 1);
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+@media screen and (max-width: 760px) {
+
+    .main-header {
+        padding: 1rem;
+    }
+
+    .main-header-connect button {
+        margin-left: 0.5rem;
+        margin-right: 0.5rem;
+    }
+
+    .main-header-logo h2 {
+        display: none;
+    }
+}
+
+/* main container style */
+.main-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-self: center;
+}
+
+.main-container-top-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.main-container-section {
+    background-color: white;
+    margin: 0 auto;
+    border-radius: 3rem;
+    margin-left: 2rem;
+}
+
+.main-container ul {
+    list-style-type: none;
+}
+
+.main-container li {
+    margin-bottom: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.main-container li span {
+    margin-left: 0.5rem;
+}
+
+.launch-dapp-button {
+    margin-top: 1.5rem;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.5rem;
+    border-color: transparent;
+    background-color: rgba(226, 128, 233, 1);
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.launch-dapp-button:disabled {
+    background-color:  rgba(226, 128, 233, 0.3);
+}
+
+@media screen and (max-width: 760px) {
+
+    .main-container-top-row {
+        flex-direction: column;
+    }
+
+    .main-container-top-row ul {
+        display: flex;
+        overflow: scroll;
+    }
+}
