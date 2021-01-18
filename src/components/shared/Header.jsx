@@ -6,7 +6,7 @@ import diamond from '../../assets/images/diamond.svg';
 import wizardLogo from '../../assets/images/wizard.svg';
 import { default as context } from '../../data/context.json';
 
-function Header(props: any) {
+function Header(props) {
 
     /**
      * initializes the DFOCore object and sets it in the state.
@@ -28,7 +28,7 @@ function Header(props: any) {
      * formats the given address string to fit it inside the button.
      * @param address ethereum address to format for the button.
      */
-    function formatAddress(address: string) {
+    function formatAddress(address) {
         return `${address.substring(0, 5)}...${address.substring(address.length - 4, address.length)}`;
     }
 
@@ -49,15 +49,15 @@ function Header(props: any) {
     )
 }
 
-function mapStateToProps(state: any) {
+function mapStateToProps(state) {
     const { core } = state;
     console.log(core);
     return { dfoCore: core.dfoCore };
 }
 
-function mapDispatchToProps(dispatch: Function) {
+function mapDispatchToProps(dispatch) {
     return {
-        setCore: (dfoCore: DFOCore) => dispatch(setDFOCore(dfoCore)),
+        setCore: (dfoCore) => dispatch(setDFOCore(dfoCore)),
         removeCore: () => dispatch(removeDFOCore()),
     }
 }

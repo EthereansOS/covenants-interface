@@ -1,9 +1,8 @@
 import { connect } from 'react-redux';
-import { selectIndex, toggleDappLaunch } from '../../store/actions';
 import { menu } from '../shared';
+import { selectIndex, toggleDappLaunch } from '../../store/actions';
 
-function HomeContainer(props: any) {
-
+function DappContainer(props) {
     return (
         <section className="main-container">
             <article className="main-container-top-row">
@@ -24,24 +23,25 @@ function HomeContainer(props: any) {
                 </div>
             </article>
             <article className="main-container-top-row">
-                <button onClick={() => props.dfoCore ? props.launchDapp() : console.log('not enabled.')} className="launch-dapp-button" disabled={props.dfoCore ? false : true}>Launch DAPP</button>
+                <button onClick={() => props.goBack()} className="launch-dapp-button">Go back</button>
             </article>
         </section>
     )
 }
 
-function mapStateToProps(state: any) {
-  const { session, core } = state;
-  const { dfoCore } = core;
-  const { dappLaunched, selectedIndex } = session;
-  return { dappLaunched, selectedIndex, dfoCore };
-}
 
-function mapDispatchToProps(dispatch: Function) {
-    return {
-        launchDapp: () => dispatch(toggleDappLaunch()),
-        selectIndex: (index: number) => dispatch(selectIndex(index)),
-    }
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(HomeContainer);
+function mapStateToProps(state) {
+    const { session, core } = state;
+    const { dfoCore } = core;
+    const { dappLaunched, selectedIndex } = session;
+    return { dappLaunched, selectedIndex, dfoCore };
+  }
+  
+  function mapDispatchToProps(dispatch) {
+      return {
+        goBack: () => dispatch(toggleDappLaunch()),
+        selectIndex: (index) => dispatch(selectIndex(index)),
+      }
+  }
+  
+  export default connect(mapStateToProps, mapDispatchToProps)(DappContainer);

@@ -3,20 +3,20 @@ import { provider } from "web3-core";
 import Web3Modal from "web3modal";
 
 export default class DFOCore {
-    address: string = '0x0000000000000000000000000000000000000000';
-    chainId: number = 0;
-    context: any;
-    contracts: any = {};
-    initialized: boolean = false;
-    provider?: provider;
-    voidEthereumAddress: string = '0x0000000000000000000000000000000000000000';
-    web3: any;
+    address = '0x0000000000000000000000000000000000000000';
+    chainId;
+    context;
+    contracts = {};
+    initialized = false;
+    provider;
+    voidEthereumAddress = '0x0000000000000000000000000000000000000000';
+    web3;
 
     /**
      * constructs the DFOCore object by passing the context json object.
      * @param {*} context app context.
      */
-    constructor(context: any = undefined) { 
+    constructor(context) { 
         this.context = context;
     }
 
@@ -27,7 +27,7 @@ export default class DFOCore {
      * @param {*} web3 
      * @param {*} providerOptions 
      */
-    async init(web3: Web3 | undefined = undefined, providerOptions: any | undefined = {}) {
+    async init(web3, providerOptions = {}) {
         // return if already initialized
         if (this.initialized) return;
         // retrieve the web3 passed in the function
@@ -45,22 +45,21 @@ export default class DFOCore {
             const accounts = await this.web3.eth.getAccounts();
             this.address = accounts[0];
             // check for accounts changes
-            provider.on('accountsChanged', (accounts: string[]) => {
+            provider.on('accountsChanged', (accounts) => {
                 this.address = accounts[0] || this.voidEthereumAddress;
                 console.log(`changed address to ${this.address}`);
             });
             // check for chain id changes
-            provider.on('chainChanged', (chainId: number) => {
+            provider.on('chainChanged', (chainId) => {
                 this.chainId = this.context.ethereumNetwork[chainId] ? chainId : 0;
                 console.log(`changed chainId to ${this.chainId}`);
             })
             // check for connection
-            provider.on('connect', (info: { chainId: number }) => {
-                this.chainId = info.chainId;
+            provider.on('connect', ({ chainId }) => {
+                this.chainId = chainId;
             });
             // check for disconnect
-            provider.on('disconnect', (error: { code: number, message: string }) => {
-                const { code, message } = error;
+            provider.on('disconnect', ({ code, message }) => {
                 console.log({ code, message });
                 this.address = this.voidEthereumAddress;
                 this.chainId = 0;
@@ -77,7 +76,7 @@ export default class DFOCore {
      * @param {*} abi contract ABI.
      * @param {*} address contract address.
      */
-    async getContract(abi: any, address: string) {
+    async getContract(abi, address) {
         this.address = address || this.voidEthereumAddress;
         // create the key
         const key = address.toLowerCase();
@@ -89,7 +88,15 @@ export default class DFOCore {
      * returns the element with the given elementName from the context.
      * @param {*} elementName name of the element to retrieve from the context.
      */
-    async getContextElement(elementName: string) {
+    getContextElement(elementName) {
+        return this.context[elementName];
+    }
+
+    /**
+     * returns the element with the given elementName from the context for the current chain network.
+     * @param {*} elementName name of the element to retrieve from the context.
+     */
+    getNetworkContextElement(elementName) {
         const network = this.context.ethereumNetwork[this.chainId];
         return this.context[`${elementName}${network}`];
     }
@@ -100,7 +107,7 @@ export default class DFOCore {
      * @param {*} method contract method that will be called.
      * @param {*} value eventual amount of ETH that will be sent.
      */
-    async getSendingOptions(method: any, value: number) {
+    async getSendingOptions(method, value) {
         try {
             // if a method is provided we use it to estimate the gas
             if (method) {
@@ -132,12 +139,9 @@ export default class DFOCore {
      * @param {*} dfoAddress proxy or double proxy address of the dfo to retrieve.
      * @param {*} dfoAddresses other dfo addresses.
      */
-    async loadDFO(dfoAddress: string, dfoAddresses: string[]) {
+    async loadDFO(dfoAddress, dfoAddresses) {
         dfoAddresses = dfoAddresses ? dfoAddresses.concat(dfoAddress) : [dfoAddress];
         // TODO retrieve DFO
     }
 
-    static fromJSON(d: Object): DFOCore {
-        return Object.assign(new DFOCore(), d);
-    }
 }

@@ -1,10 +1,10 @@
-import { SET_DFO_CORE, REMOVE_DFO_CORE, DFOCoreActionTypes, DFOCoreState } from '../../types';
+import { SET_DFO_CORE, REMOVE_DFO_CORE } from '../../types';
 
-const initialState: DFOCoreState = {
+const initialState = {
     dfoCore: null,
 }
 
-export function coreReducer(state = initialState, action: DFOCoreActionTypes): DFOCoreState {
+export function coreReducer(state = initialState, action) {
     switch (action.type) {
         case SET_DFO_CORE:
             return {

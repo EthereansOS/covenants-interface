@@ -1,11 +1,11 @@
-import { TOGGLE_DAPP_LAUNCH, SELECT_INDEX, SessionActionTypes, SessionState } from '../../types';
+import { TOGGLE_DAPP_LAUNCH, SELECT_INDEX } from '../../types';
 
-const initialState: SessionState = {
+const initialState = {
     dappLaunched: false,
     selectedIndex: 0,
 }
 
-export function sessionReducer(state = initialState, action: SessionActionTypes): SessionState {
+export function sessionReducer(state = initialState, action) {
     switch (action.type) {
         case TOGGLE_DAPP_LAUNCH:
             return {

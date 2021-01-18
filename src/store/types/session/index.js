@@ -1,0 +1,2 @@
+export const TOGGLE_DAPP_LAUNCH = 'TOGGLE_DAPP_LAUNCH';
+export const SELECT_INDEX = 'SELECT_INDEX';
