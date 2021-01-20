@@ -9,11 +9,11 @@ const HomeContainer = (props) => {
         <section className="main-container">
             <article className="main-container-top-row">
                 <div className="container pre-main-container-section">
-                    <ul>
+                    <ul className="main-container-nav">
                         {
                             menu.map(
                                 (menuItem, i) => (
-                                    <li key={menuItem.name} style={{ fontWeight: props.selectedIndex === i ? 'bold' : 'initial' }} onClick={() => props.selectIndex(i)}>
+                                    <li className="main-container-nav-item" key={menuItem.name} style={{ fontWeight: props.selectedIndex === i ? 'bold' : 'initial' }} onClick={() => props.selectIndex(i)}>
                                         <img src={menuItem.asset.default} alt="" height={30} />
                                         <span>{menuItem.name}</span>
                                     </li>

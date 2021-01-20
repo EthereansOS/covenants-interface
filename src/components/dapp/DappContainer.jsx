@@ -1,40 +1,43 @@
 import { connect } from 'react-redux';
 import { menu } from '../shared';
 import { selectIndex, toggleDappLaunch } from '../../store/actions';
-import { Link, Switch, Route, useRouteMatch } from 'react-router-dom';
-import { LiquidityMining, USD, FixedInflation } from './components';
+import { Link, Switch, Route, useRouteMatch, useLocation } from 'react-router-dom';
+import { LiquidityMining, USD, FixedInflation } from './pages';
 
 const DappContainer = (props) => {
     const match = useRouteMatch();
+    const location = useLocation();
 
     return (
         <section className="main-container">
             <article className="main-container-top-row">
-                <ul>
-                    {
-                        menu.map(
-                            (menuItem, i) => (
-                                <Link className="dapp-container-link" to={`/dapp/${menuItem.name.toLowerCase()}`}>
-                                    <li key={menuItem.name} style={{ fontWeight: props.selectedIndex === i ? 'bold' : 'initial' }} onClick={() => props.selectIndex(i)}>
-                                        <img src={menuItem.asset.default} alt="" height={30} />
-                                        <span>{menuItem.name}</span>
-                                    </li>
-                                </Link>
+                <div className="container pre-main-container-section">
+                    <ul className="main-container-nav">
+                        {
+                            menu.map(
+                                (menuItem, i) => (
+                                    <Link key={menuItem.name} className="dapp-container-link" to={`/dapp/${menuItem.name.toLowerCase()}`}>
+                                        <li className="main-container-nav-item" key={menuItem.name} style={{ fontWeight: location.pathname === `/dapp/${menuItem.name.toLowerCase()}` ? 'bold' : 'initial' }} onClick={() => props.selectIndex(i)}>
+                                            <img src={menuItem.asset.default} alt="" height={30} />
+                                            <span>{menuItem.name}</span>
+                                        </li>
+                                    </Link>
+                                )
                             )
-                        )
-                    } 
-                </ul>
-                <Switch>
-                    <Route path={`${match.path}/farm`}>
-                        <LiquidityMining />
-                    </Route>
-                    <Route path={`${match.path}/inflation`}>
-                        <FixedInflation />
-                    </Route>
-                    <Route path={`${match.path}/usd`}>
-                        <USD />
-                    </Route>
-                </Switch>
+                        } 
+                    </ul>
+                    <Switch>
+                        <Route path={`${match.path}/farm`}>
+                            <LiquidityMining />
+                        </Route>
+                        <Route path={`${match.path}/inflation`}>
+                            <FixedInflation />
+                        </Route>
+                        <Route path={`${match.path}/usd`}>
+                            <USD />
+                        </Route>
+                    </Switch>
+                </div>
             </article>
             <article className="main-container-top-row">
                 <Link to={"/"}>
