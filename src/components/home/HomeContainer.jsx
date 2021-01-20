@@ -1,6 +1,7 @@
 import { connect } from 'react-redux';
 import { selectIndex, toggleDappLaunch } from '../../store/actions';
 import { menu } from '../shared';
+import { Link } from 'react-router-dom';
 
 function HomeContainer(props) {
 
@@ -32,7 +33,9 @@ function HomeContainer(props) {
                 </div>
             </article>
             <article className="main-container-top-row">
-                <button onClick={() => props.dfoCore ? props.launchDapp() : console.log('not enabled.')} className="launch-dapp-button" disabled={props.dfoCore ? false : true}>Launch DAPP</button>
+                <Link to={"/dapp"}>
+                    <button className="launch-dapp-button" disabled={props.dfoCore ? false : true}>Launch DAPP</button>
+                </Link>
             </article>
         </section>
     )

@@ -1,5 +1,4 @@
 import Web3 from "web3";
-import { provider } from "web3-core";
 import Web3Modal from "web3modal";
 
 export default class DFOCore {

@@ -1,6 +1,7 @@
 import { connect } from 'react-redux';
 import { menu } from '../shared';
 import { selectIndex, toggleDappLaunch } from '../../store/actions';
+import { Link } from 'react-router-dom';
 
 function DappContainer(props) {
     return (
@@ -23,7 +24,9 @@ function DappContainer(props) {
                 </div>
             </article>
             <article className="main-container-top-row">
-                <button onClick={() => props.goBack()} className="launch-dapp-button">Go back</button>
+                <Link to={"/"}>
+                    <button className="launch-dapp-button" disabled={props.dfoCore ? false : true}>Go back</button>
+                </Link>
             </article>
         </section>
     )
