@@ -51,7 +51,6 @@ const Header = (props) => {
 
 const mapStateToProps = (state) => {
     const { core } = state;
-    console.log(core);
     return { dfoCore: core.dfoCore };
 }
 

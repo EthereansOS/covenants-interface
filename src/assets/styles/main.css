@@ -226,3 +226,9 @@ body {
         margin-bottom: 1rem;
     }
 }
+
+/* dapp container style */
+.dapp-container-link {
+    text-decoration: unset;
+    color: unset;
+}

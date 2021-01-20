@@ -33,7 +33,7 @@ const HomeContainer = (props) => {
                 </div>
             </article>
             <article className="main-container-top-row">
-                <Link to={"/dapp"}>
+                <Link to={`/dapp/${menu[props.selectedIndex].name.toLowerCase()}`}>
                     <button className="launch-dapp-button" disabled={props.dfoCore ? false : true}>Launch DAPP</button>
                 </Link>
             </article>
