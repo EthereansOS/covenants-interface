@@ -1,8 +1,7 @@
-import { connect } from 'react-redux';
 import { Switch, Route } from 'react-router-dom';
 import { Header, HomeContainer, DappContainer } from './components';
 
-function App(props) {
+const App = () => {
 
   return (
     <div className="App">
@@ -20,10 +19,4 @@ function App(props) {
   
 }
 
-function mapStateToProps(state) {
-  const { session } = state;
-  const { dappLaunched } = session;
-  return { dappLaunched };
-}
-
-export default connect(mapStateToProps)(App);
+export default App;

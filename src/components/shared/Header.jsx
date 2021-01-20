@@ -6,7 +6,7 @@ import diamond from '../../assets/images/diamond.svg';
 import wizardLogo from '../../assets/images/wizard.svg';
 import { default as context } from '../../data/context.json';
 
-function Header(props) {
+const Header = (props) => {
 
     /**
      * initializes the DFOCore object and sets it in the state.
@@ -49,13 +49,13 @@ function Header(props) {
     )
 }
 
-function mapStateToProps(state) {
+const mapStateToProps = (state) => {
     const { core } = state;
     console.log(core);
     return { dfoCore: core.dfoCore };
 }
 
-function mapDispatchToProps(dispatch) {
+const mapDispatchToProps = (dispatch) => {
     return {
         setCore: (dfoCore) => dispatch(setDFOCore(dfoCore)),
         removeCore: () => dispatch(removeDFOCore()),

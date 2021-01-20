@@ -3,7 +3,7 @@ import { menu } from '../shared';
 import { selectIndex, toggleDappLaunch } from '../../store/actions';
 import { Link } from 'react-router-dom';
 
-function DappContainer(props) {
+const DappContainer = (props) => {
     return (
         <section className="main-container">
             <article className="main-container-top-row">
@@ -20,7 +20,7 @@ function DappContainer(props) {
                     } 
                 </ul>
                 <div className="main-container-section">
-
+                    
                 </div>
             </article>
             <article className="main-container-top-row">
@@ -33,18 +33,18 @@ function DappContainer(props) {
 }
 
 
-function mapStateToProps(state) {
+const mapStateToProps = (state) => {
     const { session, core } = state;
     const { dfoCore } = core;
     const { dappLaunched, selectedIndex } = session;
     return { dappLaunched, selectedIndex, dfoCore };
-  }
+}
   
-  function mapDispatchToProps(dispatch) {
-      return {
-        goBack: () => dispatch(toggleDappLaunch()),
-        selectIndex: (index) => dispatch(selectIndex(index)),
-      }
-  }
+const mapDispatchToProps = (dispatch) => {
+    return {
+    goBack: () => dispatch(toggleDappLaunch()),
+    selectIndex: (index) => dispatch(selectIndex(index)),
+    }
+}
   
-  export default connect(mapStateToProps, mapDispatchToProps)(DappContainer);
+export default connect(mapStateToProps, mapDispatchToProps)(DappContainer);

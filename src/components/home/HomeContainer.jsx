@@ -3,7 +3,7 @@ import { selectIndex, toggleDappLaunch } from '../../store/actions';
 import { menu } from '../shared';
 import { Link } from 'react-router-dom';
 
-function HomeContainer(props) {
+const HomeContainer = (props) => {
 
     return (
         <section className="main-container">
@@ -41,14 +41,14 @@ function HomeContainer(props) {
     )
 }
 
-function mapStateToProps(state) {
+const mapStateToProps = (state) => {
   const { session, core } = state;
   const { dfoCore } = core;
   const { dappLaunched, selectedIndex } = session;
   return { dappLaunched, selectedIndex, dfoCore };
 }
 
-function mapDispatchToProps(dispatch) {
+const mapDispatchToProps = (dispatch) => {
     return {
         launchDapp: () => dispatch(toggleDappLaunch()),
         selectIndex: (index) => dispatch(selectIndex(index)),
