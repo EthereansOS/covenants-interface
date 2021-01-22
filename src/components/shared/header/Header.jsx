@@ -1,10 +1,10 @@
 import { connect } from 'react-redux';
-import DFOCore from '../../core';
-import { setDFOCore, removeDFOCore } from '../../store/actions';
-import map from '../../assets/images/map.svg';
-import diamond from '../../assets/images/diamond.svg';
-import wizardLogo from '../../assets/images/wizard.svg';
-import { default as context } from '../../data/context.json';
+import DFOCore from '../../../core';
+import { setDFOCore, removeDFOCore } from '../../../store/actions';
+import map from '../../../assets/images/map.svg';
+import diamond from '../../../assets/images/diamond.svg';
+import wizardLogo from '../../../assets/images/wizard.svg';
+import { default as context } from '../../../data/context.json';
 
 const Header = (props) => {
 

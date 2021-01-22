@@ -1,5 +1,5 @@
+/*
 import { connect } from 'react-redux';
-import { menu } from '../shared';
 import { selectIndex, toggleDappLaunch } from '../../store/actions';
 import { Link, Switch, Route, useRouteMatch, useLocation } from 'react-router-dom';
 import { LiquidityMining, USD, FixedInflation } from './pages';
@@ -24,7 +24,7 @@ const DappContainer = (props) => {
                                     </Link>
                                 )
                             )
-                        } 
+                                } 
                     </ul>
                     <Switch>
                         <Route path={`${match.path}/farm`}>
@@ -64,3 +64,4 @@ const mapDispatchToProps = (dispatch) => {
 }
   
 export default connect(mapStateToProps, mapDispatchToProps)(DappContainer);
+*/

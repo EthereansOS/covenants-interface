@@ -1,6 +1,6 @@
+/*
 import { connect } from 'react-redux';
 import { selectIndex, toggleDappLaunch } from '../../store/actions';
-import { menu } from '../shared';
 import { Link } from 'react-router-dom';
 
 const HomeContainer = (props) => {
@@ -10,7 +10,7 @@ const HomeContainer = (props) => {
             <article className="main-container-top-row">
                 <div className="container pre-main-container-section">
                     <ul className="main-container-nav">
-                        {
+                        { 
                             menu.map(
                                 (menuItem, i) => (
                                     <li className="main-container-nav-item" key={menuItem.name} style={{ fontWeight: props.selectedIndex === i ? 'bold' : 'initial' }} onClick={() => props.selectIndex(i)}>
@@ -25,7 +25,7 @@ const HomeContainer = (props) => {
                         <div className="main-container-section-content">
                             <div className="main-container-section-content-description">
                                 <h1><b>{menu[props.selectedIndex].name}</b></h1>
-                                <p>{ menu[props.selectedIndex].description }</p>
+                                <p>{ menu[props.selectedIndex].description}</p>
                             </div>
                             <img className="main-container-section-content-image" src={menu[props.selectedIndex].descriptionAsset.default} alt="" height={400} width={302} />
                         </div>
@@ -56,3 +56,4 @@ const mapDispatchToProps = (dispatch) => {
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(HomeContainer);
+*/
