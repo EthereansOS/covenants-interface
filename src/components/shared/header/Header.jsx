@@ -9,46 +9,36 @@ import { Link } from 'react-router-dom';
 
 const Header = (props) => {
 
-    /**
-     * initializes the DFOCore object and sets it in the state.
-     */
-    async function connectCore() {
+    const connectCore = async () => {
       const core = new DFOCore(context);
       await core.init();
       props.setCore(core);
     }
-
-    /**
-     * removes the DFOCore object from the state.
-     */
-    function disconnectCore() {
+    
+    const disconnectCore = () => {
         props.removeCore();
     }
 
-    /**
-     * formats the given address string to fit it inside the button.
-     * @param address ethereum address to format for the button.
-     */
-    function formatAddress(address) {
+    const formatAddress = (address) => {
         return `${address.substring(0, 5)}...${address.substring(address.length - 4, address.length)}`;
     }
 
     return (
-        <section className="main-header">
-            <article className="main-header-logo">
-                <Link to={"/"}>
+        <nav class="navbar navbar-light bg-transparent">
+            <div class="container-fluid">
+                <Link to={"/"} class="navbar-brand">
                     <img src={wizardLogo} alt="" height={50} />
+                    <span className="mx-3"><b>Covenants</b></span>
                 </Link>
-                <h2>Covenants</h2>
-            </article>
-            <article className="main-header-connect">
-                <img src={map} alt="" height={36} />
-                {
-                    props.dfoCore ? <button className="connect-button" onClick={() => disconnectCore()}>{formatAddress(props.dfoCore.address)}</button> : <button className="connect-button" onClick={() => connectCore()}>Connect</button>
-                }
-                <img src={diamond} alt="" height={36} />
-            </article>
-        </section>
+                <div class="d-flex">
+                    <img src={map} alt="" height={36} />
+                    {
+                        props.dfoCore ? <button className="btn btn-primary mx-4" onClick={() => disconnectCore()}>{formatAddress(props.dfoCore.address)}</button> : <button className="btn btn-primary mx-4" onClick={() => connectCore()}>Connect</button>
+                    }
+                    <img src={diamond} alt="" height={36} />
+                </div>
+            </div>
+        </nav>
     )
 }
 

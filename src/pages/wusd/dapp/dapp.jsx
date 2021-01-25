@@ -1,5 +1,97 @@
-const Dapp = () => {
-    return <div />
+import { connect } from 'react-redux';
+import DFOCore from '../../../core';
+import { setDFOCore, removeDFOCore } from '../../../store/actions';
+import { default as context } from '../../../data/context.json';
+import { useState } from 'react';
+import { Arbitrate, Burn, Farm, Mint, Stats, USDN } from './components';
+
+
+const Dapp = (props) => {
+
+    const [currentTab, setCurrentTab] = useState('mint');
+
+    const connectCore = async () => {
+        const core = new DFOCore(context);
+        await core.init();
+        props.setCore(core);
+    }
+
+    const getContent = () => {
+        switch (currentTab) {
+            case 'arbitrate':
+                return <Arbitrate />;
+            case 'mint':
+                return <Mint />;
+            case 'burn':
+                return <Burn />;
+            case 'farm':
+                return <Farm />;
+            case 'stats':
+                return <Stats />;
+            case 'usdn':
+                return <USDN />;
+            default:
+                return <div/>;
+        }
+    }
+
+    if (!props.dfoCore) {
+        return (
+            <div className="container bg-white dapp-container">
+                <div className="row">
+                    <div className="col-12 dapp-col text-center justify-content-center">
+                        <button className="btn btn-primary mx-4" onClick={() => connectCore()}>Connect</button>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    return (
+        <div className="container bg-white dapp-container">
+            <div className="row" style={{flexDirection: 'column'}}>
+                <div className="col-12 dapp-col text-center">
+                    <div className="wusd-dapp-menu">
+                        <ul class="nav justify-content-center">
+                            <li class={`nav-item ${currentTab === 'mint' ? 'nav-item-selected' : ''}`} onClick={() => setCurrentTab('mint')}>
+                                <span className="nav-link">Mint</span>
+                            </li>
+                            <li class={`nav-item ${currentTab === 'burn' ? 'nav-item-selected' : ''}`} onClick={() => setCurrentTab('burn')}>
+                                <span className="nav-link">Burn</span>
+                            </li>
+                            <li class={`nav-item ${currentTab === 'farm' ? 'nav-item-selected' : ''}`} onClick={() => setCurrentTab('farm')}>
+                                <span className="nav-link">Farm</span>
+                            </li>
+                            <li class={`nav-item ${currentTab === 'stats' ? 'nav-item-selected' : ''}`} onClick={() => setCurrentTab('stats')}>
+                                <span className="nav-link">Stats</span>
+                            </li>
+                            <li class={`nav-item ${currentTab === 'arbitrate' ? 'nav-item-selected' : ''}`} onClick={() => setCurrentTab('arbitrate')}>
+                                <span className="nav-link">Arbitrate</span>
+                            </li>
+                            <li class={`nav-item ${currentTab === 'usdn' ? 'nav-item-selected' : ''}`} onClick={() => setCurrentTab('usdn')}>
+                                <span className="nav-link">uSDN</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div className="wusd-dapp-content mt-4">
+                        { getContent() }
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
 }
 
-export default Dapp;
+const mapStateToProps = (state) => {
+    const { core } = state;
+    return { dfoCore: core.dfoCore };
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        setCore: (dfoCore) => dispatch(setDFOCore(dfoCore)),
+        removeCore: () => dispatch(removeDFOCore()),
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Dapp);

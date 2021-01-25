@@ -8,8 +8,12 @@ const App = () => {
     <div className="app">
       <Header />
       <div className="container app-container">
-        <Sidemenu />
-        <Switch>
+        <div className="row app-row w-100 align-items-center">
+          <div className="col-md-2 col-12">
+            <Sidemenu />
+          </div>
+          <div className="col-md-10 col-12">
+          <Switch>
           <Route path="/arbitrage">
             <ArbitragePage />
           </Route>
@@ -44,6 +48,9 @@ const App = () => {
             <PageNotFound />
           </Route>
         </Switch>
+          </div>
+        </div>
+        
       </div>
       <Footer />
     </div>

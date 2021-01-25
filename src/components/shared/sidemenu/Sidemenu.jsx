@@ -29,17 +29,17 @@ const Sidemenu = () => {
     console.log(location);
 
     return (
-        <ul className="sidebar-menu">
-            {
-                menu.map(
-                    (menuItem, index) => (
-                        <li className={`${location.pathname.includes(menuItem.path) ? "sidebar-menu-link-selected" : ""}`} key={index}>
-                            <img src={menuItem.asset} height={30} />
-                            <Link to={menuItem.path}>{menuItem.name}</Link>
-                        </li>
-                    )
+        <ul class="nav app-sidemenu flex-column">
+        {
+            menu.map(
+                (menuItem, index) => (
+                    <li className={`nav-link ${location.pathname.includes(menuItem.path) ? "sidebar-menu-link-selected" : ""}`} key={index}>
+                        <img src={menuItem.asset} height={30} />
+                        <Link className="sidebar-menu-link" to={menuItem.path}>{menuItem.name}</Link>
+                    </li>
                 )
-            }
+            )
+        }   
         </ul>
     )
 }

@@ -3,7 +3,7 @@ import BazaarPage from './bazaar/Bazaar';
 import CraftingPage from './crafting/Crafting';
 import FarmPage from './farm/Farm';
 import GrimoirePage from './grimoire/Grimoire';
-import MorePage from './more/More';
+import MorePage from './convenants/Covenants';
 import IndexPage from './index/Index';
 import InflationPage from './inflation/Inflation';
 import MultiswapPage from './multiswap/Multiswap';

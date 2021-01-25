@@ -1,24 +1,107 @@
+@import "node_modules/bootstrap/scss/functions";
+@import "node_modules/bootstrap/scss/variables";
+@import "node_modules/bootstrap/scss/mixins";
+@import url('https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@300;400;600;700&display=swap');
+
+$primary: #be2edd;
+$secondary: #1abc9c;
+
 body {
-    background-image: linear-gradient(rgba(226, 128, 233, 0.3), rgba(241, 212, 109, 0.3));
+  margin: 0;
+  font-family: 'Overpass Mono', monospace;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  background-image: linear-gradient(rgba(226, 128, 233, 0.3), rgba(241, 212, 109, 0.3));
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
 }
 
 #root {
   padding-bottom: 2rem;
 }
 
-/* bootstrap container */
-.container,
-.container-fluid,
-.container-xxl,
-.container-xl,
-.container-lg,
-.container-md,
-.container-sm {
-  width: 100%;
-  padding-right: var(--bs-gutter-x, 0.75rem);
-  padding-left: var(--bs-gutter-x, 0.75rem);
-  margin-right: auto;
-  margin-left: auto;
+/* customize bootstrap */
+.btn {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.btn-primary {
+  @include button-variant($primary, darken($primary, 3%));
+}
+
+.btn-secondary {
+  @include button-variant($secondary, darken($secondary, 3%));
+}
+
+.btn-outline-secondary {
+  @include button-outline-variant($secondary, #fff, lighten($secondary, 3%), $secondary);
+}
+
+.text-secondary {
+  color: $secondary !important;
+}
+
+.btn {
+  border-radius: 1.5rem;
+}
+
+/* other styles */
+.nav-item {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.sidebar-menu-link {
+  text-decoration: none;
+  color: black;
+}
+
+.sidebar-menu-link:hover {
+  text-decoration: none;
+}
+
+.nav-item-selected {
+  border-bottom: 10px $secondary solid;
+}
+
+.dapp-container {
+  border-radius: 1.5rem;
+}
+
+.dapp-col {
+  min-height: 650px;
+  max-height: 1000px;
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  flex-direction: column;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+/* wusd */
+.wusd-dapp-content {
+  width: 80%;
+}
+
+.wusd-pair-select {
+  border-color: $secondary;
+  border-radius: 1.5rem;
+}
+
+.wusd-stats-advanced {
+  cursor: pointer;
+}
+
+.health-bar {
+  border-radius: 1.5rem;
+  padding: 0.5rem 1.5rem;
+  text-align: right;
 }
 
 /* main header style */
@@ -44,32 +127,6 @@ body {
     align-items: center;
 }
 
-.main-header-connect button {
-    margin-left: 1.5rem;
-    margin-right: 1.5rem;
-    padding: 0.5rem 1.5rem;
-    border-radius: 1.5rem;
-    border-color: transparent;
-    background-color: rgba(226, 128, 233, 1);
-    color: white;
-    font-weight: bold;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-@media screen and (max-width: 768px) {
-    .main-header {
-        padding: 1rem;
-    }
-    .main-header-connect button {
-        margin-left: 0.5rem;
-        margin-right: 0.5rem;
-    }
-    .main-header-logo h2 {
-        display: none;
-    }
-}
-
 /* app component */
 .app-container {
     margin: 0 auto !important;
@@ -83,6 +140,14 @@ body {
   .app-container {
     flex-direction: column;
     padding-top: 0;
+  }
+  .app-row {
+    flex-direction: column;
+  }
+  .app-sidemenu {
+    flex-direction: row !important;
+    flex-wrap: nowrap;
+    overflow: scroll;
   }
 }
 
@@ -250,51 +315,5 @@ body {
 @media screen and(max-width: 767px) {
   .index-paragraph {
     padding: 0 !important;
-  }
-}
-
-/* media queries */
-
-@media (min-width: 375px) {
-  .container-sm, .container {
-    max-width: 350px;
-    width: 350px;
-    height: 750px;
-  }
-}
-
-@media (min-width: 576px) {
-  .container-sm, .container {
-    max-width: 540px;
-    width: 540px;
-    height: 750px;
-  }
-}
-@media (min-width: 768px) {
-  .container-md, .container-sm, .container {
-    max-width: 720px;
-    width: 720px;
-    height: 600px;
-  }
-}
-@media (min-width: 992px) {
-  .container-lg, .container-md, .container-sm, .container {
-    max-width: 960px;
-    width: 960px;
-    height: 500px;
-  }
-}
-@media (min-width: 1200px) {
-  .container-xl, .container-lg, .container-md, .container-sm, .container {
-    max-width: 1140px;
-    width: 960px;
-    height: 500px;
-  }
-}
-@media (min-width: 1400px) {
-  .container-xxl, .container-xl, .container-lg, .container-md, .container-sm, .container {
-    max-width: 1320px;
-    width: 960px;
-    height: 500px;
   }
 }

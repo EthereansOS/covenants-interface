@@ -20,7 +20,7 @@ const PageContainer = (props) => {
                     props.launchDapp ? 
                     <div className="page-container-row">
                         <Link to={props.link}>
-                            <button className="launch-dapp-button">DAPP</button>
+                            <button className="btn btn-primary">DAPP</button>
                         </Link>
                     </div> : <div/>
                 }
