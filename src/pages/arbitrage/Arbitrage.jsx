@@ -1,6 +1,8 @@
+import { ComingSoonPage } from "../../components";
+
 const Arbitrage = () => {
     return (
-        <div/>
+        <ComingSoonPage />
     )
 }
 

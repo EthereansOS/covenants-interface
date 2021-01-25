@@ -1,11 +1,11 @@
 import { PageContainer } from "../../components";
 
-const Grimoire = () => {
+const Covenants = () => {
     return (
         <PageContainer>
-            Grimoire page
+            More page
         </PageContainer>
     )
 }
 
-export default Grimoire;
+export default Covenants;

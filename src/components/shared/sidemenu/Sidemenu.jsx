@@ -20,7 +20,7 @@ const menu = [
         name: 'Grimoire', path: '/grimoire', asset: require('../../../assets/images/coin.svg').default,
     },
     {
-        name: 'More', path: '/more', asset: require('../../../assets/images/coin.svg').default,
+        name: 'Covenants', path: '/more', asset: require('../../../assets/images/coin.svg').default,
     }
 ]
 
@@ -33,7 +33,7 @@ const Sidemenu = () => {
             {
                 menu.map(
                     (menuItem, index) => (
-                        <li className={`${location.pathname === menuItem.path ? "sidebar-menu-link-selected" : ""}`} key={index}>
+                        <li className={`${location.pathname.includes(menuItem.path) ? "sidebar-menu-link-selected" : ""}`} key={index}>
                             <img src={menuItem.asset} height={30} />
                             <Link to={menuItem.path}>{menuItem.name}</Link>
                         </li>

@@ -1,6 +1,10 @@
+import { PageContainer } from "../../components";
+
 const Multiswap = () => {
     return (
-        <div/>
+        <PageContainer>
+            Multiswap page
+        </PageContainer>
     )
 }
 

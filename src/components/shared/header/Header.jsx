@@ -5,6 +5,7 @@ import map from '../../../assets/images/map.svg';
 import diamond from '../../../assets/images/diamond.svg';
 import wizardLogo from '../../../assets/images/wizard.svg';
 import { default as context } from '../../../data/context.json';
+import { Link } from 'react-router-dom';
 
 const Header = (props) => {
 
@@ -35,7 +36,9 @@ const Header = (props) => {
     return (
         <section className="main-header">
             <article className="main-header-logo">
-                <img src={wizardLogo} alt="" height={50} />
+                <Link to={"/"}>
+                    <img src={wizardLogo} alt="" height={50} />
+                </Link>
                 <h2>Covenants</h2>
             </article>
             <article className="main-header-connect">
