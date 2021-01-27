@@ -4,7 +4,7 @@ const initialState = {
     dfoCore: null,
 }
 
-export function coreReducer(state = initialState, action) {
+export const coreReducer = (state = initialState, action) => {
     switch (action.type) {
         case SET_DFO_CORE:
             return {

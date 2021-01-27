@@ -1,14 +1,29 @@
-import { TOGGLE_DAPP_LAUNCH, SELECT_INDEX } from '../../types';
+import { SET_FARMING_CONTRACT_STEP, UPDATE_FARMING_CONTRACT, ADD_FARMING_SETUP, REMOVE_FARMING_SETUP } from '../../types';
 
-export function toggleDappLaunch() {
+export const setFarmingContractStep = (step) => {
     return {
-        type: TOGGLE_DAPP_LAUNCH,
+        type: SET_FARMING_CONTRACT_STEP,
+        payload: { step },
     }
 }
 
-export function selectIndex(index) {
+export const updateFarmingContract = (farmingContract) => {
     return {
-        type: SELECT_INDEX,
-        payload: index,
+        type: UPDATE_FARMING_CONTRACT,
+        payload: { farmingContract },
+    }
+}
+
+export const addFarmingSetup = (farmingSetup) => {
+    return {
+        type: ADD_FARMING_SETUP,
+        payload: { farmingSetup },
+    }
+}
+
+export const removeFarmingSetup = (farmingSetupIndex) => {
+    return {
+        type: REMOVE_FARMING_SETUP,
+        payload: { farmingSetupIndex },
     }
 }

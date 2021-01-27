@@ -1,13 +1,13 @@
 import { SET_DFO_CORE, REMOVE_DFO_CORE } from '../../types';
 
-export function setDFOCore(dfoCore) {
+export const setDFOCore = (dfoCore) => {
     return {
         type: SET_DFO_CORE,
         payload: dfoCore,
     }
 }
 
-export function removeDFOCore() {
+export const removeDFOCore = () => {
     return {
         type: REMOVE_DFO_CORE,
     }

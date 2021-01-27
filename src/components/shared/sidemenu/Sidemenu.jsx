@@ -26,7 +26,6 @@ const menu = [
 
 const Sidemenu = () => {
     const location = useLocation();
-    console.log(location);
 
     return (
         <ul class="nav app-sidemenu flex-column">

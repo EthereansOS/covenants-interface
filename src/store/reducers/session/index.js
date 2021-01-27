@@ -1,21 +1,34 @@
-import { TOGGLE_DAPP_LAUNCH, SELECT_INDEX } from '../../types';
+import { SET_FARMING_CONTRACT_STEP, UPDATE_FARMING_CONTRACT, ADD_FARMING_SETUP, REMOVE_FARMING_SETUP } from '../../types';
 
 const initialState = {
-    dappLaunched: false,
-    selectedIndex: 0,
+    farmingContract: null,
+    farmingSetups: [],
+    creationStep: 0,
 }
 
-export function sessionReducer(state = initialState, action) {
+export const sessionReducer = (state = initialState, action) => {
     switch (action.type) {
-        case TOGGLE_DAPP_LAUNCH:
+        case SET_FARMING_CONTRACT_STEP:
             return {
                 ...state,
-                dappLaunched: !state.dappLaunched,
+                creationStep: action.payload.step,
             }
-        case SELECT_INDEX:
+        case UPDATE_FARMING_CONTRACT:
             return {
                 ...state,
-                selectedIndex: action.payload,
+                farmingContract: action.payload.farmingContract,
+            }
+        case ADD_FARMING_SETUP:
+            return {
+                ...state,
+                farmingSetups: [
+                    ...state.farmingSetups, action.payload.farmingSetup
+                ],
+            }
+        case REMOVE_FARMING_SETUP:
+            return {
+                ...state,
+                farmingSetups: state.farmingSetups.filter((fs, i) => i !== action.payload.farmingSetupIndex),
             }
         default:
             return state;

@@ -5,6 +5,7 @@
 
 $primary: #be2edd;
 $secondary: #1abc9c;
+$warning: #FDA7DF;
 
 body {
   margin: 0;
@@ -34,12 +35,24 @@ code {
   @include button-variant($primary, darken($primary, 3%));
 }
 
+.btn-outline-primary {
+  @include button-outline-variant($primary, #fff, lighten($primary, 3%), $primary);
+}
+
 .btn-secondary {
   @include button-variant($secondary, darken($secondary, 3%));
 }
 
 .btn-outline-secondary {
   @include button-outline-variant($secondary, #fff, lighten($secondary, 3%), $secondary);
+}
+
+.btn-warning {
+  @include button-variant($warning, darken($warning, 3%));
+}
+
+.btn-outline-warning {
+  @include button-outline-variant($warning, #fff, lighten($warning, 3%), $warning);
 }
 
 .text-secondary {
@@ -84,14 +97,52 @@ code {
   padding-bottom: 1.5rem;
 }
 
+/* farming */
+.farming-component-main-row {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.farming-component-main-col {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  flex-direction: column;
+}
+
+.farming-component-paragraph {
+  font-size: 14px;
+  text-align: left;
+}
+
+.no-border {
+  border: none;
+}
+
+.setup-component-main-col {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: baseline;
+  flex-direction: column;
+}
+
+.setup-component-small-p {
+  font-size: 12px;
+  text-align: right;
+}
+
 /* wusd */
 .wusd-dapp-content {
   width: 80%;
 }
 
-.wusd-pair-select {
+.wusd-pair-select, .token-filter-input {
   border-color: $secondary;
-  border-radius: 1.5rem;
+  border-radius: 1rem;
+}
+
+.farming-card {
+  border-radius: 1rem;
 }
 
 .wusd-stats-advanced {
@@ -161,7 +212,7 @@ code {
   background-color: white;
   border-radius: 1.5rem;
   width: 600px;
-  height: 500px;
+  min-height: 500px;
   margin-left: 2rem;
   display: flex;
   justify-content: space-evenly;

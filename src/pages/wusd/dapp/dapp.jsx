@@ -3,6 +3,7 @@ import DFOCore from '../../../core';
 import { setDFOCore, removeDFOCore } from '../../../store/actions';
 import { default as context } from '../../../data/context.json';
 import { useState } from 'react';
+import { DappMenu } from '../../../components';
 import { Arbitrate, Burn, Farm, Mint, Stats, USDN } from './components';
 
 
@@ -51,28 +52,7 @@ const Dapp = (props) => {
         <div className="container bg-white dapp-container">
             <div className="row" style={{flexDirection: 'column'}}>
                 <div className="col-12 dapp-col text-center">
-                    <div className="wusd-dapp-menu">
-                        <ul class="nav justify-content-center">
-                            <li class={`nav-item ${currentTab === 'mint' ? 'nav-item-selected' : ''}`} onClick={() => setCurrentTab('mint')}>
-                                <span className="nav-link">Mint</span>
-                            </li>
-                            <li class={`nav-item ${currentTab === 'burn' ? 'nav-item-selected' : ''}`} onClick={() => setCurrentTab('burn')}>
-                                <span className="nav-link">Burn</span>
-                            </li>
-                            <li class={`nav-item ${currentTab === 'farm' ? 'nav-item-selected' : ''}`} onClick={() => setCurrentTab('farm')}>
-                                <span className="nav-link">Farm</span>
-                            </li>
-                            <li class={`nav-item ${currentTab === 'stats' ? 'nav-item-selected' : ''}`} onClick={() => setCurrentTab('stats')}>
-                                <span className="nav-link">Stats</span>
-                            </li>
-                            <li class={`nav-item ${currentTab === 'arbitrate' ? 'nav-item-selected' : ''}`} onClick={() => setCurrentTab('arbitrate')}>
-                                <span className="nav-link">Arbitrate</span>
-                            </li>
-                            <li class={`nav-item ${currentTab === 'usdn' ? 'nav-item-selected' : ''}`} onClick={() => setCurrentTab('usdn')}>
-                                <span className="nav-link">uSDN</span>
-                            </li>
-                        </ul>
-                    </div>
+                    <DappMenu className="wusd-dapp-menu" onClick={(name) => setCurrentTab(name)} currentTab={currentTab} options={['Mint', 'Burn', 'Farm', 'Stats', 'Arbitrate', 'uSDN']} />
                     <div className="wusd-dapp-content mt-4">
                         { getContent() }
                     </div>
