@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { connect } from 'react-redux';
-import { Coin } from '../../../../components';
+import { ApproveButton, Input } from '../../../../components';
 
 const Mint = (props) => {
     const [pair, setPair] = useState("");
@@ -12,16 +12,7 @@ const Mint = (props) => {
     const getLpToken = () => {
         return (
             <div className="col-12 mb-4">
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <button class="btn btn-secondary" type="button">MAX</button>
-                    </div>
-                    <input type="number" class="form-control" value={lpTokenAmount} min={0} onChange={(e) => setLpTokenAmount(e.target.value)} />
-                    <div class="input-group-append">
-                        <span class="input-group-text" id=""> DAI/USDC</span>
-                    </div>
-                </div>
-                <small class="form-text text-muted">Balance: 0 DAI/USDC</small>
+                <Input showMax={true} value={lpTokenAmount} balance={1000} min={0} onChange={(e) => setLpTokenAmount(e.target.value)} showCoin={true} showBalance={true} name="DAI/USDC" />
             </div>
         )
     }
@@ -30,31 +21,13 @@ const Mint = (props) => {
         return (
             <>
                 <div className="col-12 mb-4">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <button class="btn btn-secondary" type="button">MAX</button>
-                        </div>
-                        <input type="number" class="form-control" value={firstAmount} min={0} onChange={(e) => setFirstAmount(e.target.value)} />
-                        <div class="input-group-append">
-                            <span class="input-group-text" id=""><Coin /> DAI</span>
-                        </div>
-                    </div>
-                    <small class="form-text text-muted">Balance: 0 DAI</small>
+                    <Input showMax={true} value={firstAmount} balance={1000} min={0} onChange={(e) => setFirstAmount(e.target.value)} showCoin={true} showBalance={true} name="DAI" />
                 </div>
                 <div className="col-12 mb-2">
                     <p><b>And</b></p>
                 </div>
                 <div className="col-12 mb-4">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <button class="btn btn-secondary" type="button">MAX</button>
-                        </div>
-                        <input type="number" class="form-control" value={secondAmount} min={0} onChange={(e) => setSecondAmount(e.target.value)} />
-                        <div class="input-group-append">
-                            <span class="input-group-text" id=""><img className="mr-2" src="https://assets.trustwalletapp.com/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png" height={24} /> USDC</span>
-                        </div>
-                    </div>
-                    <small class="form-text text-muted">Balance: 0 USDC</small>
+                    <Input showMax={true} value={secondAmount} balance={1000} min={0} onChange={(e) => setSecondAmount(e.target.value)} showCoin={true} showBalance={true} name="USDC" />
                 </div>
             </>
         )
@@ -65,7 +38,7 @@ const Mint = (props) => {
             <div className="col-12 mb-4">
                 <div className="row">
                     <div className="col-12 col-md-6">
-                        <button className="btn btn-primary">Approve</button>
+                        <ApproveButton onError={(error) => console.log(error)} onApproval={() => console.log('success')} />
                     </div>
                     <div className="col-12 col-md-6">
                         <button className="btn btn-secondary">Mint</button>

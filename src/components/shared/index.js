@@ -2,5 +2,7 @@ import Footer from './footer/Footer';
 import Header from './header/Header';
 import Sidemenu from './sidemenu/Sidemenu';
 import Coin from './coin/Coin';
+import Input from './input/Input';
+import ApproveButton from './buttons/ApproveButton';
 
-export { Coin, Header, Footer, Sidemenu };
+export { ApproveButton, Coin, Header, Input, Footer, Sidemenu };

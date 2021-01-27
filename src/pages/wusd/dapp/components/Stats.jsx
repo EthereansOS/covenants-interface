@@ -4,9 +4,9 @@ import { ChevronDownIcon, ChevronUpIcon } from '@primer/octicons-react';
 
 const Stats = (props) => {
     const [showAdvanced, setShowAdvanced] = useState(false);
-    const [health, setHealth] = useState(100);
-    const [credit, setCredit] = useState(1000.15);
-    const [debit, setDebit] = useState(0);
+    const [health, setHealth] = useState(45);
+    const [credit, setCredit] = useState(0);
+    const [debit, setDebit] = useState(1000.15);
     const [redUsdnSupply, setRedUsdnSupply] = useState(1000);
     const [redUsdnTreasury, setRedUsdnTreasury] = useState(500);
     const [blueUsdnSupply, setBlueUsdnSupply] = useState(1000);

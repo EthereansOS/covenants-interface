@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { connect } from 'react-redux';
+import { ApproveButton, Input } from '../../../../components';
 
 const USDN = (props) => {
     const [redAmount, setRedAmount] = useState(0);
@@ -9,16 +10,7 @@ const USDN = (props) => {
         return (
             <>
             <div className="col-12 mb-4">
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <button class="btn btn-secondary" type="button">MAX</button>
-                    </div>
-                    <input type="number" class="form-control" value={redAmount} min={0} onChange={(e) => setRedAmount(e.target.value)} />
-                    <div class="input-group-append">
-                        <span class="input-group-text" id=""> Red uSDN</span>
-                    </div>
-                </div>
-                <small class="form-text text-muted">Balance: 0 Red uSDN</small>
+                <Input showMax={true} value={redAmount} balance={1000} min={0} onChange={(e) => setRedAmount(e.target.value)} showCoin={true} showBalance={true} name="Red WUSDN" />
             </div>
             <div className="col-12 mb-4">
                 <div className="row justify-content-center">
@@ -37,10 +29,10 @@ const USDN = (props) => {
             <div className="col-12 mb-4">
                 <div className="row">
                     <div className="col-12 col-md-6">
-                        <button className="btn btn-primary">Approve</button>
+                        <ApproveButton onError={(error) => console.log(error)} onApproval={() => console.log('success')} />
                     </div>
                     <div className="col-12 col-md-6">
-                        <button className="btn btn-secondary">Mint</button>
+                        <button className="btn btn-secondary">Redeem</button>
                     </div>
                 </div>
             </div>
@@ -51,16 +43,7 @@ const USDN = (props) => {
         return (
             <>
                 <div className="col-12 mb-4">
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <button class="btn btn-secondary" type="button">MAX</button>
-                        </div>
-                        <input type="number" class="form-control" value={blueAmount} min={0} onChange={(e) => setBlueAmount(e.target.value)} />
-                        <div class="input-group-append">
-                            <span class="input-group-text" id=""> Blue uSDN</span>
-                        </div>
-                    </div>
-                    <small class="form-text text-muted">Balance: 0 Blue uSDN</small>
+                    <Input showMax={true} value={blueAmount} balance={1000} min={0} onChange={(e) => setBlueAmount(e.target.value)} showCoin={true} showBalance={true} name="Blue WUSDN" />
                 </div>
                 <div className="col-12 mb-4">
                     <div className="row justify-content-center">
@@ -79,10 +62,10 @@ const USDN = (props) => {
             <div className="col-12 mb-4">
                 <div className="row">
                     <div className="col-12 col-md-6">
-                        <button className="btn btn-primary">Approve</button>
+                        <ApproveButton onError={(error) => console.log(error)} onApproval={() => console.log('success')} />
                     </div>
                     <div className="col-12 col-md-6">
-                        <button className="btn btn-secondary">Mint</button>
+                        <button className="btn btn-secondary">Redeem</button>
                     </div>
                 </div>
             </div>

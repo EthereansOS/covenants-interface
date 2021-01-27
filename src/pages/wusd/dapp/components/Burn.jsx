@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { connect } from 'react-redux';
+import { ApproveButton, Input } from '../../../../components';
 
 const Burn = (props) => {
     const [pair, setPair] = useState("");
@@ -9,16 +10,7 @@ const Burn = (props) => {
     const getWUSDToken = () => {
         return (
             <div className="col-12 mb-4">
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <button class="btn btn-secondary" type="button">MAX</button>
-                    </div>
-                    <input type="number" class="form-control" value={amount} min={0} onChange={(e) => setAmount(e.target.value)} />
-                    <div class="input-group-append">
-                        <span class="input-group-text" id=""> WUSD</span>
-                    </div>
-                </div>
-                <small class="form-text text-muted">Balance: 0 WUSD</small>
+                <Input showMax={true} value={amount} balance={1000} min={0} onChange={(e) => setAmount(e.target.value)} showCoin={true} showBalance={true} name="WUSD" />
             </div>
         )
     }
@@ -56,10 +48,10 @@ const Burn = (props) => {
             <div className="col-12 mb-4">
                 <div className="row">
                     <div className="col-12 col-md-6">
-                        <button className="btn btn-primary">Approve</button>
+                        <ApproveButton onError={(error) => console.log(error)} onApproval={() => console.log('success')} />
                     </div>
                     <div className="col-12 col-md-6">
-                        <button className="btn btn-secondary">Mint</button>
+                        <button className="btn btn-secondary">Burn</button>
                     </div>
                 </div>
             </div>
