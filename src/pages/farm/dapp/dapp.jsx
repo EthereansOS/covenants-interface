@@ -4,7 +4,7 @@ import { setDFOCore, removeDFOCore } from '../../../store/actions';
 import { default as context } from '../../../data/context.json';
 import { useState } from 'react';
 import { DappMenu } from '../../../components';
-import { Explore, ExploreFarmingContract, Hosted, Positions } from './components';
+import { Create, Explore, ExploreFarmingContract, Hosted, Positions } from './components';
 import { Switch, Route, useHistory } from 'react-router';
 
 const Dapp = (props) => {
@@ -26,7 +26,7 @@ const Dapp = (props) => {
             case 'hosted':
                 return <Hosted />;
             case 'create':
-                return <div/>;
+                return <Create />;
             default:
                 return <div/>;
         }

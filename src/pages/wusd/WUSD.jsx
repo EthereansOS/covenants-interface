@@ -1,5 +1,5 @@
 import { PageContainer } from "../../components";
-import dragonImage from '../../assets/images/dragon.png';
+import wusdHomeImage from '../../assets/images/home-wusd.png';
 import { Route, Switch } from "react-router-dom";
 import DappWUSD from './dapp/dapp';
 
@@ -12,7 +12,7 @@ const WUSD = () => {
                 <DappWUSD />
             </Route>
             <Route path="/wusd/">
-                <PageContainer image={dragonImage} imageHeight={300} text={lorem} launchDapp={true} title={"uSD"} link={"/wusd/dapp"} />
+                <PageContainer image={wusdHomeImage} imageHeight={300} text={lorem} launchDapp={true} title={"uSD"} link={"/wusd/dapp"} />
             </Route>
         </Switch>
     )

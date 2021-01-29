@@ -7,5 +7,6 @@ import ApproveButton from './buttons/ApproveButton';
 import DappMenu from './dapp-menu/DappMenu';
 import FarmingComponent from './farming/FarmingComponent';
 import SetupComponent from './farming/SetupComponent';
+import TokenInput from './token-input/TokenInput';
 
-export { ApproveButton, Coin, DappMenu, Header, Input, FarmingComponent, Footer, Sidemenu, SetupComponent };
+export { ApproveButton, Coin, DappMenu, Header, Input, FarmingComponent, Footer, Sidemenu, SetupComponent, TokenInput };

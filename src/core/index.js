@@ -133,6 +133,10 @@ export default class DFOCore {
         }
     }
 
+    async getBlockNumber() {
+        return await this.web3.eth.getBlockNumber();
+    }
+
     /**
      * returns the dfo with the given dfoAddress (proxy or doubleProxy depending on the version we're in).
      * @param {*} dfoAddress proxy or double proxy address of the dfo to retrieve.

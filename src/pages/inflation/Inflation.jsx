@@ -1,5 +1,5 @@
 import { PageContainer } from "../../components";
-import dragonImage from '../../assets/images/dragon.png';
+import homeInflationImage from '../../assets/images/home-inflation.png';
 import { Route, Switch } from "react-router-dom";
 import InflationDapp from './dapp/dapp';
 
@@ -12,7 +12,7 @@ const Inflation = () => {
                 <InflationDapp />
             </Route>
             <Route path="/inflation/">
-                <PageContainer image={dragonImage} imageHeight={300} text={lorem} launchDapp={true} title={"Inflation"} link={"/inflation/dapp"} />
+                <PageContainer image={homeInflationImage} imageHeight={300} text={lorem} launchDapp={true} title={"Inflation"} link={"/inflation/dapp"} />
             </Route>
         </Switch>
     )

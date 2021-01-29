@@ -1,5 +1,5 @@
 import { PageContainer } from "../../components";
-import dragonImage from '../../assets/images/dragon.png';
+import homeBazaarImage from '../../assets/images/home-bazaar.png';
 import { Route, Switch } from "react-router-dom";
 import BazaarDapp from './dapp/dapp';
 
@@ -12,7 +12,7 @@ const Bazaar = () => {
                 <BazaarDapp />
             </Route>
             <Route path="/bazaar/">
-                <PageContainer image={dragonImage} imageHeight={300} text={lorem} launchDapp={true} title={"Bazaar"} link={"/bazaar/dapp"} />
+                <PageContainer image={homeBazaarImage} imageHeight={300} text={lorem} launchDapp={true} title={"Bazaar"} link={"/bazaar/dapp"} />
             </Route>
         </Switch>
     )

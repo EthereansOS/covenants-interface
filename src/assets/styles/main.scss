@@ -64,9 +64,19 @@ code {
 }
 
 /* other styles */
+.flex {
+  display: flex;
+}
+
 .nav-item {
   cursor: pointer;
   font-weight: bold;
+}
+
+.nav-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .sidebar-menu-link {
@@ -87,8 +97,7 @@ code {
 }
 
 .dapp-col {
-  min-height: 650px;
-  max-height: 1000px;
+  min-height: 500px;
   display: flex;
   justify-content: end;
   align-items: center;
@@ -117,6 +126,16 @@ code {
 
 .no-border {
   border: none;
+}
+
+.text-small {
+  font-size: 12px;
+}
+
+.deploy-contract-editor {
+  padding: 0.5rem;
+  border: 1px $secondary solid;
+  border-radius: 1.5rem;
 }
 
 .setup-component-main-col {
@@ -187,6 +206,10 @@ code {
     justify-content: center;
 }
 
+.app-sidemenu {
+  align-items: flex-start;
+}
+
 @media screen and (max-width: 768px) {
   .app-container {
     flex-direction: column;
@@ -203,17 +226,12 @@ code {
 }
 
 /* page container */
-.page-container-wrapper {
-  padding: 1rem;
-}
-
 .page-container {
   padding: 1rem;
   background-color: white;
   border-radius: 1.5rem;
   width: 600px;
   min-height: 500px;
-  margin-left: 2rem;
   display: flex;
   justify-content: space-evenly;
   align-items: center;
@@ -224,7 +242,6 @@ code {
   .page-container {
     max-width: 310px;
     width: 310px;
-    height: 500px;
   }
 
   .page-container-row {
@@ -236,7 +253,6 @@ code {
   .page-container {
     max-width: 520px;
     width: 520px;
-    height: 500px;
   }
 
   .page-container-row {
@@ -248,7 +264,6 @@ code {
   .page-container {
     max-width: 650px;
     width: 650px;
-    height: 500px;
   }
 
   .page-container-row {
@@ -260,7 +275,6 @@ code {
   .page-container {
     max-width: 750px;
     width: 750px;
-    height: 500px;
   }
 
   .page-container-row {
@@ -268,20 +282,9 @@ code {
   }
 }
 
-@media screen and (max-width: 768px) {
-  .page-container {
-    margin-top: 1rem;
-  }
-}
-
 .page-container-row {
   display: flex;
   justify-content: center;
-  align-items: center;
-}
-
-.page-container-col {
-  margin-right: 1rem;
 }
 
 .launch-dapp-button {

@@ -19,12 +19,8 @@ export const sessionReducer = (state = initialState, action) => {
                 farmingContract: action.payload.farmingContract,
             }
         case ADD_FARMING_SETUP:
-            return {
-                ...state,
-                farmingSetups: [
-                    ...state.farmingSetups, action.payload.farmingSetup
-                ],
-            }
+            state.farmingSetups.push(action.payload.farmingSetup);
+            return state;
         case REMOVE_FARMING_SETUP:
             return {
                 ...state,

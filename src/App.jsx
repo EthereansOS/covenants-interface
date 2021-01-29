@@ -9,7 +9,7 @@ const App = () => {
       <Header />
       <div className="container app-container">
         <div className="row app-row w-100 align-items-center">
-          <div className="col-md-2 col-12">
+          <div className="col-md-2 col-12 flex align-items-center justify-content-center">
             <Sidemenu />
           </div>
           <div className="col-md-10 col-12">
