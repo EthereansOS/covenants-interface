@@ -14,7 +14,7 @@ const Hosted = (props) => {
                 {
                     farmingContracts.map((farmingContract) => {
                         return (
-                            <FarmingComponent className="col-12 mb-4" contract={farmingContract} hasBorder />
+                            <FarmingComponent className="col-12 mb-4" setup={farmingContract} hasBorder />
                         )
                     })
                 }

@@ -6,6 +6,8 @@ export default class DFOCore {
     chainId;
     context;
     contracts = {};
+    deployedLiquidityMiningContracts = [];
+    eventEmitters = {};
     initialized = false;
     provider;
     voidEthereumAddress = '0x0000000000000000000000000000000000000000';
@@ -26,7 +28,7 @@ export default class DFOCore {
      * @param {*} web3 
      * @param {*} providerOptions 
      */
-    async init(web3, providerOptions = {}) {
+    init = async (web3, providerOptions = {}) => {
         // return if already initialized
         if (this.initialized) return;
         // retrieve the web3 passed in the function
@@ -68,18 +70,18 @@ export default class DFOCore {
         // set the core as initialized
         this.initialized = true;
     }
-
+    
     /**
      * returns the contract with the given abi and address if it's already stored
      * in the state, otherwise it creates it and stores it inside a variable.
      * @param {*} abi contract ABI.
      * @param {*} address contract address.
      */
-    async getContract(abi, address) {
+    getContract = async (abi, address) => {
         this.address = address || this.voidEthereumAddress;
         // create the key
         const key = address.toLowerCase();
-        this.contracts[key] = this.contracts[key] || new this.web3.eth.Contract(abi, address === this.voidEthereumAddress ? undefined : address);
+        this.contracts[key] = this.contracts[key] || new this.web3.eth.Contract(abi, address);
         return this.contracts[key];
     }
 
@@ -87,7 +89,7 @@ export default class DFOCore {
      * returns the element with the given elementName from the context.
      * @param {*} elementName name of the element to retrieve from the context.
      */
-    getContextElement(elementName) {
+    getContextElement = (elementName) => {
         return this.context[elementName];
     }
 
@@ -95,7 +97,7 @@ export default class DFOCore {
      * returns the element with the given elementName from the context for the current chain network.
      * @param {*} elementName name of the element to retrieve from the context.
      */
-    getNetworkContextElement(elementName) {
+    getNetworkContextElement = (elementName) => {
         const network = this.context.ethereumNetwork[this.chainId];
         return this.context[`${elementName}${network}`];
     }
@@ -106,7 +108,7 @@ export default class DFOCore {
      * @param {*} method contract method that will be called.
      * @param {*} value eventual amount of ETH that will be sent.
      */
-    async getSendingOptions(method, value) {
+    getSendingOptions = async (method, value) => {
         try {
             // if a method is provided we use it to estimate the gas
             if (method) {
@@ -133,8 +135,59 @@ export default class DFOCore {
         }
     }
 
-    async getBlockNumber() {
+    /**
+     * returns the current block number.
+     */
+    getBlockNumber = async () => {
         return await this.web3.eth.getBlockNumber();
+    }
+
+    /**
+     * retrieves all the deployed liquidity mining contracts from the given factory address.
+     */
+    loadDeployedLiquidityMiningContracts = async (factoryAddress) => {
+        if (this.deployedLiquidityMiningContracts.length > 0) return;
+        if (!factoryAddress) factoryAddress = this.getContextElement("liquidityMiningFactoryAddress");
+        const liquidityMiningContract = await this.getContract(this.getContextElement("liquidityMiningFactoryABI"), factoryAddress);
+        const events = await liquidityMiningContract.getPastEvents('LiquidityMiningDeployed');
+        await Promise.all(events.map(async (event) => {
+            this.deployedLiquidityMiningContracts.push(event.returnValues.liquidityMiningAddress);
+        }));
+        console.log(events);
+    }
+
+    /**
+     * pushes the contract address inside the core array.
+     * @param {*} contractAddress new liquidity mining contract address.
+     */
+    addDeployedLiquidityMiningContract = async (contractAddress) => {
+        if (!this.deployedLiquidityMiningContracts.includes(contractAddress)) {
+            this.deployedLiquidityMiningContracts.push(contractAddress);
+        }
+    }
+
+    /**
+     * starts listening for the provided event emitted by the contract with the given abi and address using
+     * the input filter and fromBlock.
+     * @param {*} abi contract abi.
+     * @param {*} address contract address.
+     * @param {*} eventName event name to start listening for.
+     * @param {*} filter event filter.
+     * @param {*} fromBlock event from block.
+     */
+    getEventEmitter = async (abi, address, eventName, filter, fromBlock) => {
+        const contract = await this.getContract(abi, address);
+        if (!this.eventEmitters[address]) {
+            this.eventEmitters[address] = {};
+        }
+        this.eventEmitters[address] = {
+            ...this.eventEmitters[address],
+            eventName: contract.events[eventName]({ filter: filter || {}, fromBlock: fromBlock || await this.getBlockNumber() }),
+        };
+    }
+
+    toDecimals = (amount, decimals = 18) => {
+        return decimals === 18 ? this.web3.utils.fromWei(amount, 'ether') : 0;
     }
 
     /**
@@ -146,5 +199,7 @@ export default class DFOCore {
         dfoAddresses = dfoAddresses ? dfoAddresses.concat(dfoAddress) : [dfoAddress];
         // TODO retrieve DFO
     }
+
+    
 
 }

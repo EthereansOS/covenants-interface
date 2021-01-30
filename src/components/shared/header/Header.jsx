@@ -6,8 +6,16 @@ import diamond from '../../../assets/images/diamond.svg';
 import wizardLogo from '../../../assets/images/wizard.svg';
 import { default as context } from '../../../data/context.json';
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 
 const Header = (props) => {
+    const [address, setAddress] = useState(null);
+
+    if (props.dfoCore) {
+        props.dfoCore.provider.on('accountsChanged', (accounts) => {
+            setAddress(formatAddress(accounts[0]));
+        })
+    }
 
     const connectCore = async () => {
       const core = new DFOCore(context);

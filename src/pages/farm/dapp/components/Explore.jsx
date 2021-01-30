@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { FarmingComponent } from '../../../../components';
 
@@ -6,8 +6,35 @@ const contracts = [{address: '0xc3BE549499f1e504c793a6c89371Bd7A98229500'}, {add
 
 const Explore = (props) => {
     const [tokenFilter, setTokenFilter] = useState("");
-    const [farmingContracts, setFarmingContracts] = useState(contracts);
-    const [startingContracts] = useState(contracts);
+    const [farmingContracts, setFarmingContracts] = useState([]);
+    const [startingContracts, setStartingContracts] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (props.dfoCore) {
+            getDeployedContracts();
+        }
+    }, []);
+
+    const getDeployedContracts = async () => {
+        setLoading(true);
+        try {
+            await props.dfoCore.loadDeployedLiquidityMiningContracts();
+            const mappedContracts = await Promise.all(
+                props.dfoCore.deployedLiquidityMiningContracts.map(async (address) => { 
+                    return props.dfoCore.getContract(props.dfoCore.getContextElement('liquidityMiningABI'), address);
+                })
+            );
+            setFarmingContracts(mappedContracts);
+            setStartingContracts(mappedContracts);
+        } catch (error) {
+            console.error(error);
+            setFarmingContracts([]);
+            setStartingContracts([]);
+        } finally {
+            setLoading(false);
+        }
+    }
 
     const onChangeTokenFilter = (value) => {
         if (!value) {
@@ -37,9 +64,14 @@ const Explore = (props) => {
             </div>
             <div className="row">
                 {
+                    farmingContracts.length === 0 && <div className="col-12 text-left">
+                        <h6><b>No farming contract available!</b></h6>
+                    </div>
+                }
+                {
                     farmingContracts.map((farmingContract) => {
                         return (
-                            <FarmingComponent className="col-12 mb-4" contract={farmingContract} hasBorder />
+                            <FarmingComponent className="col-12 mb-4" dfoCore={props.dfoCore} contract={farmingContract} hasBorder />
                         )
                     })
                 }
