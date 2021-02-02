@@ -1,9 +1,21 @@
-import { SET_FARMING_CONTRACT_STEP, UPDATE_FARMING_CONTRACT, ADD_FARMING_SETUP, REMOVE_FARMING_SETUP } from '../../types';
+import { 
+    SET_FARMING_CONTRACT_STEP, 
+    UPDATE_FARMING_CONTRACT, 
+    ADD_FARMING_SETUP, 
+    REMOVE_FARMING_SETUP,
+    SET_INFLATION_CONTRACT_STEP,
+    UPDATE_INFLATION_CONTRACT,
+    ADD_ENTRY,
+    REMOVE_ENTRY
+} from '../../types';
 
 const initialState = {
     farmingContract: null,
     farmingSetups: [],
     creationStep: 0,
+    inflationContract: null,
+    entries: [],
+    inflationCreationStep: 0
 }
 
 export const sessionReducer = (state = initialState, action) => {
@@ -25,6 +37,24 @@ export const sessionReducer = (state = initialState, action) => {
             return {
                 ...state,
                 farmingSetups: state.farmingSetups.filter((fs, i) => i !== action.payload.farmingSetupIndex),
+            }
+        case SET_INFLATION_CONTRACT_STEP:
+            return {
+                ...state,
+                inflationCreationStep: action.payload.step,
+            }
+        case UPDATE_INFLATION_CONTRACT:
+            return {
+                ...state,
+                inflationContract: action.payload.inflationContract,
+            }
+        case ADD_ENTRY:
+            state.entries.push(action.payload.entry);
+            return state;
+        case REMOVE_ENTRY:
+            return {
+                ...state,
+                entries: state.entries.filter((e, i) => i !== action.payload.entryIndex),
             }
         default:
             return state;

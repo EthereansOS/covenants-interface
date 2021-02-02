@@ -56,7 +56,7 @@ const Explore = (props) => {
                 {
                     fixedInflationContracts.map((entry) => {
                         return (
-                            <FixedInflationComponent className={"col-12 mb-4"} hasBorder={true} />
+                            <FixedInflationComponent className={"col-12 mb-4"} showButton={true} hasBorder={true} />
                         )
                     })
                 }

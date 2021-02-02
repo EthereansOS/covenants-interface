@@ -4,10 +4,11 @@ import { setDFOCore, removeDFOCore } from '../../../store/actions';
 import { default as context } from '../../../data/context.json';
 import { useState } from 'react';
 import { DappMenu } from '../../../components';
-import { Explore } from './components';
+import { Create, Explore, ExploreInflationContract } from './components';
+import { Switch, Route, useHistory } from 'react-router-dom';
 
 const Dapp = (props) => {
-
+    const history = useHistory();
     const [currentTab, setCurrentTab] = useState('explore');
 
     const connectCore = async () => {
@@ -16,12 +17,17 @@ const Dapp = (props) => {
         props.setCore(core);
     }
 
+    const setTab = (name) => {
+        history.replace('/inflation/dapp');
+        setCurrentTab(name);
+    }
+
     const getContent = () => {
         switch (currentTab) {
             case 'explore':
                 return <Explore />;
             case 'create':
-                return <div />;
+                return <Create />;
             default:
                 return <div/>;
         }
@@ -43,9 +49,16 @@ const Dapp = (props) => {
         <div className="container bg-white dapp-container">
             <div className="row" style={{flexDirection: 'column'}}>
                 <div className="col-12 dapp-col text-center">
-                    <DappMenu className="wusd-dapp-menu" onClick={(name) => setCurrentTab(name)} currentTab={currentTab} options={['Explore', 'Create']} />
+                    <DappMenu className="wusd-dapp-menu" onClick={(name) => setTab(name)} currentTab={currentTab} options={['Explore', 'Create']} />
                     <div className="wusd-dapp-content mt-4">
-                        { getContent() }
+                            <Switch>
+                                <Route path="/inflation/dapp/:address">
+                                    <ExploreInflationContract />
+                                </Route>
+                                <Route path="/inflation/dapp">
+                                    { getContent() }
+                                </Route>
+                            </Switch>
                     </div>
                 </div>
             </div>

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 
 const FixedInflationComponent = (props) => {
-    const { className, dfoCore, entry, goBack, hasBorder } = props;
+    const { className, dfoCore, entry, showButton, hasBorder } = props;
     const [metadata, setMetadata] = useState(null);
 
     const getContractMetadata = async () => {
@@ -41,7 +41,7 @@ const FixedInflationComponent = (props) => {
                                 <div className="row flex-column align-items-end">
                                     <p className="fixed-inflation-paragraph"><b>Host</b>: {metadata.host}</p>
                                     <p className="fixed-inflation-paragraph"><b>Contract</b>: {metadata.contractAddress}</p>
-                                    <Link to={`/inflation/dapp/${metadata.contractAddress}`} className="btn btn-secondary btn-sm">Open</Link>
+                                    { !showButton ? <div/> : <Link to={`/inflation/dapp/${metadata.contractAddress}`} className="btn btn-secondary btn-sm">Open</Link>}
                                 </div>
                             </div>
                             </> : <div className="col-12 justify-content-center">

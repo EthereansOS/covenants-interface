@@ -1,3 +1,5 @@
+import Create from './Create';
 import Explore from './Explore';
+import ExploreInflationContract from './ExploreInflationContract';
 
-export { Explore };
+export { Create, Explore, ExploreInflationContract };
