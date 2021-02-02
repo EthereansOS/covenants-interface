@@ -15,6 +15,9 @@ const Create = (props) => {
     const [currentReceiver, setCurrentReceiver] = useState("");
     const [receivers, setReceivers] = useState([]);
     const [isAdd, setIsAdd] = useState(false);
+    const [isEdit, setIsEdit] = useState(false);
+    const [entryIndex, setEntryIndex] = useState(null);
+    const [pathTokens, setPathTokens] = useState([]);
     const [isAddExecutionRewards, setIsAddExecutionRewards] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -43,9 +46,23 @@ const Create = (props) => {
         setLoading(false);
     }
 
+    const onAddPathToken = async (address) => {
+        if (!address) return;
+        setLoading(true);
+        const pathTokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), address);
+        const symbol = await pathTokenContract.methods.symbol().call();
+        setPathTokens(pathTokens.concat({ symbol, address }));
+        setLoading(false);
+    }
+
     const addFinishedEntry = () => {
         const entry = { receivers, percentage, recurringExecution, amount, inputToken, transferType, selectedActionType, inputTokenMethod };
-        props.addEntry(entry);
+        if (!isEdit) {
+            props.addEntry(entry);
+        } else {
+            props.removeEntry(entryIndex);
+            props.addEntry(entry);
+        }
         setInputTokenMethod(null);
         setInputToken(null);
         setRecurringExecution(null);
@@ -54,7 +71,25 @@ const Create = (props) => {
         setPercentage(0);
         setSelectedActionType(null);
         setIsAdd(false);
+        setEntryIndex(null);
+        setIsEdit(false);
         props.setInflationContractStep(0);
+    }
+
+    const editEntry = (entry, index) => {
+        const { receivers, percentage, recurringExecution, amount, inputToken, transferType, selectedActionType, inputTokenMethod } = entry;
+        setIsAdd(true);
+        setIsEdit(true);
+        setEntryIndex(index);
+        setReceivers(receivers);
+        setPercentage(percentage);
+        setRecurringExecution(recurringExecution);
+        setAmount(amount);
+        setInputTokenMethod(inputTokenMethod);
+        setTransferType(transferType);
+        setInputToken(inputToken);
+        setSelectedActionType(selectedActionType);
+        props.setInflationContractStep(2);
     }
 
     const getCreationComponent = () => {
@@ -103,7 +138,7 @@ const Create = (props) => {
                                 <b style={{fontSize: 14}}>{entry.selectedActionType} {entry.amount !== 0 ? entry.amount : `${entry.percentage}%`} {entry.inputToken.symbol} to {entry.receivers.length} wallet</b>
                             </div>
                             <div className="col-md-3 col-12 flex">
-                                <button className="btn btn-sm btn-outline-danger mr-1" onClick={() => props.removeEntry(i)}><b>X</b></button> <button className="btn btn-sm btn-danger ml-1"><b>EDIT</b></button>
+                                <button className="btn btn-sm btn-outline-danger mr-1" onClick={() => props.removeEntry(i)}><b>X</b></button> <button onClick={() => editEntry(entry, i)} className="btn btn-sm btn-danger ml-1"><b>EDIT</b></button>
                             </div>
                         </div>
                     )
@@ -200,7 +235,7 @@ const Create = (props) => {
     const getTransferSecondStep = () => {
         return <div className="col-12 flex flex-column align-items-center">
             <div className="row mb-4">
-                <h6><b>Transfer</b></h6>
+                <h6 className="text-secondary"><b>Transfer</b></h6>
             </div>
             <div className="row w-50 mb-4">
                 <select value={transferType} onChange={(e) => setTransferType(e.target.value)} className="custom-select wusd-pair-select">
@@ -273,13 +308,93 @@ const Create = (props) => {
                     setTransferType(null);
                     props.setInflationContractStep(1);
                 }} className="btn btn-light mr-4">Cancel</button>
-                <button onClick={() => addFinishedEntry()} disabled={(!amount && !percentage) || !transferType || receivers.length === 0 || !isValidPercentage()} className="btn btn-secondary">Add</button>
+                <button onClick={() => addFinishedEntry()} disabled={(!amount && !percentage) || !transferType || receivers.length === 0 || !isValidPercentage()} className="btn btn-secondary">{ isEdit ? 'Edit' : 'Add' }</button>
             </div>
         </div>
     }
 
     const getSwapSecondStep = () => {
-        return <div/>
+        return <div className="col-12 flex flex-column align-items-center">
+            <div className="row mb-4">
+                <h6 className="text-secondary"><b>Swap</b></h6>
+            </div>
+            <div className="row w-50 mb-4">
+                <select value={transferType} onChange={(e) => setTransferType(e.target.value)} className="custom-select wusd-pair-select">
+                    <option value="">Select type</option>
+                    <option value="percentage">Percentage</option>
+                    <option value="amount">Amount</option>
+                </select>
+            </div>
+            {
+                transferType ? 
+                    transferType == 'percentage' ? 
+                        <div className="row mb-4 justify-content-center align-items-center">
+                            <input type="number" min={0} max={100} value={percentage} onChange={(e) => setPercentage(e.target.value)} className="form-control mr-2" style={{width: '33%'}} />% of { inputToken.symbol } <Coin address={inputToken.address} className="ml-2" />
+                        </div>
+                    : 
+                        <div className="row mb-4 justify-content-center align-items-center">
+                            <Input showCoin={true} address={inputToken.address} name={inputToken.symbol} value={amount} onChange={(e) => setAmount(e.target.value)} />
+                        </div>
+                : <div/>
+            }
+            <div className="row mb-4">
+                <TokenInput label={"Path"} placeholder={"LPT address"} width={60} onClick={(address) => onAddPathToken(address)} text={"Load"} />
+            </div>
+            {
+                transferType ? <>
+                    <div className="row">
+                        <h6><b>Receiver</b></h6>
+                    </div>
+                    <div className="row">
+                        <div className="input-group mb-3">
+                            <input type="text"  value={currentReceiver} onChange={(e) => setCurrentReceiver(e.target.value)} className="form-control" placeholder="Address" aria-label="Receiver" aria-describedby="button-add" />
+                            <button onClick={() => {
+                                const exists = receivers.filter((r) => r.address.toLowerCase() === currentReceiver.toLowerCase()).length > 0;
+                                if (exists) return;
+                                setReceivers(receivers.concat({ address: currentReceiver, percentage: receivers.length === 0 ? 100 : 0}));
+                                setCurrentReceiver("");
+                            }} className="btn btn-outline-secondary ml-2" type="button" id="button-add">Add</button>
+                        </div>
+                    </div>
+                    <div className="row mb-4">
+                        {
+                            receivers.map((receiver, index) => {
+                                return (
+                                    <div className="col-12 mb-2">
+                                        {
+                                            receivers.length === 1 ? <div className="row align-items-center">
+                                                <b>{receiver.address}</b>
+                                                <button onClick={() => setReceivers(receivers.filter((_, i) => i !== index))} className="btn btn-danger btn-sm ml-2">X</button>
+                                            </div> : <div className="row align-items-center">
+                                                <div className="col-md-8 col-12">
+                                                    <b>{receiver.address}</b>
+                                                </div>
+                                                <div className="col-md-2 col-12">
+                                                    <input type="number" min={0} max={100} onChange={(e) => onPercentageChange(index, e.target.value)} className="form-control mr-1" value={receiver.percentage} />
+                                                </div>
+                                                <div className="col-md-2 col-12">
+                                                    <button onClick={() => setReceivers(receivers.filter((_, i) => i !== index))} className="btn btn-danger btn-sm">X</button>
+                                                </div>    
+                                            </div>
+                                        }
+                                    </div>
+                                )
+                            })
+                        }
+                    </div>
+                </> : <div/>
+            }
+            <div className="row justify-content-center">
+                <button onClick={() => {
+                    setReceivers([]);
+                    setAmount(0);
+                    setPercentage(0);
+                    setTransferType(null);
+                    props.setInflationContractStep(1);
+                }} className="btn btn-light mr-4">Cancel</button>
+                <button onClick={() => addFinishedEntry()} disabled={(!amount && !percentage) || !transferType || receivers.length === 0 || !isValidPercentage()} className="btn btn-secondary">{ isEdit ? 'Edit' : 'Add' }</button>
+            </div>
+        </div>
     }
 
     const getInflationContractStatus = () => {
