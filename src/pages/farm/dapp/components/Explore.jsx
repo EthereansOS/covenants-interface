@@ -21,8 +21,8 @@ const Explore = (props) => {
         try {
             await props.dfoCore.loadDeployedLiquidityMiningContracts();
             const mappedContracts = await Promise.all(
-                props.dfoCore.deployedLiquidityMiningContracts.map(async (address) => { 
-                    return props.dfoCore.getContract(props.dfoCore.getContextElement('liquidityMiningABI'), address);
+                props.dfoCore.deployedLiquidityMiningContracts.map(async (contract) => { 
+                    return props.dfoCore.getContract(props.dfoCore.getContextElement('liquidityMiningABI'), contract.address);
                 })
             );
             setFarmingContracts(mappedContracts);
@@ -69,7 +69,7 @@ const Explore = (props) => {
                     </div>
                 }
                 {
-                    farmingContracts.map((farmingContract) => {
+                    farmingContracts.length > 0 && farmingContracts.map((farmingContract) => {
                         return (
                             <FarmingComponent className="col-12 mb-4" dfoCore={props.dfoCore} contract={farmingContract} hasBorder />
                         )

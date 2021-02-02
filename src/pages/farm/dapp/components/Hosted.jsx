@@ -1,12 +1,27 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { FarmingComponent } from '../../../../components';
 
 const contracts = [{address: '0xc3BE549499f1e504c793a6c89371Bd7A98229500'}, {address: '0x761E02FEC5A21C6d3F284bd536dB2D2d33d5540B'}];
 
 const Hosted = (props) => {
-    const [tokenFilter, setTokenFilter] = useState("");
-    const [farmingContracts, setFarmingContracts] = useState(contracts);
+    const [farmingContracts, setFarmingContracts] = useState([]);
+
+    useEffect(() => {
+        getContracts();
+    }, [])
+
+    const getContracts = async () => {
+        const hostedContracts = props.dfoCore.getHostedLiquidityMiningContracts();
+        const mappedContracts = await Promise.all(
+            hostedContracts.map(async (contract) => { 
+                console.log(contract);
+                return props.dfoCore.getContract(props.dfoCore.getContextElement('liquidityMiningABI'), contract.address);
+            })
+        );
+        console.log(mappedContracts);
+        setFarmingContracts(mappedContracts);
+    }
 
     return (
         <div className="hosted-component">
@@ -14,7 +29,7 @@ const Hosted = (props) => {
                 {
                     farmingContracts.map((farmingContract) => {
                         return (
-                            <FarmingComponent className="col-12 mb-4" setup={farmingContract} hasBorder />
+                            <FarmingComponent className="col-12 mb-4" dfoCore={props.dfoCore} contract={farmingContract} hasBorder />
                         )
                     })
                 }

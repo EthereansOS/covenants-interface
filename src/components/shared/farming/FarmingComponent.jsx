@@ -8,6 +8,8 @@ const FarmingComponent = (props) => {
     const { className, dfoCore, contract, goBack, hasBorder } = props;
     const [metadata, setMetadata] = useState(null);
 
+    console.log(contract);
+
     const getContractMetadata = async () => {
         const rewardToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), await contract.methods._rewardTokenAddress().call());
         const symbol = await rewardToken.methods.symbol().call();

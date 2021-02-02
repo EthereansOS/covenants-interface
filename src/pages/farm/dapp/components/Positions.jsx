@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { SetupComponent } from '../../../../components';
 
@@ -39,7 +39,15 @@ const setups = [
 ];
 
 const Positions = (props) => {
-    const [farmingSetups, setFarmingSetups] = useState(setups);
+    const [farmingSetups, setFarmingSetups] = useState([]);
+
+    useEffect(() => {
+        getPositions();
+    }, []);
+
+    const getPositions = async () => {
+        await props.dfoCore.loadPositions();
+    }
 
     return (
         <div className="positions-component">
@@ -47,7 +55,7 @@ const Positions = (props) => {
                 {
                     farmingSetups.map((farmingSetup) => {
                         return (
-                            <SetupComponent className="col-12 mb-4" setup={farmingSetup} manage={farmingSetup.manage} redeem={farmingSetup.redeem} farm={farmingSetup.farm} hasBorder />
+                            <SetupComponent className="col-12 mb-4" setup={farmingSetup} dfoCore={props.dfoCore} manage={farmingSetup.manage} redeem={farmingSetup.redeem} farm={farmingSetup.farm} hasBorder />
                         )
                     })
                 }

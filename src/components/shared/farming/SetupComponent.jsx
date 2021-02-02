@@ -12,6 +12,8 @@ const SetupComponent = (props) => {
     const [AMM, setAMM] = useState({ name: "", version: ""});
     const [status, setStatus] = useState('farm');
 
+    console.log(setup);
+
     useEffect(() => {
         if (!blockNumber) {
             getSetupMetadata();
@@ -25,16 +27,14 @@ const SetupComponent = (props) => {
         try {
             setBlockNumber(await dfoCore.getBlockNumber());
             const ammContract = await dfoCore.getContract(dfoCore.getContextElement('ammABI'), setup.ammPlugin);
-            for (let j = 0; j < setup.liquidityPoolTokenAddresses.length; j++) {
-                console.log(setup.liquidityPoolTokenAddresses[j]);
-                const byTokensRes = await ammContract.methods.byLiquidityPool(setup.liquidityPoolTokenAddresses[j]).call();
-                console.log(dfoCore.toDecimals(byTokensRes['0']))
-                for (let i = 0; i < byTokensRes['2'].length; i++) {
-                    const token = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), byTokensRes['2'][i]);
-                    const symbol = await token.methods.symbol().call();
-                    tokens.push({ address: byTokensRes['2'][i], amount: parseFloat(dfoCore.toDecimals(byTokensRes['1'][i])), symbol, tot: parseInt(dfoCore.toDecimals(byTokensRes['0'])) });
-                    console.log('done');
-                }
+            const tokenAddress = setup.liquidityPoolTokenAddress;
+            const byTokensRes = await ammContract.methods.byLiquidityPool(tokenAddress).call();
+            console.log(dfoCore.toDecimals(byTokensRes['0']))
+            for (let i = 0; i < byTokensRes['2'].length; i++) {
+                const token = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), byTokensRes['2'][i]);
+                const symbol = await token.methods.symbol().call();
+                tokens.push({ address: byTokensRes['2'][i], amount: parseFloat(dfoCore.toDecimals(byTokensRes['1'][i])), symbol, tot: parseInt(dfoCore.toDecimals(byTokensRes['0'])) });
+                console.log('done');
             }
             const info = await ammContract.methods.info().call();
             setAMM(info);
@@ -44,9 +44,6 @@ const SetupComponent = (props) => {
         } finally {
             setLoading(false);
         }
-        // TODO update with real contract metadata retrieval
-        /*
-        */
     }
 
     console.log(setupTokens);
@@ -120,7 +117,7 @@ const SetupComponent = (props) => {
                                         </div> 
                                     </> : <>
                                         <div className="row mb-4">
-                                            {dfoCore.toDecimals(setup.rewardPerBlock)} <Coin address={setup.rewardTokenAddress} className="ml-2" />/block = {setupTokens.map((token, i) => <span key={token.address}>{i !== 0 ? '+' : ''}<Coin address={token.address} className="mx-2 mb-1" /></span>)}
+                                            {props.dfoCore.toDecimals(setup.rewardPerBlock)} <Coin address={setup.rewardTokenAddress} className="ml-2" />/block = {setupTokens.map((token, i) => <span key={token.address}>{i !== 0 ? '+' : ''}<Coin address={token.address} className="mx-2 mb-1" /></span>)}
                                         </div>
                                         <div className="row">
                                             <p className="mb-0 setup-component-small-p"><b>Fixed reward</b>: {AMM.name} - <span className="text-underline">block end: {setup.endBlock}</span></p>
