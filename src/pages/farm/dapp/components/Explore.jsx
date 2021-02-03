@@ -59,7 +59,7 @@ const Explore = (props) => {
                     </select>
                 </div>
                 <div className="col-12 col-md-6 mb-4 mb-md-0">
-                    <input type="text" class="form-control token-filter-input" placeholder="Reward token address.." value={tokenFilter} onChange={(e) => onChangeTokenFilter(e.target.value)} />
+                    <input type="text" className="form-control token-filter-input" placeholder="Reward token address.." value={tokenFilter} onChange={(e) => onChangeTokenFilter(e.target.value)} />
                 </div>
             </div>
             <div className="row">

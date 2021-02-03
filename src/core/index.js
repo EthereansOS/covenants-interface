@@ -210,8 +210,12 @@ export default class DFOCore {
         };
     }
 
+    fromDecimals = (amount, decimals = 18) => {
+        return decimals === 18 ? parseFloat(this.web3.utils.toWei(amount, 'ether')) : parseFloat(parseInt(amount) * 10**decimals);
+    }
+
     toDecimals = (amount, decimals = 18) => {
-        return decimals === 18 ? this.web3.utils.fromWei(amount, 'ether') : 0;
+        return decimals === 18 ? parseFloat(this.web3.utils.fromWei(amount, 'ether')) : parseFloat(parseInt(amount) / 10**decimals);
     }
 
     deployLiquidityMiningContract = async (data) => {

@@ -99,8 +99,8 @@ const SetupComponent = (props) => {
                 <div className="card-body">
                     <div className="row px-2 farming-component-main-row">
                         { loading ? <div className="col-12 justify-content-center">
-                                <div class="spinner-border text-secondary" role="status">
-                                    <span class="visually-hidden"></span>
+                                <div className="spinner-border text-secondary" role="status">
+                                    <span className="visually-hidden"></span>
                                 </div>
                             </div> : <>
                             <div className="col-12 col-md-7 setup-component-main-col">

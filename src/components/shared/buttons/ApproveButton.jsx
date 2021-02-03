@@ -1,13 +1,13 @@
 import PropTypes from 'prop-types';
 
 const ApproveButton = (props) => {
-    const { contract, spender, text, onApproval, onError } = props;
+    const { contract, spender, from, text, onApproval, onError, disabled } = props;
 
     const approveContract = async () => {
         try {
             const totalSupply = await contract.methods.totalSupply().call();
             const gas = await contract.methods.approve(spender, totalSupply).estimateGas();
-            const approve = await contract.methods.approve(spender, totalSupply).send({ gas });
+            const approve = await contract.methods.approve(spender, totalSupply).send({ from, gas });
             onApproval(approve);
         } catch (error) {
             onError(error);
@@ -15,16 +15,17 @@ const ApproveButton = (props) => {
     }
 
     return (
-        <button onClick={() => approveContract()} className="btn btn-primary approve-btn">{ text || "Approve" }</button>
+        <button onClick={() => approveContract()} disabled={disabled} className="btn btn-primary approve-btn">{ text || "Approve" }</button>
     )
 }
 
 ApproveButton.propTypes = {
-    contract: PropTypes.any.isRequired,
-    spender: PropTypes.string.isRequired,
+    from: PropTypes.string,
+    contract: PropTypes.any,
+    spender: PropTypes.string,
     text: PropTypes.string,
-    onApproval: PropTypes.func.isRequired,
-    onError: PropTypes.func.isRequired,
+    onApproval: PropTypes.func,
+    onError: PropTypes.func,
 }
 
 export default ApproveButton;

@@ -32,13 +32,13 @@ const Header = (props) => {
     }
 
     return (
-        <nav class="navbar navbar-light bg-transparent">
-            <div class="container-fluid">
-                <Link to={"/"} class="navbar-brand">
+        <nav className="navbar navbar-light bg-transparent">
+            <div className="container-fluid">
+                <Link to={"/"} className="navbar-brand">
                     <img src={wizardLogo} alt="" height={50} />
                     <span className="mx-3"><b>Covenants</b></span>
                 </Link>
-                <div class="d-flex">
+                <div className="d-flex">
                     <img src={map} alt="" height={36} />
                     {
                         props.dfoCore ? <button className="btn btn-primary mx-4" onClick={() => disconnectCore()}>{formatAddress(props.dfoCore.address)}</button> : <button className="btn btn-primary mx-4" onClick={() => connectCore()}>Connect</button>

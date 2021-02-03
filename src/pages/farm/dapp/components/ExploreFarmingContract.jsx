@@ -71,8 +71,8 @@ const ExploreFarmingContract = (props) => {
                             <SetupComponent className="col-12 mb-4" dfoCore={props.dfoCore} setup={farmingSetup} hasBorder />
                         )
                     }) : <div className="col-12 justify-content-center">
-                        <div class="spinner-border text-secondary" role="status">
-                            <span class="visually-hidden"></span>
+                        <div className="spinner-border text-secondary" role="status">
+                            <span className="visually-hidden"></span>
                         </div>
                     </div>
                 }

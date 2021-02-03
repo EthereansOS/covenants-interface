@@ -19,8 +19,29 @@ const Stats = (props) => {
     const [rebalanceBlock, setRebalanceBlock] = useState(565444664);
     const [usdRebalanceByDebit, setUsdRebalanceByDebit] = useState(0);
     const [selectedUsdn, setSelectedUsdn] = useState("");
+    const [totalSupply, setTotalSupply] = useState(0);
+    const [wusdContract, setWusdContract] = useState(null);
+    const [wusdExtensionController, setWusdExtensionController] = useState(null);
 
     // TODO add health calc
+    useEffect(() => {
+        getStats();
+    }, []);
+
+    const getStats = async () => {
+        const contract = await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDExtensionControllerABI"), props.dfoCore.getContextElement("WUSDExtensionControllerAddress"));
+        setWusdExtensionController(contract);
+        const wusdContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("ERC20ABI"), props.dfoCore.getContextElement("WUSDAddress"));
+        setWusdContract(wusdContract);
+        const supply = await wusdContract.methods.totalSupply().call();
+        const decimals = await wusdContract.methods.decimals().call();
+        const stringSupply = props.dfoCore.toDecimals(supply, decimals).toString();
+        setTotalSupply(stringSupply.substring(0, stringSupply.length - 8));
+        const differences = await contract.methods.differences().call();
+        setCredit(props.dfoCore.toDecimals(differences.credit, decimals));
+        setDebit(props.dfoCore.toDecimals(differences.debt, decimals));
+        console.log(differences);
+    }
 
     const getHealthBarStatus = () => {
         return {
@@ -45,7 +66,7 @@ const Stats = (props) => {
                                 <b>Supply</b>
                             </div>
                             <div className="col-12">
-                                1,000,0000
+                                { totalSupply }
                             </div>
                         </div>
                         <div className="row mb-3">
@@ -205,16 +226,16 @@ const Stats = (props) => {
                 <div className="row mb-4">
                     <div className="col-6 text-left">
                         <b>Rebalance by debit</b>
-                        <div class="input-group mt-4">
-                            <div class="input-group-prepend">
-                                <button class="btn btn-secondary" type="button">MAX</button>
+                        <div className="input-group mt-4">
+                            <div className="input-group-prepend">
+                                <button className="btn btn-secondary" type="button">MAX</button>
                             </div>
-                            <input type="number" class="form-control" value={usdRebalanceByDebit} min={0} onChange={(e) => setUsdRebalanceByDebit(parseFloat(e.target.value))} />
-                            <div class="input-group-append">
-                                <span class="input-group-text" id=""> uSD</span>
+                            <input type="number" className="form-control" value={usdRebalanceByDebit} min={0} onChange={(e) => setUsdRebalanceByDebit(parseFloat(e.target.value))} />
+                            <div className="input-group-append">
+                                <span className="input-group-text" id=""> uSD</span>
                             </div>
                         </div>
-                        <small class="form-text text-muted">Balance: 0 uSD</small>
+                        <small className="form-text text-muted">Balance: 0 uSD</small>
                     </div>
                     <div className="col-6">
                         <div className="row mb-2">

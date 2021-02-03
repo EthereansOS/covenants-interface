@@ -103,7 +103,7 @@ const CreateSetup = (props) => {
                         <p style={{fontSize: 12}}>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quaerat animi ipsam nemo at nobis odit temporibus autem possimus quae vel, ratione numquam modi rem accusamus, veniam neque voluptates necessitatibus enim!</p>
                     </div>
                     <div className="row justify-content-center mb-4">
-                        <input type="text" class="form-control inflation-name-input" placeholder="Name" value={title} onChange={(e) => setTitle(e.target.value)} />
+                        <input type="text" className="form-control inflation-name-input" placeholder="Name" value={title} onChange={(e) => setTitle(e.target.value)} />
                     </div>
                     <div className="row justify-content-center">
                         <h6><b>Recurring execution</b></h6>
@@ -143,8 +143,8 @@ const CreateSetup = (props) => {
             </div>
             <div className="row justify-content-center">
                 <div className="form-check my-4">
-                    <input class="form-check-input" type="checkbox" value={hasExecutionReward} onChange={(e) => setHasExecutionReward(e.target.checked)} id="executionReward" />
-                    <label class="form-check-label" for="executionReward">
+                    <input className="form-check-input" type="checkbox" value={hasExecutionReward} onChange={(e) => setHasExecutionReward(e.target.checked)} id="executionReward" />
+                    <label className="form-check-label" htmlFor="executionReward">
                         Execution reward
                     </label>
                 </div>
@@ -203,8 +203,8 @@ const CreateSetup = (props) => {
     const getLoading = () => {
         return <div className="col-12">
             <div className="row justify-content-center">
-                <div class="spinner-border text-secondary" role="status">
-                    <span class="visually-hidden"></span>
+                <div className="spinner-border text-secondary" role="status">
+                    <span className="visually-hidden"></span>
                 </div>
             </div>
         </div>

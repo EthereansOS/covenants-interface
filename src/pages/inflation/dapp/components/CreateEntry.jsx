@@ -141,8 +141,8 @@ const CreateEntry = (props) => {
             }
             {
                 loading ? <div className="row justify-content-center">
-                    <div class="spinner-border text-secondary" role="status">
-                        <span class="visually-hidden"></span>
+                    <div className="spinner-border text-secondary" role="status">
+                        <span className="visually-hidden"></span>
                     </div>
                 </div> : <>
                     <div className="row mb-4">
@@ -274,8 +274,8 @@ const CreateEntry = (props) => {
             </div>
             {
                 loading ? <div className="row justify-content-center">
-                    <div class="spinner-border text-secondary" role="status">
-                        <span class="visually-hidden"></span>
+                    <div className="spinner-border text-secondary" role="status">
+                        <span className="visually-hidden"></span>
                     </div>
                 </div> : <>
                 {

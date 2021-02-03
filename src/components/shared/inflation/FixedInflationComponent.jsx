@@ -45,8 +45,8 @@ const FixedInflationComponent = (props) => {
                                 </div>
                             </div>
                             </> : <div className="col-12 justify-content-center">
-                                <div class="spinner-border text-secondary" role="status">
-                                    <span class="visually-hidden"></span>
+                                <div className="spinner-border text-secondary" role="status">
+                                    <span className="visually-hidden"></span>
                                 </div>
                             </div>
                         }

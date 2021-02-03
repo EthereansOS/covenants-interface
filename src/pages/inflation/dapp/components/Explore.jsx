@@ -40,8 +40,8 @@ const Explore = (props) => {
                 </div>
                 <div className="col-12 col-md-6 mb-4 mb-md-0">
                     <div className="form-check my-4">
-                        <input class="form-check-input" type="checkbox" value={executable} onChange={(e) => setExecutable(e.target.checked)} id="setExecutable" />
-                        <label class="form-check-label" for="setExecutable">
+                        <input className="form-check-input" type="checkbox" value={executable} onChange={(e) => setExecutable(e.target.checked)} id="setExecutable" />
+                        <label className="form-check-label" htmlFor="setExecutable">
                             Executable
                         </label>
                     </div>

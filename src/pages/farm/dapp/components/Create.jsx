@@ -79,8 +79,8 @@ const Create = (props) => {
             </div>
             {
                 loading ? <div className="row justify-content-center">
-                    <div class="spinner-border text-secondary" role="status">
-                        <span class="visually-hidden"></span>
+                    <div className="spinner-border text-secondary" role="status">
+                        <span className="visually-hidden"></span>
                     </div>
                 </div> : <>  
                 <div className="row mb-4">
@@ -96,8 +96,8 @@ const Create = (props) => {
                 }
                 {
                     selectedRewardToken && <div className="form-check my-4">
-                        <input class="form-check-input" type="checkbox" value={byMint} onChange={(e) => setByMint(e.target.checked)} id="setByMint" />
-                        <label class="form-check-label" for="setByMint">
+                        <input className="form-check-input" type="checkbox" value={byMint} onChange={(e) => setByMint(e.target.checked)} id="setByMint" />
+                        <label className="form-check-label" htmlFor="setByMint">
                             By mint
                         </label>
                     </div>
@@ -279,8 +279,8 @@ const Create = (props) => {
             </div>
             {
                 loading ? <div className="row justify-content-center">
-                    <div class="spinner-border text-secondary" role="status">
-                        <span class="visually-hidden"></span>
+                    <div className="spinner-border text-secondary" role="status">
+                        <span className="visually-hidden"></span>
                     </div>
                 </div> :  <>
                     <div className="row mb-4">
@@ -349,8 +349,8 @@ const Create = (props) => {
             </div>
             {
                 loading ? <div className="row justify-content-center">
-                    <div class="spinner-border text-secondary" role="status">
-                        <span class="visually-hidden"></span>
+                    <div className="spinner-border text-secondary" role="status">
+                        <span className="visually-hidden"></span>
                     </div>
                 </div> :  <>
                     <div className="row mb-4">
@@ -407,8 +407,8 @@ const Create = (props) => {
             <div className="col-12">
                 <div className="row justify-content-center">
                     <div className="form-check my-4">
-                        <input class="form-check-input" type="checkbox" value={lockedHasPenaltyFee} onChange={(e) => setLockedHasPenaltyFee(e.target.checked)} id="penaltyFee" />
-                        <label class="form-check-label" for="penaltyFee">
+                        <input className="form-check-input" type="checkbox" value={lockedHasPenaltyFee} onChange={(e) => setLockedHasPenaltyFee(e.target.checked)} id="penaltyFee" />
+                        <label className="form-check-label" htmlFor="penaltyFee">
                             Penalty fee
                         </label>
                     </div>
@@ -425,8 +425,8 @@ const Create = (props) => {
                 </div>
                 <div className="row justify-content-center">
                     <div className="form-check my-4">
-                        <input class="form-check-input" type="checkbox" value={lockedIsRenewable} onChange={(e) => setLockedIsRenewable(e.target.checked)} id="repeat" />
-                        <label class="form-check-label" for="repeat">
+                        <input className="form-check-input" type="checkbox" value={lockedIsRenewable} onChange={(e) => setLockedIsRenewable(e.target.checked)} id="repeat" />
+                        <label className="form-check-label" htmlFor="repeat">
                             Repeat
                         </label>
                     </div>
@@ -454,8 +454,8 @@ const Create = (props) => {
             <div className="col-12">
                 <div className="row justify-content-center">
                     <div className="form-check my-4">
-                        <input class="form-check-input" type="checkbox" value={hasLoadBalancer} onChange={(e) => setHasLoadBalancer(e.target.checked)} id="penaltyFee" />
-                        <label class="form-check-label" for="penaltyFee">
+                        <input className="form-check-input" type="checkbox" value={hasLoadBalancer} onChange={(e) => setHasLoadBalancer(e.target.checked)} id="penaltyFee" />
+                        <label className="form-check-label" htmlFor="penaltyFee">
                             Load balancer
                         </label>
                     </div>

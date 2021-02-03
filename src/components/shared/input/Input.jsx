@@ -7,20 +7,20 @@ const Input = (props) => {
     return (
         <>
             { label && <h6><b>{label}</b></h6> }
-            <div class="input-group">
+            <div className="input-group">
                 {
-                    showMax && <div class="input-group-prepend">
-                        <button class="btn btn-secondary" onClick={() => onChange({ target: { value: balance }})} type="button">MAX</button>
+                    showMax && <div className="input-group-prepend">
+                        <button className="btn btn-secondary" onClick={() => onChange({ target: { value: balance }})} type="button">MAX</button>
                     </div>
                 }
-                <input type="number" step={step || 1} class="form-control" value={value} min={min} max={max || balance} onChange={onChange} />
+                <input type="number" step={step || 1} className="form-control" value={value} min={min} max={max || balance} onChange={onChange} />
                 {
-                    showCoin && <div class="input-group-append">
-                        <span class="input-group-text" id=""><Coin address={address} /> {name}</span>
+                    showCoin && <div className="input-group-append">
+                        <span className="input-group-text" id=""><Coin address={address} /> {name}</span>
                     </div>
                 }
             </div>
-            { showBalance && <small class="form-text text-muted">Balance: {balance} {name}</small> }
+            { showBalance && <small className="form-text text-muted">Balance: {balance} {name}</small> }
         </>
     )
 }
