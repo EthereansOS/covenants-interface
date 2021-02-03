@@ -29,7 +29,7 @@ const Create = (props) => {
     const [lockedMainToken, setLockedMainToken] = useState(null);
     const [lockedMaxLiquidity, setLockedMaxLiquidity] = useState(0);
     const [lockedRewardPerBlock, setLockedRewardPerBlock] = useState(0);
-    const [lockedSecondaryTokens, setLockedSecondaryTokens] = useState([]);
+    const [lockedSecondaryToken, setLockedSecondaryToken] = useState(null);
     const [lockedHasPenaltyFee, setLockedHasPenaltyFee] = useState(false);
     const [lockedPenaltyFee, setLockedPenaltyFee] = useState(0);
     const [lockedIsRenewable, setLockedIsRenewable] = useState(false);
@@ -224,7 +224,7 @@ const Create = (props) => {
         setLockedPenaltyFee(0);
         setLockedIsRenewable(false);
         setLockedRenewTimes(0);
-        setLockedSecondaryTokens([]);
+        setLockedSecondaryToken(null);
         props.setFarmingContractStep(0);
     }
 
@@ -251,7 +251,7 @@ const Create = (props) => {
             rewardPerBlock: lockedRewardPerBlock,
             penaltyFee: lockedPenaltyFee,
             renewTimes: lockedRenewTimes,
-            secondaryTokens: lockedSecondaryTokens,
+            secondaryToken: lockedSecondaryToken,
         }
         props.addFarmingSetup(setup);
         console.log(props.farmingSetups);
@@ -264,7 +264,7 @@ const Create = (props) => {
         setLockedPenaltyFee(0);
         setLockedIsRenewable(false);
         setLockedRenewTimes(0);
-        setLockedSecondaryTokens([]);
+        setLockedSecondaryToken(null);
         setSelectedFarmingType(null);
         setIsAdd(false);
         props.setFarmingContractStep(0);
@@ -364,17 +364,13 @@ const Create = (props) => {
                             <hr/>
                             <div className="row justify-content-center my-4">
                                 <div className="col-9">
-                                    <TokenInput label={"Liquidity pool tokens"} placeholder={"Liquidity pool token address"} width={60} onClick={(address) => setLockedSecondaryTokens(lockedSecondaryTokens.includes(address) || address === lockedMainToken.address ? lockedSecondaryTokens : lockedSecondaryTokens.concat(address))} text={"Load"} />
+                                    <TokenInput label={"Liquidity pool token"} placeholder={"Liquidity pool token address"} width={60} onClick={(address) => setLockedSecondaryToken(address !== lockedMainToken.address ? address : lockedSecondaryToken)} text={"Load"} />
                                 </div>
                             </div>
                             {
-                                lockedSecondaryTokens.length > 0 && lockedSecondaryTokens.map((secondaryToken, i) => {
-                                    return (
-                                        <div key={secondaryToken} className="row align-items-center justify-content-around mb-2">
-                                            { /* <Coin address={secondaryToken} className="mr-2" />  */ } <p>{secondaryToken}</p> <button className="btn btn-outline-danger btn-sm" onClick={() => setLockedSecondaryTokens(lockedSecondaryTokens.filter((_, index) => index !== i))}>Remove</button>
-                                        </div>
-                                    )
-                                })
+                                lockedSecondaryToken && <div key={lockedSecondaryToken} className="row align-items-center justify-content-around mb-2">
+                                    { /* <Coin address={secondaryToken} className="mr-2" />  */ } <p>{lockedSecondaryToken}</p> <button className="btn btn-outline-danger btn-sm" onClick={() => setLockedSecondaryToken(null)}>Remove</button>
+                                </div>
                             }
                             <div className="row justify-content-center mt-4 mb-4">
                                 <div className="col-6">
@@ -399,7 +395,7 @@ const Create = (props) => {
                     }
                     <div className="row justify-content-center mb-4">
                         <button onClick={() => goToFirstStep() } className="btn btn-light mr-4">Cancel</button>
-                        <button onClick={() => props.setFarmingContractStep(2) } disabled={!lockedMainToken || lockedRewardPerBlock <= 0 || !lockedMaxLiquidity || !lockedSecondaryTokens || !lockedStartBlock || !lockedPeriod} className="btn btn-secondary ml-4">Next</button>
+                        <button onClick={() => props.setFarmingContractStep(2) } disabled={!lockedMainToken || lockedRewardPerBlock <= 0 || !lockedMaxLiquidity || !lockedSecondaryToken || !lockedStartBlock || !lockedPeriod} className="btn btn-secondary ml-4">Next</button>
                     </div>
                 </>
             }

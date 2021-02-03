@@ -3,6 +3,8 @@ import {
     UPDATE_FARMING_CONTRACT, 
     ADD_FARMING_SETUP, 
     REMOVE_FARMING_SETUP,
+    ADD_INFLATION_SETUP,
+    REMOVE_INFLATION_SETUP,
     SET_INFLATION_CONTRACT_STEP,
     UPDATE_INFLATION_CONTRACT,
     ADD_ENTRY,
@@ -14,6 +16,7 @@ const initialState = {
     farmingSetups: [],
     creationStep: 0,
     inflationContract: null,
+    inflationSetups: [],
     entries: [],
     inflationCreationStep: 0
 }
@@ -31,12 +34,24 @@ export const sessionReducer = (state = initialState, action) => {
                 farmingContract: action.payload.farmingContract,
             }
         case ADD_FARMING_SETUP:
-            state.farmingSetups.push(action.payload.farmingSetup);
-            return state;
+            return {
+                ...state,
+                farmingSetups: state.farmingSetups.concat(action.payload.farmingSetup),
+            };
         case REMOVE_FARMING_SETUP:
             return {
                 ...state,
                 farmingSetups: state.farmingSetups.filter((fs, i) => i !== action.payload.farmingSetupIndex),
+            }
+        case ADD_INFLATION_SETUP:
+            return {
+                ...state,
+                inflationSetups: state.inflationSetups.concat(action.payload.inflationSetup),
+            };
+        case REMOVE_INFLATION_SETUP:
+            return {
+                ...state,
+                inflationSetups: state.inflationSetups.filter((fs, i) => i !== action.payload.inflationSetupIndex),
             }
         case SET_INFLATION_CONTRACT_STEP:
             return {
@@ -49,12 +64,32 @@ export const sessionReducer = (state = initialState, action) => {
                 inflationContract: action.payload.inflationContract,
             }
         case ADD_ENTRY:
-            state.entries.push(action.payload.entry);
-            return state;
-        case REMOVE_ENTRY:
+            const addEntrySetups = state.inflationSetups.map((setup, index) => {
+                if (index === action.payload.setupIndex) {
+                    return {
+                        ...setup,
+                        entries: setup.entries.concat(action.payload.entry),
+                    }
+                }
+                return setup;
+            })
             return {
                 ...state,
-                entries: state.entries.filter((e, i) => i !== action.payload.entryIndex),
+                inflationSetups: addEntrySetups
+            };
+        case REMOVE_ENTRY:
+            const removeEntrySetups = state.inflationSetups.map((setup, index) => {
+                if (index === action.payload.setupIndex) {
+                    return {
+                        ...setup,
+                        entries: setup.entries.filter((_, i) => i !== index),
+                    }
+                }
+                return setup;
+            })
+            return {
+                ...state,
+                inflationSetups: removeEntrySetups,
             }
         default:
             return state;
