@@ -3,7 +3,8 @@ import {
     REMOVE_DFO_CORE, 
     ADD_PENDING_TRANSACTION, 
     REMOVE_PENDING_TRANSACTION,
-    CLEAR_PENDING_TRANSACTIONS
+    CLEAR_PENDING_TRANSACTIONS,
+    SET_MAGIC_VISUAL_MODE
 } from '../../types';
 
 export const setDFOCore = (dfoCore) => {
@@ -16,6 +17,20 @@ export const setDFOCore = (dfoCore) => {
 export const removeDFOCore = () => {
     return {
         type: REMOVE_DFO_CORE,
+    }
+}
+
+export const setMagicVisualMode = () => {
+    return {
+        type: SET_MAGIC_VISUAL_MODE,
+        payload: true
+    }
+}
+
+export const removeMagicVisualMode = () => {
+    return {
+        type: SET_MAGIC_VISUAL_MODE,
+        payload: false
     }
 }
 

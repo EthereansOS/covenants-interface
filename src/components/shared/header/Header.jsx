@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import DFOCore from '../../../core';
-import { setDFOCore, removeDFOCore } from '../../../store/actions';
+import { setDFOCore, removeDFOCore, setMagicVisualMode, removeMagicVisualMode } from '../../../store/actions';
 import map from '../../../assets/images/map.svg';
 import diamond from '../../../assets/images/diamond.svg';
 import wizardLogo from '../../../assets/images/wizard.svg';
@@ -39,6 +39,8 @@ const Header = (props) => {
                     <span className="mx-3"><b>Covenants</b></span>
                 </Link>
                 <div className="d-flex">
+                    {props.dfoCore && !props.magicMode && <button className="btn btn-primary mx-4" onClick={props.setMagicMode}>Magic</button>}
+                    {props.dfoCore && props.magicMode && <button className="btn btn-primary mx-4" onClick={props.removeMagicMode}>Penguin</button>}
                     <img src={map} alt="" height={36} />
                     {
                         props.dfoCore ? <button className="btn btn-primary mx-4" onClick={() => disconnectCore()}>{formatAddress(props.dfoCore.address)}</button> : <button className="btn btn-primary mx-4" onClick={() => connectCore()}>Connect</button>
@@ -52,13 +54,15 @@ const Header = (props) => {
 
 const mapStateToProps = (state) => {
     const { core } = state;
-    return { dfoCore: core.dfoCore };
+    return { dfoCore: core.dfoCore, magicMode: core.magicMode };
 }
 
 const mapDispatchToProps = (dispatch) => {
     return {
         setCore: (dfoCore) => dispatch(setDFOCore(dfoCore)),
         removeCore: () => dispatch(removeDFOCore()),
+        setMagicMode : () => dispatch(setMagicVisualMode()),
+        removeMagicMode : () => dispatch(removeMagicVisualMode()),
     }
 }
 

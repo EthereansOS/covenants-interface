@@ -3,7 +3,8 @@ import {
     REMOVE_DFO_CORE, 
     ADD_PENDING_TRANSACTION, 
     REMOVE_PENDING_TRANSACTION,
-    CLEAR_PENDING_TRANSACTIONS
+    CLEAR_PENDING_TRANSACTIONS,
+    SET_MAGIC_VISUAL_MODE
 } from '../../types';
 
 const initialState = {
@@ -22,6 +23,11 @@ export const coreReducer = (state = initialState, action) => {
             return {
                 ...state,
                 dfoCore: null,
+            }
+        case SET_MAGIC_VISUAL_MODE:
+            return {
+                ...state,
+                magicMode: action.payload,
             }
         case ADD_PENDING_TRANSACTION:
             state.pendingTransactions.push(action.payload.transaction);

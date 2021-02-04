@@ -1,11 +1,17 @@
+import { connect } from 'react-redux';
 import { Switch, Route } from 'react-router-dom';
 import { Header, Footer, PageNotFound, Sidemenu } from './components';
 import { ArbitragePage, BazaarPage, CraftingPage, GrimoirePage, MorePage, IndexPage, MultiswapPage, FarmPage, InflationPage, WUSDPage } from './pages';
 
-const App = () => {
+const mapStateToProps = (state) => {
+  const { core } = state;
+  return { dfoCore: core.dfoCore, magicMode: core.magicMode };
+}
+
+const App = (props) => {
 
   return (
-    <div className="app">
+    <div className={`app ${!props.dfoCore ? 'fantasy' : props.magicMode ? 'magic' : 'penguin'}`}>
       <Header />
       <div className="container app-container">
         <div className="row app-row w-100 align-items-center">
@@ -58,4 +64,4 @@ const App = () => {
   
 }
 
-export default App;
+export default connect(mapStateToProps)(App);
