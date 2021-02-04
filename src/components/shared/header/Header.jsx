@@ -59,10 +59,24 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        setCore: (dfoCore) => dispatch(setDFOCore(dfoCore)),
-        removeCore: () => dispatch(removeDFOCore()),
-        setMagicMode : () => dispatch(setMagicVisualMode()),
-        removeMagicMode : () => dispatch(removeMagicVisualMode()),
+        setCore: (dfoCore) => {
+            document.body.className = `${!dfoCore ? 'fantasy' : window.localStorage.magicMode === "true" ? 'magic' : 'penguin'}`;
+            dispatch(setDFOCore(dfoCore))
+        },
+        removeCore: () => {
+            document.body.className = "fantasy";
+            dispatch(removeDFOCore())
+        },
+        setMagicMode : () => {
+            window.localStorage.setItem("magicMode", true);
+            document.body.className = "magic";
+            dispatch(setMagicVisualMode())
+        },
+        removeMagicMode : () => {
+            window.localStorage.removeItem("magicMode", true);
+            document.body.className = "penguin";
+            dispatch(removeMagicVisualMode())
+        }
     }
 }
 
