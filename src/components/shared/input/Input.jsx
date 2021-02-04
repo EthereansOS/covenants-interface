@@ -2,7 +2,7 @@ import Coin from '../coin/Coin';
 import PropTypes from 'prop-types';
 
 const Input = (props) => {
-    const { label, value, min, max, onChange, showBalance, balance, showMax, showCoin, address, name, step } = props;
+    const { label, value, min, max, onChange, showBalance, balance, showMax, showCoin, address, name, step, extra } = props;
 
     return (
         <>
@@ -20,7 +20,7 @@ const Input = (props) => {
                     </div>
                 }
             </div>
-            { showBalance && <small className="form-text text-muted">Balance: {balance} {name}</small> }
+            { showBalance && <small className="form-text text-muted">Balance: {balance} {name} {extra ? extra : ''}</small> }
         </>
     )
 }

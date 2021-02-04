@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { ApproveButton, Input } from '../../../../components';
+import { ethers } from 'ethers';
+
+const abi = new ethers.utils.AbiCoder();
 
 const Burn = (props) => {
     const [pair, setPair] = useState("");
@@ -18,7 +21,7 @@ const Burn = (props) => {
     const [estimatedToken1, setEstimatedToken1] = useState(0);
     const [estimatedLpToken, setEstimatedLpToken] = useState(0);
     const [wusdExtensionController, setWusdExtensionController] = useState(null);
-
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         getController();
@@ -26,6 +29,7 @@ const Burn = (props) => {
 
     const getController = async () => {
         const contract = await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDExtensionControllerABI"), props.dfoCore.getContextElement("WUSDExtensionControllerAddress"));
+        console.log(contract);
         setWusdExtensionController(contract);
         const allowedAMMS = await contract.methods.allowedAMMs().call();
         let allowedPairs = [];
@@ -52,6 +56,7 @@ const Burn = (props) => {
             }));
             allowedPairs = [...allowedPairs, ...pools ];
         }))
+        const wusdInfo = await contract.methods.wusdInfo().call();  
         const wusdContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("ERC20ABI"), props.dfoCore.getContextElement("WUSDAddress"));
         const balance = await wusdContract.methods.balanceOf(props.dfoCore.address).call();
         const approval = await wusdContract.methods.allowance(props.dfoCore.address, props.dfoCore.getContextElement("WUSDExtensionControllerAddress")).call();
@@ -71,21 +76,68 @@ const Burn = (props) => {
         }
     }
 
+    const clearTokens = () => {
+        setEstimatedToken0(0);
+        setEstimatedToken1(0);
+        setEstimatedLpToken(0);
+    }
+
     const onWUSDAmountChange = async (amount) => {
+        setLoading(true);
         setAmount(amount);
-        /*
+        if (!amount) {
+            clearTokens();
+            return;
+        }
+        if (parseInt(amount) <= 0) {
+            clearTokens();
+            return;
+        }
         const chosenPair = pairs[pair];
         const { ammContract, liquidityPool, token0decimals, token1decimals } = chosenPair;
-        const lpAmount = props.dfoCore.fromDecimals(amount.toString(), 18).toString();
-        const res = await ammContract.methods.byLiquidityPoolAmount(liquidityPool, lpAmount).call();
-        const { tokensAmounts, liquidityPoolTokens } = res;
-        const [firstTokenAmount, secondTokenAmount] = tokensAmounts;
-        const updatedFirstTokenAmount = props.dfoCore.fromDecimals(props.dfoCore.toDecimals(tokensAmounts[0], token0decimals), token0decimals);
-        const updatedSecondTokenAmount = props.dfoCore.fromDecimals(props.dfoCore.toDecimals(tokensAmounts[1], token1decimals), token0decimals);
-        const wusdRealAmount = props.dfoCore.fromDecimals(amount.toString(), 18) * (updatedFirstTokenAmount/updatedSecondTokenAmount);
-        const result = await ammContract.methods.byTokenAmount(liquidityPool, wusdContract.options.address, wusdRealAmount.toString()).call();
-        console.log(result);
-        */
+        const wusdAmount = props.dfoCore.fromDecimals(amount.toString(), 18);
+
+        const res = await ammContract.methods.byLiquidityPool(liquidityPool).call();
+
+        const liquidityPoolAmount = res[0];
+        const tokensAmounts = res[1];
+        const liquidityPoolTokens = res[2];
+        const updatedSecondTokenAmount = tokensAmounts[1] * 10**12;
+
+        const ratio = tokensAmounts[0] / updatedSecondTokenAmount;
+        const ratio2 = updatedSecondTokenAmount / tokensAmounts[0];
+
+        const wusdRealAmount = (parseInt(wusdAmount) * ratio) / 2;
+
+        const result = await ammContract.methods.byTokenAmount(liquidityPool, liquidityPoolTokens[0], wusdRealAmount.toString()).call();
+        const [token0, token1] = result.tokensAmounts;
+        const stableCoinOutput = parseInt(token0) + parseInt(token1 * 10**12);
+        const rate = parseInt(wusdAmount) / stableCoinOutput;
+        const lpResult = await ammContract.methods.byTokenAmount(liquidityPool, liquidityPoolTokens[0], (parseInt(token0) * rate).toString()).call();
+
+        setEstimatedToken0(props.dfoCore.toDecimals(parseInt(token0) * rate, token0decimals));
+        setEstimatedToken1(props.dfoCore.toDecimals(parseInt(token1) * rate, token1decimals));
+        setEstimatedLpToken(props.dfoCore.toDecimals(lpResult.liquidityPoolAmount, 18));
+        setLoading(false);
+    }
+
+    const burnWUSD = async () => {
+        const info = await wusdExtensionController.methods.wusdInfo().call();
+        const collectionAddress = info['0'];
+        const wusdObjectId = info['1'];
+        const wusdInteroperableInterfaceAddress = info['2'];
+        console.log(collectionAddress, wusdObjectId, wusdInteroperableInterfaceAddress);
+        const wusdCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), collectionAddress);
+        console.log(pairs[pair]);
+        const burnData = abi.encode(["uint256","uint256","uint256","bool"], [pairs[pair].ammIndex, pairs[pair].lpIndex, props.dfoCore.fromDecimals(estimatedLpToken, 18), !getLpToken])
+        const data = abi.encode(["uint256", "bytes"], [0, burnData]);
+        console.log(data);
+        console.log(props.dfoCore.fromDecimals(amount, 18).toString());
+        console.log(wusdExtensionController);
+        // await wusdCollection.methods.setApprovalForAll(collectionAddress, true).send({ from: props.dfoCore.address });
+        const res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [props.dfoCore.fromDecimals(amount, 18).toString()], abi.encode(["bytes[]"], [[data]])).send({ from: props.dfoCore.address});
+        console.log(res);
+        await getController();
     }
 
     const getWUSDToken = () => {
@@ -100,6 +152,17 @@ const Burn = (props) => {
         if (!pair) {
             return (<div/>);
         }
+        /*
+        if (loading) {
+            return (
+                <div className="col-12 justify-content-center">
+                    <div className="spinner-border text-secondary" role="status">
+                        <span className="visually-hidden"></span>
+                    </div>
+                </div>
+            )
+        }
+        */
         if (getLpToken) {
             return (
                 <div className="col-12 mb-4">
@@ -107,7 +170,7 @@ const Burn = (props) => {
                         <b>For</b>
                     </div>
                     <div className="row justify-content-center">
-                        1000 DAI/USDC
+                    { estimatedLpToken } { pairs[pair].symbol0 }/{ pairs[pair].symbol1 }
                     </div>
                 </div>
             )
@@ -134,7 +197,7 @@ const Burn = (props) => {
                         </div> : <div/>
                     }
                     <div className="col-12 col-md-6">
-                        <button className="btn btn-secondary">Burn</button>
+                        <button onClick={() => burnWUSD()} className="btn btn-secondary">Burn</button>
                     </div>
                 </div>
             </div>

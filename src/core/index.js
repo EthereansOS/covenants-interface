@@ -52,12 +52,12 @@ export default class DFOCore {
             // check for accounts changes
             provider.on('accountsChanged', (accounts) => {
                 this.address = accounts[0] || this.voidEthereumAddress;
-                console.log(`changed address to ${this.address}`);
+                
             });
             // check for chain id changes
             provider.on('chainChanged', (chainId) => {
                 this.chainId = this.context.ethereumNetwork[chainId] ? chainId : 0;
-                console.log(`changed chainId to ${this.chainId}`);
+                
             })
             // check for connection
             provider.on('connect', ({ chainId }) => {
@@ -65,7 +65,7 @@ export default class DFOCore {
             });
             // check for disconnect
             provider.on('disconnect', ({ code, message }) => {
-                console.log({ code, message });
+                
                 this.address = this.voidEthereumAddress;
                 this.chainId = 0;
             });
@@ -132,7 +132,7 @@ export default class DFOCore {
             }
         } catch (error) {
             // catch any error and log it
-            console.error(error);
+            
         } finally {
             // return this after any error or if no method is provided
             return { from: this.address, gas: '99999999', };
@@ -159,7 +159,7 @@ export default class DFOCore {
                 this.deployedLiquidityMiningContracts.push({ address: event.returnValues.liquidityMiningAddress, sender: event.returnValues.sender });
             }));
         } catch (error) {
-            console.error(error);
+            
             this.deployedLiquidityMiningContracts = [];
         }
     }
@@ -176,7 +176,7 @@ export default class DFOCore {
                 const events = await contract.getPastEvents('Transfer', { filter: { to: this.address }});
             }));
         } catch (error) {
-            console.error(error);
+            
         }
     }
 
@@ -211,11 +211,21 @@ export default class DFOCore {
     }
 
     fromDecimals = (amount, decimals = 18) => {
-        return decimals === 18 ? parseFloat(this.web3.utils.toWei(amount, 'ether')) : parseFloat(parseInt(amount) * 10**decimals);
+        return decimals === 18 ? this.web3.utils.toWei(toFixed(amount), 'ether') : parseInt(toFixed(amount)) * 10**decimals;
     }
 
-    toDecimals = (amount, decimals = 18) => {
-        return decimals === 18 ? parseFloat(this.web3.utils.fromWei(amount, 'ether')) : parseFloat(parseInt(amount) / 10**decimals);
+    toFixed = (amount) => {
+        return toFixed(amount);
+    }
+
+    toDecimals = (amount, decimals = 18, precision = 4) => {
+        amount = amount.toString();
+        const res = decimals === 18 ? this.web3.utils.fromWei(amount, 'ether') : parseInt(amount) / 10**decimals;
+        return parseFloat(res).toFixed(precision);
+    }
+
+    normalizeValue = (amount, decimals) => {
+        return amount * 10**(18-decimals);
     }
 
     deployLiquidityMiningContract = async (data) => {
@@ -233,7 +243,7 @@ export default class DFOCore {
         const payload = this.web3.utils.sha3(`init(${types.join(',')})`).substring(0, 10) + (this.web3.eth.abi.encodeParameters(types, params).substring(2));
         const deployTransaction = await liquidityMiningFactory.methods.deploy(payload).send({ from: this.account });
         const liquidityMiningContractAddress = this.web3.eth.abi.decodeParameter("address", deployTransaction.logs.filter(it => it.topics[0] === this.web3.utils.sha3("LiquidityMiningDeployed(address,address,bytes)"))[0].topics[1]);
-        console.log(liquidityMiningContractAddress);
+        
     }
 
     /**
@@ -249,3 +259,21 @@ export default class DFOCore {
     
 
 }
+
+function toFixed(x) {
+    if (Math.abs(x) < 1.0) {
+      var e = parseInt(x.toString().split('e-')[1]);
+      if (e) {
+          x *= Math.pow(10,e-1);
+          x = '0.' + (new Array(e)).join('0') + x.toString().substring(2);
+      }
+    } else {
+      var e = parseInt(x.toString().split('+')[1]);
+      if (e > 20) {
+          e -= 20;
+          x /= Math.pow(10,e);
+          x += (new Array(e+1)).join('0');
+      }
+    }
+    return x;
+  }

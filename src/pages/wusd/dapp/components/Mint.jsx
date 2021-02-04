@@ -24,6 +24,7 @@ const Mint = (props) => {
 
     const getController = async () => {
         const contract = await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDExtensionControllerABI"), props.dfoCore.getContextElement("WUSDExtensionControllerAddress"));
+        console.log(contract);
         setWusdExtensionController(contract);
         const allowedAMMS = await contract.methods.allowedAMMs().call();
         let allowedPairs = [];
@@ -102,7 +103,7 @@ const Mint = (props) => {
         setFirstAmount(amount);
         const chosenPair = pairs[pair];
         const { ammContract, liquidityPool, token0, token0decimals, token1decimals } = chosenPair;
-        const amount0 = props.dfoCore.fromDecimals(amount, token0decimals).toString();
+        const amount0 = props.dfoCore.fromDecimals(amount.toString(), token0decimals).toString();
         const res = await ammContract.methods.byTokenAmount(liquidityPool, token0, amount0).call();
         const { tokensAmounts, liquidityPoolAmount } = res;
         setLpTokenAmount(props.dfoCore.toDecimals(liquidityPoolAmount, 18));
@@ -114,7 +115,7 @@ const Mint = (props) => {
         setSecondAmount(amount);
         const chosenPair = pairs[pair];
         const { ammContract, liquidityPool, token1, token0decimals, token1decimals } = chosenPair;
-        const amount1 = props.dfoCore.fromDecimals(amount, token1decimals).toString();
+        const amount1 = props.dfoCore.fromDecimals(amount.toString(), token1decimals).toString();
         const res = await ammContract.methods.byTokenAmount(liquidityPool, token1, amount1).call();
         const { tokensAmounts, liquidityPoolAmount } = res;
         setLpTokenAmount(props.dfoCore.toDecimals(liquidityPoolAmount, 18));
@@ -126,7 +127,7 @@ const Mint = (props) => {
         setLpTokenAmount(amount);
         const chosenPair = pairs[pair];
         const { ammContract, liquidityPool, token0decimals, token1decimals } = chosenPair;
-        const lpAmount = props.dfoCore.fromDecimals(amount, 18).toString();
+        const lpAmount = props.dfoCore.fromDecimals(amount.toString(), 18).toString();
         const res = await ammContract.methods.byLiquidityPoolAmount(liquidityPool, lpAmount).call();
         const { tokensAmounts } = res;
         setFirstAmount(props.dfoCore.toDecimals(tokensAmounts[0], token0decimals));

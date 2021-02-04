@@ -7,21 +7,27 @@ const Stats = (props) => {
     const [health, setHealth] = useState(45);
     const [credit, setCredit] = useState(0);
     const [debit, setDebit] = useState(1000.15);
-    const [redUsdnSupply, setRedUsdnSupply] = useState(1000);
-    const [redUsdnTreasury, setRedUsdnTreasury] = useState(500);
-    const [blueUsdnSupply, setBlueUsdnSupply] = useState(1000);
-    const [blueUsdnTreasury, setBlueUsdnTreasury] = useState(500);
-    const [farmTreasury, setFarmTreasury] = useState(1000.15);
+    const [farmTreasury, setFarmTreasury] = useState(0);
     const [farmReward, setFarmReward] = useState(10);
     const [newFarmReward, setNewFarmReward] = useState(20);
     const [unifiTreasury, setUnifiTreasury] = useState(1000.15);
     const [rebalanceReward, setRebalanceReward] = useState(50);
-    const [rebalanceBlock, setRebalanceBlock] = useState(565444664);
+    const [currentBlock, setCurrentBlock] = useState(0);
+    const [rebalanceBlock, setRebalanceBlock] = useState(0);
     const [usdRebalanceByDebit, setUsdRebalanceByDebit] = useState(0);
     const [selectedUsdn, setSelectedUsdn] = useState("");
     const [totalSupply, setTotalSupply] = useState(0);
     const [wusdContract, setWusdContract] = useState(null);
+    const [x2USDContract, setx2USDContract] = useState(null);
+    const [x5USDContract, setx5USDContract] = useState(null);
+    const [x2USDNoteControllerContract, setx2USDNoteControllerContract] = useState(null);
+    const [x5USDNoteControllerContract, setx5USDNoteControllerContract] = useState(null);
+    const [x2USDSupply, setx2USDSupply] = useState(0);
+    const [x2USDTreasury, setx2USDTreasury] = useState(0);
+    const [x5USDSupply, setx5USDSupply] = useState(0);
+    const [x5USDTreasury, setx5USDTreasury] = useState(0);
     const [wusdExtensionController, setWusdExtensionController] = useState(null);
+    const [collateralData, setCollateralData] = useState([]);
 
     // TODO add health calc
     useEffect(() => {
@@ -35,12 +41,96 @@ const Stats = (props) => {
         setWusdContract(wusdContract);
         const supply = await wusdContract.methods.totalSupply().call();
         const decimals = await wusdContract.methods.decimals().call();
-        const stringSupply = props.dfoCore.toDecimals(supply, decimals).toString();
-        setTotalSupply(stringSupply.substring(0, stringSupply.length - 8));
+        setTotalSupply(supply);
         const differences = await contract.methods.differences().call();
+        
         setCredit(props.dfoCore.toDecimals(differences.credit, decimals));
         setDebit(props.dfoCore.toDecimals(differences.debt, decimals));
-        console.log(differences);
+
+        const wusdNote2Info = await contract.methods.wusdNote2Info().call();
+        const wusdNote5Info = await contract.methods.wusdNote5Info().call();
+        const x2USDcontract = await props.dfoCore.getContract(props.dfoCore.getContextElement("IEthItemInteroperableInterfaceABI"), wusdNote2Info[2]);
+        const x5USDcontract = await props.dfoCore.getContract(props.dfoCore.getContextElement("IEthItemInteroperableInterfaceABI"), wusdNote5Info[2]);
+        const x2USDNoteController = await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDNoteControllerABI"), wusdNote2Info[3]);
+        const x5USDNoteController = await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDNoteControllerABI"), wusdNote5Info[3]);
+        
+        setx2USDContract(x2USDcontract);
+        setx2USDContract(x5USDcontract);
+        setx2USDNoteControllerContract(x2USDNoteController);
+        setx5USDNoteControllerContract(x5USDNoteController);
+
+        setx2USDSupply(props.dfoCore.toDecimals(await x2USDcontract.methods.totalSupply().call(), decimals));
+        setx5USDSupply(props.dfoCore.toDecimals(await x5USDcontract.methods.totalSupply().call(), decimals));
+        setx2USDTreasury(props.dfoCore.toDecimals(await wusdContract.methods.balanceOf(x2USDNoteController.options.address).call(), decimals));
+        setx5USDTreasury(props.dfoCore.toDecimals(await wusdContract.methods.balanceOf(x5USDNoteController.options.address).call(), decimals));
+        
+        const info = await contract.methods.rebalanceByCreditReceiversInfo().call();
+        setUnifiTreasury(props.dfoCore.toDecimals(info[2], decimals));
+        const lastRebalanceBlock = await contract.methods.lastRebalanceByCreditBlock().call();
+        const interval = await contract.methods.rebalanceByCreditBlockInterval().call();
+        setCurrentBlock(await props.dfoCore.getBlockNumber());
+        if (lastRebalanceBlock === "0") {
+            setRebalanceBlock(await props.dfoCore.getBlockNumber());
+        } else {
+            setRebalanceBlock(parseInt(lastRebalanceBlock) * parseInt(interval));
+        }
+        await getCollateralData(contract, supply);
+    }
+
+    const getCollateralData = async (contract, supply) => {
+        const ammAggregatorContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
+        const allowedAMMs = await contract.methods.allowedAMMs().call();
+        const data = {
+            collateral: {},
+            liquidity: {},
+            total: 0,
+        };
+        const extensionAddress = await contract.methods.extension().call();
+        await Promise.all(allowedAMMs.map(async (allowedAMM) => {
+            const ammContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMABI'), allowedAMM.ammAddress);
+            const info = await ammContract.methods.info().call();
+            const basePool = { ammAddress: allowedAMM.ammAddress, info: { name: info[0], version: info[1] } };
+            await Promise.all(allowedAMM.liquidityPools.map(async (liquidityPool) => {
+                const balanceOf = await ammAggregatorContract.methods.balanceOf(liquidityPool, extensionAddress).call();
+                
+                await Promise.all(balanceOf['1'].map(async (balance, index) => {
+                    const address = balanceOf['2'][index];
+                    
+                    const currentToken = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), address);
+                    const symbol = await currentToken.methods.symbol().call();
+                    const decimals = await currentToken.methods.decimals().call();
+                    const value = props.dfoCore.normalizeValue(balance, decimals);
+                    data.total += value;
+                    if (!data.liquidity[basePool.info.name]) {
+                        data.liquidity[basePool.info.name] = value;
+                    } else {
+                        data.liquidity[basePool.info.name] += value;
+                    }
+                    if (!data.collateral[symbol]) {
+                        data.collateral[symbol] = value;
+                    } else {
+                        data.collateral[symbol] += value;
+                    }
+                }))
+            }))
+        }))
+        setCollateralData(data);
+        await getHealth(data, supply);
+    }
+
+    const getHealth = async (data, supply) => {
+        const ratio = data.total / parseInt(supply);
+        setHealth(props.dfoCore.toDecimals(100 * ratio, 0, 2));
+    }
+
+    const rebalanceByCredit = async () => {
+        try {
+            const gasLimit = await wusdExtensionController.methods.rebalanceByCredit().estimateGas({ from: props.dfoCore.address });
+            await wusdExtensionController.methods.rebalanceByCredit().send({ from: props.dfoCore.address, gasLimit });
+            await getStats();
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     const getHealthBarStatus = () => {
@@ -65,8 +155,8 @@ const Stats = (props) => {
                             <div className="col-12">
                                 <b>Supply</b>
                             </div>
-                            <div className="col-12">
-                                { totalSupply }
+                            <div className="col-12" style={{wordBreak: 'break-word'}}>
+                                { totalSupply ? props.dfoCore.toDecimals(totalSupply, 18) : totalSupply } WUSD
                             </div>
                         </div>
                         <div className="row mb-3">
@@ -74,9 +164,14 @@ const Stats = (props) => {
                                 <b>Collateral</b>
                             </div>
                             <div className="col-12">
-                                1,000,0000 PAX
-                                <br/>
-                                1,000,0000 PAX
+                                {
+                                    (collateralData && collateralData.collateral) ?
+                                        Object.entries(collateralData.collateral).map((entry, i) => {
+                                            
+                                            return <p>{props.dfoCore.toDecimals(entry[1].toString())} {entry[0]}</p>
+                                        })
+                                    : <div/>
+                                }
                             </div>
                         </div>
                         <div className="row mb-3">
@@ -84,9 +179,13 @@ const Stats = (props) => {
                                 <b>Liquidity</b>
                             </div>
                             <div className="col-12">
-                                UniswapV2: 50%
-                                <br/>
-                                Balancer: 50%
+                                {
+                                    (collateralData && collateralData.liquidity) ?
+                                        Object.entries(collateralData.liquidity).map((entry, i) => {
+                                            return <p>{entry[0]}: {(entry[1]/collateralData.total) * 100}%</p>
+                                        })
+                                    : <div/>
+                                }
                             </div>
                         </div>
                     </div>
@@ -118,26 +217,26 @@ const Stats = (props) => {
                 </div>
                 <div className="row mb-4">
                     <div className="col-6">
-                        <b>Red uSDN supply</b>
+                        <b>x2USD supply</b>
                         <br/>
-                        {redUsdnSupply}
+                        {x2USDSupply}
                     </div>
                     <div className="col-6">
-                        <b>Red uSDN treasury</b>
+                        <b>x2USD treasury</b>
                         <br/>
-                        {redUsdnTreasury}
+                        {x2USDTreasury}
                     </div>
                 </div>
                 <div className="row mb-4">
                     <div className="col-6">
-                        <b>Blue uSDN supply</b>
+                        <b>x5USD supply</b>
                         <br/>
-                        {blueUsdnSupply}
+                        {x5USDSupply}
                     </div>
                     <div className="col-6">
-                        <b>Blue uSDN treasury</b>
+                        <b>x5USD treasury</b>
                         <br/>
-                        {blueUsdnTreasury}
+                        {x5USDTreasury}
                     </div>
                 </div>
                 <div className="row mb-4">
@@ -165,7 +264,6 @@ const Stats = (props) => {
                 {
                     showAdvanced ? 
                     <>
-                        <hr/>
                         <div className="container">
                             { getAdvancedRow() }
                             <div className="row">
@@ -199,28 +297,44 @@ const Stats = (props) => {
                             <br/>
                             {farmTreasury} uSD Farm treasury
                             <br/>
-                            {redUsdnTreasury + blueUsdnTreasury} uSDN treasury
+                            {x2USDTreasury + x5USDTreasury} uSDN treasury
                             <br/>
                             {unifiTreasury} Unifi treasury
                             <br/>
-                            {rebalanceReward} uSD rebalance reward
+                            {parseFloat(credit) - parseFloat(unifiTreasury) - parseFloat(x2USDTreasury) - parseFloat(x5USDTreasury) - parseFloat(farmTreasury)} uSD rebalance reward
                         </div>
                         <div className="col-6">
-                            <div className="row mb-2">
-                                <div className="col-12">
-                                    <b>Rebalance by credit</b>
-                                    <br/>
-                                    Rebalance block: #{rebalanceBlock}
+                            {
+                                rebalanceBlock <= currentBlock ? <>
+                                    <div className="row mb-2">
+                                        <div className="col-12">
+                                            <b>Rebalance by credit</b>
+                                            <br/>
+                                            Rebalance block: #{rebalanceBlock}
+                                        </div>
+                                    </div>
+                                    <div className="row justify-content-center mb-2">
+                                        <button className="btn btn-outline-secondary" onClick={() => rebalanceByCredit()} disabled={rebalanceBlock > currentBlock}>Rebalance</button>
+                                    </div>
+                                    <div className="row justify-content-center">
+                                       Reward: {credit * (2/100)}
+                                    </div>
+                                </> : <div className="row mb-2">
+                                    <div className="col-12">
+                                        <b>Rebalance by credit</b>
+                                        <br/>
+                                        Next rebalance block: #{rebalanceBlock}
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="row justify-content-center">
-                                <button className="btn btn-outline-secondary">Rebalance</button>
-                            </div>
+                                
+                            }
+                            
                         </div>
                     </div>    
+                    <hr/>
                 </>
             );
-        } else {
+        } else if (debit < credit) {
             return (
                 <>
                 <div className="row mb-4">
@@ -241,16 +355,16 @@ const Stats = (props) => {
                         <div className="row mb-2">
                             <div className="col-12">
                                 <select className="custom-select wusd-pair-select" value={selectedUsdn} onChange={(e) => setSelectedUsdn(e.target.value)}>
-                                    <option value="">Choose uSDN..</option>
-                                    <option value="red">Red uSDN</option>
-                                    <option value="blue">Blue uSDN</option>
+                                    <option value="">Choose uSD..</option>
+                                    <option value="x2">x2USD</option>
+                                    <option value="x5">x5USD</option>
                                 </select>
                                 {
                                     selectedUsdn ? 
                                     <div className="mt-2">
                                         For
                                         <br/>
-                                        { selectedUsdn === 'red' ? "700 red uSDN" : "500 blue uSDN"}
+                                        { selectedUsdn === 'x2' ? "700 x2USD" : "500 x5USD"}
                                     </div> : <div/>
                                 }
                                 
@@ -264,8 +378,11 @@ const Stats = (props) => {
                         }
                     </div>
                 </div>   
+                <hr/>
                 </>
             );
+        } else {
+            return <div/>
         }
     }
 
