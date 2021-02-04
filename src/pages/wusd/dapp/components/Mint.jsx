@@ -17,45 +17,53 @@ const Mint = (props) => {
     const [lpTokenBalance, setLpTokenBalance] = useState(0);
     const [lpTokenApproved, setLpTokenApproved] = useState(false);
     const [wusdExtensionController, setWusdExtensionController] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         getController();
     }, [])
 
     const getController = async () => {
-        const contract = await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDExtensionControllerABI"), props.dfoCore.getContextElement("WUSDExtensionControllerAddress"));
-        console.log(contract);
-        setWusdExtensionController(contract);
-        const allowedAMMS = await contract.methods.allowedAMMs().call();
-        let allowedPairs = [];
-        await Promise.all(allowedAMMS.map(async (allowedAMM, ammIndex) => {
-            const { ammAddress, liquidityPools } = allowedAMM;
-            const pools = [];
-            await Promise.all(liquidityPools.map(async (liquidityPool, lpIndex) => {
-                const ammContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("AMMABI"), ammAddress);
-                const poolInfo = await ammContract.methods.byLiquidityPool(liquidityPool).call();
-                const totalAmount = poolInfo['0'];
-                const [token0Amount, token1Amount] = poolInfo['1'];
-                const [token0, token1] = poolInfo['2'];
-                const token0Contract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), token0);
-                const token1Contract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), token1);
-                const symbol0 = await token0Contract.methods.symbol().call();
-                const symbol1 = await token1Contract.methods.symbol().call();
-                const balance0 = await token0Contract.methods.balanceOf(props.dfoCore.address).call();
-                const token0decimals = await token0Contract.methods.decimals().call();
-                const balance1 = await token1Contract.methods.balanceOf(props.dfoCore.address).call();
-                const token1decimals = await token1Contract.methods.decimals().call();
-                const lpContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), liquidityPool);
-                const balanceLp = await lpContract.methods.balanceOf(props.dfoCore.address).call();
-                const decimalsLp = await lpContract.methods.decimals().call();
-                setLpTokenBalance(props.dfoCore.toDecimals(balanceLp, parseInt(decimalsLp)));
-                setFirstTokenBalance(props.dfoCore.toDecimals(balance0, parseInt(token0decimals)));
-                setSecondTokenBalance(props.dfoCore.toDecimals(balance1, parseInt(token1decimals)));
-                pools.push({ ammContract, ammIndex, lpIndex, totalAmount, token0Amount, token1Amount, liquidityPool, token0, token1, symbol0, symbol1, token0decimals, token1decimals, decimalsLp, token0Contract, token1Contract });
-            }));
-            allowedPairs = [...allowedPairs, ...pools ];
-        }))
-        setPairs(allowedPairs);
+        setLoading(true);
+        try {
+            const contract = await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDExtensionControllerABI"), props.dfoCore.getContextElement("WUSDExtensionControllerAddress"));
+            console.log(contract);
+            setWusdExtensionController(contract);
+            const allowedAMMS = await contract.methods.allowedAMMs().call();
+            let allowedPairs = [];
+            await Promise.all(allowedAMMS.map(async (allowedAMM, ammIndex) => {
+                const { ammAddress, liquidityPools } = allowedAMM;
+                const pools = [];
+                await Promise.all(liquidityPools.map(async (liquidityPool, lpIndex) => {
+                    const ammContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("AMMABI"), ammAddress);
+                    const poolInfo = await ammContract.methods.byLiquidityPool(liquidityPool).call();
+                    const totalAmount = poolInfo['0'];
+                    const [token0Amount, token1Amount] = poolInfo['1'];
+                    const [token0, token1] = poolInfo['2'];
+                    const token0Contract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), token0);
+                    const token1Contract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), token1);
+                    const symbol0 = await token0Contract.methods.symbol().call();
+                    const symbol1 = await token1Contract.methods.symbol().call();
+                    const balance0 = await token0Contract.methods.balanceOf(props.dfoCore.address).call();
+                    const token0decimals = await token0Contract.methods.decimals().call();
+                    const balance1 = await token1Contract.methods.balanceOf(props.dfoCore.address).call();
+                    const token1decimals = await token1Contract.methods.decimals().call();
+                    const lpContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), liquidityPool);
+                    const balanceLp = await lpContract.methods.balanceOf(props.dfoCore.address).call();
+                    const decimalsLp = await lpContract.methods.decimals().call();
+                    setLpTokenBalance(props.dfoCore.toDecimals(balanceLp, parseInt(decimalsLp)));
+                    setFirstTokenBalance(props.dfoCore.toDecimals(balance0, parseInt(token0decimals)));
+                    setSecondTokenBalance(props.dfoCore.toDecimals(balance1, parseInt(token1decimals)));
+                    pools.push({ ammContract, ammIndex, lpIndex, totalAmount, token0Amount, token1Amount, liquidityPool, token0, token1, symbol0, symbol1, token0decimals, token1decimals, decimalsLp, token0Contract, token1Contract });
+                }));
+                allowedPairs = [...allowedPairs, ...pools ];
+            }))
+            setPairs(allowedPairs);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
     }
 
     const onTokenApproval = (type) => {
@@ -84,22 +92,29 @@ const Mint = (props) => {
     }
 
     const mintWUSD = async () => {
-        if (firstAmount > 0 && secondAmount > 0) {
-            const chosenPair = pairs[pair];
-            const { ammIndex, lpIndex, token0Contract, token1Contract, token0decimals, token1decimals } = chosenPair;
-            await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, props.dfoCore.fromDecimals(lpTokenAmount.toString(), 18).toString(), false).send({ from: props.dfoCore.address, gasLimit: 1000000 });
-            const balance0 = await token0Contract.methods.balanceOf(props.dfoCore.address).call();
-            const balance1 = await token1Contract.methods.balanceOf(props.dfoCore.address).call();
-            setFirstTokenBalance(props.dfoCore.toDecimals(balance0, parseInt(token0decimals)));
-            setSecondTokenBalance(props.dfoCore.toDecimals(balance1, parseInt(token1decimals)));
-        } else if (lpTokenAmount > 0) {
-            
-        } else {
-            return;
+        setLoading(true);
+        try {
+            if (firstAmount > 0 && secondAmount > 0) {
+                const chosenPair = pairs[pair];
+                const { ammIndex, lpIndex, token0Contract, token1Contract, token0decimals, token1decimals } = chosenPair;
+                await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, props.dfoCore.fromDecimals(lpTokenAmount.toString(), 18).toString(), false).send({ from: props.dfoCore.address, gasLimit: 1000000 });
+                const balance0 = await token0Contract.methods.balanceOf(props.dfoCore.address).call();
+                const balance1 = await token1Contract.methods.balanceOf(props.dfoCore.address).call();
+                setFirstTokenBalance(props.dfoCore.toDecimals(balance0, parseInt(token0decimals)));
+                setSecondTokenBalance(props.dfoCore.toDecimals(balance1, parseInt(token1decimals)));
+            } else if (lpTokenAmount > 0) {
+                
+            } else {
+                return;
+            }
+            setFirstAmount(0);
+            setSecondAmount(0);
+            setLpTokenAmount(0);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
         }
-        setFirstAmount(0);
-        setSecondAmount(0);
-        setLpTokenAmount(0);
     }
 
     const updateFirstAmount = async (amount) => {
@@ -199,6 +214,20 @@ const Mint = (props) => {
                     </div>
                     <div className="col-12 col-md-6">
                         <button className="btn btn-secondary" onClick={() => mintWUSD()} disabled={(!firstAmount || !secondAmount) && !lpTokenAmount}>Mint</button>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    if (loading) {
+        return (
+            <div className="mint-component">
+                <div className="row">
+                    <div className="col-12 justify-content-center">
+                        <div className="spinner-border text-secondary" role="status">
+                            <span className="visually-hidden"></span>
+                        </div>
                     </div>
                 </div>
             </div>

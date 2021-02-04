@@ -172,12 +172,18 @@ export default class DFOCore {
         console.log(this.positions);
         if (this.positions > 0 && !force) return;
         try {
+            this.positions = [];
             await this.loadDeployedLiquidityMiningContracts();
             await Promise.all(this.deployedLiquidityMiningContracts.map(async (c) => {
-                console.log(c);
                 const contract = new this.web3.eth.Contract(this.getContextElement("LiquidityMiningABI"), c.address);
-                const events = await contract.getPastEvents('Transfer');
-                console.log(events);
+                const events = await contract.getPastEvents('Transfer', { filter: { to: this.address }, fromBlock: 11790157 });
+                await Promise.all(events.map(async (event) => {
+                    const { returnValues } = event;
+                    const { positionId } = returnValues;
+                    const position = await contract.methods.position(positionId).call();
+                    const setup = (await contract.methods.setups().call())[position.setupIndex];
+                    this.positions.push({ ...setup, contract, position, positionId });
+                }))
             }));
         } catch (error) {
             console.error(error);
@@ -259,8 +265,6 @@ export default class DFOCore {
         console.log(extensionInitData);
         const deployTransaction = await liquidityMiningFactory.methods.deploy(payload).send({ from: sender, gasLimit: 10000000 });
         console.log(deployTransaction);
-        const liquidityMiningContractAddress = this.web3.eth.abi.decodeParameter("address", deployTransaction.logs.filter(it => it.topics[0] === this.web3.utils.sha3("LiquidityMiningDeployed(address,address,bytes)"))[0].topics[1]);
-        
     }
 
     /**

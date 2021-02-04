@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { FarmingComponent } from '../../../../components'; 
 
 const Farm = (props) => {
+    const [loading, setLoading] = useState(false);
     const [farmingContracts, setFarmingContracts] = useState([]);
 
     useEffect(() => {
@@ -10,7 +11,28 @@ const Farm = (props) => {
     }, []);
 
     const getFarmingSetups = async () => {
-        await props.dfoCore.loadDeployedLiquidityMiningContracts();
+        setLoading(true);
+        try {
+            await props.dfoCore.loadDeployedLiquidityMiningContracts();
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    if (loading) {
+        return (
+            <div className="explore-component">
+                <div className="row">
+                    <div className="col-12 justify-content-center">
+                        <div className="spinner-border text-secondary" role="status">
+                            <span className="visually-hidden"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
     }
 
     return (

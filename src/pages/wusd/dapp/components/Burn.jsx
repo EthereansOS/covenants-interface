@@ -28,45 +28,54 @@ const Burn = (props) => {
     }, [])
 
     const getController = async () => {
-        const contract = await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDExtensionControllerABI"), props.dfoCore.getContextElement("WUSDExtensionControllerAddress"));
-        console.log(contract);
-        setWusdExtensionController(contract);
-        const allowedAMMS = await contract.methods.allowedAMMs().call();
-        let allowedPairs = [];
-        await Promise.all(allowedAMMS.map(async (allowedAMM, ammIndex) => {
-            const { ammAddress, liquidityPools } = allowedAMM;
-            const pools = [];
-            await Promise.all(liquidityPools.map(async (liquidityPool, lpIndex) => {
-                const ammContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("AMMABI"), ammAddress);
-                const poolInfo = await ammContract.methods.byLiquidityPool(liquidityPool).call();
-                const totalAmount = poolInfo['0'];
-                const [token0Amount, token1Amount] = poolInfo['1'];
-                const [token0, token1] = poolInfo['2'];
-                const token0Contract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), token0);
-                const token1Contract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), token1);
-                const symbol0 = await token0Contract.methods.symbol().call();
-                const symbol1 = await token1Contract.methods.symbol().call();
-                const balance0 = await token0Contract.methods.balanceOf(props.dfoCore.address).call();
-                const token0decimals = await token0Contract.methods.decimals().call();
-                const balance1 = await token1Contract.methods.balanceOf(props.dfoCore.address).call();
-                const token1decimals = await token1Contract.methods.decimals().call();
-                const lpContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), liquidityPool);
-                const decimalsLp = await lpContract.methods.decimals().call();
-                setFirstTokenBalance(props.dfoCore.toDecimals(balance0, parseInt(token0decimals)));
-                setSecondTokenBalance(props.dfoCore.toDecimals(balance1, parseInt(token1decimals)));
-                pools.push({ ammContract, ammIndex, lpIndex, totalAmount, token0Amount, token1Amount, liquidityPool, token0, token1, symbol0, symbol1, token0decimals, token1decimals, decimalsLp, token0Contract, token1Contract });
-            }));
-            allowedPairs = [...allowedPairs, ...pools ];
-        }))
-        const wusdInfo = await contract.methods.wusdInfo().call();  
-        const wusdContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("ERC20ABI"), props.dfoCore.getContextElement("WUSDAddress"));
-        const balance = await wusdContract.methods.balanceOf(props.dfoCore.address).call();
-        const approval = await wusdContract.methods.allowance(props.dfoCore.address, props.dfoCore.getContextElement("WUSDExtensionControllerAddress")).call();
-        setWusdContract(wusdContract);
-        console.log(approval);
-        setWusdApproved(parseInt(approval) !== 0);
-        setWusdBalance(props.dfoCore.toDecimals(balance, await wusdContract.methods.decimals().call()));
-        setPairs(allowedPairs);
+        setLoading(true);
+        try {
+            const contract = await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDExtensionControllerABI"), props.dfoCore.getContextElement("WUSDExtensionControllerAddress"));
+            console.log(contract);
+            setWusdExtensionController(contract);
+            const allowedAMMS = await contract.methods.allowedAMMs().call();
+            let allowedPairs = [];
+            await Promise.all(allowedAMMS.map(async (allowedAMM, ammIndex) => {
+                const { ammAddress, liquidityPools } = allowedAMM;
+                const pools = [];
+                await Promise.all(liquidityPools.map(async (liquidityPool, lpIndex) => {
+                    const ammContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("AMMABI"), ammAddress);
+                    const poolInfo = await ammContract.methods.byLiquidityPool(liquidityPool).call();
+                    const totalAmount = poolInfo['0'];
+                    const [token0Amount, token1Amount] = poolInfo['1'];
+                    const [token0, token1] = poolInfo['2'];
+                    const token0Contract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), token0);
+                    const token1Contract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), token1);
+                    const symbol0 = await token0Contract.methods.symbol().call();
+                    const symbol1 = await token1Contract.methods.symbol().call();
+                    const balance0 = await token0Contract.methods.balanceOf(props.dfoCore.address).call();
+                    const token0decimals = await token0Contract.methods.decimals().call();
+                    const balance1 = await token1Contract.methods.balanceOf(props.dfoCore.address).call();
+                    const token1decimals = await token1Contract.methods.decimals().call();
+                    const lpContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), liquidityPool);
+                    const lpSymbol = await lpContract.methods.symbol().call();
+                    const decimalsLp = await lpContract.methods.decimals().call();
+                    const approval = await lpContract.methods.allowance(props.dfoCore.address, props.dfoCore.getContextElement("WUSDExtensionControllerAddress")).call();
+                    setFirstTokenBalance(props.dfoCore.toDecimals(balance0, parseInt(token0decimals)));
+                    setSecondTokenBalance(props.dfoCore.toDecimals(balance1, parseInt(token1decimals)));
+                    pools.push({ ammContract, ammIndex, lpContract, lpIndex, lpSymbol, totalAmount, token0Amount, token1Amount, liquidityPool, token0, token1, symbol0, symbol1, token0decimals, token1decimals, decimalsLp, token0Contract, token1Contract, lpTokenApproved: parseInt(approval) !== 0 });
+                }));
+                allowedPairs = [...allowedPairs, ...pools ];
+            }))
+            const wusdInfo = await contract.methods.wusdInfo().call();  
+            const wusdContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("ERC20ABI"), props.dfoCore.getContextElement("WUSDAddress"));
+            const balance = await wusdContract.methods.balanceOf(props.dfoCore.address).call();
+            const approval = await wusdContract.methods.allowance(props.dfoCore.address, props.dfoCore.getContextElement("WUSDExtensionControllerAddress")).call();
+            setWusdContract(wusdContract);
+            console.log(approval);
+            setWusdApproved(parseInt(approval) !== 0);
+            setWusdBalance(props.dfoCore.toDecimals(balance, await wusdContract.methods.decimals().call()));
+            setPairs(allowedPairs);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
     }
 
     const onTokenApproval = (type) => {
@@ -74,6 +83,7 @@ const Burn = (props) => {
             case 'wusd':
                 setWusdApproved(true);
             default:
+                setPairs(pairs.map((pair, i) => i === parseInt(type) ? {...pair, lpTokenApproved: true} : pair));
                 return;
         }
     }
@@ -85,7 +95,6 @@ const Burn = (props) => {
     }
 
     const onWUSDAmountChange = async (amount) => {
-        setLoading(true);
         setAmount(amount);
         if (!amount) {
             clearTokens();
@@ -120,7 +129,6 @@ const Burn = (props) => {
         setEstimatedToken0(props.dfoCore.toDecimals(props.dfoCore.toFixed(parseInt(token0) * rate), token0decimals));
         setEstimatedToken1(props.dfoCore.toDecimals(props.dfoCore.toFixed(parseInt(token1) * rate), token1decimals));
         setEstimatedLpToken(props.dfoCore.toDecimals(lpResult.liquidityPoolAmount, decimalsLp));
-        setLoading(false);
     }
 
     const burnWUSD = async () => {
@@ -134,8 +142,8 @@ const Burn = (props) => {
         const burnData = abi.encode(["uint256","uint256","uint256","bool"], [pairs[pair].ammIndex, pairs[pair].lpIndex, props.dfoCore.fromDecimals(estimatedLpToken, 18), !getLpToken])
         const data = abi.encode(["uint256", "bytes"], [0, burnData]);
         console.log(props.dfoCore.fromDecimals(amount, 18).toString());
-        // await wusdCollection.methods.setApprovalForAll(collectionAddress, true).send({ from: props.dfoCore.address });
-        const res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [props.dfoCore.fromDecimals(amount, 18).toString()], abi.encode(["bytes[]"], [[data]])).send({ from: props.dfoCore.address});
+        const gasLimit = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [props.dfoCore.fromDecimals(amount, 18).toString()], abi.encode(["bytes[]"], [[data]])).estimateGas({ from: props.dfoCore.address});
+        const res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [props.dfoCore.fromDecimals(amount, 18).toString()], abi.encode(["bytes[]"], [[data]])).send({ from: props.dfoCore.address, gasLimit });
         console.log(res);
         await getController();
     }
@@ -152,17 +160,7 @@ const Burn = (props) => {
         if (!pair) {
             return (<div/>);
         }
-        /*
-        if (loading) {
-            return (
-                <div className="col-12 justify-content-center">
-                    <div className="spinner-border text-secondary" role="status">
-                        <span className="visually-hidden"></span>
-                    </div>
-                </div>
-            )
-        }
-        */
+        
         if (getLpToken) {
             return (
                 <div className="col-12 mb-4">
@@ -170,7 +168,7 @@ const Burn = (props) => {
                         <b>For</b>
                     </div>
                     <div className="row justify-content-center">
-                    { estimatedLpToken } { pairs[pair].symbol0 }/{ pairs[pair].symbol1 }
+                        { estimatedLpToken } { pairs[pair].symbol0 }/{ pairs[pair].symbol1 }
                     </div>
                 </div>
             )
@@ -188,6 +186,7 @@ const Burn = (props) => {
     }
 
     const getButtons = () => {
+        console.log(pairs[pair]);
         return (
             <div className="col-12 mb-4">
                 <div className="row justify-content-center">
@@ -196,8 +195,27 @@ const Burn = (props) => {
                             <ApproveButton contract={wusdContract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.log(error)} onApproval={() => onTokenApproval('wusd')} text={`Approve WUSD`} />
                         </div> : <div/>
                     }
+                    {
+                        !pairs[pair].lpTokenApproved ? <div className="col-12 col-md-6">
+                            <ApproveButton contract={pairs[pair].lpContract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.log(error)} onApproval={() => onTokenApproval(pair)} text={`Approve ${pairs[pair].lpSymbol}`} />
+                        </div> : <div/>
+                    }
                     <div className="col-12 col-md-6">
                         <button onClick={() => burnWUSD()} className="btn btn-secondary">Burn</button>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+    
+    if (loading) {
+        return (
+            <div className="explore-component">
+                <div className="row">
+                    <div className="col-12 justify-content-center">
+                        <div className="spinner-border text-secondary" role="status">
+                            <span className="visually-hidden"></span>
+                        </div>
                     </div>
                 </div>
             </div>

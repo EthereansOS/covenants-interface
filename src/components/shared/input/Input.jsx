@@ -25,18 +25,4 @@ const Input = (props) => {
     )
 }
 
-Input.propTypes = {
-    label: PropTypes.string,
-    step: PropTypes.number,
-    value: PropTypes.number.isRequired,
-    min: PropTypes.number,
-    onChange: PropTypes.func.isRequired,
-    showBalance: PropTypes.bool,
-    showMax: PropTypes.bool,
-    showCoin: PropTypes.bool,
-    address: PropTypes.string,
-    name: PropTypes.string,
-    balance: PropTypes.number,
-}
-
 export default Input;

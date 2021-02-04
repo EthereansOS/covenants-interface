@@ -98,11 +98,4 @@ const FarmingComponent = (props) => {
     )
 }
 
-FarmingComponent.propTypes = {
-    className: PropTypes.string,
-    contract: PropTypes.any.isRequired,
-    goBack: PropTypes.bool,
-    hasBorder: PropTypes.bool
-};
-
 export default FarmingComponent;

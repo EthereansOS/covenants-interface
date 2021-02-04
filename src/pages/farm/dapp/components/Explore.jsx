@@ -52,6 +52,20 @@ const Explore = (props) => {
         }));
         setFarmingContracts(filteredFarmingContracts);
     }
+    
+    if (loading) {
+        return (
+            <div className="explore-component">
+                <div className="row">
+                    <div className="col-12 justify-content-center">
+                        <div className="spinner-border text-secondary" role="status">
+                            <span className="visually-hidden"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="explore-component">

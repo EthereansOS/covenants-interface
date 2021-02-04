@@ -2,42 +2,6 @@ import { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { SetupComponent } from '../../../../components';
 
-const setups = [
-    {
-        type: 'Free farm',
-        mainToken: null,
-        secondaryToken: null,
-        rewardToken: null,
-        sharedRewardFrom: 'Uniswap V2',
-        mainTokenLiquidity: 10,
-        secondaryTokenLiquidity: 1000,
-        estimated: '1 SSJ/block = 1 ETH + 1,000 BUIDL',
-        manage: true,
-    },
-    {
-        type: 'Free farm',
-        mainToken: null,
-        secondaryToken: null,
-        rewardToken: null,
-        sharedRewardFrom: 'Uniswap V2',
-        mainTokenLiquidity: 10,
-        secondaryTokenLiquidity: 1000,
-        estimated: '1 SSJ/block = 1 ETH + 1,000 BUIDL',
-        manage: true,
-    },
-    {
-        type: 'Free farm',
-        mainToken: null,
-        secondaryToken: null,
-        rewardToken: null,
-        sharedRewardFrom: 'Uniswap V2',
-        mainTokenLiquidity: 10,
-        secondaryTokenLiquidity: 1000,
-        estimated: '1 SSJ/block = 1 ETH + 1,000 BUIDL',
-        manage: true,
-    }
-];
-
 const Positions = (props) => {
     const [farmingSetups, setFarmingSetups] = useState([]);
 
@@ -47,15 +11,16 @@ const Positions = (props) => {
 
     const getPositions = async () => {
         await props.dfoCore.loadPositions();
+        setFarmingSetups(props.dfoCore.positions);
     }
 
     return (
         <div className="positions-component">
             <div className="row mb-4">
                 {
-                    farmingSetups.map((farmingSetup) => {
+                    farmingSetups.map((farmingSetup, setupIndex) => {
                         return (
-                            <SetupComponent className="col-12 mb-4" setup={farmingSetup} dfoCore={props.dfoCore} manage={farmingSetup.manage} redeem={farmingSetup.redeem} farm={farmingSetup.farm} hasBorder />
+                            <SetupComponent className="col-12 mb-4" setupIndex={setupIndex} positionId={farmingSetup.positionId} position={farmingSetup.position} lmContract={farmingSetup.contract} dfoCore={props.dfoCore} setup={farmingSetup} manage={true} hasBorder />
                         )
                     })
                 }
