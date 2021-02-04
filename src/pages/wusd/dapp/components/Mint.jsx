@@ -45,9 +45,13 @@ const Mint = (props) => {
                 const token0decimals = await token0Contract.methods.decimals().call();
                 const balance1 = await token1Contract.methods.balanceOf(props.dfoCore.address).call();
                 const token1decimals = await token1Contract.methods.decimals().call();
+                const lpContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), liquidityPool);
+                const balanceLp = await lpContract.methods.balanceOf(props.dfoCore.address).call();
+                const decimalsLp = await lpContract.methods.decimals().call();
+                setLpTokenBalance(props.dfoCore.toDecimals(balanceLp, parseInt(decimalsLp)));
                 setFirstTokenBalance(props.dfoCore.toDecimals(balance0, parseInt(token0decimals)));
                 setSecondTokenBalance(props.dfoCore.toDecimals(balance1, parseInt(token1decimals)));
-                pools.push({ ammContract, ammIndex, lpIndex, totalAmount, token0Amount, token1Amount, liquidityPool, token0, token1, symbol0, symbol1, token0decimals, token1decimals, token0Contract, token1Contract });
+                pools.push({ ammContract, ammIndex, lpIndex, totalAmount, token0Amount, token1Amount, liquidityPool, token0, token1, symbol0, symbol1, token0decimals, token1decimals, decimalsLp, token0Contract, token1Contract });
             }));
             allowedPairs = [...allowedPairs, ...pools ];
         }))
@@ -102,24 +106,35 @@ const Mint = (props) => {
         if (!amount) return;
         setFirstAmount(amount);
         const chosenPair = pairs[pair];
-        const { ammContract, liquidityPool, token0, token0decimals, token1decimals } = chosenPair;
+        const { ammContract, liquidityPool, token0, token0decimals, token1decimals, decimalsLp } = chosenPair;
         const amount0 = props.dfoCore.fromDecimals(amount.toString(), token0decimals).toString();
-        const res = await ammContract.methods.byTokenAmount(liquidityPool, token0, amount0).call();
+
+        const res = await ammContract.methods.byTokenAmount(liquidityPool, token0, props.dfoCore.toFixed(amount0)).call();
         const { tokensAmounts, liquidityPoolAmount } = res;
-        setLpTokenAmount(props.dfoCore.toDecimals(liquidityPoolAmount, 18));
-        setSecondAmount(props.dfoCore.toDecimals(tokensAmounts[1], token1decimals));
+
+        const fixedSecondAmount = props.dfoCore.toDecimals(tokensAmounts[1], token1decimals);
+        const fixedLpAmount = props.dfoCore.toDecimals(liquidityPoolAmount, decimalsLp);
+
+        setSecondAmount(fixedSecondAmount);
+        setLpTokenAmount(fixedLpAmount);
     }
 
     const updateSecondAmount = async (amount) => {
         if (!amount) return;
         setSecondAmount(amount);
         const chosenPair = pairs[pair];
-        const { ammContract, liquidityPool, token1, token0decimals, token1decimals } = chosenPair;
+        const { ammContract, liquidityPool, token1, token0decimals, token1decimals, decimalsLp } = chosenPair;
         const amount1 = props.dfoCore.fromDecimals(amount.toString(), token1decimals).toString();
-        const res = await ammContract.methods.byTokenAmount(liquidityPool, token1, amount1).call();
+
+        const res = await ammContract.methods.byTokenAmount(liquidityPool, token1, props.dfoCore.toFixed(amount1)).call();
+
         const { tokensAmounts, liquidityPoolAmount } = res;
-        setLpTokenAmount(props.dfoCore.toDecimals(liquidityPoolAmount, 18));
-        setFirstAmount(props.dfoCore.toDecimals(tokensAmounts[0], token0decimals));
+
+        const fixedFirstAmount = props.dfoCore.toDecimals(tokensAmounts[0], token0decimals);
+        const fixedLpAmount = props.dfoCore.toDecimals(liquidityPoolAmount, decimalsLp);
+
+        setLpTokenAmount(fixedLpAmount);
+        setFirstAmount(fixedFirstAmount);
     }
 
     const updateLpAmount = async (amount) => {
@@ -136,7 +151,7 @@ const Mint = (props) => {
 
     const getEstimatedAmount = () => {
         if (firstAmount != 0 && secondAmount != 0) {
-            return firstAmount + secondAmount;
+            return parseFloat(firstAmount) + parseFloat(secondAmount);
         }
         return 0;
     }
@@ -146,7 +161,7 @@ const Mint = (props) => {
 
         return (
             <div className="col-12 mb-4">
-                <Input showMax={true} step={0.0001} value={lpTokenAmount} balance={1000} min={0} onChange={(e) => updateLpAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={`${chosenPair.symbol0}/${chosenPair.symbol1}`} />
+                <Input showMax={true} step={0.0001} value={lpTokenAmount} balance={lpTokenBalance} min={0} onChange={(e) => updateLpAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={`${chosenPair.symbol0}/${chosenPair.symbol1}`} />
             </div>
         )
     }

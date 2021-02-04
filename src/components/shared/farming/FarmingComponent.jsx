@@ -5,16 +5,20 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 
 const FarmingComponent = (props) => {
-    const { className, dfoCore, contract, goBack, hasBorder } = props;
+    const { className, dfoCore, contract, goBack, hasBorder, hostedBy } = props;
     const [metadata, setMetadata] = useState(null);
 
     console.log(contract);
+
+    useEffect(() => {
+        getContractMetadata();
+    }, []);
 
     const getContractMetadata = async () => {
         const rewardToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), await contract.methods._rewardTokenAddress().call());
         const symbol = await rewardToken.methods.symbol().call();
         const extensionAddress = await contract.methods._extension().call();
-        const extensionContract = await dfoCore.getContract(dfoCore.getContextElement('liquidityMiningExtensionABI'), extensionAddress);
+        const extensionContract = await dfoCore.getContract(dfoCore.getContextElement('LiquidityMiningExtensionABI'), extensionAddress);
         const { host, byMint } = await extensionContract.methods.data().call();
 
         const setups = await contract.methods.setups().call();
@@ -23,22 +27,17 @@ const FarmingComponent = (props) => {
         const { data } = await axios.get(dfoCore.getContextElement("coingeckoEthereumPriceURL"));
         const [ ethData ] = data;
 
-        const uniswapV2Router = await dfoCore.getContract(dfoCore.getContextElement('uniswapV2RouterABI'), dfoCore.getContextElement('uniswapV2RouterAddress'));
-
         let rewardPerBlock = 0;
         await Promise.all(setups.map(async (setup) => {
             rewardPerBlock += parseInt(setup.rewardPerBlock);
         }))
+        const uniswapV2Router = await dfoCore.getContract(dfoCore.getContextElement('uniswapV2RouterABI'), dfoCore.getContextElement('uniswapV2RouterAddress'));
+        console.log(setups);
         let valueLocked = 0;
         await Promise.all(setups.map(async (setup) => {
             if (parseInt(setup.totalSupply) === 0 || parseInt(setup.currentStakedLiquidity) === 0) return;
-            if (setup.free) {
-                const amounts = await uniswapV2Router.methods.getAmountsOut(setup.totalSupply, [dfoCore.getContextElement('wethTokenAddress'), setup.liquidityPoolTokenAddresses[0]]).call();
-                console.log(amounts);
-            } else {
-                const amounts = await uniswapV2Router.methods.getAmountsOut(setup.currentStakedLiquidity, [dfoCore.getContextElement('wethTokenAddress'), setup.mainTokenAddress]).call();
-                console.log(amounts);
-            }
+            const amounts = await uniswapV2Router.methods.getAmountsOut(setup.totalSupply, [dfoCore.getContextElement('wethTokenAddress'), setup.liquidityPoolTokenAddress]).call();
+            console.log(amounts);
             valueLocked += setup.free ? parseInt(setup.totalSupply) : parseInt(setup.currentStakedLiquidity);
         }))
         valueLocked = valueLocked * ethData.current_price;
@@ -55,10 +54,6 @@ const FarmingComponent = (props) => {
             lockedSetups,
             host: `${host.substring(0, 5)}...${host.substring(host.length - 3, host.length)}`,
         });
-    }
-
-    if (!metadata) {
-        getContractMetadata();
     }
 
     return (

@@ -22,13 +22,13 @@ const Explore = (props) => {
             await props.dfoCore.loadDeployedLiquidityMiningContracts();
             const mappedContracts = await Promise.all(
                 props.dfoCore.deployedLiquidityMiningContracts.map(async (contract) => { 
-                    return props.dfoCore.getContract(props.dfoCore.getContextElement('liquidityMiningABI'), contract.address);
+                    return props.dfoCore.getContract(props.dfoCore.getContextElement('LiquidityMiningABI'), contract.address);
                 })
             );
             setFarmingContracts(mappedContracts);
             setStartingContracts(mappedContracts);
         } catch (error) {
-            console.error(error);
+            
             setFarmingContracts([]);
             setStartingContracts([]);
         } finally {
@@ -36,14 +36,20 @@ const Explore = (props) => {
         }
     }
 
-    const onChangeTokenFilter = (value) => {
+    const onChangeTokenFilter = async (value) => {
         if (!value) {
             setTokenFilter("");
             setFarmingContracts(startingContracts);
             return;
         }
         setTokenFilter(value);
-        const filteredFarmingContracts = startingContracts.filter((contract) => contract.address.toLowerCase().includes(value.toLowerCase()));
+        const filteredFarmingContracts = [];
+        await Promise.all(startingContracts.map(async (contract) => {
+            const rewardTokenAddress = await contract.methods._rewardTokenAddress().call();
+            if (rewardTokenAddress.toLowerCase().includes(value.toLowerCase())) {
+                filteredFarmingContracts.push(contract);
+            }
+        }));
         setFarmingContracts(filteredFarmingContracts);
     }
 

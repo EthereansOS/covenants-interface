@@ -16,7 +16,7 @@ const Hosted = (props) => {
         const mappedContracts = await Promise.all(
             hostedContracts.map(async (contract) => { 
                 console.log(contract);
-                return props.dfoCore.getContract(props.dfoCore.getContextElement('liquidityMiningABI'), contract.address);
+                return props.dfoCore.getContract(props.dfoCore.getContextElement('LiquidityMiningABI'), contract.address);
             })
         );
         console.log(mappedContracts);
@@ -29,7 +29,7 @@ const Hosted = (props) => {
                 {
                     farmingContracts.map((farmingContract) => {
                         return (
-                            <FarmingComponent className="col-12 mb-4" dfoCore={props.dfoCore} contract={farmingContract} hasBorder />
+                            <FarmingComponent className="col-12 mb-4" dfoCore={props.dfoCore} contract={farmingContract} hostedBy={true} hasBorder />
                         )
                     })
                 }

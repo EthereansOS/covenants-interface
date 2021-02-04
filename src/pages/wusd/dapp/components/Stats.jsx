@@ -4,9 +4,10 @@ import { ChevronDownIcon, ChevronUpIcon } from '@primer/octicons-react';
 
 const Stats = (props) => {
     const [showAdvanced, setShowAdvanced] = useState(false);
-    const [health, setHealth] = useState(45);
+    const [health, setHealth] = useState(100);
     const [credit, setCredit] = useState(0);
-    const [debit, setDebit] = useState(1000.15);
+    const [debit, setDebit] = useState(0);
+    const [loading, setLoading] = useState(false);
     const [farmTreasury, setFarmTreasury] = useState(0);
     const [farmReward, setFarmReward] = useState(10);
     const [newFarmReward, setNewFarmReward] = useState(20);
@@ -35,46 +36,53 @@ const Stats = (props) => {
     }, []);
 
     const getStats = async () => {
-        const contract = await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDExtensionControllerABI"), props.dfoCore.getContextElement("WUSDExtensionControllerAddress"));
-        setWusdExtensionController(contract);
-        const wusdContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("ERC20ABI"), props.dfoCore.getContextElement("WUSDAddress"));
-        setWusdContract(wusdContract);
-        const supply = await wusdContract.methods.totalSupply().call();
-        const decimals = await wusdContract.methods.decimals().call();
-        setTotalSupply(supply);
-        const differences = await contract.methods.differences().call();
-        
-        setCredit(props.dfoCore.toDecimals(differences.credit, decimals));
-        setDebit(props.dfoCore.toDecimals(differences.debt, decimals));
+        setLoading(true);
+        try {
+            const contract = await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDExtensionControllerABI"), props.dfoCore.getContextElement("WUSDExtensionControllerAddress"));
+            setWusdExtensionController(contract);
+            const wusdContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("ERC20ABI"), props.dfoCore.getContextElement("WUSDAddress"));
+            setWusdContract(wusdContract);
+            const supply = await wusdContract.methods.totalSupply().call();
+            const decimals = await wusdContract.methods.decimals().call();
+            setTotalSupply(supply);
+            const differences = await contract.methods.differences().call();
+            
+            setCredit(props.dfoCore.toDecimals(differences.credit, decimals));
+            setDebit(props.dfoCore.toDecimals(differences.debt, decimals));
 
-        const wusdNote2Info = await contract.methods.wusdNote2Info().call();
-        const wusdNote5Info = await contract.methods.wusdNote5Info().call();
-        const x2USDcontract = await props.dfoCore.getContract(props.dfoCore.getContextElement("IEthItemInteroperableInterfaceABI"), wusdNote2Info[2]);
-        const x5USDcontract = await props.dfoCore.getContract(props.dfoCore.getContextElement("IEthItemInteroperableInterfaceABI"), wusdNote5Info[2]);
-        const x2USDNoteController = await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDNoteControllerABI"), wusdNote2Info[3]);
-        const x5USDNoteController = await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDNoteControllerABI"), wusdNote5Info[3]);
-        
-        setx2USDContract(x2USDcontract);
-        setx2USDContract(x5USDcontract);
-        setx2USDNoteControllerContract(x2USDNoteController);
-        setx5USDNoteControllerContract(x5USDNoteController);
+            const wusdNote2Info = await contract.methods.wusdNote2Info().call();
+            const wusdNote5Info = await contract.methods.wusdNote5Info().call();
+            const x2USDcontract = await props.dfoCore.getContract(props.dfoCore.getContextElement("IEthItemInteroperableInterfaceABI"), wusdNote2Info[2]);
+            const x5USDcontract = await props.dfoCore.getContract(props.dfoCore.getContextElement("IEthItemInteroperableInterfaceABI"), wusdNote5Info[2]);
+            const x2USDNoteController = await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDNoteControllerABI"), wusdNote2Info[3]);
+            const x5USDNoteController = await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDNoteControllerABI"), wusdNote5Info[3]);
+            
+            setx2USDContract(x2USDcontract);
+            setx2USDContract(x5USDcontract);
+            setx2USDNoteControllerContract(x2USDNoteController);
+            setx5USDNoteControllerContract(x5USDNoteController);
 
-        setx2USDSupply(props.dfoCore.toDecimals(await x2USDcontract.methods.totalSupply().call(), decimals));
-        setx5USDSupply(props.dfoCore.toDecimals(await x5USDcontract.methods.totalSupply().call(), decimals));
-        setx2USDTreasury(props.dfoCore.toDecimals(await wusdContract.methods.balanceOf(x2USDNoteController.options.address).call(), decimals));
-        setx5USDTreasury(props.dfoCore.toDecimals(await wusdContract.methods.balanceOf(x5USDNoteController.options.address).call(), decimals));
-        
-        const info = await contract.methods.rebalanceByCreditReceiversInfo().call();
-        setUnifiTreasury(props.dfoCore.toDecimals(info[2], decimals));
-        const lastRebalanceBlock = await contract.methods.lastRebalanceByCreditBlock().call();
-        const interval = await contract.methods.rebalanceByCreditBlockInterval().call();
-        setCurrentBlock(await props.dfoCore.getBlockNumber());
-        if (lastRebalanceBlock === "0") {
-            setRebalanceBlock(await props.dfoCore.getBlockNumber());
-        } else {
-            setRebalanceBlock(parseInt(lastRebalanceBlock) * parseInt(interval));
+            setx2USDSupply(props.dfoCore.toDecimals(await x2USDcontract.methods.totalSupply().call(), decimals));
+            setx5USDSupply(props.dfoCore.toDecimals(await x5USDcontract.methods.totalSupply().call(), decimals));
+            setx2USDTreasury(props.dfoCore.toDecimals(await wusdContract.methods.balanceOf(x2USDNoteController.options.address).call(), decimals));
+            setx5USDTreasury(props.dfoCore.toDecimals(await wusdContract.methods.balanceOf(x5USDNoteController.options.address).call(), decimals));
+            
+            const info = await contract.methods.rebalanceByCreditReceiversInfo().call();
+            setUnifiTreasury(props.dfoCore.toDecimals(info[2], decimals));
+            const lastRebalanceBlock = await contract.methods.lastRebalanceByCreditBlock().call();
+            const interval = await contract.methods.rebalanceByCreditBlockInterval().call();
+            setCurrentBlock(await props.dfoCore.getBlockNumber());
+            if (lastRebalanceBlock === "0") {
+                setRebalanceBlock(await props.dfoCore.getBlockNumber());
+            } else {
+                setRebalanceBlock(parseInt(lastRebalanceBlock) * parseInt(interval));
+            }
+            await getCollateralData(contract, supply);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
         }
-        await getCollateralData(contract, supply);
     }
 
     const getCollateralData = async (contract, supply) => {
@@ -156,7 +164,7 @@ const Stats = (props) => {
                                 <b>Supply</b>
                             </div>
                             <div className="col-12" style={{wordBreak: 'break-word'}}>
-                                { totalSupply ? props.dfoCore.toDecimals(totalSupply, 18) : totalSupply } WUSD
+                                { totalSupply ? props.dfoCore.toDecimals(props.dfoCore.toFixed(totalSupply), 18) : totalSupply } WUSD
                             </div>
                         </div>
                         <div className="row mb-3">
@@ -167,8 +175,7 @@ const Stats = (props) => {
                                 {
                                     (collateralData && collateralData.collateral) ?
                                         Object.entries(collateralData.collateral).map((entry, i) => {
-                                            
-                                            return <p>{props.dfoCore.toDecimals(entry[1].toString())} {entry[0]}</p>
+                                            return <p>{props.dfoCore.toDecimals(props.dfoCore.toFixed(entry[1]).toString())} {entry[0]}</p>
                                         })
                                     : <div/>
                                 }
@@ -384,6 +391,16 @@ const Stats = (props) => {
         } else {
             return <div/>
         }
+    }
+
+    if (loading) {
+        return (
+            <div className="col-12 justify-content-center">
+                <div className="spinner-border text-secondary" role="status">
+                    <span className="visually-hidden"></span>
+                </div>
+            </div>
+        )
     }
 
     return (

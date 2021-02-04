@@ -49,7 +49,8 @@ const ExploreFarmingContract = (props) => {
     }, []);
 
     const getContractMetadata = async () => {
-        const lmContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('liquidityMiningABI'), address);
+        const lmContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('LiquidityMiningABI'), address);
+        console.log(await lmContract.methods._extension().call());
         const rewardTokenAddress = await lmContract.methods._rewardTokenAddress().call();
         setContract(lmContract);
         const setups = await lmContract.methods.setups().call();
@@ -61,14 +62,14 @@ const ExploreFarmingContract = (props) => {
             {
                 contract ? 
                 <div className="row">
-                    <FarmingComponent dfoCore={props.dfoCore} contract={contract} goBack={true} />
+                    <FarmingComponent dfoCore={props.dfoCore} contract={contract} goBack={true} hostedBy={true} />
                 </div> : <div/>
             }
             <div className="row">
                 {
-                    farmingSetups.length > 0 ? farmingSetups.map((farmingSetup) => {
+                    farmingSetups.length > 0 ? farmingSetups.map((farmingSetup, setupIndex) => {
                         return (
-                            <SetupComponent className="col-12 mb-4" dfoCore={props.dfoCore} setup={farmingSetup} hasBorder />
+                            <SetupComponent className="col-12 mb-4" setupIndex={setupIndex} lmContract={contract} dfoCore={props.dfoCore} setup={farmingSetup} hostedBy={true} hasBorder />
                         )
                     }) : <div className="col-12 justify-content-center">
                         <div className="spinner-border text-secondary" role="status">

@@ -36,6 +36,8 @@ const Create = (props) => {
     const [lockedRenewTimes, setLockedRenewTimes] = useState(0);
     const [loading, setLoading] = useState(false);
     const [isAdd, setIsAdd] = useState(false);
+    const [isEdit, setIsEdit] = useState(false);
+    const [editIndex, setEditIndex] = useState(null);
     const [isAddLoadBalancer, setIsAddLoadBalancer] = useState(false);
     const [isDeploy, setIsDeploy] = useState(false);
 
@@ -60,6 +62,81 @@ const Create = (props) => {
         return address.length === 42;
     }
 
+    const addFreeFarmingSetup = () => {
+        const setup = {
+            rewardPerBlock: freeRewardPerBlock,
+            data: freeLiquidityPoolToken,
+        }
+        if (isAdd && editIndex) {
+            props.removeFarmingSetup(editIndex);
+            setIsEdit(false);
+            setEditIndex(null);
+        }
+        props.addFarmingSetup(setup);
+        setFreeLiquidityPoolToken(null);
+        setFreeRewardPerBlock(0);
+        setSelectedFarmingType(null);
+        setIsAdd(false);
+    }
+
+    const addLockedFarmingSetup = () => {
+        const setup = {
+            period: lockedPeriod,
+            startBlock: lockedStartBlock,
+            endBlock: lockedStartBlock + lockedPeriod,
+            data: lockedMainToken,
+            maxLiquidity: lockedMaxLiquidity,
+            rewardPerBlock: lockedRewardPerBlock,
+            penaltyFee: lockedPenaltyFee,
+            renewTimes: lockedRenewTimes,
+            secondaryToken: lockedSecondaryToken,
+        }
+        if (isAdd && editIndex) {
+            props.removeFarmingSetup(editIndex);
+            setIsEdit(false);
+            setEditIndex(null);
+        }
+        props.addFarmingSetup(setup);
+        setLockedPeriod(null);
+        setLockedStartBlock(0);
+        setLockedMainToken(null);
+        setLockedMaxLiquidity(0);
+        setLockedRewardPerBlock(0);
+        setLockedHasPenaltyFee(false);
+        setLockedPenaltyFee(0);
+        setLockedIsRenewable(false);
+        setLockedRenewTimes(0);
+        setLockedSecondaryToken(null);
+        setSelectedFarmingType(null);
+        setIsAdd(false);
+        props.setFarmingContractStep(0);
+    }
+
+    const editSetup = (setup, index) => {
+        if (!setup.endBlock) {
+            // free setup
+            setFreeLiquidityPoolToken(setup.data);
+            setFreeRewardPerBlock(setup.rewardPerBlock);
+            setSelectedFarmingType('free');
+        } else {
+            // locked setup
+            setLockedPeriod(setup.period);
+            setLockedStartBlock(setup.startBlock);
+            setLockedMainToken(setup.data);
+            setLockedMaxLiquidity(setup.maxLiquidity);
+            setLockedRewardPerBlock(setup.rewardPerBlock);
+            setLockedHasPenaltyFee(setup.penaltyFee !== 0);
+            setLockedPenaltyFee(setup.penaltyFee);
+            setLockedIsRenewable(setup.renewTimes !== 0);
+            setLockedRenewTimes(setup.renewTimes);
+            setLockedSecondaryToken(setup.secondaryToken);
+            setSelectedFarmingType('locked');
+        }
+        setIsAdd(true);
+        setIsEdit(true);
+        setEditIndex(index);
+    }
+
     const onSelectRewardToken = async (address) => {
         if (!address) address = "0x7b123f53421b1bF8533339BFBdc7C98aA94163db";
         setLoading(true);
@@ -68,6 +145,38 @@ const Create = (props) => {
         const symbol = await rewardToken.methods.symbol().call();
         setSelectedRewardToken({ symbol, address });
         setLoading(false);
+    }
+
+    const deployContract = async () => {
+        const data = { setups: [], rewardTokenAddress: selectedRewardToken.address, byMint, hasLoadBalancer, pinnedSetupIndex };
+        const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
+        await Promise.all(props.farmingSetups.map(async (setup) => {
+            const isFree = !setup.endBlock;
+            const result = await ammAggregator.methods.findByLiquidityPool(isFree ? setup.data.address : setup.secondaryToken).call();
+            const { amm } = result;
+            data.setups.push(
+                [
+                    amm,//uniswapAMM.options.address,
+                    0,
+                    isFree ? setup.data.address : setup.secondaryToken,
+                    isFree ? setup.data.token0 : setup.data.address,
+                    isFree ? 0 : setup.startBlock,
+                    isFree ? 0 : (setup.startBlock + parseInt(setup.period)),
+                    props.dfoCore.fromDecimals(setup.rewardPerBlock),
+                    isFree ? props.dfoCore.fromDecimals(setup.rewardPerBlock) : 0,
+                    0,
+                    0,
+                    isFree ? 0 : props.dfoCore.fromDecimals(setup.maxLiquidity),
+                    0,
+                    isFree,
+                    isFree ? 0 : setup.renewTimes,
+                    isFree ? 0 : setup.penaltyFee,
+                    false//mainToken == utilities.voidEthereumAddress || secondaryToken == utilities.voidEthereumAddress
+                ]
+            )
+        }))
+        console.log(data);
+        await props.dfoCore.deployLiquidityMiningContract(data, props.dfoCore.address);
     }
 
     const getCreationComponent = () => {
@@ -118,12 +227,12 @@ const Create = (props) => {
             {
                 props.farmingSetups.map((setup, i) => {
                     return (
-                        <div key={i} className="row align-items-center text-left mb-md-0 mb-4">
+                        <div key={i} className="row align-items-center text-left mb-md-2 mb-4">
                             <div className="col-md-9 col-12">
                                 <b style={{fontSize: 14}}>{ !setup.startBlock ? "Free setup" : "Locked setup" } { setup.data.name }{ setup.startBlock ? `${setup.data.symbol}` : ` | ${ setup.data.symbol1} ${ setup.data.symbol2 }` } - Reward: {setup.rewardPerBlock} {props.farmingContract.rewardToken.symbol}/block</b>
                             </div>
                             <div className="col-md-3 col-12 flex">
-                                <button className="btn btn-sm btn-outline-danger mr-1" onClick={() => props.removeFarmingSetup(i)}><b>X</b></button> <button className="btn btn-sm btn-danger ml-1"><b>EDIT</b></button>
+                                <button className="btn btn-sm btn-outline-danger mr-1" onClick={() => props.removeFarmingSetup(i)}><b>X</b></button> <button onClick={() => editSetup(setup, i)} className="btn btn-sm btn-danger ml-1"><b>EDIT</b></button>
                             </div>
                         </div>
                     )
@@ -225,48 +334,6 @@ const Create = (props) => {
         setLockedIsRenewable(false);
         setLockedRenewTimes(0);
         setLockedSecondaryToken(null);
-        props.setFarmingContractStep(0);
-    }
-
-    const addFreeFarmingSetup = () => {
-        const setup = {
-            rewardPerBlock: freeRewardPerBlock,
-            data: freeLiquidityPoolToken,
-        }
-        props.addFarmingSetup(setup);
-        console.log(props.farmingSetups);
-        setFreeLiquidityPoolToken(null);
-        setFreeRewardPerBlock(0);
-        setSelectedFarmingType(null);
-        setIsAdd(false);
-    }
-
-    const addLockedFarmingSetup = () => {
-        const setup = {
-            period: lockedPeriod,
-            startBlock: lockedStartBlock,
-            endBlock: lockedStartBlock + lockedPeriod,
-            data: lockedMainToken,
-            maxLiquidity: lockedMaxLiquidity,
-            rewardPerBlock: lockedRewardPerBlock,
-            penaltyFee: lockedPenaltyFee,
-            renewTimes: lockedRenewTimes,
-            secondaryToken: lockedSecondaryToken,
-        }
-        props.addFarmingSetup(setup);
-        console.log(props.farmingSetups);
-        setLockedPeriod(null);
-        setLockedStartBlock(0);
-        setLockedMainToken(null);
-        setLockedMaxLiquidity(0);
-        setLockedRewardPerBlock(0);
-        setLockedHasPenaltyFee(false);
-        setLockedPenaltyFee(0);
-        setLockedIsRenewable(false);
-        setLockedRenewTimes(0);
-        setLockedSecondaryToken(null);
-        setSelectedFarmingType(null);
-        setIsAdd(false);
         props.setFarmingContractStep(0);
     }
 
@@ -553,8 +620,8 @@ const Create = (props) => {
                         setIsDeploy(false);
                     } } className="btn btn-light mr-4">Cancel</button>
                     <button onClick={() => {
-                        setIsDeploy(false);
-                        // TODO add deploy contract
+                        // setIsDeploy(false);
+                        deployContract();
                     }} className="btn btn-secondary ml-4" disabled={!selectedHost || (selectedHost === 'wallet' && (!hostWalletAddress || !isValidAddress(hostWalletAddress))) || (selectedHost === 'deployed-contract' && (!hostDeployedContract || !isValidAddress(hostDeployedContract)))}>Deploy</button>
                 </div>
             </div>
