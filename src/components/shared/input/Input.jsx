@@ -1,22 +1,34 @@
 import Coin from '../coin/Coin';
 import PropTypes from 'prop-types';
+import { useState } from 'react';
+import { useEffect } from 'react/cjs/react.development';
 
 const Input = (props) => {
-    const { label, value, min, max, onChange, showBalance, balance, showMax, showCoin, address, name, step, extra } = props;
+    const { label, min, max, value, onChange, showBalance, balance, showMax, showCoin, address, name, step, extra } = props;
+    const [val, setVal] = useState(value);
+
+    useEffect(() => {
+        setVal(value);
+    }, [value])
+
+    const onDetectedChange = (value) => {
+        if (!value) return { target: { value: balance }};
+        return parseFloat(value) > parseFloat(balance) ? { target: { value: balance }} : { target: { value } };
+    } 
 
     return (
         <>
             { label && <h6><b>{label}</b></h6> }
-            <div className="input-group">
+            <div className="input-group" onBlur={() => onChange(onDetectedChange(val))}  tabIndex={0}>
                 {
                     showMax && <div className="input-group-prepend">
-                        <button className="btn btn-secondary" onClick={() => onChange({ target: { value: balance }})} type="button">MAX</button>
+                        <button className="btn btn-secondary" onClick={() => onChange(onDetectedChange())} type="button">MAX</button>
                     </div>
                 }
-                <input type="number" step={step || 1} className="form-control" value={value} min={min} max={max || balance} onChange={onChange} />
+                <input type="number" className={`form-control input-form-field ${parseFloat(val) > parseFloat(balance) ? 'is-invalid' : ''}`} value={val} min={min} max={max || balance} onChange={(e) => setVal(e.target.value)}/>
                 {
-                    showCoin && <div className="input-group-append">
-                        <span className="input-group-text" id=""><Coin address={address} /> {name}</span>
+                    showCoin && <div className={`input-group-append no-border-right`}>
+                        <span className={`input-group-text ${parseFloat(val) > parseFloat(balance) ? 'is-invalid' : ''}`} id=""><Coin address={address} /> {name}</span>
                     </div>
                 }
             </div>

@@ -92,6 +92,19 @@ code {
   border-bottom: 10px $secondary solid;
 }
 
+.no-border-right {
+  border-right: 0;
+}
+
+.input-group-text {
+  background-color: transparent;
+  border-left: 0;
+}
+
+.input-group-append .is-invalid {
+  border-color: #dc3545;
+}
+
 .dapp-container {
   border-radius: 1.5rem;
 }

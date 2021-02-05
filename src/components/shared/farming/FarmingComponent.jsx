@@ -8,7 +8,7 @@ const FarmingComponent = (props) => {
     const { className, dfoCore, contract, goBack, hasBorder, hostedBy } = props;
     const [metadata, setMetadata] = useState(null);
 
-    console.log(contract);
+    
 
     useEffect(() => {
         getContractMetadata();
@@ -32,12 +32,12 @@ const FarmingComponent = (props) => {
             rewardPerBlock += parseInt(setup.rewardPerBlock);
         }))
         const uniswapV2Router = await dfoCore.getContract(dfoCore.getContextElement('uniswapV2RouterABI'), dfoCore.getContextElement('uniswapV2RouterAddress'));
-        console.log(setups);
+        
         let valueLocked = 0;
         await Promise.all(setups.map(async (setup) => {
             if (parseInt(setup.totalSupply) === 0 || parseInt(setup.currentStakedLiquidity) === 0) return;
             const amounts = await uniswapV2Router.methods.getAmountsOut(setup.totalSupply, [dfoCore.getContextElement('wethTokenAddress'), setup.liquidityPoolTokenAddress]).call();
-            console.log(amounts);
+            
             valueLocked += setup.free ? parseInt(setup.totalSupply) : parseInt(setup.currentStakedLiquidity);
         }))
         valueLocked = valueLocked * ethData.current_price;

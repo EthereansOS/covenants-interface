@@ -41,7 +41,7 @@ export const sessionReducer = (state = initialState, action) => {
         case REMOVE_FARMING_SETUP:
             return {
                 ...state,
-                farmingSetups: state.farmingSetups.filter((fs, i) => i !== action.payload.farmingSetupIndex),
+                farmingSetups: state.farmingSetups.filter((fs, i) => i !== parseInt(action.payload.farmingSetupIndex)),
             }
         case ADD_INFLATION_SETUP:
             return {
@@ -51,7 +51,7 @@ export const sessionReducer = (state = initialState, action) => {
         case REMOVE_INFLATION_SETUP:
             return {
                 ...state,
-                inflationSetups: state.inflationSetups.filter((fs, i) => i !== action.payload.inflationSetupIndex),
+                inflationSetups: state.inflationSetups.filter((fs, i) => i !== parseInt(action.payload.inflationSetupIndex)),
             }
         case SET_INFLATION_CONTRACT_STEP:
             return {
