@@ -2,10 +2,7 @@ import { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Coin, Input, TokenInput } from '../../../../components/shared';
 import { setFarmingContractStep, updateFarmingContract, addFarmingSetup, removeFarmingSetup  } from '../../../../store/actions';
-import Editor from 'react-simple-code-editor';
-import { highlight, languages } from 'prismjs/components/prism-core';
-import 'prismjs/components/prism-clike';
-import 'prismjs/components/prism-solidity';
+import Editor from "@monaco-editor/react";
 import { ethers } from "ethers";
 
 const abi = new ethers.utils.AbiCoder();
@@ -18,10 +15,11 @@ const Create = (props) => {
     const [currentBlockNumber, setCurrentBlockNumber] = useState(0);
     const [selectedRewardToken, setSelectedRewardToken] = useState(null);
     const [selectedFarmingType, setSelectedFarmingType] = useState(null);
-    const [selectedHost, setSelectedHost] = useState(null);
+    const [selectedHost, setSelectedHost] = useState("");
     const [hostWalletAddress, setHostWalletAddress] = useState(null);
     const [hostDeployedContract, setHostDeployedContract] = useState(null);
     const [deployContractCode, setDeployContractCode] = useState("");
+    const [deployedContractVerified, setDeployedContractVerified] = useState(false);
     const [hasLoadBalancer, setHasLoadBalancer] = useState(false);
     const [pinnedSetupIndex, setPinnedSetupIndex] = useState(null);
     const [byMint, setByMint] = useState(false);
@@ -153,6 +151,24 @@ const Create = (props) => {
         setLoading(false);
     }
 
+    const verifyContract = async () => {
+        try {
+            setDeployedContractVerified(true);
+        } catch (error) {
+            setDeployedContractVerified(false);
+        }
+    }
+
+    const uploadFile = (e) => {
+        e.preventDefault()
+        const reader = new FileReader()
+            reader.onload = async (e) => { 
+            const text = (e.target.result)
+            setDeployContractCode(text);
+        };
+        reader.readAsText(e.target.files[0])
+    }
+
     const initializeDeployData = async () => {
         setDeployLoading(true);
         try {
@@ -196,6 +212,7 @@ const Create = (props) => {
 
     const deployContract = async () => {
         let error = false;
+        let deployTransaction = null;
         setDeployLoading(true);
         try {
             const { setups, rewardTokenAddress, hasLoadBalancer, pinnedSetupIndex, extensionAddress, extensionInitData } = deployData;
@@ -208,14 +225,13 @@ const Create = (props) => {
             console.log(payload);
             console.log(extensionInitData);
             const gasLimit = await liquidityMiningFactory.methods.deploy(payload).estimateGas({ from: props.dfoCore.address });
-            const deployTransaction = await liquidityMiningFactory.methods.deploy(payload).send({ from: props.dfoCore.address, gasLimit });
+            deployTransaction = await liquidityMiningFactory.methods.deploy(payload).send({ from: props.dfoCore.address, gasLimit });
             console.log(deployTransaction);
         } catch (error) {
             console.error(error);
             error = true;
         } finally {
-            setDeployStep(!error ? deployStep + 1 : deployStep);
-            if (!error) {
+            if (!error && deployTransaction) {
                 props.updateFarmingContract(null);
                 await Promise.all(props.farmingSetups.map(async (_, i) => {
                     props.removeFarmingSetup(i);
@@ -711,22 +727,20 @@ const Create = (props) => {
                         <div className="row mb-2">
                             <input type="text" className="form-control" value={hostDeployedContract} onChange={(e) => setHostDeployedContract(e.target.value.toString())} placeholder={"Deployed contract address"} aria-label={"Deployed contract address"}/>
                         </div>
-                        <div className="row mb-4 justify-content-between">
-                            <button className="btn btn-sm btn-dark">Choose file</button>
-                            <button className="btn btn-sm btn-secondary">VERIFY</button>
+                        <div className="row mb-2">
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="customFile" onChange={(e) => uploadFile(e)} />
+                                <label class="custom-file-label" for="customFile">Choose file</label>
+                            </div>
                         </div>
-                    </> : selectedHost === 'deploy-contract' ? <>
+                        <div className="row mb-4 justify-content-between">
+                            <button onClick={() => verifyContract()} className="btn btn-sm btn-secondary">VERIFY</button>
+                        </div>
                         <Editor
-                            className="deploy-contract-editor"
-                            value={deployContractCode}
-                            onValueChange={code => setDeployContractCode(code)}
-                            highlight={code => highlight(code, languages.sol)}
-                            padding={10}
-                            style={{
-                                fontFamily: '"Fira code", "Fira Mono", monospace',
-                                fontSize: 14,
-                                minHeight: 500
-                            }}
+                            height="90vh"
+                            defaultLanguage="sol"
+                            defaultValue={deployContractCode}
+                            onChange={(value, event) => setDeployContractCode(value)}
                         />
                     </> : <div/>
                 }
@@ -739,7 +753,7 @@ const Create = (props) => {
                     <button onClick={() => {
                         initializeDeployData();
                         setDeployStep(selectedHost === 'deployed-contract' ? 2 : 1);
-                    }} className="btn btn-secondary ml-4" disabled={!selectedHost || (selectedHost === 'wallet' && (!hostWalletAddress || !isValidAddress(hostWalletAddress))) || (selectedHost === 'deployed-contract' && (!hostDeployedContract || !isValidAddress(hostDeployedContract)))}>Deploy</button>
+                    }} className="btn btn-secondary ml-4" disabled={!selectedHost || (selectedHost === 'wallet' && (!hostWalletAddress || !isValidAddress(hostWalletAddress))) || (selectedHost === 'deployed-contract' && (!hostDeployedContract || !isValidAddress(hostDeployedContract) || !deployedContractVerified))}>Deploy</button>
                 </div>
             </div>
         )
