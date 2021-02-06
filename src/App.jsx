@@ -11,7 +11,7 @@ const mapStateToProps = (state) => {
 const App = (props) => {
 
   return (
-    <div className={`app ${!props.dfoCore ? 'fantasy' : props.magicMode ? 'magic' : 'penguin'}`}>
+    <div className={`app`}>
       <Header />
       <div className="container app-container">
         <div className="row app-row w-100 align-items-center">

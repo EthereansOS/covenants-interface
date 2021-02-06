@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 
 const menu = [
     {
-        name: 'Farm', path: '/farm', asset: require('../../../assets/images/cloud.png').default,
+        name: 'Farm', path: '/farm', asset: require('../../../assets/images/farm.png').default,
     },
     {
         name: 'Inflation', path: '/inflation', asset: require('../../../assets/images/cloud.png').default,
@@ -32,9 +32,10 @@ const Sidemenu = () => {
         {
             menu.map(
                 (menuItem, index) => (
-                    <li className={`nav-link ${location.pathname.includes(menuItem.path) ? "sidebar-menu-link-selected" : ""}`} key={index}>
-                        <img src={menuItem.asset} className="mr-2" height={48} />
-                        <Link className="sidebar-menu-link" to={menuItem.path}>{menuItem.name}</Link>
+                    <li className={`nav-link ${location.pathname.includes(menuItem.path) ? "sidebar-menu-link-selected fantasyMenuLi" : ""}`} key={index}>
+                        <img src={menuItem.asset} className="mr-2" height={32} />
+                        <img className="Ditone" src="../../../assets/images/indicator.png"></img>
+                        <Link className="sidebar-menu-link fantasyMenu" to={menuItem.path}>{menuItem.name}</Link>
                     </li>
                 )
             )

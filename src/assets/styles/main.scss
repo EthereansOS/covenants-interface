@@ -9,11 +9,10 @@ $warning: #FDA7DF;
 
 body {
   margin: 0;
-  font-family: 'Overpass Mono', monospace;
+  font-family: 'EthOSregular', 'Overpass Mono', monospace;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
-  background-image: linear-gradient(rgba(226, 128, 233, 0.3), rgba(241, 212, 109, 0.3));
 }
 
 code {
@@ -240,7 +239,6 @@ code {
 /* page container */
 .page-container {
   padding: 1rem;
-  background-color: white;
   border-radius: 1.5rem;
   width: 600px;
   min-height: 500px;
