@@ -104,6 +104,42 @@ export default class DFOCore {
         return this.context[`${elementName}${network}`];
     }
 
+    numberToString = (num, locale) => {
+        if (num === undefined || num === null) {
+            num = 0;
+        }
+        if ((typeof num).toLowerCase() === 'string') {
+            return num;
+        }
+        let numStr = String(num);
+    
+        if (Math.abs(num) < 1.0) {
+            let e = parseInt(num.toString().split('e-')[1]);
+            if (e) {
+                let negative = num < 0;
+                if (negative) num *= -1
+                num *= Math.pow(10, e - 1);
+                numStr = '0.' + (new Array(e)).join('0') + num.toString().substring(2);
+                if (negative) numStr = "-" + numStr;
+            }
+        } else {
+            let e = parseInt(num.toString().split('+')[1]);
+            if (e > 20) {
+                e -= 20;
+                num /= Math.pow(10, e);
+                numStr = num.toString() + (new Array(e + 1)).join('0');
+            }
+        }
+        if (locale === true) {
+            var numStringSplitted = numStr.split(' ').join('').split('.');
+            return parseInt(numStringSplitted[0]).toLocaleString() + (numStringSplitted.length === 1 ? '' : ('.' + numStringSplitted[1]))
+        }
+        return numStr;
+    }
+
+    formatNumber = (value) => {
+        return parseFloat(this.numberToString(value).split(',').join(''));
+    }
     /**
      * returns the sending options for the given method and value.
      * if no params are used, the {from: address, gas: '99999999'} object is returned.
@@ -246,7 +282,7 @@ export default class DFOCore {
     }
 
     normalizeValue = (amount, decimals) => {
-        return amount * 10**(18-decimals);
+        return this.web3.utils.toBN(amount).mul(this.web3.utils.toBN(10**(18 - decimals))).toString();
     }
 
     normalizeFixed = (amount, decimals) => {

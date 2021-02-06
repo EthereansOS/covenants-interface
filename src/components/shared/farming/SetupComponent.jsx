@@ -12,7 +12,7 @@ const SetupComponent = (props) => {
     const [status, setStatus] = useState('farm');
     const [edit, setEdit] = useState(false);
     const [currentBlock, setCurrentBlock] = useState(0);
-    const [addLiquidityType, setAddLiquidityType] = useState("add-tokens"); 
+    const [addLiquidityType, setAddLiquidityType] = useState(""); 
     const [setupTokens, setSetupTokens] = useState([]);
     const [tokensAmounts, setTokensAmount] = useState([]);
     const [tokensApprovals, setTokensApprovals] = useState([]);
@@ -40,16 +40,13 @@ const SetupComponent = (props) => {
         return address.toLowerCase() === props.dfoCore.getContextElement('wethTokenAddress').toLowerCase();
     }
 
+    const isFinished = (setup) => {
+        return (setup.free && parseInt(setup.rewardPerBlock) === 0) || (!setup.free && ((parseInt(setup.rewardPerBlock) - parseInt(setup.currentRewardPerBlock) === 0) || (parseInt(setup.maximumLiquidity) - parseInt(setup.currentStakedLiquidity) === 0)));
+    }
+
     const getSetupMetadata = async () => {
         setLoading(true);
         try {
-            /*
-            let position = null;
-            if (positionId) {
-                position = await lmContract.methods.position(positionId).call();
-                setCurrentPosition(isValidPosition(position) ? position : null);
-            }
-            */
             const posArray = [];
             const events = await lmContract.getPastEvents('Transfer', { filter: { to: dfoCore.address, setupIndex }, fromBlock: 11790157 });
             for (let i = 0; i < events.length; i++) {
@@ -387,19 +384,40 @@ const SetupComponent = (props) => {
                                     }
                                 </>
                             }
+                            {
+                                !position.free && <>
+                                    <hr/>
+                                    <div className="col-md-6">
+                                        <p style={{fontSize: 14}}>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quaerat animi ipsam nemo at nobis odit temporibus autem possimus quae vel, ratione numquam modi rem accusamus, veniam neque voluptates necessitatibus enim!</p>
+                                    </div>
+                                    <div className="col-md-6">
+                                        <div className="form-check">
+                                            <input className="form-check-input" type="checkbox" value={unwrapPair} onChange={(e) => setUnwrapPair(e.target.checked)} id="getLpToken" />
+                                            <label className="form-check-label" htmlFor="getLpToken">
+                                                Unwrap tokens
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div className="col-12">
+                                        <button onClick={() => unlockPosition()} className="btn btn-secondary">Unlock position</button>
+                                    </div>
+                                </>
+                            }
                         </>
                         )
                     }
                     </div>
+                    
                     {
                         (currentPosition && (currentPosition.free || parseInt(currentPosition.setupEndBlock) > currentBlock)) && <>
                             <hr/>
                             <div className="row mt-4">
                                 <div className="col-md-6">
                                     <select className="custom-select wusd-pair-select" value={addLiquidityType} onChange={(e) => setAddLiquidityType(e.target.value)}>
+                                        <option value="">Choose..</option>
                                         {
                                             (currentPosition.free || parseInt(setup.rewardPerBlock) > parseInt(setup.currentRewardPerBlock)) && <>
-                                                <option value="add-tokens">Add liquidity</option>
+                                                <option value="add-tokens" disabled={!currentPosition.free && (isFinished(setup))}>Add liquidity</option>
                                                 <option value="add-lp">Add liquidity by LP token</option>
                                             </>
                                         }
@@ -459,7 +477,7 @@ const SetupComponent = (props) => {
                                             <button className="btn btn-secondary" onClick={() => addLiquidity()} disabled={!lpTokenInfo.approval || parseFloat(lpTokenAmount) === 0}>Add</button>
                                         </div>
                                     </div>
-                                </> : addLiquidityType === 'remove' ? <>
+                                </> : <>
                                     <div className="row justify-content-center mt-4">
                                         <div class="form-group w-100">
                                             <label htmlFor="formControlRange" className="text-secondary"><b>Amount:</b> {removalAmount}%</label>
@@ -487,23 +505,6 @@ const SetupComponent = (props) => {
                                     </div>
                                     <div className="row justify-content-center mt-4">
                                         <button onClick={() => removeLiquidity()} disabled={!removalAmount || removalAmount === 0} className="btn btn-secondary">Remove</button>
-                                    </div>
-                                </> : <>
-                                    <div className="row justify-content-center mt-4">
-                                        <div className="col-12">
-                                            <p style={{fontSize: 14}}>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quaerat animi ipsam nemo at nobis odit temporibus autem possimus quae vel, ratione numquam modi rem accusamus, veniam neque voluptates necessitatibus enim!</p>
-                                        </div>
-                                        <div className="col-12 mb-2">
-                                            <div className="form-check">
-                                                <input className="form-check-input" type="checkbox" value={unwrapPair} onChange={(e) => setUnwrapPair(e.target.checked)} id="getLpToken" />
-                                                <label className="form-check-label" htmlFor="getLpToken">
-                                                    Unwrap tokens
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div className="col-12">
-                                            <button onClick={() => unlockPosition()} className="btn btn-secondary">Unlock position</button>
-                                        </div>
                                     </div>
                                 </>
                             }
