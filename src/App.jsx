@@ -14,7 +14,7 @@ const App = (props) => {
     <div className={`app`}>
       <Header />
       <div className="container app-container">
-        <div className="row app-row w-100 align-items-center">
+        <div className="row app-row w-100 align-items-start">
           <div className="col-md-2 col-12 flex align-items-center justify-content-center">
             <Sidemenu />
           </div>
