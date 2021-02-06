@@ -151,27 +151,28 @@ const Stats = (props) => {
     const getFirstCol = () => {
         return (
             <div className="col-3 text-left">
-                <div className="row">
+                {/*}<div className="row">
                     <div className="col-12">
-                        <p><b>uSD: $1</b></p>
+                        <p><b>Price:</b></p>
+                        <p>$1</p>
                     </div>
-                </div>
-                <hr />
+                </div>{*/}
                 <div className="row">
                     <div className="col-12">
                         <div className="row mb-3">
                             <div className="col-12">
                                 <b>Supply</b>
                             </div>
-                            <div className="col-12" style={{wordBreak: 'break-word'}}>
+                            <div className="col-12 infoList">
                                 { totalSupply ? props.dfoCore.toDecimals(props.dfoCore.toFixed(totalSupply), 18) : totalSupply } WUSD
                             </div>
                         </div>
+                        <hr />
                         <div className="row mb-3">
                             <div className="col-12">
                                 <b>Collateral</b>
                             </div>
-                            <div className="col-12">
+                            <div className="col-12 infoList">
                                 {
                                     (collateralData && collateralData.collateral) ?
                                         Object.entries(collateralData.collateral).map((entry, i) => {
@@ -181,11 +182,12 @@ const Stats = (props) => {
                                 }
                             </div>
                         </div>
+                        <hr />
                         <div className="row mb-3">
                             <div className="col-12">
                                 <b>Liquidity</b>
                             </div>
-                            <div className="col-12">
+                            <div className="col-12 infoList">
                                 {
                                     (collateralData && collateralData.liquidity) ?
                                         Object.entries(collateralData.liquidity).map((entry, i) => {
@@ -271,7 +273,7 @@ const Stats = (props) => {
                 {
                     showAdvanced ? 
                     <>
-                        <div className="container">
+                        <div className="">
                             { getAdvancedRow() }
                             <div className="row">
                                 <div className="col-12">
