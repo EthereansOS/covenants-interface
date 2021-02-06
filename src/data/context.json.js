@@ -12,6 +12,7 @@ export default {
     "uniSwapPoolURLTemplate": "https://app.uniswap.org/#/pool?inputCurrency={0}&outputCurrency={1}",
     "coingeckoEthereumPriceURL": "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=ethereum",
     "coingeckoEthereumPriceRequestInterval": 600000,
+    "coingeckoCoinPriceURL": "https://api.coingecko.com/api/v3/simple/token_price/ethereum?vs_currencies=usd&contract_addresses=",
     "trustwalletImgURLTemplate": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/{0}/logo.png",
     "defaultOcelotTokenAddress": "0x9784b427ecb5275c9300ea34adef57923ab170af",
     "defaultOcelotTokenAddressRopsten": "0x6ae6cf934b2bd8c84d932aee75102ca2ef1bf2ce",

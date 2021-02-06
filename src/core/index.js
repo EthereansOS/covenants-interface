@@ -70,6 +70,7 @@ export default class DFOCore {
         }
         // set the core as initialized
         this.initialized = true;
+        window.web3 = this.web3;
     }
 
     /**
@@ -153,14 +154,17 @@ export default class DFOCore {
             const events = await factoryContract.getPastEvents('LiquidityMiningDeployed', { fromBlock: 11790157 });
             this.deployedLiquidityMiningContracts = [];
             await Promise.all(events.map(async (event) => {
-                const contract = new this.web3.eth.Contract(this.getContextElement("LiquidityMiningABI"), event.returnValues.liquidityMiningAddress);
-                const extensionAddress = await contract.methods._extension().call();
-                const extensionContract = new this.web3.eth.Contract(this.getContextElement("LiquidityMiningExtensionABI"), extensionAddress);
-                const { host } = await extensionContract.methods.data().call();
-                this.deployedLiquidityMiningContracts.push({ address: event.returnValues.liquidityMiningAddress, sender: host });
+                try {
+                    const contract = new this.web3.eth.Contract(this.getContextElement("LiquidityMiningABI"), event.returnValues.liquidityMiningAddress);
+                    const extensionAddress = await contract.methods._extension().call();
+                    const extensionContract = new this.web3.eth.Contract(this.getContextElement("LiquidityMiningExtensionABI"), extensionAddress);
+                    const { host } = await extensionContract.methods.data().call();
+                    this.deployedLiquidityMiningContracts.push({ address: event.returnValues.liquidityMiningAddress, sender: host });
+                } catch (error) {
+                    console.error(error);
+                }
             }));
         } catch (error) {
-            
             this.deployedLiquidityMiningContracts = [];
         }
     }
@@ -173,8 +177,7 @@ export default class DFOCore {
         return position.uniqueOwner !== this.voidEthereumAddress && position.creationBlock !== '0';
     }
 
-    loadPositions = async (force = false) => {
-        
+    loadPositions = async () => {
         try {
             this.positions = [];
             await this.loadDeployedLiquidityMiningContracts();
@@ -192,7 +195,8 @@ export default class DFOCore {
                 }))
             }));
         } catch (error) {
-            
+            console.error(error);
+            this.positions = [];
         }
     }
 
