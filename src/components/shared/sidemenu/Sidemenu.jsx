@@ -32,9 +32,9 @@ const Sidemenu = () => {
         {
             menu.map(
                 (menuItem, index) => (
-                    <li className={`nav-link ${location.pathname.includes(menuItem.path) ? "sidebar-menu-link-selected fantasyMenuLi" : ""}`} key={index}>
+                    <li className={`fantasyMenuLi nav-link ${location.pathname.includes(menuItem.path) ? "sidebar-menu-link-selected" : ""}`} key={index}>
                         <img src={menuItem.asset} className="mr-2" height={32} />
-                        <img className="Ditone" src="../../../assets/images/indicator.png"></img>
+                        <span className="Ditone"></span>
                         <Link className="sidebar-menu-link fantasyMenu" to={menuItem.path}>{menuItem.name}</Link>
                     </li>
                 )

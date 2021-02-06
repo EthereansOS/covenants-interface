@@ -10,9 +10,7 @@
 
 .fantasy {background-color: black !important;}
 .fantasyMenu {font-size: 13px;}
-.fantasyMenuLi {position: relative;}
-.Ditone {display: none; width: 30px; height: 30px;}
-.fantasyMenuLi:hover .Ditone {position: absolute; left: 10px; top: 10px; display: inline-block;}
+.fantasyMenuLi {position: relative; cursor: pointer;}
 .mr-2, .mx-2 {margin-right: 1rem;}
 .menuIconMap {vertical-align: middle; display: inline-block; width: 40px; height: 30px;}
 .menuIconEth {vertical-align: middle; display: inline-block; width: 30px; height: 30px;}
@@ -21,10 +19,17 @@
 .BtnConnect, .BtnConnectAfter {font-size: 15px; padding: 4px 13px; display: inline-block; vertical-align: middle; margin: auto 5px auto 20px; background-color: transparent; border-radius: 8px; box-shadow: none; text-shadow: none; text-decoration: none; cursor: pointer;}
 .BtnConnect:hover, .BtnConnectAfter:hover {text-decoration: none;}
 .LogoM {background-image: url(./assets/images/covlogo.png); display: inline-block; height: 42px;width: 30px; vertical-align: middle; background-repeat: no-repeat;}
+.Ditone {width: 20px; height: 20px; display: none; position: absolute; left: -10px;top: 18px; background-image: url(./assets/images/indicator.png); background-repeat: no-repeat;}
+.fantasyMenuLi:hover .Ditone {display: block !important; z-index: 10;left: -15px;}
+.sidebar-menu-link-selected .Ditone {display: block !important; z-index: 10;}
 
-
-.fantasy {background-color: black !important;}
+.fantasy {background-color: #4d4c4a !important;}
 .fantasy .LogoM {background-position: 0 -50px;}
+.fantasy .page-container {background-image: url(./assets/images/index.jpg) !important;}
+.fantasy .dapp-container {background-image: url(./assets/images/index.jpg) !important;}
+
+.fantasy .TitleCov {color: #ffffff;}
+.fantasy .fantasyMenu:hover, .fantasy .fantasyMenu {color: #ffffff;}
 
 
 .penguin {background: rgb(58,60,106);background: linear-gradient(135deg, rgba(58,60,106,1) 0%, rgba(0,0,0,1) 41%);}
@@ -37,6 +42,7 @@
 .penguin .BtnConnect {border: 1px solid #7474f7; color: #7474f7;}
 .penguin .BtnConnectAfter {border: 1px solid #9e6915; color: #9e6915;}
 .penguin .TitleCov {color: #ffffff;}
+.penguin .fantasyMenu:hover, .penguin .fantasyMenu {color: #ffffff;}
 
 
 .magic {background: rgb(210,208,247);background: linear-gradient(135deg, rgba(210,208,247,1) 0%, rgba(253,247,245,1) 41%);}
@@ -47,3 +53,4 @@
 .magic .BtnConnect {border: 1px solid #7474f7; color: #7474f7;}
 .magic .BtnConnectAfter {border: 1px solid #9e6915; color: #9e6915;}
 .magic .TitleCov {color: #000000;}
+.magic .fantasyMenu:hover, .magic .fantasyMenu {color: #000000;}

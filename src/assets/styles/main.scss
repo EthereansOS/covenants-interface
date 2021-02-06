@@ -91,8 +91,17 @@ code {
   border-bottom: 10px $secondary solid;
 }
 
-.dapp-container {
+
+/* page container */
+.dapp-container, .page-container {
+  padding: 1rem;
   border-radius: 1.5rem;
+  width: 600px;
+  min-height: 500px;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  flex-direction: column;
 }
 
 .dapp-col {
@@ -208,7 +217,7 @@ code {
 /* app component */
 .app-container {
     margin: 0 auto !important;
-    padding-top: 2rem;
+    padding-top: 4rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -237,7 +246,7 @@ code {
 }
 
 /* page container */
-.page-container {
+.page-container, .dapp-container {
   padding: 1rem;
   border-radius: 1.5rem;
   width: 600px;
@@ -249,7 +258,7 @@ code {
 }
 
 @media (min-width: 375px) {
-  .page-container {
+  .page-container, .dapp-container {
     max-width: 310px;
     width: 310px;
   }
@@ -260,7 +269,7 @@ code {
 }
   
 @media (min-width: 576px) {
-  .page-container {
+  .page-container, .dapp-container {
     max-width: 520px;
     width: 520px;
   }
@@ -271,7 +280,7 @@ code {
 }
 
 @media (min-width: 768px) {
-  .page-container {
+  .page-container, .dapp-container {
     max-width: 650px;
     width: 650px;
   }
@@ -282,7 +291,7 @@ code {
 }
 
 @media (min-width: 992px) {
-  .page-container {
+  .page-container, .dapp-container {
     max-width: 750px;
     width: 750px;
   }

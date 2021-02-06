@@ -39,7 +39,7 @@ const Dapp = (props) => {
 
     if (!props.dfoCore) {
         return (
-            <div className="container bg-white dapp-container">
+            <div className="dapp-container">
                 <div className="row">
                     <div className="col-12 dapp-col text-center justify-content-center">
                         <button className="btn btn-primary mx-4" onClick={() => connectCore()}>Connect</button>
@@ -50,7 +50,7 @@ const Dapp = (props) => {
     }
 
     return (
-        <div className="container bg-white dapp-container">
+        <div className="dapp-container">
             <div className="row" style={{flexDirection: 'column'}}>
                 <div className="col-12 dapp-col text-center">
                     <DappMenu className="wusd-dapp-menu" onClick={(name) => setTab(name)} currentTab={currentTab} options={['Explore', 'Positions', 'Hosted', 'Create']} />
