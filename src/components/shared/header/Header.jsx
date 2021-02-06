@@ -36,13 +36,13 @@ const Header = (props) => {
             <div className="container-fluid">
                 <Link to={"/"} className="navbar-brand">
                     <span  className="LogoM" src={wizardLogo} alt=""></span>
-                    <span className="mx-3"><b>Covenants</b></span>
+                    <span className="mx-3 TitleCov"><b>Covenants</b></span>
                 </Link>
                 <div className="d-flex">
                     {props.dfoCore && !props.magicMode && <a className="ChangeMod" onClick={props.setMagicMode}>&#10024;</a>}
                     {props.dfoCore && props.magicMode && <a className="ChangeMod" onClick={props.removeMagicMode}>&#128188;</a>}
                     {
-                        props.dfoCore ? <button className="btn btn-primary mx-4" onClick={() => disconnectCore()}>{formatAddress(props.dfoCore.address)}</button> : <button className="btn btn-primary mx-4" onClick={() => connectCore()}>Connect</button>
+                        props.dfoCore ? <a className="BtnConnectAfter" onClick={() => disconnectCore()}>{formatAddress(props.dfoCore.address)}</a> : <a className="BtnConnect" onClick={() => connectCore()}>Connect</a>
                     }
                     <img className="menuIconEth" src={diamond} alt=""/>
                 </div>
