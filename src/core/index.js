@@ -189,8 +189,8 @@ export default class DFOCore {
                     const { positionId } = returnValues;
                     const position = await contract.methods.position(positionId).call();
                     const setup = (await contract.methods.setups().call())[position.setupIndex];
-                    if (this.isValidPosition(position)) {
-                        this.positions.push({ ...setup, contract, position, positionId });
+                    if (this.isValidPosition(position) && !this.positions.includes({ ...setup, contract, setupIndex: position.setupIndex })) {
+                        this.positions.push({ ...setup, contract, setupIndex: position.setupIndex });
                     }
                 }))
             }));

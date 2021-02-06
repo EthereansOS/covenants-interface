@@ -18,9 +18,9 @@ const Positions = (props) => {
         <div className="positions-component">
             <div className="row mb-4">
                 {
-                    farmingSetups.map((farmingSetup, setupIndex) => {
+                    farmingSetups.map((farmingSetup) => {
                         return (
-                            <SetupComponent className="col-12 mb-4" setupIndex={setupIndex} positionId={farmingSetup.positionId} position={farmingSetup.position} lmContract={farmingSetup.contract} dfoCore={props.dfoCore} setup={farmingSetup} manage={true} hasBorder />
+                            <SetupComponent className="col-12 mb-4" setupIndex={farmingSetup.setupIndex} lmContract={farmingSetup.contract} dfoCore={props.dfoCore} setup={farmingSetup} manage={true} hasBorder />
                         )
                     })
                 }
