@@ -276,9 +276,33 @@ export default class DFOCore {
 
     toDecimals = (amount, decimals = 18, precision = 4) => {
         if (parseInt(amount) === 0) return 0;
-       
         const res = decimals === 18 ? this.web3.utils.fromWei(amount, 'ether') : parseInt(amount) / 10**decimals;
         return parseFloat(res).toFixed(precision);
+    }
+
+    formatMoney = (value, decPlaces, thouSeparator, decSeparator) => {
+        value = (typeof value).toLowerCase() !== 'number' ? parseFloat(value) : value;
+        var n = value,
+            decPlaces = isNaN(decPlaces = Math.abs(decPlaces)) ? 2 : decPlaces,
+            decSeparator = decSeparator == undefined ? "." : decSeparator,
+            thouSeparator = thouSeparator == undefined ? "," : thouSeparator,
+            sign = n < 0 ? "-" : "",
+            i = parseInt(n = Math.abs(+n || 0).toFixed(decPlaces)) + "",
+            j = (j = i.length) > 3 ? j % 3 : 0;
+        var result = sign + (j ? i.substr(0, j) + thouSeparator : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thouSeparator) + (decPlaces ? decSeparator + Math.abs(n - i).toFixed(decPlaces).slice(2) : "");
+        return this.eliminateFloatingFinalZeroes(result, decSeparator);
+    }
+
+    eliminateFloatingFinalZeroes = (value, decSeparator) => {
+        decSeparator = decSeparator || '.';
+        if (value.indexOf(decSeparator) === -1) {
+            return value;
+        }
+        var split = value.split(decSeparator);
+        while (split[1].endsWith('0')) {
+            split[1] = split[1].substring(0, split[1].length - 1);
+        }
+        return split[1].length === 0 ? split[0] : split.join(decSeparator);
     }
 
     normalizeValue = (amount, decimals) => {

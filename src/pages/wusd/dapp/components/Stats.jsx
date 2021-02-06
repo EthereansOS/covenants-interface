@@ -125,17 +125,9 @@ const Stats = (props) => {
                     const symbol = await currentToken.methods.symbol().call();
                     const decimals = await currentToken.methods.decimals().call();
                     const value = props.dfoCore.normalizeValue(balance, decimals);
-                    data.total += value;
-                    if (!data.liquidity[basePool.info.name]) {
-                        data.liquidity[basePool.info.name] = value;
-                    } else {
-                        data.liquidity[basePool.info.name] += value;
-                    }
-                    if (!data.collateral[symbol]) {
-                        data.collateral[symbol] = value;
-                    } else {
-                        data.collateral[symbol] += value;
-                    }
+                    data.total = window.web3.utils.toBN(data.total).add(window.web3.utils.toBN(value)).toString();
+                    data.liquidity[basePool.info.name] = window.web3.utils.toBN(data.liquidity[basePool.info.name] || '0').add(window.web3.utils.toBN(value)).toString();
+                    data.collateral[symbol] = window.web3.utils.toBN(data.collateral[symbol] || '0').add(window.web3.utils.toBN(value)).toString();
                 }))
             }))
         }))
@@ -203,7 +195,7 @@ const Stats = (props) => {
                                 <b>Supply</b>
                             </div>
                             <div className="col-12 infoList">
-                                { totalSupply ? props.dfoCore.toDecimals(props.dfoCore.toFixed(totalSupply), 18) : totalSupply } WUSD
+                                { totalSupply ? props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(totalSupply), 18), 4) : totalSupply } WUSD
                             </div>
                         </div>
                         <hr />
@@ -215,7 +207,7 @@ const Stats = (props) => {
                                 {
                                     (collateralData && collateralData.collateral) ?
                                         Object.entries(collateralData.collateral).map((entry, i) => {
-                                            return <p>{props.dfoCore.toDecimals(props.dfoCore.toFixed(entry[1]).toString())} {entry[0]}</p>
+                                            return <p key={entry[0]}>{props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(entry[1]).toString()), 4)} {entry[0]}</p>
                                         })
                                     : <div/>
                                 }
@@ -230,7 +222,7 @@ const Stats = (props) => {
                                 {
                                     (collateralData && collateralData.liquidity) ?
                                         Object.entries(collateralData.liquidity).map((entry, i) => {
-                                            return <p>{entry[0]}: {(entry[1]/collateralData.total) * 100}%</p>
+                                            return <p key={entry[0]}>{entry[0]}: {props.dfoCore.formatMoney((parseInt(entry[1]) / parseInt(collateralData.total))*100)}%</p>
                                         })
                                     : <div/>
                                 }
@@ -258,7 +250,7 @@ const Stats = (props) => {
                         {credit} uSD
                     </div>
                     <div className="col-6">
-                        <b>Debit</b>
+                        <b>Debt</b>
                         <br/>
                         {debit} uSD
                     </div>

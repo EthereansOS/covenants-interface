@@ -9,6 +9,7 @@ const Input = (props) => {
 
     useEffect(() => {
         setVal(value);
+        //onChange && onChange(value);
     }, [value])
 
     const onDetectedChange = (value) => {

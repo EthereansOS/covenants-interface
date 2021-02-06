@@ -249,7 +249,7 @@ const Mint = (props) => {
                         <option value="">Choose pair..</option>
                         {
                             pairs.map((pair, index) => {
-                                return <option key={index} value={index}>{pair.symbol0}/{pair.symbol1}</option>
+                                return <option key={pair.ammName + pair.symbol0 + pair.symbol1} value={index}>{pair.ammName} - {pair.symbol0}/{pair.symbol1}</option>
                             })
                         }
                     </select>

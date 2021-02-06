@@ -133,13 +133,9 @@ const Burn = (props) => {
 
         const lpResult = await ammContract.methods.byTokenAmount(liquidityPool, liquidityPoolTokens[0], text).call();
 
-        window.lpAmount = lpResult.liquidityPoolAmount;
-        var finalToken0 = props.dfoCore.normalizeValue(lpResult[1][0], token0decimals);
-        var finalToken1 = props.dfoCore.normalizeValue(lpResult[1][1], token1decimals);
-        console.log(window.amount = window.web3.utils.toBN(finalToken0).add(window.web3.utils.toBN(finalToken1)).toString());
-        setEstimatedToken0(props.dfoCore.toDecimals(lpResult[1][0], token0decimals));
-        setEstimatedToken1(props.dfoCore.toDecimals(lpResult[1][1], token1decimals));
-        setEstimatedLpToken(props.dfoCore.toDecimals(lpResult.liquidityPoolAmount, decimalsLp));
+        setEstimatedToken0(lpResult[1][0], token0decimals);
+        setEstimatedToken1(lpResult[1][1], token1decimals);
+        setEstimatedLpToken(lpResult[0], decimalsLp);
     }
 
     const burnWUSD = async () => {
@@ -149,10 +145,13 @@ const Burn = (props) => {
 
         const wusdCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), collectionAddress);
 
-        const burnData = abi.encode(["uint256","uint256","uint256","bool"], [pairs[pair].ammIndex, pairs[pair].lpIndex, window.lpAmount, getLpToken])
+        const { token0decimals, token1decimals } = pairs[pair];
+        const wusd = window.web3.utils.toBN(props.dfoCore.normalizeValue(estimatedToken0, token0decimals)).add(window.web3.utils.toBN(props.dfoCore.normalizeValue(estimatedToken1, token1decimals))).toString();
+
+        const burnData = abi.encode(["uint256","uint256","uint256","bool"], [pairs[pair].ammIndex, pairs[pair].lpIndex, estimatedLpToken, getLpToken])
         const data = abi.encode(["uint256", "bytes"], [0, burnData]);
-        const gasLimit = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [window.amount], abi.encode(["bytes[]"], [[data]])).estimateGas({ from: props.dfoCore.address});
-        const res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [window.amount], abi.encode(["bytes[]"], [[data]])).send({ from: props.dfoCore.address, gasLimit });
+        const gasLimit = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusd], abi.encode(["bytes[]"], [[data]])).estimateGas({ from: props.dfoCore.address});
+        const res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusd], abi.encode(["bytes[]"], [[data]])).send({ from: props.dfoCore.address, gasLimit });
         console.log(res);
         await getController();
     }
@@ -177,7 +176,7 @@ const Burn = (props) => {
                         <b>For</b>
                     </div>
                     <div className="row justify-content-center">
-                        { estimatedLpToken } { pairs[pair].symbol0 }/{ pairs[pair].symbol1 }
+                        { props.dfoCore.toDecimals(estimatedLpToken, pairs[pair].decimalsLp) } { pairs[pair].symbol0 }/{ pairs[pair].symbol1 }
                     </div>
                 </div>
             )
@@ -188,7 +187,7 @@ const Burn = (props) => {
                     <b>For</b>
                 </div>
                 <div className="row justify-content-center">
-                    { estimatedToken0 } { pairs[pair].symbol0 } / { estimatedToken1 } { pairs[pair].symbol1 }
+                    { props.dfoCore.toDecimals(estimatedToken0,  pairs[pair].token0decimals) } { pairs[pair].symbol0 } / { props.dfoCore.toDecimals(estimatedToken1, pairs[pair].token1decimals) } { pairs[pair].symbol1 }
                 </div>
             </div>
         )
