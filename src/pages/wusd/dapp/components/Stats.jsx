@@ -150,7 +150,7 @@ const Stats = (props) => {
 
     const getFirstCol = () => {
         return (
-            <div className="col-3 text-left">
+            <div className="col-3 text-left StatsBro">
                 {/*}<div className="row">
                     <div className="col-12">
                         <p><b>Price:</b></p>

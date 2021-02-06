@@ -9,7 +9,7 @@ import { Arbitrate, Burn, Farm, Mint, Stats, USDN } from './components';
 
 const Dapp = (props) => {
 
-    const [currentTab, setCurrentTab] = useState('mint');
+    const [currentTab, setCurrentTab] = useState('stats');
 
     const connectCore = async () => {
         const core = new DFOCore(context);
@@ -52,7 +52,7 @@ const Dapp = (props) => {
         <div className="dapp-container">
             <div className="row" style={{flexDirection: 'column'}}>
                 <div className="col-12 dapp-col text-center">
-                    <DappMenu className="wusd-dapp-menu" onClick={(name) => setCurrentTab(name)} currentTab={currentTab} options={['Mint', 'Burn', 'Farm', 'Stats', 'Arbitrate', 'uSDN']} />
+                    <DappMenu className="wusd-dapp-menu" onClick={(name) => setCurrentTab(name)} currentTab={currentTab} options={['Stats', 'Burn', 'Farm', 'Mint', 'Arbitrate', 'uSDN']} />
                     <div className="wusd-dapp-content mt-4">
                         { getContent() }
                     </div>
