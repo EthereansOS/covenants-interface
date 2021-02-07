@@ -22,6 +22,7 @@ const Stats = (props) => {
     const [selectedUsdn, setSelectedUsdn] = useState("");
     const [totalSupply, setTotalSupply] = useState(0);
     const [wusdContract, setWusdContract] = useState(null);
+    const [wusdDecimals, setWusdDecimals] = useState(18);
     const [x2USDContract, setx2USDContract] = useState(null);
     const [x5USDContract, setx5USDContract] = useState(null);
     const [x2USDNoteControllerContract, setx2USDNoteControllerContract] = useState(null);
@@ -48,6 +49,7 @@ const Stats = (props) => {
             setWusdContract(wusdContract);
             const supply = await wusdContract.methods.totalSupply().call();
             const decimals = await wusdContract.methods.decimals().call();
+            setWusdDecimals(decimals);
             setTotalSupply(supply);
             const differences = await contract.methods.differences().call();
             
@@ -141,7 +143,8 @@ const Stats = (props) => {
     }
 
     const onUpdateUsdRebalanceByDebit = (value) => {
-        setUsdRebalanceByDebit(value ? value : 0);
+        console.log({ value, full: props.dfoCore.fromDecimals(value || 0, wusdDecimals)});
+        setUsdRebalanceByDebit({ value, full: props.dfoCore.fromDecimals(value || 0, wusdDecimals)});
     }
 
     const rebalanceByCredit = async () => {
@@ -386,7 +389,7 @@ const Stats = (props) => {
                             <div className="input-group-prepend">
                                 <button className="btn btn-secondary" type="button">MAX</button>
                             </div>
-                            <input type="number" className="form-control" value={usdRebalanceByDebit} min={0} onChange={(e) => onUpdateUsdRebalanceByDebit(e.target.value)} />
+                            <input type="number" className="form-control" value={usdRebalanceByDebit.value} min={0} onChange={(e) => onUpdateUsdRebalanceByDebit(e.target.value)} />
                             <div className="input-group-append">
                                 <span className="input-group-text" id=""> uSD</span>
                             </div>
@@ -406,7 +409,7 @@ const Stats = (props) => {
                                     <div className="mt-2">
                                         For
                                         <br/>
-                                        {`${props.dfoCore.toDecimals(usdRebalanceByDebit)} ${selectedUsdn}USD`}
+                                        {`${usdRebalanceByDebit.value} ${selectedUsdn}USD`}
                                     </div> : <div/>
                                 }
                                 

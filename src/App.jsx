@@ -1,8 +1,9 @@
 import { connect } from 'react-redux';
-import { Switch, Route } from 'react-router-dom';
+import { Switch, Route, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { Header, Footer, PageNotFound, Sidemenu } from './components';
 import { ArbitragePage, BazaarPage, CraftingPage, GrimoirePage, MorePage, IndexPage, MultiswapPage, FarmPage, InflationPage, WUSDPage } from './pages';
+import { useEffect } from 'react/cjs/react.development';
 
 const mapStateToProps = (state) => {
   const { core } = state;
@@ -10,6 +11,18 @@ const mapStateToProps = (state) => {
 }
 
 const App = (props) => {
+  const location = useLocation();
+
+  console.log(location);
+
+  useEffect(() => {
+    
+    if (location.pathname.includes('/dapp')) {
+      document.body.className = `${window.localStorage.magicMode === "true" ? 'magic' : 'penguin'}`;
+    } else {
+      document.body.className = `fantasy`;
+    }
+  }, [location]);
 
   if (props.dfoCore) {
       props.dfoCore.provider.on('accountsChanged', (accounts) => {
@@ -20,7 +33,7 @@ const App = (props) => {
       })
   }
 
-  useState(() => {
+  useEffect(() => {
     console.log('updating.');
   }, []);
 

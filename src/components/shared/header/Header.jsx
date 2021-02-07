@@ -5,11 +5,12 @@ import map from '../../../assets/images/map.svg';
 import diamond from '../../../assets/images/ethereum.png';
 import wizardLogo from '../../../assets/images/covlogo.png';
 import { default as context } from '../../../data/context.json';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 
 const Header = (props) => {
     const [address, setAddress] = useState(null);
+    const location = useLocation();
 
     if (props.dfoCore) {
         props.dfoCore.provider.on('accountsChanged', (accounts) => {
@@ -39,8 +40,8 @@ const Header = (props) => {
                     <span className="mx-3 TitleCov"><b>Covenants</b></span>
                 </Link>
                 <div className="d-flex">
-                    {props.dfoCore && !props.magicMode && <a className="ChangeMod" onClick={props.setMagicMode}>&#10024;</a>}
-                    {props.dfoCore && props.magicMode && <a className="ChangeMod" onClick={props.removeMagicMode}>&#128188;</a>}
+                    {location.pathname.includes('/dapp') && !window.localStorage.magicMode && <a className="ChangeMod" onClick={props.setMagicMode}>&#10024;</a>}
+                    {location.pathname.includes('/dapp') && window.localStorage.magicMode && <a className="ChangeMod" onClick={props.removeMagicMode}>&#128188;</a>}
                     {
                         props.dfoCore ? <a className="BtnConnectAfter" onClick={() => disconnectCore()}>{formatAddress(props.dfoCore.address)}</a> : <a className="BtnConnect" onClick={() => connectCore()}>Connect</a>
                     }
@@ -59,8 +60,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
     return {
         setCore: (dfoCore) => {
-            document.body.className = `${!dfoCore ? 'fantasy' : window.localStorage.magicMode === "true" ? 'magic' : 'penguin'}`;
-            dispatch(setDFOCore(dfoCore))
+            dispatch(setDFOCore(dfoCore));
         },
         removeCore: () => {
             document.body.className = "fantasy";
