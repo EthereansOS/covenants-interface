@@ -74,7 +74,7 @@ const USDN = (props) => {
     }
 
     const redeemX2 = async () => {
-        if (x2Amount > x2USDTreasury) return;
+        if (x2Amount > parseFloat(props.dfoCore.toFixed(props.dfoCore.fromDecimals(x2USDTreasury)))) return;
         const x2USDCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), x2USDNoteInfo['0']);
         const from = props.dfoCore.address;
         const to = x2USDNoteControllerContract.options.address;
@@ -91,7 +91,7 @@ const USDN = (props) => {
     }
 
     const redeemX5 = async () => {
-        if (x5Amount > x5USDTreasury) return;
+        if (x5Amount > parseFloat(props.dfoCore.toFixed(props.dfoCore.fromDecimals(x5USDTreasury)))) return;
         const x5USDCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), x5USDNoteInfo['0']);
         const from = props.dfoCore.address;
         const to = x5USDNoteControllerContract.options.address;
@@ -130,7 +130,7 @@ const USDN = (props) => {
         return (
             <>
             <div className="col-12 mb-4">
-                <Input showMax={true} value={x2Amount.value} balance={x2Balance} extra={`| Treasury ${x2USDTreasury} WUSD`} min={0} onChange={(e) => onUpdateX2Value(e.target.value)} showCoin={true} showBalance={true} name="x2USD" />
+                <Input showMax={true} value={x2Amount.value} balance={props.dfoCore.toDecimals(x2Balance, decimals)} extra={`| Treasury ${x2USDTreasury} WUSD`} min={0} onChange={(e) => onUpdateX2Value(e.target.value)} showCoin={true} showBalance={true} name="x2USD" />
             </div>
             {
                 x2Amount ? 
@@ -171,7 +171,7 @@ const USDN = (props) => {
         return (
             <>
                 <div className="col-12 mb-4">
-                    <Input showMax={true} value={x5Amount.value} balance={x5Balance} extra={`| Treasury ${x5USDTreasury} WUSD`} min={0} onChange={(e) => onUpdateX5Value(e.target.value)} showCoin={true} showBalance={true} name="x5USD" />
+                    <Input showMax={true} value={x5Amount.value} balance={props.dfoCore.toDecimals(x5Balance, decimals)} extra={`| Treasury ${x5USDTreasury} WUSD`} min={0} onChange={(e) => onUpdateX5Value(e.target.value)} showCoin={true} showBalance={true} name="x5USD" />
                 </div>
                 {
                     x5Amount ?
