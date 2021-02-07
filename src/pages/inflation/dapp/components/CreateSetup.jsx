@@ -30,7 +30,7 @@ const CreateSetup = (props) => {
             setHasExecutionReward(editSetup.hasExecutionReward);
             setExecutionRewardAmount(editSetup.executionRewardAmount);
         }
-    })
+    }, []);
 
     const getSetup = () => {
         return {
@@ -43,7 +43,7 @@ const CreateSetup = (props) => {
     // first step methods
     const finishFirstStep = () => {
         setLoading(true);
-        setSetup({ title, recurringExecution, entries: [] });
+        editSetup ? setSetup({ ...editSetup, title, recurringExecution }) : setSetup({ title, recurringExecution, entries: [] });
         setStep(1);
         setLoading(false);
     }
@@ -113,15 +113,15 @@ const CreateSetup = (props) => {
                         <select value={recurringExecution} onChange={(e) => setRecurringExecution(e.target.value)} className="custom-select wusd-pair-select">
                             <option value="">Select one</option>
                             {
-                                Object.keys(props.dfoCore.getContextElement("blockIntervals")).map((key) => {
-                                   return <option value={props.dfoCore.getContextElement("blockIntervals")[key]}>{key}</option>
+                                Object.keys(props.dfoCore.getContextElement("blockIntervals")).map((key, index) => {
+                                   return <option key={index} value={props.dfoCore.getContextElement("blockIntervals")[key]}>{key}</option>
                                 })
                             }
                         </select>
                     </div>
                     <div className="row">
                         { onCancel ? <button onClick={() => onCancel()} className="btn btn-light mr-4">Cancel</button> : <></> }
-                        <button onClick={() => finishFirstStep()} disabled={!title || !recurringExecution} className="btn btn-secondary ml-4">Create</button>
+                        <button onClick={() => finishFirstStep()} disabled={!title || !recurringExecution} className="btn btn-secondary ml-4">{!editSetup ? "Create" : "Next"}</button>
                     </div>
                 </div>
             </div>

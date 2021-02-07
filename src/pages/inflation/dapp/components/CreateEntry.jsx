@@ -66,10 +66,41 @@ const CreateEntry = (props) => {
     const onAddPathToken = async (address) => {
         if (!address) return;
         setLoading(true);
-        const pathTokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), address);
-        const symbol = await pathTokenContract.methods.symbol().call();
-        setPathTokens(pathTokens.concat({ symbol, address, output: null }));
-        setLoading(false);
+        try {
+            const lastOutputToken = pathTokens.length === 0 ? inputToken.address.toLowerCase() : pathTokens[pathTokens.length - 1].outputTokenAddress.toLowerCase(9);
+            console.log(lastOutputToken);
+
+            const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
+            const info = await ammAggregator.methods.info(address).call();
+            const ammContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("AMMABI"), info['amm']);
+            const lpInfo = await ammContract.methods.byLiquidityPool(address).call();
+            const lpTokensAddresses = lpInfo[2];
+            const ammData = await ammContract.methods.data().call();
+            const ethAddress = ammData[0];
+            const symbols = [];
+            let outputTokenAddress = null;
+            let hasLastOutputToken = false;
+            for (let i = 0; i < lpTokensAddresses.length; i++) {
+                const currentTokenAddress = lpTokensAddresses[i];
+                if (ethAddress.toLowerCase() === currentTokenAddress) {
+                    symbols.push('ETH');
+                } else {
+                    if (lpTokensAddresses.length === 2 && currentTokenAddress.toLowerCase() === inputToken.address) {
+                        outputTokenAddress = currentTokenAddress;
+                    }
+                    const currentToken = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), currentTokenAddress);
+                    const currentTokenSymbol = await currentToken.methods.symbol().call();
+                    symbols.push(currentTokenSymbol);
+                }
+            }
+            const pathTokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), address);
+            const symbol = await pathTokenContract.methods.symbol().call();
+            setPathTokens(pathTokens.concat({ symbol, address, output: null, outputTokenAddress, lpTokensAddresses, symbols }));
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
     }
 
     const getEntry = () => {
@@ -284,15 +315,19 @@ const CreateEntry = (props) => {
                             <>
                                 <div className="row mb-4">
                                     { pathToken && <div className="col-12">
-                                            <b>{pathToken.address}</b> {index === pathTokens.length -1 ?  <button className="btn btn-sm btn-outline-danger ml-1" onClick={() => setPathTokens(pathTokens.filter((_, i) => i !== index))}><b>Remove</b></button> : <div/>}
+                                            <b>{pathToken.symbol} {pathToken.symbols.map((symbol) => <span>{symbol} </span>)}</b> {index === pathTokens.length -1 ?  <button className="btn btn-sm btn-outline-danger ml-1" onClick={() => setPathTokens(pathTokens.filter((_, i) => i !== index))}><b>Remove</b></button> : <div/>}
                                         </div>
                                     }
                                 </div>
                                 <div className="row w-50 mb-4">
-                                    <select value={pathToken.output} onChange={(e) => setPathTokens(pathTokens.map((pt, i) => i === index ? { ...pt, output: e.target.value } : pt))} className="custom-select wusd-pair-select">
-                                        <option value={null}>Output</option>
-                                        <option value="ETH">ETH</option>
-                                        <option value="buidl">buidl</option>
+                                    <select value={pathToken.output} onChange={(e) => setPathTokens(pathTokens.map((pt, i) => i === index ? { ...pt, outputTokenAddress: e.target.value } : pt))} className="custom-select wusd-pair-select">
+                                        {
+                                            pathToken.lpTokensAddresses.map((lpTokenAddress, lpTokenIndex) => {
+                                                if (lpTokenAddress.toLowerCase() !== inputToken.address.toLowerCase()) {
+                                                    return <option value={lpTokenAddress}>{pathToken.symbols[lpTokenIndex]}</option>
+                                                }
+                                            })
+                                        }
                                     </select>
                                 </div>
                             </>

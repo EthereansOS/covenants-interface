@@ -150,7 +150,6 @@ const Create = (props) => {
     }
 
     const onSelectRewardToken = async (address) => {
-        if (!address) address = "0x7b123f53421b1bF8533339BFBdc7C98aA94163db";
         setLoading(true);
         const rewardToken = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), address);
         console.log(rewardToken);
@@ -197,7 +196,7 @@ const Create = (props) => {
                         0,
                         isFree,
                         isFree ? 0 : setup.renewTimes,
-                        isFree ? 0 : setup.penaltyFee,
+                        isFree ? 0 : props.dfoCore.fromDecimals(setup.penaltyFee),
                         involvingETH
                     ]
                 )
@@ -513,8 +512,8 @@ const Create = (props) => {
                     <select className="custom-select wusd-pair-select" value={lockedPeriod} onChange={(e) => setLockedPeriod(e.target.value)}>
                         <option value={0}>Choose locked period</option>
                         {
-                            Object.keys(props.dfoCore.getContextElement("blockIntervals")).map((key) => {
-                                return <option value={props.dfoCore.getContextElement("blockIntervals")[key]}>{key}</option>
+                            Object.keys(props.dfoCore.getContextElement("blockIntervals")).map((key, index) => {
+                                return <option key={index} value={props.dfoCore.getContextElement("blockIntervals")[key]}>{key}</option>
                             })
                         }
                     </select>
