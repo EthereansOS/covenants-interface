@@ -396,7 +396,7 @@ const Stats = (props) => {
                 <>
                 <div className="row mb-4">
                     <div className="col-12 mb-4">
-                        <Input showMax={true} label={"Rebalance by debit"} value={usdRebalanceByDebit.value} balance={wusdBalance} min={0} onChange={(e) => onUpdateUsdRebalanceByDebit(e.target.value)} address={props.dfoCore.getContextElement("WUSDAddress")} showCoin={true} showBalance={true} name="uSD" />
+                        <Input showMax={true} label={"Rebalance by debit"} value={usdRebalanceByDebit.value} balance={props.dfoCore.toDecimals(wusdBalance, wusdDecimals)} min={0} onChange={(e) => onUpdateUsdRebalanceByDebit(e.target.value)} address={props.dfoCore.getContextElement("WUSDAddress")} showCoin={true} showBalance={true} name="uSD" />
                         {
                             /* 
                         <b>Rebalance by debit</b>
