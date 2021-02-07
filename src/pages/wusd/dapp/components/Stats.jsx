@@ -171,11 +171,16 @@ const Stats = (props) => {
             const wusdObjectId = info['1'];
 
             const wusdCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), collectionAddress);
-
+            console.log(`selected usdn is ${selectedUsdn === "x2" ? 2 : 5}`);
             const byDebtData = abi.encode(["uint256"], [selectedUsdn === "x2" ? 2 : 5]);
+            console.log(`by debt data is ${byDebtData}`);
             const data = abi.encode(["uint256", "bytes"], [1, byDebtData]);
-            const gasLimit = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [props.dfoCore.web3.utils.toBN(props.dfoCore.toFixed(usdRebalanceByDebit.full)).toString()], abi.encode(["bytes[]"], [[data]])).estimateGas({ from: props.dfoCore.address});
-            const res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [props.dfoCore.web3.utils.toBN(props.dfoCore.toFixed(usdRebalanceByDebit.full)).toString()], abi.encode(["bytes[]"], [[data]])).send({ from: props.dfoCore.address, gasLimit });
+            console.log(`final encoded data is ${data}`);
+            console.log(`wusd object id ${wusdObjectId}`);
+            const amount = props.dfoCore.web3.utils.toBN(props.dfoCore.toFixed(usdRebalanceByDebit.full)).toString();
+            console.log(`sending amount ${amount}`);
+            const gasLimit = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [amount], abi.encode(["bytes[]"], [[data]])).estimateGas({ from: props.dfoCore.address});
+            const res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [amount], abi.encode(["bytes[]"], [[data]])).send({ from: props.dfoCore.address, gasLimit });
             await getStats();
         } catch (error) {
             console.error(error);
