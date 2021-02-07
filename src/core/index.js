@@ -187,7 +187,7 @@ export default class DFOCore {
         try {
             if (!factoryAddress) factoryAddress = this.getContextElement("liquidityMiningFactoryAddress");
             const factoryContract = new this.web3.eth.Contract(this.getContextElement("LiquidityMiningFactoryABI"), factoryAddress);
-            const events = await factoryContract.getPastEvents('LiquidityMiningDeployed', { fromBlock: 11790157 });
+            const events = await factoryContract.getPastEvents('LiquidityMiningDeployed', { fromBlock: 11808179  });
             this.deployedLiquidityMiningContracts = [];
             await Promise.all(events.map(async (event) => {
                 try {
@@ -219,7 +219,7 @@ export default class DFOCore {
             await this.loadDeployedLiquidityMiningContracts();
             await Promise.all(this.deployedLiquidityMiningContracts.map(async (c) => {
                 const contract = new this.web3.eth.Contract(this.getContextElement("LiquidityMiningABI"), c.address);
-                const events = await contract.getPastEvents('Transfer', { filter: { to: this.address }, fromBlock: 11790157 });
+                const events = await contract.getPastEvents('Transfer', { filter: { to: this.address }, fromBlock: 11808179  });
                 await Promise.all(events.map(async (event) => {
                     const { returnValues } = event;
                     const { positionId } = returnValues;

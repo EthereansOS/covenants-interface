@@ -184,7 +184,7 @@ const Create = (props) => {
                         isFree ? setup.data.address : setup.secondaryToken,
                         isFree ? setup.data.token0 : setup.data.address,
                         isFree ? 0 : setup.startBlock,
-                        isFree ? 0 : (setup.startBlock + parseInt(setup.period)),
+                        isFree ? 0 : (parseInt(setup.startBlock) + parseInt(setup.period)),
                         props.dfoCore.fromDecimals(setup.rewardPerBlock),
                         isFree ? props.dfoCore.fromDecimals(setup.rewardPerBlock) : 0,
                         0,
