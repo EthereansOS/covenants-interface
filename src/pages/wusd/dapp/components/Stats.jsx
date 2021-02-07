@@ -425,7 +425,7 @@ const Stats = (props) => {
                                     <div className="mt-2">
                                         For
                                         <br/>
-                                        {`${usdRebalanceByDebit.value || 0} ${selectedUsdn}USD`} = {usdRebalanceByDebit.value * multipliers[selectedUsdn === 'x2' ? 0 : 1]} WUSD
+                                        {`${usdRebalanceByDebit.value || 0} ${selectedUsdn}USD`}
                                     </div> : <div/>
                                 }
                                 
