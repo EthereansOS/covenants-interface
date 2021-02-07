@@ -608,7 +608,7 @@ const Create = (props) => {
                 {
                     lockedHasPenaltyFee && <div className="row mb-4 justify-content-center">
                         <div className="col-md-6 col-12">
-                            <Input step={0.001} max={100} min={0} showCoin={true} address={lockedMainToken.address} value={lockedPenaltyFee} name={lockedMainToken.symbol} onChange={(e) => onUpdatePenaltyFee(e.target.value)} />
+                            <input type="number" step={0.001} max={100} min={0} value={lockedPenaltyFee} onChange={(e) => onUpdatePenaltyFee(e.target.value)} />
                         </div>
                     </div>
                 }
