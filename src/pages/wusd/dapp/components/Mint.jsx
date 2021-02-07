@@ -141,16 +141,20 @@ const Mint = (props) => {
     const mintWUSD = async () => {
         setMintLoading(true);
         try {
-            if (firstAmount > 0 && secondAmount > 0) {
+            if ((firstAmount.value > 0 && secondAmount.value > 0) || lpTokenAmount.value > 0) {
                 const chosenPair = pairs[pair];
                 const { ammIndex, lpIndex, token0Contract, token1Contract, token0decimals, token1decimals } = chosenPair;
-                await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, props.dfoCore.fromDecimals(lpTokenAmount.toString(), 18).toString(), false).send({ from: props.dfoCore.address, gasLimit: 1000000 });
+                console.log(`amm index: ${ammIndex}`);
+                console.log(`lp index ${lpIndex}`);
+                console.log(`lp amount ${lpTokenAmount.full.toString()}`);
+                console.log(`first token amount ${firstAmount.full.toString()}`);
+                console.log(`second token amount ${firstAmount.full.toString()}`);
+                const gasLimit = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), false).estimateGas({ from: props.dfoCore.address });
+                const result = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), false).send({ from: props.dfoCore.address, gasLimit });
                 const balance0 = await token0Contract.methods.balanceOf(props.dfoCore.address).call();
                 const balance1 = await token1Contract.methods.balanceOf(props.dfoCore.address).call();
                 setFirstTokenBalance(props.dfoCore.toDecimals(balance0, parseInt(token0decimals)));
                 setSecondTokenBalance(props.dfoCore.toDecimals(balance1, parseInt(token1decimals)));
-            } else if (lpTokenAmount > 0) {
-                
             } else {
                 return;
             }
@@ -272,7 +276,7 @@ const Mint = (props) => {
                                 <ApproveButton contract={pairs[pair].lpContract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.log(error)} onApproval={() => onTokenApproval('first')} text={`Approve ${pairs[pair].symbolLp}`} />
                         }
                     </div>
-                    <div className="col-12 col-md-6">
+                    <div className={`col-12 ${(!useLpToken && firstTokenApproved && secondTokenApproved) || (useLpToken && lpTokenApproved) ? "" : "col-md-6"}`}>
                         {
                             mintLoading ? <button className="btn btn-secondary" disabled={mintLoading}>
                                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
