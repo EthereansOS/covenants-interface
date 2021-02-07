@@ -62,7 +62,7 @@ const Create = (props) => {
     }, []);
 
     const isWeth = (address) => {
-        return address.toLowerCase() === props.dfoCore.getContextElement('wethTokenAddress').toLowerCase();
+        return (address.toLowerCase() === props.dfoCore.getContextElement('wethTokenAddress').toLowerCase()) || (address === props.dfoCore.voidEthereumAddress);
     }
 
     const isValidAddress = (address) => {
@@ -143,6 +143,10 @@ const Create = (props) => {
         setIsAdd(true);
         setIsEdit(true);
         setEditIndex(index);
+    }
+
+    const onUpdatePenaltyFee = (value) => {
+        setLockedPenaltyFee(value > 100 ? 100 : value);
     }
 
     const onSelectRewardToken = async (address) => {
@@ -337,7 +341,7 @@ const Create = (props) => {
                     return (
                         <div key={i} className="row align-items-center text-left mb-md-2 mb-4">
                             <div className="col-md-9 col-12">
-                                <b style={{fontSize: 14}}>{ !setup.startBlock ? "Free setup" : "Locked setup" } { setup.data.name }{ setup.startBlock ? `${setup.data.symbol}` : ` | ${ setup.data.symbol1} ${ setup.data.symbol2 }` } - Reward: {setup.rewardPerBlock} {props.farmingContract.rewardToken.symbol}/block</b>
+                                <b style={{fontSize: 14}}>{ !setup.startBlock ? "Free setup" : "Locked setup" } { setup.data.name }{ setup.startBlock ? `${setup.data.symbol}` : ` | ${setup.data.tokens.map((token) => `${token.symbol}` )}` } - Reward: {setup.rewardPerBlock} {props.farmingContract.rewardToken.symbol}/block</b>
                             </div>
                             <div className="col-md-3 col-12 flex">
                                 <button className="btn btn-sm btn-outline-danger mr-1" onClick={() => props.removeFarmingSetup(i)}><b>X</b></button> <button onClick={() => editSetup(setup, i)} className="btn btn-sm btn-danger ml-1"><b>EDIT</b></button>
@@ -396,21 +400,34 @@ const Create = (props) => {
         if (!address) return;
         try {
             setLoading(true);
-            const liquidityPoolToken = await props.dfoCore.getContract(props.dfoCore.getContextElement('uniswapV2PairABI'), address);
-            const name = await liquidityPoolToken.methods.name().call();
-            const token0 = await liquidityPoolToken.methods.token0().call();
-            const token1 = await liquidityPoolToken.methods.token1().call();
-            const token0Contract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), token0);
-            const token1Contract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), token1);
-            const symbol1 = await token0Contract.methods.symbol().call();
-            const symbol2 = await token1Contract.methods.symbol().call();
+            const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
+            const res = await ammAggregator.methods.info(address).call();
+            const name = res['name'];
+            const ammAddress = res['amm'];
+            const ammContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMABI'), ammAddress);
+            const lpInfo = await ammContract.methods.byLiquidityPool(address).call();
+            console.log(lpInfo);
+            const tokens = [];
+            await Promise.all(lpInfo[2].map(async (tkAddress) => {
+                if (isWeth(tkAddress)) {
+                    tokens.push({
+                        symbol: 'ETH',
+                        address: props.dfoCore.getContextElement('wethTokenAddress'),
+                    })
+                } else {
+                    const currentToken = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), tkAddress);
+                    const symbol = await currentToken.methods.symbol().call();
+                    tokens.push({
+                        symbol,
+                        address: tkAddress
+                    })
+                }
+                
+            }))
             setFreeLiquidityPoolToken({ 
                 address, 
                 name,
-                token0: isWeth(token0) ? props.dfoCore.voidEthereumAddress : token0, 
-                token1: isWeth(token1) ? props.dfoCore.voidEthereumAddress : token1, 
-                symbol1: isWeth(token0) ? 'ETH' : symbol1,
-                symbol2: isWeth(token1) ? 'ETH' : symbol2 
+                tokens,
             });
         } catch (error) {
             setFreeLiquidityPoolToken(null);
@@ -459,8 +476,8 @@ const Create = (props) => {
                     </div>
                 </div> :  <>
                     <div className="row mb-4">
-                        { freeLiquidityPoolToken && <div className="col-12">
-                                <b>{freeLiquidityPoolToken.name} | {freeLiquidityPoolToken.symbol0} {freeLiquidityPoolToken.symbol1}</b> <Coin address={freeLiquidityPoolToken.token0} className="mr-2" /> <Coin address={freeLiquidityPoolToken.token1} />
+                        { (freeLiquidityPoolToken && freeLiquidityPoolToken.tokens.length > 0) && <div className="col-12">
+                                <b>{freeLiquidityPoolToken.name} | {freeLiquidityPoolToken.tokens.map((token) => <>{token.symbol} </>)}</b> {freeLiquidityPoolToken.tokens.map((token) => <Coin address={token.address} className="mr-2" /> )}
                             </div>
                         }
                     </div>
@@ -495,14 +512,11 @@ const Create = (props) => {
                 <div className="col-12">
                     <select className="custom-select wusd-pair-select" value={lockedPeriod} onChange={(e) => setLockedPeriod(e.target.value)}>
                         <option value={0}>Choose locked period</option>
-                        <option value={750}>1 week</option>
-                        <option value={1500}>2 weeks</option>
-                        <option value={2250}>3 weeks</option>
-                        <option value={3000}>1 month</option>
-                        <option value={6000}>2 months</option>
-                        <option value={9000}>3 months</option>
-                        <option value={18000}>6 months</option>
-                        <option value={36000}>1 year</option>
+                        {
+                            Object.keys(props.dfoCore.getContextElement("farmingBlockIntervals")).map((key) => {
+                                return <option value={props.dfoCore.getContextElement("farmingBlockIntervals")[key]}>{key}</option>
+                            })
+                        }
                     </select>
                 </div>
             </div>
@@ -511,7 +525,7 @@ const Create = (props) => {
             </div>
             <div className="row justify-content-center mb-4">
                 <div className="col-6">
-                    <Input label={"Start block"} min={currentBlockNumber} value={lockedStartBlock || currentBlockNumber} onChange={(e) => setLockedStartBlock(e.target.value)} />
+                    <Input label={"Start block"} min={currentBlockNumber} value={lockedStartBlock || currentBlockNumber} onChange={(e) => setLockedStartBlock(parseInt(e.target.value))} />
                 </div>
             </div>
             <div className="row mb-4">
@@ -594,7 +608,7 @@ const Create = (props) => {
                 {
                     lockedHasPenaltyFee && <div className="row mb-4 justify-content-center">
                         <div className="col-md-6 col-12">
-                            <Input step={0.001} max={100} min={0} showCoin={true} address={lockedMainToken.address} value={lockedPenaltyFee} name={lockedMainToken.symbol} onChange={(e) => setLockedPenaltyFee(e.target.value)} />
+                            <Input step={0.001} max={100} min={0} showCoin={true} address={lockedMainToken.address} value={lockedPenaltyFee} name={lockedMainToken.symbol} onChange={(e) => onUpdatePenaltyFee(e.target.value)} />
                         </div>
                     </div>
                 }
@@ -645,8 +659,9 @@ const Create = (props) => {
                                 <option value={null}>Choose setup..</option>
                                 {
                                     props.farmingSetups.map((setup, index) => {
+                                        console.log(setup.data);
                                         return <option key={index} value={index} disabled={setup.startBlock}>
-                                            { !setup.startBlock ? "Free setup" : "Locked setup" } { setup.data.name }{ setup.startBlock ? `${setup.data.symbol}` : ` | ${ setup.data.symbol1} ${ setup.data.symbol2 }` } - Reward: {setup.rewardPerBlock} {props.farmingContract.rewardToken.symbol}/block
+                                            { !setup.startBlock ? "Free setup" : "Locked setup" } { setup.data.name }{ setup.startBlock ? `${setup.data.symbol}` : ` | ${setup.data.tokens.map((token) => <>{token.symbol}</> )}` } - Reward: {setup.rewardPerBlock} {props.farmingContract.rewardToken.symbol}/block
                                         </option>;
                                     })
                                 }

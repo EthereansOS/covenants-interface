@@ -37,6 +37,7 @@ const Mint = (props) => {
                     await Promise.all(liquidityPools.map(async (liquidityPool, lpIndex) => {
                         try {
                             const ammContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("AMMABI"), ammAddress);
+                            const ammInfo = await ammContract.methods.info().call();
                             const poolInfo = await ammContract.methods.byLiquidityPool(liquidityPool).call();
                             const totalAmount = poolInfo['0'];
                             const [token0Amount, token1Amount] = poolInfo['1'];
@@ -50,12 +51,13 @@ const Mint = (props) => {
                             const balance1 = await token1Contract.methods.balanceOf(props.dfoCore.address).call();
                             const token1decimals = await token1Contract.methods.decimals().call();
                             const lpContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), liquidityPool);
+                            const symbolLp = await lpContract.methods.symbol().call();
                             const balanceLp = await lpContract.methods.balanceOf(props.dfoCore.address).call();
                             const decimalsLp = await lpContract.methods.decimals().call();
                             setLpTokenBalance(props.dfoCore.toDecimals(balanceLp, parseInt(decimalsLp)));
                             setFirstTokenBalance(props.dfoCore.toDecimals(balance0, parseInt(token0decimals)));
                             setSecondTokenBalance(props.dfoCore.toDecimals(balance1, parseInt(token1decimals)));
-                            pools.push({ ammContract, ammIndex, lpIndex, totalAmount, token0Amount, token1Amount, liquidityPool, token0, token1, symbol0, symbol1, token0decimals, token1decimals, decimalsLp, token0Contract, token1Contract });
+                            pools.push({ ammContract, ammName: ammInfo[0], ammIndex, lpIndex, totalAmount, symbolLp, token0Amount, token1Amount, lpContract, liquidityPool, token0, token1, symbol0, symbol1, token0decimals, token1decimals, decimalsLp, token0Contract, token1Contract });
                         } catch (error) {
                             console.log(error);
                         }
@@ -87,14 +89,27 @@ const Mint = (props) => {
     }
 
     const setChosenPair = async (pairIndex) => {
-        setPair(pairIndex);
-        if (pairIndex) {
-            const chosenPair = pairs[pairIndex];
-            const allowance0 = await chosenPair.token0Contract.methods.allowance(props.dfoCore.address, props.dfoCore.getContextElement("WUSDExtensionControllerAddress")).call();
-            const allowance1 = await chosenPair.token1Contract.methods.allowance(props.dfoCore.address, props.dfoCore.getContextElement("WUSDExtensionControllerAddress")).call();
-            console.log(allowance0, allowance1);
-            setFirstTokenApproved(parseInt(allowance0) !== 0);
-            setSecondTokenApproved(parseInt(allowance1) !== 0);
+        setLoading(true);
+        try {
+            if (pairIndex) {
+                const chosenPair = pairs[pairIndex];
+                const allowance0 = await chosenPair.token0Contract.methods.allowance(props.dfoCore.address, props.dfoCore.getContextElement("WUSDExtensionControllerAddress")).call();
+                const allowance1 = await chosenPair.token1Contract.methods.allowance(props.dfoCore.address, props.dfoCore.getContextElement("WUSDExtensionControllerAddress")).call();
+                console.log(allowance0, allowance1);
+                setFirstTokenApproved(parseInt(allowance0) !== 0);
+                setSecondTokenApproved(parseInt(allowance1) !== 0);
+                const balance0 = await chosenPair.token0Contract.methods.balanceOf(props.dfoCore.address).call();
+                const balance1 = await chosenPair.token1Contract.methods.balanceOf(props.dfoCore.address).call();
+                const balanceLp = await chosenPair.lpContract.methods.balanceOf(props.dfoCore.address).call();
+                setLpTokenBalance(props.dfoCore.toDecimals(balanceLp, parseInt(chosenPair.decimalsLp)));
+                setFirstTokenBalance(props.dfoCore.toDecimals(balance0, parseInt(chosenPair.token0decimals)));
+                setSecondTokenBalance(props.dfoCore.toDecimals(balance1, parseInt(chosenPair.token1decimals)));
+            }
+            setPair(pairIndex);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -211,12 +226,17 @@ const Mint = (props) => {
                 <div className="row">
                     <div className="col-12 col-md-6">
                         {
-                            !firstTokenApproved ? 
+                            (!useLpToken && !firstTokenApproved) ? 
                                 <ApproveButton contract={pairs[pair].token0Contract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.log(error)} onApproval={() => onTokenApproval('first')} text={`Approve ${pairs[pair].symbol0}`} />
                                 :
-                                !secondTokenApproved ?
+                                (!useLpToken && !secondTokenApproved) ?
                                     <ApproveButton contract={pairs[pair].token1Contract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.log(error)} onApproval={() => onTokenApproval('second')} text={`Approve ${pairs[pair].symbol1}`} />
-                                : <ApproveButton disabled={true} onError={(error) => console.log(error)} />
+                                : <div/>
+                        }
+                        
+                        {
+                            (useLpToken && !lpTokenApproved) && 
+                                <ApproveButton contract={pairs[pair].lpContract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.log(error)} onApproval={() => onTokenApproval('first')} text={`Approve ${pairs[pair].symbolLp}`} />
                         }
                     </div>
                     <div className="col-12 col-md-6">

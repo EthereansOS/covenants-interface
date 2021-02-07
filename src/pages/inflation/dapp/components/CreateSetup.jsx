@@ -112,9 +112,11 @@ const CreateSetup = (props) => {
                     <div className="row w-100 mb-4">
                         <select value={recurringExecution} onChange={(e) => setRecurringExecution(e.target.value)} className="custom-select wusd-pair-select">
                             <option value="">Select one</option>
-                            <option value="daily">Daily</option>
-                            <option value="monthly">Monthly</option>
-                            <option value="yearly">Yearly</option>
+                            {
+                                Object.keys(props.dfoCore.getContextElement("blockIntervals")).map((key) => {
+                                   return <option value={props.dfoCore.getContextElement("blockIntervals")[key]}>{key}</option>
+                                })
+                            }
                         </select>
                     </div>
                     <div className="row">
@@ -215,9 +217,9 @@ const CreateSetup = (props) => {
 }
 
 const mapStateToProps = (state) => {
-    const { session } = state;
+    const { session, core } = state;
     const { inflationSetups } = session;
-    return { inflationSetups };
+    return { inflationSetups, dfoCore: core.dfoCore };
 }
 
 const mapDispatchToProps = (dispatch) => {

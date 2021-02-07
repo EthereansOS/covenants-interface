@@ -83,7 +83,6 @@ const FarmingComponent = (props) => {
                             <div className="col-12 col-md-5">
                                 <div className="row">
                                     <p className="farming-component-paragraph"><b>Returns (APY)</b>: {metadata.apy}</p>
-                                    <p className="farming-component-paragraph"><b>Value locked</b>: {metadata.valueLocked}</p>
                                     <p className="farming-component-paragraph"><b>Rewards/block</b>: {metadata.rewardPerBlock}</p>
                                 </div>
                             </div>

@@ -1,5 +1,6 @@
 import { connect } from 'react-redux';
 import { Switch, Route } from 'react-router-dom';
+import { useState } from 'react';
 import { Header, Footer, PageNotFound, Sidemenu } from './components';
 import { ArbitragePage, BazaarPage, CraftingPage, GrimoirePage, MorePage, IndexPage, MultiswapPage, FarmPage, InflationPage, WUSDPage } from './pages';
 
@@ -9,6 +10,19 @@ const mapStateToProps = (state) => {
 }
 
 const App = (props) => {
+
+  if (props.dfoCore) {
+      props.dfoCore.provider.on('accountsChanged', (accounts) => {
+          window.location.reload();
+      })
+      props.dfoCore.provider.on('chainChanged', (chainId) => {
+         window.location.reload();
+      })
+  }
+
+  useState(() => {
+    console.log('updating.');
+  }, []);
 
   return (
     <div className={`app`}>
