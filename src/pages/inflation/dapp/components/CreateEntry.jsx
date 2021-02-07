@@ -67,9 +67,9 @@ const CreateEntry = (props) => {
         if (!address) return;
         setLoading(true);
         try {
-            const lastOutputToken = pathTokens.length === 0 ? inputToken.address.toLowerCase() : pathTokens[pathTokens.length - 1].outputTokenAddress.toLowerCase(9);
-            console.log(lastOutputToken);
-
+            console.log(pathTokens);
+            const lastOutputToken = pathTokens.length === 0 ? inputToken.address.toLowerCase() : pathTokens[pathTokens.length - 1].outputTokenAddress;
+            console.log(`lot: ${lastOutputToken}`);
             const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
             const info = await ammAggregator.methods.info(address).call();
             const ammContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("AMMABI"), info['amm']);
@@ -85,13 +85,19 @@ const CreateEntry = (props) => {
                 if (ethAddress.toLowerCase() === currentTokenAddress) {
                     symbols.push('ETH');
                 } else {
-                    if (lpTokensAddresses.length === 2 && currentTokenAddress.toLowerCase() === inputToken.address) {
+                    if (lpTokensAddresses.length === 2 && currentTokenAddress.toLowerCase() !== lastOutputToken) {
                         outputTokenAddress = currentTokenAddress;
                     }
                     const currentToken = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), currentTokenAddress);
                     const currentTokenSymbol = await currentToken.methods.symbol().call();
                     symbols.push(currentTokenSymbol);
                 }
+                if (lastOutputToken.toLowerCase() === currentTokenAddress.toLowerCase()) {
+                    hasLastOutputToken = true;
+                }
+            }
+            if (!hasLastOutputToken) {
+                return;
             }
             const pathTokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), address);
             const symbol = await pathTokenContract.methods.symbol().call();
@@ -320,11 +326,18 @@ const CreateEntry = (props) => {
                                     }
                                 </div>
                                 <div className="row w-50 mb-4">
-                                    <select value={pathToken.output} onChange={(e) => setPathTokens(pathTokens.map((pt, i) => i === index ? { ...pt, outputTokenAddress: e.target.value } : pt))} className="custom-select wusd-pair-select">
+                                    <select value={pathToken.output} disabled={index !== pathTokens.length - 1} onChange={(e) => setPathTokens(pathTokens.map((pt, i) => i === index ? { ...pt, outputTokenAddress: e.target.value } : pt))} className="custom-select wusd-pair-select">
                                         {
                                             pathToken.lpTokensAddresses.map((lpTokenAddress, lpTokenIndex) => {
-                                                if (lpTokenAddress.toLowerCase() !== inputToken.address.toLowerCase()) {
-                                                    return <option value={lpTokenAddress}>{pathToken.symbols[lpTokenIndex]}</option>
+                                                const isFirst = index === 0;
+                                                if (isFirst) {
+                                                    if (lpTokenAddress.toLowerCase() !== inputToken.address.toLowerCase()) {
+                                                        return <option value={lpTokenAddress}>{pathToken.symbols[lpTokenIndex]}</option>
+                                                    }
+                                                } else {
+                                                    if (lpTokenAddress.toLowerCase() !== pathTokens[index - 1].outputTokenAddress.toLowerCase()) {
+                                                        return <option value={lpTokenAddress}>{pathToken.symbols[lpTokenIndex]}</option>
+                                                    }
                                                 }
                                             })
                                         }

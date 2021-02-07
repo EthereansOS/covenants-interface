@@ -14,7 +14,7 @@ const Input = (props) => {
 
     const onDetectedChange = (value) => {
         if (!value) return { target: { value: balance }};
-        return parseFloat(value) > parseFloat(balance) ? { target: { value: balance }} : { target: { value } };
+        return { target: { value } };
     } 
 
     return (
@@ -26,7 +26,7 @@ const Input = (props) => {
                         <button className="btn btn-secondary" onClick={() => onChange(onDetectedChange())} type="button">MAX</button>
                     </div>
                 }
-                <input type="number" className={`form-control input-form-field ${parseFloat(val) > parseFloat(balance) ? 'is-invalid' : ''}`} value={val} min={min} max={max || balance} onChange={(e) => setVal(e.target.value)} onKeyUp={() => onChange(onDetectedChange(val))}/>
+                <input type="number" className={`form-control input-form-field ${parseFloat(val) > parseFloat(balance) ? 'is-invalid' : ''}`} value={val} min={min} max={max || balance} onChange={(e) => setVal(e.target.value)}/>
                 {
                     showCoin && <div className={`input-group-append no-border-right`}>
                         <span className={`input-group-text ${parseFloat(val) > parseFloat(balance) ? 'is-invalid' : ''}`} id=""><Coin address={address} /> {name}</span>

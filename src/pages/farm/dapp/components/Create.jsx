@@ -19,9 +19,7 @@ const Create = (props) => {
     const [selectedHost, setSelectedHost] = useState("");
     const [hostWalletAddress, setHostWalletAddress] = useState(null);
     const [hostDeployedContract, setHostDeployedContract] = useState(null);
-    const [customPayload, setCustomPayload] = useState(null);
     const [deployContract, setDeployContract] = useState(null);
-    const [deployedContractVerified, setDeployedContractVerified] = useState(false);
     const [useDeployedContract, setUseDeployedContract] = useState(false);
     const [hasLoadBalancer, setHasLoadBalancer] = useState(false);
     const [pinnedSetupIndex, setPinnedSetupIndex] = useState(null);
@@ -156,14 +154,6 @@ const Create = (props) => {
         const symbol = await rewardToken.methods.symbol().call();
         setSelectedRewardToken({ symbol, address });
         setLoading(false);
-    }
-
-    const verifyContract = async () => {
-        try {
-            setDeployedContractVerified(true);
-        } catch (error) {
-            setDeployedContractVerified(false);
-        }
     }
 
     const initializeDeployData = async () => {
@@ -757,17 +747,6 @@ const Create = (props) => {
                                 <div className="row mb-2">
                                     <input type="text" className="form-control" value={hostDeployedContract} onChange={(e) => setHostDeployedContract(e.target.value.toString())} placeholder={"Deployed contract address"} aria-label={"Deployed contract address"}/>
                                 </div>
-                                <div className="row mb-2">
-                                    <div className="col-md-6 p-0 col-12">
-                                        <div class="custom-file">
-                                            <input type="file" class="custom-file-input" id="customFile" onChange={(e) => console.log(e)} />
-                                            <label class="custom-file-label" for="customFile">Choose file</label>
-                                        </div>
-                                    </div>
-                                    <div className="col-md-6 col-12">
-                                        <button onClick={() => verifyContract()} className="btn btn-sm btn-secondary">VERIFY</button>
-                                    </div>
-                                </div>
                             </>
                         }
                     </> : <div/>
@@ -784,7 +763,7 @@ const Create = (props) => {
                     <button onClick={() => {
                         initializeDeployData();
                         setDeployStep((selectedHost === 'deployed-contract' && hostDeployedContract && !deployContract) ? 2 : 1);
-                    }} className="btn btn-secondary ml-4" disabled={!selectedHost || (selectedHost === 'wallet' && (!hostWalletAddress || !isValidAddress(hostWalletAddress))) || (selectedHost === 'deployed-contract' && ((!useDeployedContract && (!deployContract || !deployContract.contract)) || (useDeployedContract && (!hostDeployedContract || !deployedContractVerified))))}>Deploy</button>
+                    }} className="btn btn-secondary ml-4" disabled={!selectedHost || (selectedHost === 'wallet' && (!hostWalletAddress || !isValidAddress(hostWalletAddress))) || (selectedHost === 'deployed-contract' && ((!useDeployedContract && (!deployContract || !deployContract.contract)) || (useDeployedContract && !hostDeployedContract)))}>Deploy</button>
                 </div>
             </div>
         )

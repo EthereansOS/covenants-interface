@@ -223,17 +223,25 @@ const SetupComponent = (props) => {
                 }))
             }
             const res = await ammContract.methods.byLiquidityPoolAmount(setup.liquidityPoolTokenAddress, dfoCore.toFixed(dfoCore.fromDecimals(lpTokenAmount.toString()))).call();
+            // const res = await ammContract.methods.byTokensAmount(setup.liquidityPoolTokenAddress,  , stake.amount).call();
+            console.log(res);
             if (!setup.free) {
                 stake.amount = res.tokensAmounts[0];
                 ethTokenValue = res.tokensAmounts[ethTokenIndex];
             } else {
                 ethTokenValue = res.tokensAmounts[ethTokenIndex];
             }
+
             console.log(ethTokenValue);
             if ((currentPosition && isValidPosition(currentPosition)) || setup.free) {
                 // adding liquidity to the setup
-                const gasLimit = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).estimateGas({ from: dfoCore.address, value: setup.involvingETH ? ethTokenValue : 0 });
-                const result = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).send({ from: dfoCore.address, gasLimit, value: setup.involvingETH ? ethTokenValue : 0 });
+                if (!currentPosition) {
+                    const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value: setup.involvingETH ? ethTokenValue : 0  });
+                    const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit, value: setup.involvingETH ? ethTokenValue : 0  });
+                } else {
+                    const gasLimit = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).estimateGas({ from: dfoCore.address, value: setup.involvingETH ? ethTokenValue : 0 });
+                    const result = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).send({ from: dfoCore.address, gasLimit, value: setup.involvingETH ? ethTokenValue : 0 });
+                }
                 
             } else if (!setup.free) {
                 console.log('here');

@@ -60,9 +60,9 @@ const ContractEditor = (props) => {
                 </div>
                 <div className="col-md-3"></div>
                 <div className="col-md-3 col-12">
-                    <div class="custom-file">
-                        <input type="file" class="custom-file-input" id="customFile" onChange={(e) => onUploadFile(e)} />
-                        <label class="custom-file-label" for="customFile"></label>
+                    <div className="custom-file">
+                        <input type="file" className="custom-file-input" id="customFile" onChange={(e) => onUploadFile(e)} />
+                        <label className="custom-file-label" for="customFile"></label>
                     </div>
                 </div>
             </div>

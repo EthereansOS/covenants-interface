@@ -12,7 +12,6 @@ const Create = (props) => {
     const [hostWalletAddress, setHostWalletAddress] = useState(null);
     const [hostDeployedContract, setHostDeployedContract] = useState(null);
     const [deployContract, setDeployContract] = useState(null);
-    const [deployedContractVerified, setDeployedContractVerified] = useState(false);
     const [useDeployedContract, setUseDeployedContract] = useState(false);
     const [extensionPayload, setExtensionPayload] = useState("");
     const [deployStep, setDeployStep] = useState(0);
@@ -32,18 +31,9 @@ const Create = (props) => {
         props.removeInflationSetup(index);
     }
 
-    const verifyContract = async () => {
-        try {
-            setDeployedContractVerified(true);
-        } catch (error) {
-            setDeployedContractVerified(false);
-        }
-    }
-
     const initializeDeployData = async () => {
         setDeployLoading(true);
         try {
-            const data = {};
             const updatedEntries = [];
             for (let i = 0; i < props.inflationSetups.length; i++) {
                 const entry = props.inflationSetups[i];
@@ -52,7 +42,7 @@ const Create = (props) => {
                     lastBlock: 0,
                     name: entry.name,
                     blockInterval: parseInt(entry.recurringExecution),
-                    callerRewardPercentage: !entry.hasExecutionReward ? 0 : props.dfoCore.fromDecimals(entry.executionRewardAmount, 18),
+                    callerRewardPercentage: !entry.hasExecutionReward ? 0 : props.dfoCore.fromDecimals((parseInt(entry.executionRewardAmount) / 100).toString(), 18),
                     operations: []
                 };
                 for (let j = 0; j < entry.entries.length; j++) {
@@ -75,7 +65,7 @@ const Create = (props) => {
                     const liquidityPoolAddresses = currentOperation.pathTokens.map((token) => props.dfoCore.web3.utils.toChecksumAddress(token.address));
                     const swapPath = currentOperation.pathTokens.map((token) => props.dfoCore.web3.utils.toChecksumAddress(token.exitTokenAddress));
                     const receivers = currentOperation.receivers.map((receiver) => props.dfoCore.web3.utils.toChecksumAddress(receiver.address));
-                    const receiversPercentages = currentOperation.receivers.length === 1 ? [] : currentOperation.receivers.map((receiver) => props.dfoCore.toFixed(props.dfoCore.fromDecimals(receiver.percentage)));
+                    const receiversPercentages = currentOperation.receivers.length === 1 ? [] : currentOperation.receivers.map((receiver) => props.dfoCore.toFixed(props.dfoCore.fromDecimals(receiver.percentage.toString())));
                     if (receiversPercentages.length > 1) {
                         receiversPercentages.splice(-1, 1);
                     }
@@ -94,12 +84,10 @@ const Create = (props) => {
                         exitInETH: swapPath.length > 0 ? swapPath[swapPath.length - 1].toLowerCase() === ethAddress.toLowerCase() : false,
                     });
                 }
+                updatedEntries.push(currentEntry);
             }
-            console.log(props.inflationSetups);
-            console.log(`host wallet address ${hostWalletAddress}`)
-            console.log(`host deployed contract ${hostDeployedContract}`)
-            console.log(`payload ${extensionPayload}`)
-            console.log(deployContract);
+            console.log({ entries: updatedEntries, hostWalletAddress, hostDeployedContract, extensionPayload, useDeployedContract, deployContract });
+            setDeployData({ entries: updatedEntries, hostWalletAddress, hostDeployedContract, extensionPayload, deployContract, useDeployedContract })
         } catch (error) {
             console.error(error);
         } finally {
@@ -241,17 +229,6 @@ const Create = (props) => {
                             <div className="row mb-2">
                                 <input type="text" className="form-control" value={hostDeployedContract} onChange={(e) => setHostDeployedContract(e.target.value.toString())} placeholder={"Deployed contract address"} aria-label={"Deployed contract address"}/>
                             </div>
-                            <div className="row mb-2">
-                                <div className="col-md-6 p-0 col-12">
-                                    <div class="custom-file">
-                                        <input type="file" class="custom-file-input" id="customFile" onChange={(e) => console.log(e)} />
-                                        <label class="custom-file-label" for="customFile">Choose file</label>
-                                    </div>
-                                </div>
-                                <div className="col-md-6 col-12">
-                                    <button onClick={() => verifyContract()} className="btn btn-sm btn-secondary">VERIFY</button>
-                                </div>
-                            </div>
                         </>
                     }
                 </> : <div/>
@@ -265,7 +242,7 @@ const Create = (props) => {
                 <div className="col-12 mt-4">
                     <button onClick={() => {
                         setStep(step - 1);
-                    }} className="btn btn-light mr-4">Cancel</button> <button onClick={() => { initializeDeployData(); }} disabled={!selectedHost || (selectedHost === 'wallet' && (!hostWalletAddress || !props.dfoCore.isValidAddress(hostWalletAddress))) || (selectedHost === 'deployed-contract' && ((!useDeployedContract && (!deployContract || !deployContract.contract)) || (useDeployedContract && (!hostDeployedContract || !deployedContractVerified))))} className="btn btn-secondary ml-4">Deploy</button>
+                    }} className="btn btn-light mr-4">Cancel</button> <button onClick={() => { initializeDeployData(); }} disabled={!selectedHost || (selectedHost === 'wallet' && (!hostWalletAddress || !props.dfoCore.isValidAddress(hostWalletAddress))) || (selectedHost === 'deployed-contract' && ((!useDeployedContract && (!deployContract || !deployContract.contract)) || (useDeployedContract && !hostDeployedContract)))} className="btn btn-secondary ml-4">Deploy</button>
                 </div>
             </div>
         </div>
