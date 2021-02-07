@@ -1,5 +1,5 @@
 import { PageContainer } from "../../components";
-import homeBazaarImage from '../../assets/images/home-bazaar.png';
+import homeBazaarImage from '../../assets/images/5.png';
 import { Route, Switch } from "react-router-dom";
 import BazaarDapp from './dapp/dapp';
 
