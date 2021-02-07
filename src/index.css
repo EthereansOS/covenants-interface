@@ -33,6 +33,7 @@
 
 .fantasy .TitleCov {color: #ffffff;}
 .fantasy .fantasyMenu:hover, .fantasy .fantasyMenu {color: #ffffff;}
+.fantasy .BtnConnectAfter, .fantasy .BtnConnect,.fantasy .menuIconEth {display: none !important;}
 
 
 .penguin {background: rgb(58,60,106);background: linear-gradient(135deg, rgba(58,60,106,1) 0%, rgba(0,0,0,1) 41%);}
@@ -40,6 +41,7 @@
 .penguin .sidebar-menu-link {color: #ffffff;}
 .penguin .nav-link {color: #ffffff;}
 .penguin .custom-control-label::before, .penguin .custom-file-label, .penguin .custom-select, .penguin .custom-select:focus {transition: none; background: url("./assets/images/arrowdown.png") right 0.75rem center/15px 10px no-repeat;border-color: #9e6915 !important; box-shadow: none;}
+.penguin .token-filter-input {border-color: #9e6915 !important;}
 .penguin .wusd-pair-select, .penguin .token-filter-input {background-color: #2d2e40 !important; color: #ffffff;}
 .penguin .LogoM {background-position: 0 0px;}
 .penguin .BtnConnect {border: 1px solid #7474f7; color: #7474f7;}
