@@ -173,7 +173,8 @@ const Create = (props) => {
             const hasExtension = (selectedHost === "deployed-contract" && hostDeployedContract && !deployContract);
             const data = { setups: [], rewardTokenAddress: selectedRewardToken.address, byMint, hasLoadBalancer, pinnedSetupIndex, deployContract, host, hasExtension, extensionInitData: "" };
             const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
-            await Promise.all(props.farmingSetups.map(async (setup) => {
+            for (let i = 0; i < props.farmingSetups.length; i++) {
+                const setup = props.farmingSetups[i];
                 const isFree = !setup.endBlock;
                 const result = await ammAggregator.methods.findByLiquidityPool(isFree ? setup.data.address : setup.secondaryToken).call();
                 const { amm } = result;
@@ -200,7 +201,7 @@ const Create = (props) => {
                         involvingETH
                     ]
                 )
-            }))
+            }
             console.log(data);
             setDeployData(data);
         } catch (error) {
