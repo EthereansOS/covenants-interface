@@ -67,7 +67,7 @@ const FarmingComponent = (props) => {
 
     return (
         <div className={className}>
-            <div className={`card farming-card ${!hasBorder ? "no-border" : ""}`}>
+            <div className={`card farming-card primary-farming-card ${!hasBorder ? "no-border" : ""}`}>
                 <div className="card-body">
                     <div className="row px-2 farming-component-main-row">
                         {

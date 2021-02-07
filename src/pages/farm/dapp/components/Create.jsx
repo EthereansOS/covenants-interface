@@ -171,7 +171,7 @@ const Create = (props) => {
         try {
             const host = selectedHost === "no-host" ? props.dfoCore.voidEthereumAddress : selectedHost === 'wallet' ? hostWalletAddress : hostDeployedContract;
             const hasExtension = (selectedHost === "deployed-contract" && hostDeployedContract && !deployContract);
-            const data = { setups: [], rewardTokenAddress: selectedRewardToken.address, byMint, hasLoadBalancer, pinnedSetupIndex, deployContract, host, hasExtension, extensionInitData: "" };
+            const data = { setups: [], rewardTokenAddress: selectedRewardToken.address, byMint, hasLoadBalancer, pinnedSetupIndex, deployContract, host, hasExtension, extensionInitData: extensionPayload || '' };
             const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
             for (let i = 0; i < props.farmingSetups.length; i++) {
                 const setup = props.farmingSetups[i];
