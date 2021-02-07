@@ -2,8 +2,8 @@ import { connect } from 'react-redux';
 import DFOCore from '../../../core';
 import { setDFOCore, removeDFOCore, setMagicVisualMode, removeMagicVisualMode } from '../../../store/actions';
 import map from '../../../assets/images/map.svg';
-import diamond from '../../../assets/images/diamond.svg';
-import wizardLogo from '../../../assets/images/wizard.svg';
+import diamond from '../../../assets/images/ethereum.png';
+import wizardLogo from '../../../assets/images/covlogo.png';
 import { default as context } from '../../../data/context.json';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
@@ -34,18 +34,17 @@ const Header = (props) => {
     return (
         <nav className="navbar navbar-light bg-transparent">
             <div className="container-fluid">
-                <Link to={"/"} className="navbar-brand">
-                    <img src={wizardLogo} alt="" height={50} />
-                    <span className="mx-3"><b>Covenants</b></span>
+                <Link to={"/"} onClick={() => document.body.className = "fantasy"} className="navbar-brand">
+                    <span  className="LogoM" src={wizardLogo} alt=""></span>
+                    <span className="mx-3 TitleCov"><b>Covenants</b></span>
                 </Link>
                 <div className="d-flex">
-                    {props.dfoCore && !props.magicMode && <button className="btn btn-primary mx-4" onClick={props.setMagicMode}>Magic</button>}
-                    {props.dfoCore && props.magicMode && <button className="btn btn-primary mx-4" onClick={props.removeMagicMode}>Penguin</button>}
-                    <img src={map} alt="" height={36} />
+                    {props.dfoCore && !props.magicMode && <a className="ChangeMod" onClick={props.setMagicMode}>&#10024;</a>}
+                    {props.dfoCore && props.magicMode && <a className="ChangeMod" onClick={props.removeMagicMode}>&#128188;</a>}
                     {
-                        props.dfoCore ? <button className="btn btn-primary mx-4" onClick={() => disconnectCore()}>{formatAddress(props.dfoCore.address)}</button> : <button className="btn btn-primary mx-4" onClick={() => connectCore()}>Connect</button>
+                        props.dfoCore ? <a className="BtnConnectAfter" onClick={() => disconnectCore()}>{formatAddress(props.dfoCore.address)}</a> : <a className="BtnConnect" onClick={() => connectCore()}>Connect</a>
                     }
-                    <img src={diamond} alt="" height={36} />
+                    <img className="menuIconEth" src={diamond} alt=""/>
                 </div>
             </div>
         </nav>

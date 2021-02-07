@@ -117,7 +117,10 @@ const Burn = (props) => {
         const updatedFirstTokenAmount = props.dfoCore.formatNumber(props.dfoCore.normalizeValue(tokensAmounts[0], token0decimals));
         const updatedSecondTokenAmount = props.dfoCore.formatNumber(props.dfoCore.normalizeValue(tokensAmounts[1], token1decimals));
 
-        const ratio = updatedFirstTokenAmount / updatedSecondTokenAmount;
+        const ratio = updatedFirstTokenAmount > updatedSecondTokenAmount ? updatedFirstTokenAmount / updatedSecondTokenAmount : updatedSecondTokenAmount / updatedFirstTokenAmount;
+        if (ratio > 1.1) {
+            return;
+        }
 
         const wusdRealAmount =  props.dfoCore.numberToString((props.dfoCore.formatNumber(wusdAmount) * ratio) / 2).split('.')[0];
 
@@ -197,17 +200,21 @@ const Burn = (props) => {
             <div className="col-12 mb-4">
                 <div className="row justify-content-center">
                     {
+                        /*
                         !wusdApproved ? <div className="col-12 col-md-6">
                             <ApproveButton contract={wusdContract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.log(error)} onApproval={() => onTokenApproval('wusd')} text={`Approve WUSD`} />
                         </div> : <div/>
+                        */
                     }
                     {
+                        /*
                         !pairs[pair].lpTokenApproved ? <div className="col-12 col-md-6">
                             <ApproveButton contract={pairs[pair].lpContract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.log(error)} onApproval={() => onTokenApproval(pair)} text={`Approve ${pairs[pair].lpSymbol}`} />
                         </div> : <div/>
+                        */
                     }
                     <div className="col-12 col-md-6">
-                        <button onClick={() => burnWUSD()} className="btn btn-secondary">Burn</button>
+                        <button onClick={() => burnWUSD()} disabled={!window.amount} className="btn btn-secondary">Burn</button>
                     </div>
                 </div>
             </div>

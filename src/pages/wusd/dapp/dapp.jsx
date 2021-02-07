@@ -9,7 +9,7 @@ import { Arbitrate, Burn, Farm, Mint, Stats, USDN } from './components';
 
 const Dapp = (props) => {
 
-    const [currentTab, setCurrentTab] = useState('mint');
+    const [currentTab, setCurrentTab] = useState('stats');
 
     const connectCore = async () => {
         const core = new DFOCore(context);
@@ -38,7 +38,7 @@ const Dapp = (props) => {
 
     if (!props.dfoCore) {
         return (
-            <div className="container bg-white dapp-container">
+            <div className="dapp-container">
                 <div className="row">
                     <div className="col-12 dapp-col text-center justify-content-center">
                         <button className="btn btn-primary mx-4" onClick={() => connectCore()}>Connect</button>
@@ -49,10 +49,10 @@ const Dapp = (props) => {
     }
 
     return (
-        <div className="container bg-white dapp-container">
+        <div className="dapp-container">
             <div className="row" style={{flexDirection: 'column'}}>
                 <div className="col-12 dapp-col text-center">
-                    <DappMenu className="wusd-dapp-menu" onClick={(name) => setCurrentTab(name)} currentTab={currentTab} options={['Mint', 'Burn', 'Farm', 'Stats', 'Arbitrate', 'uSDN']} />
+                    <DappMenu className="wusd-dapp-menu" onClick={(name) => setCurrentTab(name)} currentTab={currentTab} options={['Stats', 'Burn', 'Farm', 'Mint', 'Arbitrate', 'uSDN']} />
                     <div className="wusd-dapp-content mt-4">
                         { getContent() }
                     </div>
@@ -69,7 +69,10 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        setCore: (dfoCore) => dispatch(setDFOCore(dfoCore)),
+        setCore: (dfoCore) => {
+            document.body.className = `${!dfoCore ? 'fantasy' : window.localStorage.magicMode === "true" ? 'magic' : 'penguin'}`;
+            dispatch(setDFOCore(dfoCore));
+        },
         removeCore: () => dispatch(removeDFOCore()),
     }
 }

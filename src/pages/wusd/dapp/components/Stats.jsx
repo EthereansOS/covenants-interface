@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { ChevronDownIcon, ChevronUpIcon } from '@primer/octicons-react';
+import { ethers } from 'ethers';
+
+const abi = new ethers.utils.AbiCoder();
 
 const Stats = (props) => {
     const [showAdvanced, setShowAdvanced] = useState(false);
@@ -29,6 +32,7 @@ const Stats = (props) => {
     const [x5USDTreasury, setx5USDTreasury] = useState(0);
     const [wusdExtensionController, setWusdExtensionController] = useState(null);
     const [collateralData, setCollateralData] = useState([]);
+    const [percentages, setPercentages] = useState([]);
 
     // TODO add health calc
     useEffect(() => {
@@ -50,8 +54,12 @@ const Stats = (props) => {
             setCredit(props.dfoCore.toDecimals(differences.credit, decimals));
             setDebit(props.dfoCore.toDecimals(differences.debt, decimals));
 
+            const perc = [];
+
             const wusdNote2Info = await contract.methods.wusdNote2Info().call();
+            perc[0] = props.dfoCore.toDecimals(wusdNote2Info[4]);
             const wusdNote5Info = await contract.methods.wusdNote5Info().call();
+            perc[1] = props.dfoCore.toDecimals(wusdNote5Info[4]);
             const x2USDcontract = await props.dfoCore.getContract(props.dfoCore.getContextElement("IEthItemInteroperableInterfaceABI"), wusdNote2Info[2]);
             const x5USDcontract = await props.dfoCore.getContract(props.dfoCore.getContextElement("IEthItemInteroperableInterfaceABI"), wusdNote5Info[2]);
             const x2USDNoteController = await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDNoteControllerABI"), wusdNote2Info[3]);
@@ -68,7 +76,16 @@ const Stats = (props) => {
             setx5USDTreasury(props.dfoCore.toDecimals(await wusdContract.methods.balanceOf(x5USDNoteController.options.address).call(), decimals));
             
             const info = await contract.methods.rebalanceByCreditReceiversInfo().call();
-            setUnifiTreasury(props.dfoCore.toDecimals(info[2], decimals));
+            let farmTotalPercentage = 0;
+            await Promise.all(info[1].map(async (p) => {
+                farmTotalPercentage += parseInt(p);
+            }))
+            farmTotalPercentage = props.dfoCore.toDecimals(props.dfoCore.toFixed(farmTotalPercentage));
+            perc[2] = props.dfoCore.toDecimals(info[2]);
+            perc[3] = farmTotalPercentage;
+            setPercentages(perc);
+
+            setUnifiTreasury(0);
             const lastRebalanceBlock = await contract.methods.lastRebalanceByCreditBlock().call();
             const interval = await contract.methods.rebalanceByCreditBlockInterval().call();
             setCurrentBlock(await props.dfoCore.getBlockNumber());
@@ -131,10 +148,32 @@ const Stats = (props) => {
         setHealth(props.dfoCore.toDecimals(100 * ratio, 0, 2));
     }
 
+    const onUpdateUsdRebalanceByDebit = (value) => {
+        setUsdRebalanceByDebit(value ? props.dfoCore.fromDecimals(value) : 0);
+    }
+
     const rebalanceByCredit = async () => {
         try {
             const gasLimit = await wusdExtensionController.methods.rebalanceByCredit().estimateGas({ from: props.dfoCore.address });
             await wusdExtensionController.methods.rebalanceByCredit().send({ from: props.dfoCore.address, gasLimit });
+            await getStats();
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    const rebalanceByDebit = async () => {
+        try {
+            const info = await wusdExtensionController.methods.wusdInfo().call();
+            const collectionAddress = info['0'];
+            const wusdObjectId = info['1'];
+
+            const wusdCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), collectionAddress);
+
+            const byDebtData = abi.encode(["uint256"], [selectedUsdn === "x2" ? 2 : 5]);
+            const data = abi.encode(["uint256", "bytes"], [1, byDebtData]);
+            const gasLimit = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [props.dfoCore.web3.utils.toBN(usdRebalanceByDebit).toString()], abi.encode(["bytes[]"], [[data]])).estimateGas({ from: props.dfoCore.address});
+            const res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [props.dfoCore.web3.utils.toBN(usdRebalanceByDebit).toString()], abi.encode(["bytes[]"], [[data]])).send({ from: props.dfoCore.address, gasLimit });
             await getStats();
         } catch (error) {
             console.error(error);
@@ -150,28 +189,29 @@ const Stats = (props) => {
 
     const getFirstCol = () => {
         return (
-            <div className="col-3 text-left">
-                <div className="row">
+            <div className="col-3 text-left StatsBro">
+                {/*}<div className="row">
                     <div className="col-12">
-                        <p><b>uSD: $1</b></p>
+                        <p><b>Price:</b></p>
+                        <p>$1</p>
                     </div>
-                </div>
-                <hr />
+                </div>{*/}
                 <div className="row">
                     <div className="col-12">
                         <div className="row mb-3">
                             <div className="col-12">
                                 <b>Supply</b>
                             </div>
-                            <div className="col-12" style={{wordBreak: 'break-word'}}>
+                            <div className="col-12 infoList">
                                 { totalSupply ? props.dfoCore.toDecimals(props.dfoCore.toFixed(totalSupply), 18) : totalSupply } WUSD
                             </div>
                         </div>
+                        <hr />
                         <div className="row mb-3">
                             <div className="col-12">
                                 <b>Collateral</b>
                             </div>
-                            <div className="col-12">
+                            <div className="col-12 infoList">
                                 {
                                     (collateralData && collateralData.collateral) ?
                                         Object.entries(collateralData.collateral).map((entry, i) => {
@@ -181,11 +221,12 @@ const Stats = (props) => {
                                 }
                             </div>
                         </div>
+                        <hr />
                         <div className="row mb-3">
                             <div className="col-12">
                                 <b>Liquidity</b>
                             </div>
-                            <div className="col-12">
+                            <div className="col-12 infoList">
                                 {
                                     (collateralData && collateralData.liquidity) ?
                                         Object.entries(collateralData.liquidity).map((entry, i) => {
@@ -271,7 +312,7 @@ const Stats = (props) => {
                 {
                     showAdvanced ? 
                     <>
-                        <div className="container">
+                        <div className="">
                             { getAdvancedRow() }
                             <div className="row">
                                 <div className="col-12">
@@ -304,7 +345,9 @@ const Stats = (props) => {
                             <br/>
                             {farmTreasury} uSD Farm treasury
                             <br/>
-                            {x2USDTreasury + x5USDTreasury} uSDN treasury
+                            {x2USDTreasury} x2USD treasury
+                            <br/>
+                            {x5USDTreasury} x5USD treasury
                             <br/>
                             {unifiTreasury} Unifi treasury
                             <br/>
@@ -341,7 +384,7 @@ const Stats = (props) => {
                     <hr/>
                 </>
             );
-        } else if (debit < credit) {
+        } else if (debit > credit) {
             return (
                 <>
                 <div className="row mb-4">
@@ -351,7 +394,7 @@ const Stats = (props) => {
                             <div className="input-group-prepend">
                                 <button className="btn btn-secondary" type="button">MAX</button>
                             </div>
-                            <input type="number" className="form-control" value={usdRebalanceByDebit} min={0} onChange={(e) => setUsdRebalanceByDebit(parseFloat(e.target.value))} />
+                            <input type="number" className="form-control" value={props.dfoCore.toDecimals(usdRebalanceByDebit)} min={0} onChange={(e) => onUpdateUsdRebalanceByDebit(e.target.value)} />
                             <div className="input-group-append">
                                 <span className="input-group-text" id=""> uSD</span>
                             </div>
@@ -371,7 +414,7 @@ const Stats = (props) => {
                                     <div className="mt-2">
                                         For
                                         <br/>
-                                        { selectedUsdn === 'x2' ? "700 x2USD" : "500 x5USD"}
+                                        {`${props.dfoCore.toDecimals(usdRebalanceByDebit)} ${selectedUsdn}USD`}
                                     </div> : <div/>
                                 }
                                 
@@ -380,7 +423,7 @@ const Stats = (props) => {
                         {
                             selectedUsdn ? 
                             <div className="row justify-content-center">
-                                <button className="btn btn-outline-secondary" disabled={usdRebalanceByDebit === 0}>Rebalance</button>
+                                <button className="btn btn-outline-secondary" onClick={() => rebalanceByDebit()} disabled={usdRebalanceByDebit === 0}>Rebalance</button>
                             </div> : <div/>
                         }
                     </div>

@@ -9,11 +9,10 @@ $warning: #FDA7DF;
 
 body {
   margin: 0;
-  font-family: 'Overpass Mono', monospace;
+  font-family: 'EthOSregular', 'Overpass Mono', monospace;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
-  background-image: linear-gradient(rgba(226, 128, 233, 0.3), rgba(241, 212, 109, 0.3));
 }
 
 code {
@@ -92,21 +91,17 @@ code {
   border-bottom: 10px $secondary solid;
 }
 
-.no-border-right {
-  border-right: 0;
-}
 
-.input-group-text {
-  background-color: transparent;
-  border-left: 0;
-}
-
-.input-group-append .is-invalid {
-  border-color: #dc3545;
-}
-
-.dapp-container {
+/* page container */
+.dapp-container, .page-container {
+  padding: 1rem;
   border-radius: 1.5rem;
+  width: 600px;
+  min-height: 500px;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  flex-direction: column;
 }
 
 .dapp-col {
@@ -174,7 +169,7 @@ code {
 
 /* wusd */
 .wusd-dapp-content {
-  width: 80%;
+  width: 99%;
 }
 
 .wusd-pair-select, .token-filter-input {
@@ -222,7 +217,7 @@ code {
 /* app component */
 .app-container {
     margin: 0 auto !important;
-    padding-top: 2rem;
+    padding-top: 4rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -251,9 +246,8 @@ code {
 }
 
 /* page container */
-.page-container {
+.page-container, .dapp-container {
   padding: 1rem;
-  background-color: white;
   border-radius: 1.5rem;
   width: 600px;
   min-height: 500px;
@@ -264,7 +258,7 @@ code {
 }
 
 @media (min-width: 375px) {
-  .page-container {
+  .page-container, .dapp-container {
     max-width: 310px;
     width: 310px;
   }
@@ -275,7 +269,7 @@ code {
 }
   
 @media (min-width: 576px) {
-  .page-container {
+  .page-container, .dapp-container {
     max-width: 520px;
     width: 520px;
   }
@@ -286,7 +280,7 @@ code {
 }
 
 @media (min-width: 768px) {
-  .page-container {
+  .page-container, .dapp-container {
     max-width: 650px;
     width: 650px;
   }
@@ -297,7 +291,7 @@ code {
 }
 
 @media (min-width: 992px) {
-  .page-container {
+  .page-container, .dapp-container {
     max-width: 750px;
     width: 750px;
   }

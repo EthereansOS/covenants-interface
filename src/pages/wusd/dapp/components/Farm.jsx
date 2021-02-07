@@ -36,7 +36,7 @@ const Farm = (props) => {
     }
 
     return (
-        <div className="container bg-white dapp-container">
+        <div className="dapp-container">
             <div className="row">
                 {
                     farmingContracts.length === 0 && <div className="col-12 text-left">

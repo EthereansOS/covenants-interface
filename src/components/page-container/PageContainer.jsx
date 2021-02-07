@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 
 const PageContainer = (props) => {
     return (
-        <div className="page-container-wrapper mt-4 mt-md-0">
             <div className="page-container">
                 <div className="page-container-row">
                     <div className="col-md-6 col-12 flex flex-column mb-4 mb-md-0" style={{justifyContent: 'space-evenly'}}>
@@ -25,7 +24,6 @@ const PageContainer = (props) => {
                     </div> : <div/>
                 }
             </div>
-        </div>
     )
 }
 
