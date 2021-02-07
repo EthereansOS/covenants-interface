@@ -185,7 +185,7 @@ const Create = (props) => {
                         amm,//uniswapAMM.options.address,
                         0,
                         isFree ? setup.data.address : setup.secondaryToken,
-                        isFree ? setup.data.token0 : setup.data.address,
+                        isFree ? props.dfoCore.voidEthereumAddress : setup.data.address,
                         isFree ? 0 : setup.startBlock,
                         isFree ? 0 : (parseInt(setup.startBlock) + parseInt(setup.period)),
                         props.dfoCore.fromDecimals(setup.rewardPerBlock),
@@ -660,7 +660,7 @@ const Create = (props) => {
                                     props.farmingSetups.map((setup, index) => {
                                         console.log(setup.data);
                                         return <option key={index} value={index} disabled={setup.startBlock}>
-                                            { !setup.startBlock ? "Free setup" : "Locked setup" } { setup.data.name }{ setup.startBlock ? `${setup.data.symbol}` : ` | ${setup.data.tokens.map((token) => <>{token.symbol}</> )}` } - Reward: {setup.rewardPerBlock} {props.farmingContract.rewardToken.symbol}/block
+                                            { !setup.startBlock ? "Free setup" : "Locked setup" } { setup.data.name }{ setup.startBlock ? `${setup.data.symbol}` : ` | ${setup.data.tokens.map((token) => `${token.symbol}` )}` } - Reward: {setup.rewardPerBlock} {props.farmingContract.rewardToken.symbol}/block
                                         </option>;
                                     })
                                 }
