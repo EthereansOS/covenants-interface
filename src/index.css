@@ -46,7 +46,7 @@
 .penguin .BtnConnectAfter {border: 1px solid #9e6915; color: #9e6915;}
 .penguin .TitleCov {color: #ffffff;}
 .penguin .fantasyMenu:hover, .penguin .fantasyMenu {color: #ffffff;}
-.penguin .form-check-label, .penguin .infoList, .penguin .StatsBro {color: #ffffff;}
+.penguin .form-check-label, .penguin .infoList, .penguin .StatsBro, .penguin .StatsBroO {color: #ffffff;}
 
 
 .magic {background: rgb(210,208,247);background: linear-gradient(135deg, rgba(210,208,247,1) 0%, rgba(253,247,245,1) 41%);}
