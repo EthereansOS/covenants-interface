@@ -30,6 +30,15 @@ code {
   padding-right: 1.5rem;
 }
 
+.btn:focus {
+  box-shadow: unset !important;
+}
+
+.custom-select:focus {
+  box-shadow: unset !important;
+  border-color: $secondary;
+}
+
 .btn-primary {
   @include button-variant($primary, darken($primary, 3%));
 }
