@@ -52,7 +52,7 @@ const Dapp = (props) => {
         <div className="dapp-container">
             <div className="row" style={{flexDirection: 'column'}}>
                 <div className="col-12 dapp-col text-center">
-                    <DappMenu className="wusd-dapp-menu" onClick={(name) => setCurrentTab(name)} currentTab={currentTab} options={['Stats', 'Burn', 'Farm', 'Mint', 'Arbitrate', 'uSDN']} />
+                    <DappMenu className="wusd-dapp-menu" onClick={(name) => setCurrentTab(name)} currentTab={currentTab} options={['Stats', 'Mint', 'Burn', 'Farm', 'Arbitrate', 'uSDN']} />
                     <div className="wusd-dapp-content mt-4">
                         { getContent() }
                     </div>

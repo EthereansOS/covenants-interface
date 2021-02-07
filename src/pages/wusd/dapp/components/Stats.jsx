@@ -212,7 +212,7 @@ const Stats = (props) => {
                     </div>
                 </div>
                 <div className="my-4" />
-                <div className="row mb-4">
+                <div className="row mb-4 StatsBroO">
                     <div className="col-6">
                         <b>Credit</b>
                         <br/>
@@ -224,7 +224,7 @@ const Stats = (props) => {
                         {debit} uSD
                     </div>
                 </div>
-                <div className="row mb-4">
+                <div className="row mb-4 StatsBroO">
                     <div className="col-6">
                         <b>x2USD supply</b>
                         <br/>
@@ -236,7 +236,7 @@ const Stats = (props) => {
                         {x2USDTreasury}
                     </div>
                 </div>
-                <div className="row mb-4">
+                <div className="row mb-4 StatsBroO">
                     <div className="col-6">
                         <b>x5USD supply</b>
                         <br/>
@@ -248,7 +248,7 @@ const Stats = (props) => {
                         {x5USDTreasury}
                     </div>
                 </div>
-                <div className="row mb-4">
+                <div className="row mb-4 StatsBroO">
                     <div className="col-6">
                         <b>Farm treasury</b>
                         <br/>
@@ -273,7 +273,7 @@ const Stats = (props) => {
                 {
                     showAdvanced ? 
                     <>
-                        <div className="">
+                        <div className="StatsBroO">
                             { getAdvancedRow() }
                             <div className="row">
                                 <div className="col-12">
