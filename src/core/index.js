@@ -299,9 +299,10 @@ export default class DFOCore {
 
     toDecimals = (amount, decimals = 18, precision) => {
         if (parseFloat(amount) === 0) return 0;
-        precision = -Math.floor( Math.log10(amount) + 1);
-        if (precision < 0) precision = 4;
         const res = decimals === 18 ? this.web3.utils.fromWei(amount, 'ether') : parseInt(amount) / 10**decimals;
+        precision = -Math.floor( Math.log10(res));
+        console.log(precision);
+        if (precision < 0) precision = 4;
         return parseFloat(res).toFixed(precision);
     }
     

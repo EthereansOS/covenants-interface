@@ -22,6 +22,7 @@ const Mint = (props) => {
     const [isHealthyPair, setIsHealthyPair] = useState(true);
 
     useEffect(() => {
+        console.log(props.dfoCore.toDecimals("90810", 18));
         getController();
     }, [])
 
