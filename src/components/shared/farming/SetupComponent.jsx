@@ -3,21 +3,21 @@ import { useEffect, useState } from 'react';
 import { Input, ApproveButton } from '..';
 
 const SetupComponent = (props) => {
-    const { className, dfoCore, setupIndex, hostedBy, setup, lmContract, manage, farm, redeem } = props;
+    const { className, dfoCore, setupIndex, setup, lmContract, manage, farm, redeem } = props;
     const [open, setOpen] = useState(false);
     const [blockNumber, setBlockNumber] = useState(0);
     const [loading, setLoading] = useState(false);
     const [AMM, setAMM] = useState({ name: "", version: ""});
     const [ammContract, setAmmContract] = useState(null);
+    const [extensionContract, setExtensionContract] = useState(null);
     const [status, setStatus] = useState('farm');
     const [edit, setEdit] = useState(false);
-    const [currentBlock, setCurrentBlock] = useState(0);
+    const [isHost, setIsHost] = useState(true);
     const [addLiquidityType, setAddLiquidityType] = useState(""); 
     const [setupTokens, setSetupTokens] = useState([]);
     const [tokensAmounts, setTokensAmount] = useState([]);
     const [tokensApprovals, setTokensApprovals] = useState([]);
     const [tokensContracts, setTokensContracts] = useState([]);
-    const [setupLiquidity, setSetupLiquidity] = useState(null);
     const [lpTokenAmount, setLpTokenAmount] = useState(0);
     const [lockedEstimatedReward, setLockedEstimatedReward] = useState(0);
     const [freeAvailableRewards, setFreeAvailableRewards] = useState([]);
@@ -30,7 +30,10 @@ const SetupComponent = (props) => {
     const [unwrapPair, setUnwrapPair] = useState(false);
     const [currentPosition, setCurrentPosition] = useState(null);
     const [positions, setPositions] = useState([]);
-    const [updatedRewardPerBlock, setUpdatedRewardPerBlock] = useState(dfoCore.toDecimals(setup.rewardPerBlock));
+    const [updatedRewardPerBlock, setUpdatedRewardPerBlock] = useState(setup.rewardPerBlock);
+    const [updatedRenewTimes, setUpdatedRenewTimes] = useState(setup.renewTimes);
+    const [openPositionForAnotherWallet, setOpenPositionForAnotherWallet] = useState(false);
+    const [uniqueOwner, setUniqueOwner] = useState(dfoCore.voidEthereumAddress);
 
     useEffect(() => {
         getSetupMetadata();
@@ -60,7 +63,16 @@ const SetupComponent = (props) => {
             setPositions(posArray);
             const extensionAddress = await lmContract.methods._extension().call();
             setExtension(extensionAddress);
-            setCurrentBlock(await dfoCore.getBlockNumber());
+            console.log(extensionAddress);
+            try {
+                const extContract = await dfoCore.getContract(dfoCore.getContextElement("LiquidityMiningExtensionABI"), extensionAddress);
+                console.log(extContract);
+                const extData = await extensionContract.methods.data().call();
+                setExtensionContract(extContract);
+                // setIsHost(extData["host"].toLowerCase() === dfoCore.address.toLowerCase());
+            } catch (error) {
+                console.error("non standard lm extension.");
+            }
             const rewardTokenAddress = await lmContract.methods._rewardTokenAddress().call();
             const rewardToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), await lmContract.methods._rewardTokenAddress().call());
             const rewardTokenSymbol = await rewardToken.methods.symbol().call();
@@ -73,6 +85,7 @@ const SetupComponent = (props) => {
             const lpTokenBalance = await lpToken.methods.balanceOf(dfoCore.address).call();
             const lpTokenApproval = await lpToken.methods.allowance(dfoCore.address, lmContract.options.address).call();
             setLpTokenInfo({ contract: lpToken, symbol: lpTokenSymbol, decimals: lpTokenDecimals, balance: lpTokenBalance, approval: parseInt(lpTokenApproval) !== 0 });
+            console.log(await dfoCore.getBlockNumber());
             setBlockNumber(await dfoCore.getBlockNumber());
             const ammContract = await dfoCore.getContract(dfoCore.getContextElement('AMMABI'), setup.ammPlugin);
             setAmmContract(ammContract);
@@ -95,8 +108,9 @@ const SetupComponent = (props) => {
                 const decimals = await token.methods.decimals().call();
                 const balance = !isWeth(address) ? await token.methods.balanceOf(dfoCore.address).call() : await dfoCore.web3.eth.getBalance(dfoCore.address);
                 const approval = !isWeth(address) ? await token.methods.allowance(dfoCore.address, lmContract.options.address).call() : true;
-                approvals.push(approval);
+                approvals.push(parseInt(approval) !== 0);
                 tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: res.tokensAmounts[i], decimals, address, symbol });
+                contracts.push(token);
             }
             const info = await ammContract.methods.info().call();
             setAMM({ name: info['0'], version: info['1'] });
@@ -104,6 +118,7 @@ const SetupComponent = (props) => {
             setTokensContracts(contracts);
             setTokensAmount(new Array(tokens.length).fill(0));
             setTokensApprovals(approvals);
+            console.log(contracts);
             const statuses = [];
             const freeRewards = [];
             const lockedRewards = [];
@@ -215,12 +230,12 @@ const SetupComponent = (props) => {
                 ethTokenValue = res.tokensAmounts[ethTokenIndex];
             }
             console.log(ethTokenValue);
-            if (currentPosition.positionId && isValidPosition(currentPosition)) {
+            if ((currentPosition && isValidPosition(currentPosition)) || setup.free) {
                 // adding liquidity to the setup
                 const gasLimit = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).estimateGas({ from: dfoCore.address, value: setup.involvingETH ? ethTokenValue : 0 });
                 const result = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).send({ from: dfoCore.address, gasLimit, value: setup.involvingETH ? ethTokenValue : 0 });
                 
-            } else if (!currentPosition.positionId) {
+            } else if (!setup.free) {
                 console.log('here');
                 // opening position
                 const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value: setup.involvingETH ? ethTokenValue : 0  });
@@ -238,7 +253,7 @@ const SetupComponent = (props) => {
     const removeLiquidity = async () => {
         setLoading(true);
         try {
-            if (manageStatuses[currentPosition.index].free) {
+            if (currentPosition.free) {
                 const removedLiquidity = props.dfoCore.toFixed(parseInt(manageStatuses[currentPosition.index].liquidityPoolAmount) * removalAmount / 100).toString().split('.')[0];
                 console.log(removedLiquidity);
                 const gasLimit = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, 0, unwrapPair, removedLiquidity).estimateGas({ from: dfoCore.address });
@@ -259,7 +274,6 @@ const SetupComponent = (props) => {
             
             const gasLimit = await lmContract.methods.withdrawReward(currentPosition.positionId).estimateGas({ from: dfoCore.address });
             const result = await lmContract.methods.withdrawReward(currentPosition.positionId).send({ from: dfoCore.address, gasLimit});
-            
             await getSetupMetadata();
         } catch (error) {
             
@@ -282,28 +296,43 @@ const SetupComponent = (props) => {
         }
     }
 
-    const getButton = () => {
-        if (open || edit) {
-            return <button className="btn btn-secondary" onClick={() => { setOpen(false); setEdit(false) }}>Close</button>;
-        } else {
-            if (manage && currentPosition) {
-                return <button className="btn btn-secondary" onClick={() => { setOpen(true); setEdit(false); setStatus('manage') }}>Manage</button>;
-            } else if ((setup.free && setup.rewardPerBlock > 0) || (!setup.free && setup.startBlock <= currentBlock)) {
-                
-                return <button className="btn btn-secondary" onClick={() => { setOpen(true); setEdit(false) }}>Farm</button>
-            }
-            /*
-            if (status === 'manage' && !edit) {
-                return <button className="btn btn-secondary" onClick={() => { setOpen(true); setEdit(false) }}>Manage</button>;
-            } else if (status === 'farm' && !edit) {
-                return <button className="btn btn-secondary" onClick={() => { setOpen(true); setEdit(false) }}>Farm</button>;
-            } else if (status === 'redeem' && !edit) {
-                return <button className="btn btn-warning" onClick={() => { setOpen(true); setEdit(false) }}>Redeem</button>;
-            } else {
-                return <div/>
-            }
-            */
+    const updateSetup = async () => {
+        setLoading(true);
+        try {
+            const updatedSetup = { ...setup, rewardPerBlock: updatedRewardPerBlock, renewTimes: updatedRenewTimes };
+            const updatedSetupConfiguration = { add: false, index: setupIndex, data: updatedSetup };
+            const gasLimit = await extensionContract.methods.setLiquidityMiningSetups([updatedSetupConfiguration], false, false, 0).estimateGas({ from: dfoCore.address });
+            const result = await extensionContract.methods.setLiquidityMiningSetups([updatedSetupConfiguration], false, false, 0).send({ from: dfoCore.address, gasLimit });
+            // await getSetupMetadata();
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
         }
+    }
+
+    const getButton = () => {
+        return <>
+            {
+                (isHost && extensionContract && !edit) && <div className="col-md-6 col-12">
+                    <button className="btn btn-primary" onClick={() => { setOpen(false); setEdit(true) }}>Edit</button>
+                </div>
+            }
+            {
+                (open || edit) && <div className="col-md-6 col-12">
+                    <button className="btn btn-secondary" onClick={() => { setOpen(false); setEdit(false) }}>Close</button>
+                </div>
+            }
+            {
+                (parseInt(setup.startBlock) > 0 && blockNumber < parseInt(setup.startBlock)) ? <div className="col-md-6 col-12">
+                    <button className="btn btn-secondary" disabled={true}>{setup.startBlock}</button>
+                </div> :(manage && currentPosition && !open) ? <div className="col-md-6 col-12">
+                    <button className="btn btn-secondary" onClick={() => { setOpen(true); setEdit(false); setStatus('manage') }}>Manage</button>
+                </div> : (setup.rewardPerBlock > 0 && !open && (setup.free || parseInt(setup.startBlock) >= blockNumber)) ? <div className="col-md-6 col-12">
+                    <button className="btn btn-secondary" onClick={() => { setOpen(true); setEdit(false); setStatus('manage') }}>Farm</button>
+                </div> : <div/>
+        }
+        </>
     }
 
     const getApproveButton = (isLp) => {
@@ -325,188 +354,218 @@ const SetupComponent = (props) => {
     }
 
     const getAdvanced = () => {
-        /*
-        if (status === 'manage') {
-            return getManageAdvanced();
-        } else if (status === 'farm') {
-            return getFarmAdvanced();
-        } else if (status === 'redeem') {
-            return getRedeemAdvanced();
-        }
-        */
-        return getManageAdvanced();
+        return !edit ? getManageAdvanced() : getEdit();
     }
 
     const getEdit = () => {
-        return <div className="row">
-            <hr/>
+        return <div className="pb-4 px-4">
+        <hr/>
+                <div className="row mt-2 align-items-center justify-content-start">  
+                    <div className="col-12 mb-md-2">
+                        <Input value={dfoCore.toDecimals(updatedRewardPerBlock)} min={0} onChange={(e) => setUpdatedRewardPerBlock(dfoCore.toFixed(dfoCore.fromDecimals(e.target.value)))} label={"Reward per block"} />
+                    </div>
+                    {
+                        !setup.free && <div className="col-12 mb-md-2">
+                            <Input value={updatedRenewTimes} min={0} onChange={(e) => setUpdatedRenewTimes(e.target.value)} label={"Renew times"} />
+                        </div>
+                    }
+                    <div className="col-12">
+                        <button onClick={() => updateSetup()} className="btn btn-secondary">Update</button>
+                    </div>
+            </div>
         </div>
     }
 
     const getManageAdvanced = () => {
         return <div className="pb-4 px-4">
-                    <div className="row mt-2 align-items-center justify-content-start">   
-                    {
-                        positions.map((position, index) => <>
-                            <hr/>
-                            <div className="col-12 mt-4">
-                                <h6 style={{fontSize: 14}}>
-                                    <b>Your position: </b> 
-                                    {dfoCore.toDecimals(manageStatuses[currentPosition.index].liquidityPoolAmount, lpTokenInfo.decimals, 8)} {lpTokenInfo.symbol} - {manageStatuses[currentPosition.index].tokens.map((token, i) =>  <span> {dfoCore.toDecimals(manageStatuses[currentPosition.index].tokensAmounts[i], token.decimals)} {token.symbol} </span>)}
-                                    ({manageStatuses[currentPosition.index].free ? manageStatuses[currentPosition.index].liquidityPoolAmount/setup.totalSupply : parseInt(manageStatuses[currentPosition.index].mainTokenAmount)/parseInt(setup.currentStakedLiquidity)}%)
-                                </h6>
-                            </div>
-                            {
-                                position.free && <>
-                                    <div className="col-md-6 col-12">
-                                        <h6 style={{fontSize: 14}}>
-                                            <b>Available reward:</b> {dfoCore.toDecimals(dfoCore.toFixed(freeAvailableRewards[currentPosition.index]), rewardTokenInfo.decimals, 8)} {rewardTokenInfo.symbol}
-                                        </h6>
+            {
+                positions.map((position, index) =>
+                    <div className="row mt-2 align-items-center justify-content-start">
+                        <hr/>
+                        <div className="col-12 mt-4">
+                            <h6 style={{fontSize: 14}}>
+                                <b>Your position: </b> 
+                                {dfoCore.toDecimals(manageStatuses[currentPosition.index].liquidityPoolAmount, lpTokenInfo.decimals, 8)} {lpTokenInfo.symbol} - {manageStatuses[currentPosition.index].tokens.map((token, i) =>  <span> {dfoCore.toDecimals(manageStatuses[currentPosition.index].tokensAmounts[i], token.decimals)} {token.symbol} </span>)}
+                                ({manageStatuses[currentPosition.index].free ? manageStatuses[currentPosition.index].liquidityPoolAmount/setup.totalSupply : parseInt(manageStatuses[currentPosition.index].mainTokenAmount)/parseInt(setup.currentStakedLiquidity)}%)
+                            </h6>
+                        </div>
+                        {
+                            position.free && <>
+                                <div className="col-md-6 col-12">
+                                    <h6 style={{fontSize: 14}}>
+                                        <b>Available reward:</b> {dfoCore.toDecimals(dfoCore.toFixed(freeAvailableRewards[currentPosition.index]), rewardTokenInfo.decimals, 8)} {rewardTokenInfo.symbol}
+                                    </h6>
+                                </div>
+                                {
+                                    freeAvailableRewards[currentPosition.index] && <div className="col-md-6 col-12">
+                                        <button onClick={() => withdrawReward()} className="btn btn-primary">Redeem</button>
                                     </div>
-                                    {
-                                        freeAvailableRewards[currentPosition.index] && <div className="col-md-6 col-12">
-                                            <button onClick={() => withdrawReward()} className="btn btn-primary">Redeem</button>
-                                        </div>
-                                    }
-                                </>
-                            }
-                            {
-                                !position.free && <>
-                                    <div className="col-md-6 col-12">
-                                        <h6 style={{fontSize: 14}}>
-                                            <b>Available reward:</b> {dfoCore.toDecimals(dfoCore.toFixed(lockedAvailableRewards[currentPosition.index]), rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}
-                                        </h6>
+                                }
+                            </>
+                        }
+                        {
+                            !position.free && <>
+                                <div className="col-md-6 col-12">
+                                    <h6 style={{fontSize: 14}}>
+                                        <b>Available reward:</b> {dfoCore.toDecimals(dfoCore.toFixed(lockedAvailableRewards[currentPosition.index]), rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}
+                                    </h6>
+                                </div>
+                                {
+                                    lockedAvailableRewards[currentPosition.index] && <div className="col-md-6 col-12">
+                                        <button onClick={() => withdrawReward()} className="btn btn-primary">Partial reward</button>
                                     </div>
-                                    {
-                                        lockedAvailableRewards[currentPosition.index] && <div className="col-md-6 col-12">
-                                            <button onClick={() => withdrawReward()} className="btn btn-primary">Partial reward</button>
-                                        </div>
-                                    }
-                                </>
-                            }
-                            {
-                                !position.free && <>
-                                    <hr/>
-                                    <div className="col-md-6">
-                                        <p style={{fontSize: 14}}>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quaerat animi ipsam nemo at nobis odit temporibus autem possimus quae vel, ratione numquam modi rem accusamus, veniam neque voluptates necessitatibus enim!</p>
-                                    </div>
-                                    <div className="col-md-6">
-                                        <div className="form-check">
-                                            <input className="form-check-input" type="checkbox" value={unwrapPair} onChange={(e) => setUnwrapPair(e.target.checked)} id="getLpToken" />
-                                            <label className="form-check-label" htmlFor="getLpToken">
-                                                Unwrap tokens
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div className="col-12">
-                                        <button onClick={() => unlockPosition()} className="btn btn-secondary">Unlock position</button>
-                                    </div>
-                                </>
-                            }
-                        </>
-                        )
-                    }
-                    </div>
-                    
-                    {
-                        (currentPosition && (currentPosition.free || parseInt(currentPosition.setupEndBlock) > currentBlock)) && <>
-                            <hr/>
-                            <div className="row mt-4">
+                                }
+                            </>
+                        }
+                        {
+                            !position.free && <>
+                                <hr/>
                                 <div className="col-md-6">
-                                    <select className="custom-select wusd-pair-select" value={addLiquidityType} onChange={(e) => setAddLiquidityType(e.target.value)}>
-                                        <option value="">Choose..</option>
-                                        {
-                                            (currentPosition.free || parseInt(setup.rewardPerBlock) > parseInt(setup.currentRewardPerBlock)) && <>
-                                                <option value="add-tokens" disabled={!currentPosition.free && (isFinished(setup))}>Add liquidity</option>
-                                                <option value="add-lp">Add liquidity by LP token</option>
-                                            </>
-                                        }
-                                        {
-                                            currentPosition.free && <option value="remove">Remove liquidity</option>
-                                        }
-                                    </select>
+                                    <p style={{fontSize: 14}}>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quaerat animi ipsam nemo at nobis odit temporibus autem possimus quae vel, ratione numquam modi rem accusamus, veniam neque voluptates necessitatibus enim!</p>
+                                </div>
+                                <div className="col-md-6">
+                                    <div className="form-check">
+                                        <input className="form-check-input" type="checkbox" value={unwrapPair} onChange={(e) => setUnwrapPair(e.target.checked)} id="getLpToken" />
+                                        <label className="form-check-label" htmlFor="getLpToken">
+                                            Unwrap tokens
+                                        </label>
+                                    </div>
+                                </div>
+                                <div className="col-12">
+                                    <button onClick={() => unlockPosition()} className="btn btn-secondary">Unlock position</button>
+                                </div>
+                            </>
+                        }
+                        <hr/>
+                    </div>
+                    )
+                }
+                    <div className="row mt-4">
+                        <div className="col-md-6">
+                            <select className="custom-select wusd-pair-select" value={addLiquidityType} onChange={(e) => setAddLiquidityType(e.target.value)}>
+                                <option value="">Choose..</option>
+                                {
+                                    (setup.free || parseInt(setup.rewardPerBlock) > parseInt(setup.currentRewardPerBlock)) && <>
+                                        <option value="add-tokens">Add liquidity</option>
+                                        <option value="add-lp">Add liquidity by LP token</option>
+                                    </>
+                                }
+                                {
+                                    (currentPosition && currentPosition.free) && <option value="remove">Remove liquidity</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    { addLiquidityType === 'add-tokens' ? <>
+                        <div className="row justify-content-center mt-4">
+                            <div className="col-md-9 col-12">
+                                {
+                                    setupTokens.map((setupToken, i) => {
+                                        return <div className="row text-center mb-4">
+                                            <Input showMax={true} address={setupToken.address} value={tokensAmounts[i]} balance={setupToken.balance} min={0} onChange={(e) => onUpdateTokenAmount(e.target.value, i)} showCoin={true} showBalance={true} name={setupToken.symbol} />
+                                        </div>
+                                    })
+                                }
                                 </div>
                             </div>
-                            { addLiquidityType === 'add-tokens' ? <>
-                                <div className="row justify-content-center mt-4">
-                                    <div className="col-md-9 col-12">
-                                        {
-                                            setupTokens.map((setupToken, i) => {
-                                                return <div className="row text-center mb-4">
-                                                    <Input showMax={true} address={setupToken.address} value={tokensAmounts[i]} balance={setupToken.balance} min={0} onChange={(e) => onUpdateTokenAmount(e.target.value, i)} showCoin={true} showBalance={true} name={setupToken.symbol} />
-                                                </div>
-                                            })
-                                        }
-                                        </div>
-                                    </div>
-                                    {
-                                        (!setup.free && rewardTokenInfo) && <div className="row justify-content-center mt-4">
-                                            <b>Estimated earnings (total)</b>: {lockedEstimatedReward} {rewardTokenInfo.symbol}/block
-                                        </div>
-                                    }
-                                    <div className="row justify-content-center mt-4">
-                                        {
-                                            tokensApprovals.some((value) => !value) && <div className="col-md-6 col-12">
-                                                { getApproveButton() }
-                                            </div>
-                                        }
-                                        <div className="col-md-6 col-12">
-                                            <button className="btn btn-secondary" onClick={() => addLiquidity()} disabled={tokensApprovals.some((value) => !value) || tokensAmounts.some((value) => value === 0)}>Add</button>
-                                        </div>
-                                    </div>
-                                </>  : addLiquidityType === 'add-lp' ? <>
-                                    <div className="row justify-content-center mt-4">
+                            {
+                                (!setup.free || positions.length === 0) && <div className="form-check">
+                                    <input className="form-check-input" type="checkbox" value={openPositionForAnotherWallet} onChange={(e) => setOpenPositionForAnotherWallet(e.target.checked)} id="openPositionWallet1" />
+                                    <label className="form-check-label" htmlFor="openPositionWallet1">
+                                        Open position for another wallet
+                                    </label>
+                                </div>
+                            }
+                            {
+                                openPositionForAnotherWallet &&  <div className="row justify-content-center mb-4">
                                         <div className="col-md-9 col-12">
-                                            <div className="row text-center mb-4">
-                                                <Input showMax={true} address={setup.liquidityPoolTokenAddress} value={lpTokenAmount} balance={dfoCore.toDecimals(lpTokenInfo.balance, lpTokenInfo.decimals, 8)} min={0} onChange={(e) => onUpdateLpTokenAmount(e.target.value)} showCoin={true} showBalance={true} name={lpTokenInfo.symbol} />
-                                            </div>
-                                        </div>
+                                        <input type="text" value={uniqueOwner} onChange={(e) => setUniqueOwner(e.target.value)} className="form-control" id="uniqueOwner" ></input>
                                     </div>
-                                    {
-                                        (!setup.free && rewardTokenInfo) && <div className="row justify-content-center mt-4">
-                                            <b>Estimated earnings (total)</b>: {lockedEstimatedReward} {rewardTokenInfo.symbol}/block
-                                        </div>
-                                    }
-                                    <div className="row justify-content-center mt-4">
-                                        {
-                                            !lpTokenInfo.approval && <div className="col-md-6 col-12">
-                                                { getApproveButton(true) }
-                                            </div>
-                                        }
-                                        <div className="col-md-6 col-12">
-                                            <button className="btn btn-secondary" onClick={() => addLiquidity()} disabled={!lpTokenInfo.approval || parseFloat(lpTokenAmount) === 0}>Add</button>
-                                        </div>
+                                </div>
+                            }
+                            {
+                                (!setup.free && rewardTokenInfo) && <div className="row justify-content-center mt-4">
+                                    <b>Estimated earnings (total)</b>: {lockedEstimatedReward} {rewardTokenInfo.symbol}/block
+                                </div>
+                            }
+                            <div className="row justify-content-center mt-4">
+                                {
+                                    tokensApprovals.some((value) => !value) && <div className="col-md-6 col-12">
+                                        { getApproveButton() }
                                     </div>
-                                </> : <>
-                                    <div className="row justify-content-center mt-4">
-                                        <div class="form-group w-100">
-                                            <label htmlFor="formControlRange" className="text-secondary"><b>Amount:</b> {removalAmount}%</label>
-                                            <input type="range" value={removalAmount} onChange={(e) => setRemovalAmount(e.target.value)} class="form-control-range" id="formControlRange" />
-                                        </div>
+                                }
+                                <div className="col-md-6 col-12">
+                                    <button className="btn btn-secondary" onClick={() => addLiquidity()} disabled={tokensApprovals.some((value) => !value) || tokensAmounts.some((value) => value === 0)}>Add</button>
+                                </div>
+                            </div>
+                        </>  : addLiquidityType === 'add-lp' ? <>
+                            <div className="row justify-content-center mt-4">
+                                <div className="col-md-9 col-12">
+                                    <div className="row text-center mb-4">
+                                        <Input showMax={true} address={setup.liquidityPoolTokenAddress} value={lpTokenAmount} balance={dfoCore.toDecimals(lpTokenInfo.balance, lpTokenInfo.decimals, 8)} min={0} onChange={(e) => onUpdateLpTokenAmount(e.target.value)} showCoin={true} showBalance={true} name={lpTokenInfo.symbol} />
                                     </div>
-                                    <div className="row mt-2 justify-content-evenly">
-                                        <button className="btn btn-outline-secondary mr-2" onClick={() => setRemovalAmount(10)} >10%</button>
-                                        <button className="btn btn-outline-secondary mr-2" onClick={() => setRemovalAmount(25)} >25%</button>
-                                        <button className="btn btn-outline-secondary mr-2" onClick={() => setRemovalAmount(50)} >50%</button>
-                                        <button className="btn btn-outline-secondary mr-2" onClick={() => setRemovalAmount(75)} >75%</button>
-                                        <button className="btn btn-outline-secondary mr-2" onClick={() => setRemovalAmount(90)} >90%</button>
-                                        <button className="btn btn-outline-secondary" onClick={() => setRemovalAmount(100)} >MAX</button>
+                                </div>
+                            </div>
+                            {
+                                (!setup.free || positions.length === 0) && <div className="form-check">
+                                    <input className="form-check-input" type="checkbox" value={openPositionForAnotherWallet} onChange={(e) => setOpenPositionForAnotherWallet(e.target.checked)} id="openPosition2" />
+                                    <label className="form-check-label" htmlFor="openPosition2">
+                                        Open position for another wallet
+                                    </label>
+                                </div>
+                            }
+                            {
+                                openPositionForAnotherWallet && <div className="row justify-content-center mb-4">
+                                        <div className="col-md-9 col-12">
+                                        <input type="text" value={uniqueOwner} onChange={(e) => setUniqueOwner(e.target.value)} className="form-control" id="uniqueOwner" ></input>
                                     </div>
-                                    <div className="row mt-4">
-                                        <h6><b>Remove: </b> {dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatuses[currentPosition.index].liquidityPoolAmount) * removalAmount / 100).toString(), lpTokenInfo.decimals, 8)} {lpTokenInfo.symbol} - {manageStatuses[currentPosition.index].tokens.map((token, i) =>  <span> {dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatuses[currentPosition.index].tokensAmounts[i]) * removalAmount / 100).toString(), token.decimals)} {token.symbol} </span>)}</h6>
+                                </div>
+                            }
+                            {
+                                (!setup.free && rewardTokenInfo) && <div className="row justify-content-center mt-4">
+                                    <b>Estimated earnings (total)</b>: {lockedEstimatedReward} {rewardTokenInfo.symbol}/block
+                                </div>
+                            }
+                            <div className="row justify-content-center mt-4">
+                                {
+                                    !lpTokenInfo.approval && <div className="col-md-6 col-12">
+                                        { getApproveButton(true) }
                                     </div>
-                                    <div className="row mt-4">
-                                        <div className="form-check">
-                                            <input className="form-check-input" type="checkbox" value={unwrapPair} onChange={(e) => setUnwrapPair(e.target.checked)} id="getLpToken" />
-                                            <label className="form-check-label" htmlFor="getLpToken">
-                                                Unwrap tokens
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div className="row justify-content-center mt-4">
-                                        <button onClick={() => removeLiquidity()} disabled={!removalAmount || removalAmount === 0} className="btn btn-secondary">Remove</button>
-                                    </div>
-                                </>
+                                }
+                                <div className="col-md-6 col-12">
+                                    <button className="btn btn-secondary" onClick={() => addLiquidity()} disabled={!lpTokenInfo.approval || parseFloat(lpTokenAmount) === 0}>Add</button>
+                                </div>
+                            </div>
+                        </> : <> { (currentPosition && currentPosition.free) && <>
+                            <div className="row justify-content-center mt-4">
+                                <div className="form-group w-100">
+                                    <label htmlFor="formControlRange" className="text-secondary"><b>Amount:</b> {removalAmount}%</label>
+                                    <input type="range" value={removalAmount} onChange={(e) => setRemovalAmount(e.target.value)} className="form-control-range" id="formControlRange" />
+                                </div>
+                            </div>
+                            <div className="row mt-2 justify-content-evenly">
+                                <button className="btn btn-outline-secondary mr-2" onClick={() => setRemovalAmount(10)} >10%</button>
+                                <button className="btn btn-outline-secondary mr-2" onClick={() => setRemovalAmount(25)} >25%</button>
+                                <button className="btn btn-outline-secondary mr-2" onClick={() => setRemovalAmount(50)} >50%</button>
+                                <button className="btn btn-outline-secondary mr-2" onClick={() => setRemovalAmount(75)} >75%</button>
+                                <button className="btn btn-outline-secondary mr-2" onClick={() => setRemovalAmount(90)} >90%</button>
+                                <button className="btn btn-outline-secondary" onClick={() => setRemovalAmount(100)} >MAX</button>
+                            </div>
+                            <div className="row mt-4">
+                                <h6><b>Remove: </b> {dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatuses[currentPosition.index].liquidityPoolAmount) * removalAmount / 100).toString(), lpTokenInfo.decimals, 8)} {lpTokenInfo.symbol} - {manageStatuses[currentPosition.index].tokens.map((token, i) =>  <span> {dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatuses[currentPosition.index].tokensAmounts[i]) * removalAmount / 100).toString(), token.decimals)} {token.symbol} </span>)}</h6>
+                            </div>
+                            <div className="row mt-4">
+                                <div className="form-check">
+                                    <input className="form-check-input" type="checkbox" value={unwrapPair} onChange={(e) => setUnwrapPair(e.target.checked)} id="getLpToken" />
+                                    <label className="form-check-label" htmlFor="getLpToken">
+                                        Unwrap tokens
+                                    </label>
+                                </div>
+                            </div>
+                            <div className="row justify-content-center mt-4">
+                                <button onClick={() => removeLiquidity()} disabled={!removalAmount || removalAmount === 0} className="btn btn-secondary">Remove</button>
+                            </div> 
+                            </>
                             }
                         </>
                     }
@@ -560,12 +619,6 @@ const SetupComponent = (props) => {
         </>
     }
 
-    const getRedeemAdvanced = () => {
-        return <div className="row">
-            <hr/>
-        </div>
-    }
-
     return (
         <div className={className}>
             <div className={`card farming-card`}>
@@ -596,7 +649,7 @@ const SetupComponent = (props) => {
                                             {props.dfoCore.toDecimals(setup.rewardPerBlock)} <Coin address={setup.rewardTokenAddress} className="ml-2" />/block = {setupTokens.map((token, i) => <span key={token.address}>{i !== 0 ? '+' : ''}<Coin address={token.address} className="mx-2 mb-1" /></span>)}
                                         </div>
                                         <div className="row">
-                                            <p className="mb-0 setup-component-small-p"><b>Fixed reward</b>: {AMM.name} - <span className="text-underline">block end: {setup.endBlock}</span></p>
+                                            <p className="mb-0 setup-component-small-p text-left"><b>Fixed reward</b>: {AMM.name} - <span className="text-underline">block end: {setup.endBlock}</span></p>
                                         </div> 
                                     </>
                                 }

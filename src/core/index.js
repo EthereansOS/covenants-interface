@@ -6,6 +6,7 @@ export default class DFOCore {
     chainId;
     context;
     contracts = {};
+    deployedFixedInflationContracts = [];
     deployedLiquidityMiningContracts = [];
     eventEmitters = {};
     initialized = false;
@@ -187,7 +188,7 @@ export default class DFOCore {
         try {
             if (!factoryAddress) factoryAddress = this.getContextElement("liquidityMiningFactoryAddress");
             const factoryContract = new this.web3.eth.Contract(this.getContextElement("LiquidityMiningFactoryABI"), factoryAddress);
-            const events = await factoryContract.getPastEvents('LiquidityMiningDeployed', { fromBlock: 11790157 });
+            const events = await factoryContract.getPastEvents('LiquidityMiningDeployed', { fromBlock: 11806961 });
             this.deployedLiquidityMiningContracts = [];
             await Promise.all(events.map(async (event) => {
                 try {
@@ -205,6 +206,28 @@ export default class DFOCore {
         }
     }
 
+    loadDeployedFixedInflationContracts = async (factoryAddress) => {
+        try {
+            if (!factoryAddress) factoryAddress = this.getContextElement("fixedInflationFactoryAddress");
+            const factoryContract = new this.web3.eth.Contract(this.getContextElement("FixedInflationFactoryABI"), factoryAddress);
+            const events = await factoryContract.getPastEvents('FixedInflationDeployed', { fromBlock: 11806961 });
+            this.deployedFixedInflationContracts = [];
+            await Promise.all(events.map(async (event) => {
+                try {
+                    const contract = new this.web3.eth.Contract(this.getContextElement("FixedInflationABI"), event.returnValues.fixedInflationAddress);
+                    const extensionAddress = await contract.methods._extension().call();
+                    const extensionContract = new this.web3.eth.Contract(this.getContextElement("FixedInflationExtensionABI"), extensionAddress);
+                    const { host } = await extensionContract.methods.data().call();
+                    this.deployedFixedInflationContracts.push({ address: event.returnValues.fixedInflationAddress, sender: host });
+                } catch (error) {
+                    console.error(error);
+                }
+            }));
+        } catch (error) {
+            this.deployedFixedInflationContracts = [];
+        }
+    };
+
     getHostedLiquidityMiningContracts = () => {
         return this.deployedLiquidityMiningContracts.filter((item) => item.sender.toLowerCase() === this.address.toLowerCase());
     }
@@ -219,7 +242,7 @@ export default class DFOCore {
             await this.loadDeployedLiquidityMiningContracts();
             await Promise.all(this.deployedLiquidityMiningContracts.map(async (c) => {
                 const contract = new this.web3.eth.Contract(this.getContextElement("LiquidityMiningABI"), c.address);
-                const events = await contract.getPastEvents('Transfer', { filter: { to: this.address }, fromBlock: 11790157 });
+                const events = await contract.getPastEvents('Transfer', { filter: { to: this.address }, fromBlock: 11806961 });
                 await Promise.all(events.map(async (event) => {
                     const { returnValues } = event;
                     const { positionId } = returnValues;

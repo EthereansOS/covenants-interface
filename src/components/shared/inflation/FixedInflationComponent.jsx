@@ -1,25 +1,36 @@
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
+import { useEffect } from 'react/cjs/react.development';
 
 const FixedInflationComponent = (props) => {
-    const { className, dfoCore, entry, showButton, hasBorder } = props;
+    const { className, dfoCore, contract, entry, operations, showButton, hasBorder } = props;
     const [metadata, setMetadata] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        getContractMetadata();
+    }, []);
 
     const getContractMetadata = async () => {
-
-        setMetadata({
-            name: 'XXXXXXXXX',
-            period: 'Weekly',
-            executorReward: '5%',
-            operations: [0, 0, 0],
-            host: '0x0000',
-            contractAddress: '0x0000'
-        });
-    }
-
-    if (!metadata) {
-        getContractMetadata();
+        setLoading(true);
+        try {
+            const period = Object.entries(dfoCore.getContextElement("blockIntervals")).filter(([key, value]) => value === entry.blockInterval);
+            const oneHundred = await contract.methods.ONE_HUNDRED().call();
+            const executorReward = (entry.callerRewardPercentage / oneHundred);
+            setMetadata({
+                name: entry.name,
+                period: period[0],
+                executorReward: `${executorReward}%`,
+                operations: [0, 0, 0],
+                host: '0x0000',
+                contractAddress: '0x0000'
+            });
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (

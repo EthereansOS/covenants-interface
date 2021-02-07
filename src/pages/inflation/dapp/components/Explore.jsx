@@ -2,11 +2,10 @@ import { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { FixedInflationComponent, FarmingComponent } from '../../../../components';
 
-const extFixedInflationContracts = [{address: '0xc3BE549499f1e504c793a6c89371Bd7A98229500'}, {address: '0x761E02FEC5A21C6d3F284bd536dB2D2d33d5540B'}];
-
 const Explore = (props) => {
     const [executable, setExecutable] = useState(false);
     const [fixedInflationContracts, setFixedInflationContracts] = useState([]);
+    const [startingContracts, setStartingContracts] = useState([]);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -18,7 +17,22 @@ const Explore = (props) => {
     const getEntries = async () => {
         setLoading(true);
         try {
-            setFixedInflationContracts(extFixedInflationContracts);
+            await props.dfoCore.loadDeployedFixedInflationContracts();
+            const mappedEntries = [];
+            await Promise.all(
+                props.dfoCore.deployedFixedInflationContracts.map(async (contract) => { 
+                    const fiContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('FixedInflationABI'), contract.address);
+                    const events = await fiContract.getPastEvents('Entry', { fromBlock: 11806961 });
+                    await Promise.all(events.map(async (event) => {
+                        const { id } = event.returnValues;
+                        const result = await fiContract.methods.entry(id).call();
+                        const [entry, operations] = result;
+                        mappedEntries.push({ contract: fiContract, entry, operations });
+                    }))
+                })
+            );
+            setFixedInflationContracts(mappedEntries);
+            setStartingContracts(mappedEntries);
         } catch (error) {
             console.error(error);
             setFixedInflationContracts([]);
@@ -54,9 +68,9 @@ const Explore = (props) => {
                     </div>
                 }
                 {
-                    fixedInflationContracts.map((entry) => {
+                    fixedInflationContracts.map(({ contract, entry, operations }) => {
                         return (
-                            <FixedInflationComponent className={"col-12 mb-4"} showButton={true} hasBorder={true} />
+                            <FixedInflationComponent className={"col-12 mb-4"} contract={contract} entry={entry} operations={operations} showButton={true} hasBorder={true} />
                         )
                     })
                 }

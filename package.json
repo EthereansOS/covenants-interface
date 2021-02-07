@@ -34,7 +34,7 @@
     "web3modal": "^1.9.3"
   },
   "scripts": {
-    "start": "concurrently \"ganache-cli -f $blockchain_connection_string -e 100000\" \"react-scripts start\"",
+    "start": "concurrently \"ganache-cli -p 7545 -f $blockchain_connection_string --db ./db -m trade,host,journey,carbon,finger,minute,just,million,deny,finger,proof,retreat -e 100000 -l 10000000\" \"react-scripts start\"",
     "dev": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
