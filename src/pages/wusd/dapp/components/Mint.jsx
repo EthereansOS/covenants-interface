@@ -104,8 +104,10 @@ const Mint = (props) => {
                 const chosenPair = pairs[pairIndex];
                 const allowance0 = await chosenPair.token0Contract.methods.allowance(props.dfoCore.address, props.dfoCore.getContextElement("WUSDExtensionControllerAddress")).call();
                 const allowance1 = await chosenPair.token1Contract.methods.allowance(props.dfoCore.address, props.dfoCore.getContextElement("WUSDExtensionControllerAddress")).call();
+                const allowanceLp = await chosenPair.lpContract.methods.allowance(props.dfoCore.address, props.dfoCore.getContextElement("WUSDExtensionControllerAddress")).call();
                 setFirstTokenApproved(parseInt(allowance0) !== 0);
                 setSecondTokenApproved(parseInt(allowance1) !== 0);
+                setLpTokenApproved(parseInt(allowanceLp) !== 0);
                 const balance0 = await chosenPair.token0Contract.methods.balanceOf(props.dfoCore.address).call();
                 const balance1 = await chosenPair.token1Contract.methods.balanceOf(props.dfoCore.address).call();
                 const balanceLp = await chosenPair.lpContract.methods.balanceOf(props.dfoCore.address).call();
