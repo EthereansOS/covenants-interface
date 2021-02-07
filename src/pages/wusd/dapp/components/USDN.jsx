@@ -74,7 +74,7 @@ const USDN = (props) => {
     }
 
     const redeemX2 = async () => {
-        if (x2Amount > parseFloat(props.dfoCore.toFixed(props.dfoCore.fromDecimals(x2USDTreasury)))) return;
+        if (x2Amount.full > parseFloat(props.dfoCore.toFixed(props.dfoCore.fromDecimals(x2USDTreasury)))) return;
         const x2USDCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), x2USDNoteInfo['0']);
         const from = props.dfoCore.address;
         const to = x2USDNoteControllerContract.options.address;
@@ -91,7 +91,7 @@ const USDN = (props) => {
     }
 
     const redeemX5 = async () => {
-        if (x5Amount > parseFloat(props.dfoCore.toFixed(props.dfoCore.fromDecimals(x5USDTreasury)))) return;
+        if (x5Amount.full > parseFloat(props.dfoCore.toFixed(props.dfoCore.fromDecimals(x5USDTreasury)))) return;
         const x5USDCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), x5USDNoteInfo['0']);
         const from = props.dfoCore.address;
         const to = x5USDNoteControllerContract.options.address;
