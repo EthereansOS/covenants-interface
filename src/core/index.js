@@ -302,6 +302,10 @@ export default class DFOCore {
         const res = decimals === 18 ? this.web3.utils.fromWei(amount, 'ether') : parseInt(amount) / 10**decimals;
         return parseFloat(res).toFixed(precision);
     }
+    
+    isValidAddress = (address) => {
+        return this.web3.utils.isAddress(address, this.chainId);
+    }
 
     formatMoney = (value, decPlaces, thouSeparator, decSeparator) => {
         value = (typeof value).toLowerCase() !== 'number' ? parseFloat(value) : value;

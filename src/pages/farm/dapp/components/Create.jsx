@@ -150,7 +150,6 @@ const Create = (props) => {
     }
 
     const onSelectRewardToken = async (address) => {
-        if (!address) address = "0x7b123f53421b1bF8533339BFBdc7C98aA94163db";
         setLoading(true);
         const rewardToken = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), address);
         console.log(rewardToken);
@@ -172,9 +171,10 @@ const Create = (props) => {
         try {
             const host = selectedHost === "no-host" ? props.dfoCore.voidEthereumAddress : selectedHost === 'wallet' ? hostWalletAddress : hostDeployedContract;
             const hasExtension = (selectedHost === "deployed-contract" && hostDeployedContract && !deployContract);
-            const data = { setups: [], rewardTokenAddress: selectedRewardToken.address, byMint, hasLoadBalancer, pinnedSetupIndex, deployContract, host, hasExtension, extensionInitData: "" };
+            const data = { setups: [], rewardTokenAddress: selectedRewardToken.address, byMint, hasLoadBalancer, pinnedSetupIndex, deployContract, host, hasExtension, extensionInitData: extensionPayload || '' };
             const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
-            await Promise.all(props.farmingSetups.map(async (setup) => {
+            for (let i = 0; i < props.farmingSetups.length; i++) {
+                const setup = props.farmingSetups[i];
                 const isFree = !setup.endBlock;
                 const result = await ammAggregator.methods.findByLiquidityPool(isFree ? setup.data.address : setup.secondaryToken).call();
                 const { amm } = result;
@@ -186,7 +186,7 @@ const Create = (props) => {
                         amm,//uniswapAMM.options.address,
                         0,
                         isFree ? setup.data.address : setup.secondaryToken,
-                        isFree ? setup.data.token0 : setup.data.address,
+                        isFree ? props.dfoCore.voidEthereumAddress : setup.data.address,
                         isFree ? 0 : setup.startBlock,
                         isFree ? 0 : (parseInt(setup.startBlock) + parseInt(setup.period)),
                         props.dfoCore.fromDecimals(setup.rewardPerBlock),
@@ -197,11 +197,11 @@ const Create = (props) => {
                         0,
                         isFree,
                         isFree ? 0 : setup.renewTimes,
-                        isFree ? 0 : setup.penaltyFee,
+                        isFree ? 0 : props.dfoCore.fromDecimals(setup.penaltyFee),
                         involvingETH
                     ]
                 )
-            }))
+            }
             console.log(data);
             setDeployData(data);
         } catch (error) {
@@ -513,8 +513,8 @@ const Create = (props) => {
                     <select className="custom-select wusd-pair-select" value={lockedPeriod} onChange={(e) => setLockedPeriod(e.target.value)}>
                         <option value={0}>Choose locked period</option>
                         {
-                            Object.keys(props.dfoCore.getContextElement("blockIntervals")).map((key) => {
-                                return <option value={props.dfoCore.getContextElement("blockIntervals")[key]}>{key}</option>
+                            Object.keys(props.dfoCore.getContextElement("blockIntervals")).map((key, index) => {
+                                return <option key={index} value={props.dfoCore.getContextElement("blockIntervals")[key]}>{key}</option>
                             })
                         }
                     </select>
@@ -661,7 +661,7 @@ const Create = (props) => {
                                     props.farmingSetups.map((setup, index) => {
                                         console.log(setup.data);
                                         return <option key={index} value={index} disabled={setup.startBlock}>
-                                            { !setup.startBlock ? "Free setup" : "Locked setup" } { setup.data.name }{ setup.startBlock ? `${setup.data.symbol}` : ` | ${setup.data.tokens.map((token) => <>{token.symbol}</> )}` } - Reward: {setup.rewardPerBlock} {props.farmingContract.rewardToken.symbol}/block
+                                            { !setup.startBlock ? "Free setup" : "Locked setup" } { setup.data.name }{ setup.startBlock ? `${setup.data.symbol}` : ` | ${setup.data.tokens.map((token) => `${token.symbol}` )}` } - Reward: {setup.rewardPerBlock} {props.farmingContract.rewardToken.symbol}/block
                                         </option>;
                                     })
                                 }
