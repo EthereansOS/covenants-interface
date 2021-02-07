@@ -18,7 +18,8 @@ const Input = (props) => {
         onChange(onDetectedChange(value));
     }
 
-    const onDetectedChange = (value) => {
+    const onDetectedChange = (value, sendBalance) => {
+        if (sendBalance) return { target: { value: balance }};
         if (!value) return { target: { value: 0 }};
         return { target: { value } };
     } 
@@ -29,7 +30,7 @@ const Input = (props) => {
             <div className="input-group" tabIndex={0}>
                 {
                     showMax && <div className="input-group-prepend">
-                        <button className="btn btn-secondary" onClick={() => onChange(onDetectedChange())} type="button">MAX</button>
+                        <button className="btn btn-secondary" onClick={() => onChange(onDetectedChange(0, balance))} type="button">MAX</button>
                     </div>
                 }
                 <input type="number" lang="en-US" step="any" className={`form-control input-form-field ${parseFloat(val) > parseFloat(balance) ? 'is-invalid' : ''}`} value={val} min={min} max={max || balance} onChange={(e) => onRealChange(e.target.value)}/>
