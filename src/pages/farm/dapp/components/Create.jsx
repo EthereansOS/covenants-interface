@@ -19,6 +19,7 @@ const Create = (props) => {
     const [selectedHost, setSelectedHost] = useState("");
     const [hostWalletAddress, setHostWalletAddress] = useState(null);
     const [hostDeployedContract, setHostDeployedContract] = useState(null);
+    const [customPayload, setCustomPayload] = useState(null);
     const [deployContract, setDeployContract] = useState(null);
     const [deployedContractVerified, setDeployedContractVerified] = useState(false);
     const [useDeployedContract, setUseDeployedContract] = useState(false);
@@ -46,6 +47,7 @@ const Create = (props) => {
     const [deployLoading, setDeployLoading] = useState(false);
     const [deployStep, setDeployStep] = useState(0);
     const [deployData, setDeployData] = useState(null);
+    const [extensionPayload, setExtensionPayload] = useState("");
 
     useEffect(() => {
         if (props.farmingContract?.rewardToken) {
@@ -216,7 +218,7 @@ const Create = (props) => {
             const liquidityMiningFactory = await props.dfoCore.getContract(props.dfoCore.getContextElement("LiquidityMiningFactoryABI"), factoryAddress);
             const types = ["address", "bytes", "address", "address", "bytes", "bool", "uint256"];
             const encodedSetups = abi.encode(["tuple(address,uint256,address,address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,bool,uint256,uint256,bool)[]"], [setups]);
-            const params = [extensionAddress ? extensionAddress : hostDeployedContract, extensionInitData ? extensionInitData : "0x", props.dfoCore.getContextElement("ethItemOrchestratorAddress"), rewardTokenAddress, encodedSetups, hasLoadBalancer, pinnedSetupIndex || 0];
+            const params = [extensionAddress ? extensionAddress : hostDeployedContract, extensionInitData || extensionPayload || "0x", props.dfoCore.getContextElement("ethItemOrchestratorAddress"), rewardTokenAddress, encodedSetups, hasLoadBalancer, pinnedSetupIndex || 0];
             console.log(params)
             console.log(extensionInitData);
             const payload = props.dfoCore.web3.utils.sha3(`init(${types.join(',')})`).substring(0, 10) + (props.dfoCore.web3.eth.abi.encodeParameters(types, params).substring(2));
@@ -643,7 +645,6 @@ const Create = (props) => {
                                 <option value={null}>Choose setup..</option>
                                 {
                                     props.farmingSetups.map((setup, index) => {
-                                        
                                         return <option key={index} value={index} disabled={setup.startBlock}>
                                             { !setup.startBlock ? "Free setup" : "Locked setup" } { setup.data.name }{ setup.startBlock ? `${setup.data.symbol}` : ` | ${ setup.data.symbol1} ${ setup.data.symbol2 }` } - Reward: {setup.rewardPerBlock} {props.farmingContract.rewardToken.symbol}/block
                                         </option>;
@@ -756,6 +757,9 @@ const Create = (props) => {
                         }
                     </> : <div/>
                 }
+                <div>
+                    <input type="text" className="form-control" value={extensionPayload || ""} onChange={(e) => setExtensionPayload(e.target.value.toString())} placeholder={"Payload"} aria-label={"Payload"}/>
+                </div>
                 <div className="row justify-content-center my-4">
                     <button onClick={() => {
                         setSelectedHost(null);
