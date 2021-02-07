@@ -197,7 +197,7 @@ const Create = (props) => {
                         0,
                         isFree,
                         isFree ? 0 : setup.renewTimes,
-                        isFree ? 0 : props.dfoCore.fromDecimals(setup.penaltyFee),
+                        isFree ? 0 : props.dfoCore.fromDecimals(setup.penaltyFee / 100),
                         involvingETH
                     ]
                 )
@@ -607,8 +607,8 @@ const Create = (props) => {
                 </div>
                 {
                     lockedHasPenaltyFee && <div className="row mb-4 justify-content-center">
-                        <div className="col-md-6 col-12">
-                            <input type="number" step={0.001} max={100} min={0} value={lockedPenaltyFee} onChange={(e) => onUpdatePenaltyFee(e.target.value)} />
+                        <div className="col-md-6 col-12 flex justify-content-center">
+                            <input type="number" className="form-control w-50" step={0.001} max={100} min={0} value={lockedPenaltyFee} onChange={(e) => onUpdatePenaltyFee(e.target.value)} />
                         </div>
                     </div>
                 }

@@ -20,13 +20,13 @@ const Input = (props) => {
     return (
         <>
             { label && <h6><b>{label}</b></h6> }
-            <div className="input-group" onBlur={() => onChange(onDetectedChange(val))}  tabIndex={0}>
+            <div className="input-group" onBlur={() => onChange(onDetectedChange(val))} tabIndex={0}>
                 {
                     showMax && <div className="input-group-prepend">
                         <button className="btn btn-secondary" onClick={() => onChange(onDetectedChange())} type="button">MAX</button>
                     </div>
                 }
-                <input type="number" className={`form-control input-form-field ${parseFloat(val) > parseFloat(balance) ? 'is-invalid' : ''}`} value={val} min={min} max={max || balance} onChange={(e) => setVal(e.target.value)}/>
+                <input type="number" className={`form-control input-form-field ${parseFloat(val) > parseFloat(balance) ? 'is-invalid' : ''}`} value={val} min={min} max={max || balance} onChange={(e) => setVal(e.target.value)} onKeyUp={() => onChange(onDetectedChange(val))}/>
                 {
                     showCoin && <div className={`input-group-append no-border-right`}>
                         <span className={`input-group-text ${parseFloat(val) > parseFloat(balance) ? 'is-invalid' : ''}`} id=""><Coin address={address} /> {name}</span>
