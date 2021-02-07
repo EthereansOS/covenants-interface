@@ -32,7 +32,7 @@ const Input = (props) => {
                         <button className="btn btn-secondary" onClick={() => onChange(onDetectedChange())} type="button">MAX</button>
                     </div>
                 }
-                <input type="number" className={`form-control input-form-field ${parseFloat(val) > parseFloat(balance) ? 'is-invalid' : ''}`} value={val} min={min} max={max || balance} onChange={(e) => onRealChange(e.target.value)}/>
+                <input type="number" lang="en-US" step="any" className={`form-control input-form-field ${parseFloat(val) > parseFloat(balance) ? 'is-invalid' : ''}`} value={val} min={min} max={max || balance} onChange={(e) => onRealChange(e.target.value)}/>
                 {
                     showCoin && <div className={`input-group-append no-border-right`}>
                         <span className={`input-group-text ${parseFloat(val) > parseFloat(balance) ? 'is-invalid' : ''}`} id=""><Coin address={address} /> {name}</span>

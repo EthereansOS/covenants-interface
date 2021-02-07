@@ -13,10 +13,10 @@ const Stats = (props) => {
     const [debit, setDebit] = useState(0);
     const [loading, setLoading] = useState(false);
     const [farmTreasury, setFarmTreasury] = useState(0);
-    const [farmReward, setFarmReward] = useState(10);
-    const [newFarmReward, setNewFarmReward] = useState(20);
-    const [unifiTreasury, setUnifiTreasury] = useState(1000.15);
-    const [rebalanceReward, setRebalanceReward] = useState(50);
+    const [farmReward, setFarmReward] = useState(0);
+    const [newFarmReward, setNewFarmReward] = useState(0);
+    const [unifiTreasury, setUnifiTreasury] = useState(0);
+    const [rebalanceReward, setRebalanceReward] = useState(0);
     const [currentBlock, setCurrentBlock] = useState(0);
     const [rebalanceBlock, setRebalanceBlock] = useState(0);
     const [usdRebalanceByDebit, setUsdRebalanceByDebit] = useState({ value: 0, full: 0});
@@ -24,7 +24,7 @@ const Stats = (props) => {
     const [totalSupply, setTotalSupply] = useState(0);
     const [wusdContract, setWusdContract] = useState(null);
     const [wusdBalance, setWusdBalance] = useState(0);
-    const [wusdDecimals, setWusdDecimals] = useState(18);
+    const [wusdDecimals, setWusdDecimals] = useState(0);
     const [x2USDContract, setx2USDContract] = useState(null);
     const [x5USDContract, setx5USDContract] = useState(null);
     const [x2USDNoteControllerContract, setx2USDNoteControllerContract] = useState(null);
@@ -37,6 +37,9 @@ const Stats = (props) => {
     const [collateralData, setCollateralData] = useState([]);
     const [percentages, setPercentages] = useState([]);
     const [multipliers, setMultipliers] = useState([2, 5]);
+    const [minimumRebalanceByDebtAmount, setMinimumRebalanceByDebtAmount] = useState(0);
+    const [showCredit, setShowCredit] = useState(false);
+    const [showDebt, setShowDebt] = useState(false);
 
     // TODO add health calc
     useEffect(() => {
@@ -48,6 +51,8 @@ const Stats = (props) => {
         try {
             const contract = await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDExtensionControllerABI"), props.dfoCore.getContextElement("WUSDExtensionControllerAddress"));
             setWusdExtensionController(contract);
+            const rbda = await contract.methods.minimumRebalanceByDebtAmount().call();
+            setMinimumRebalanceByDebtAmount(rbda);
             const wusdContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("ERC20ABI"), props.dfoCore.getContextElement("WUSDAddress"));
             setWusdContract(wusdContract);
             const supply = await wusdContract.methods.totalSupply().call();
@@ -58,8 +63,10 @@ const Stats = (props) => {
             setWusdBalance(balance);
             const differences = await contract.methods.differences().call();
             
-            setCredit(props.dfoCore.toDecimals(differences.credit, decimals));
-            setDebit(props.dfoCore.toDecimals(differences.debt, decimals));
+            setCredit(differences.credit);
+            setDebit(differences.debt);
+
+            setShowDebt(parseInt(differences.debt) > parseInt(rbda));
 
             const perc = [];
 
@@ -102,8 +109,9 @@ const Stats = (props) => {
             if (lastRebalanceBlock === "0") {
                 setRebalanceBlock(await props.dfoCore.getBlockNumber());
             } else {
-                setRebalanceBlock(parseInt(lastRebalanceBlock) * parseInt(interval));
+                setRebalanceBlock(parseInt(lastRebalanceBlock) + parseInt(interval));
             }
+            setShowCredit(parseInt(differences.credit) && (parseInt(lastRebalanceBlock) + parseInt(interval) <= await props.dfoCore.getBlockNumber()));
             await getCollateralData(contract, supply);
         } catch (error) {
             console.error(error);
@@ -262,12 +270,12 @@ const Stats = (props) => {
                     <div className="col-6">
                         <b>Credit</b>
                         <br/>
-                        {credit} uSD
+                        {props.dfoCore.toDecimals(credit, wusdDecimals)} uSD
                     </div>
                     <div className="col-6">
                         <b>Debt</b>
                         <br/>
-                        {debit} uSD
+                        {props.dfoCore.toDecimals(debit, wusdDecimals)} uSD
                     </div>
                 </div>
                 <div className="row mb-4 StatsBroO">
@@ -294,18 +302,20 @@ const Stats = (props) => {
                         {x5USDTreasury}
                     </div>
                 </div>
-                <div className="row mb-4 StatsBroO">
-                    <div className="col-6">
-                        <b>Farm treasury</b>
-                        <br/>
-                        {farmTreasury} uSD
-                    </div>
-                    <div className="col-6">
-                        <b>Farm reward</b>
-                        <br/>
-                        {farmReward} uSD per block
-                    </div>
-                </div>
+                {/*
+                    <div className="row mb-4 StatsBroO">
+                        <div className="col-6">
+                            <b>Farm treasury</b>
+                            <br/>
+                            {farmTreasury} uSD
+                        </div>
+                        <div className="col-6">
+                            <b>Farm reward</b>
+                            <br/>
+                            {farmReward} uSD per block
+                        </div>
+                    </div>*/
+                }
             </div>
         )
     }
@@ -321,6 +331,7 @@ const Stats = (props) => {
                     <>
                         <div className="StatsBroO">
                             { getAdvancedRow() }
+                            { /*
                             <div className="row">
                                 <div className="col-12">
                                     <div className="row mb-2">
@@ -334,7 +345,8 @@ const Stats = (props) => {
                                         <button className="btn btn-outline-secondary">Rebalance</button>
                                     </div>
                                 </div>
-                            </div>   
+                            </div>  */
+                            } 
                         </div>
                     </> : <div/>
                 }
@@ -343,7 +355,7 @@ const Stats = (props) => {
     } 
 
     const getAdvancedRow = () => {
-        if (credit > debit) {
+        if (showCredit) {
             return (
                 <>
                     <div className="row mb-4">
@@ -391,26 +403,12 @@ const Stats = (props) => {
                     <hr/>
                 </>
             );
-        } else if (debit > credit) {
+        } else if (showDebt) {
             return (
                 <>
                 <div className="row mb-4">
                     <div className="col-12 mb-4">
                         <Input showMax={true} label={"Rebalance by debit"} value={usdRebalanceByDebit.value} balance={props.dfoCore.toDecimals(wusdBalance, wusdDecimals)} min={0} onChange={(e) => onUpdateUsdRebalanceByDebit(e.target.value)} address={props.dfoCore.getContextElement("WUSDAddress")} showCoin={true} showBalance={true} name="uSD" />
-                        {
-                            /* 
-                        <b>Rebalance by debit</b>
-                        <div className="input-group mt-4">
-                            <div className="input-group-prepend">
-                                <button className="btn btn-secondary" type="button">MAX</button>
-                            </div>
-                            <input type="number" className="form-control" value={usdRebalanceByDebit.value} min={0} onChange={(e) => onUpdateUsdRebalanceByDebit(e.target.value)} />
-                            <div className="input-group-append">
-                                <span className="input-group-text" id=""> uSD</span>
-                            </div>
-                        </div>
-                        <small className="form-text text-muted">Balance: 0 uSD</small> */
-                        }
                     </div>
                     <div className="col-12">
                         <div className="row mb-2">
@@ -463,10 +461,14 @@ const Stats = (props) => {
                 { getFirstCol() }
                 { getSecondCol() }
             </div>
-            <hr />
-            <div className="row">
-                { getAdvancedCol() }
-            </div>
+            {
+                (showCredit || showDebt) && <>
+                    <hr />
+                    <div className="row">
+                        { getAdvancedCol() }
+                    </div>
+                </>
+            }
         </div>
     )
 }

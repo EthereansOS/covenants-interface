@@ -18,6 +18,8 @@ const Mint = (props) => {
     const [lpTokenApproved, setLpTokenApproved] = useState(false);
     const [wusdExtensionController, setWusdExtensionController] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [mintLoading, setMintLoading] = useState(false);
+    const [isHealthyPair, setIsHealthyPair] = useState(true);
 
     useEffect(() => {
         getController();
@@ -110,6 +112,23 @@ const Mint = (props) => {
                 setLpTokenBalance(props.dfoCore.toDecimals(balanceLp, parseInt(chosenPair.decimalsLp)));
                 setFirstTokenBalance(props.dfoCore.toDecimals(balance0, parseInt(chosenPair.token0decimals)));
                 setSecondTokenBalance(props.dfoCore.toDecimals(balance1, parseInt(chosenPair.token1decimals)));
+
+                const res = await chosenPair.ammContract.methods.byLiquidityPool(chosenPair.liquidityPool).call();
+
+                const tokensAmounts = res[1];
+                const updatedFirstTokenAmount = props.dfoCore.formatNumber(props.dfoCore.normalizeValue(tokensAmounts[0], chosenPair.token0decimals));
+                const updatedSecondTokenAmount = props.dfoCore.formatNumber(props.dfoCore.normalizeValue(tokensAmounts[1], chosenPair.token1decimals));
+        
+                const ratio = updatedFirstTokenAmount > updatedSecondTokenAmount ? updatedFirstTokenAmount / updatedSecondTokenAmount : updatedSecondTokenAmount / updatedFirstTokenAmount;
+                const maximumPairRatioForMint = await wusdExtensionController.methods.maximumPairRatioForMint().call();
+                const oneHundred = await wusdExtensionController.methods.ONE_HUNDRED().call()
+                
+                console.log(parseFloat(ratio), (parseInt(maximumPairRatioForMint) / parseInt(oneHundred)));
+                if (parseFloat(ratio) > (parseInt(maximumPairRatioForMint) / parseInt(oneHundred))) {
+                    setIsHealthyPair(false);
+                } else {
+                    setIsHealthyPair(true);
+                }
             }
             setPair(pairIndex);
         } catch (error) {
@@ -120,7 +139,7 @@ const Mint = (props) => {
     }
 
     const mintWUSD = async () => {
-        setLoading(true);
+        setMintLoading(true);
         try {
             if (firstAmount > 0 && secondAmount > 0) {
                 const chosenPair = pairs[pair];
@@ -141,7 +160,7 @@ const Mint = (props) => {
         } catch (error) {
             console.error(error);
         } finally {
-            setLoading(false);
+            setMintLoading(false);
         }
     }
 
@@ -154,7 +173,7 @@ const Mint = (props) => {
         const { ammContract, liquidityPool, token0, token0decimals, token1decimals, decimalsLp } = chosenPair;
         const updatedFirstAmount = { value: props.dfoCore.toFixed(amount), full: props.dfoCore.toFixed(props.dfoCore.fromDecimals(parseFloat(amount).toString() || "0", token0decimals)).toString()};
         setFirstAmount(updatedFirstAmount);
-        console.log(updatedFirstAmount);
+
         const res = await ammContract.methods.byTokenAmount(liquidityPool, token0, updatedFirstAmount.full.toString()).call();
         const { tokensAmounts, liquidityPoolAmount } = res;
 
@@ -254,7 +273,14 @@ const Mint = (props) => {
                         }
                     </div>
                     <div className="col-12 col-md-6">
-                        <button className="btn btn-secondary" onClick={() => mintWUSD()} disabled={((!firstAmount.value || !secondAmount.value) && !lpTokenAmount.value) || !firstTokenApproved || !secondTokenApproved}>Mint</button>
+                        {
+                            mintLoading ? <button className="btn btn-secondary" disabled={mintLoading}>
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <span class="sr-only">Loading...</span>
+                            </button>
+                            : 
+                            <button className="btn btn-secondary" onClick={() => mintWUSD()} disabled={((!firstAmount.value || !secondAmount.value) && !lpTokenAmount.value) || !firstTokenApproved || !secondTokenApproved}>Mint</button>
+                        }
                     </div>
                 </div>
             </div>
@@ -287,18 +313,25 @@ const Mint = (props) => {
                             })
                         }
                     </select>
-                    <div className="form-check mt-4">
-                        <input className="form-check-input" type="checkbox" value={useLpToken} onChange={(e) => setUseLpToken(e.target.checked)} id="useLpToken" disabled={!pair} />
-                        <label className="form-check-label" htmlFor="useLpToken">
-                            Use liquidity pool token
-                        </label>
-                    </div>
+                    {
+                        isHealthyPair && <div className="form-check mt-4">
+                            <input className="form-check-input" type="checkbox" value={useLpToken} onChange={(e) => setUseLpToken(e.target.checked)} id="useLpToken" disabled={!pair} />
+                            <label className="form-check-label" htmlFor="useLpToken">
+                                Use liquidity pool token
+                            </label>
+                        </div>
+                    }
                 </div>
                 {
-                    pair ? useLpToken ? getLpToken() : getMultipleTokens() : <div/>
+                    !isHealthyPair && <div className="col-12">
+                        Lorem, ipsum dolor sit amet consectetur adipisicing elit. Facere error, dicta nobis consequatur voluptas culpa dignissimos ipsam laudantium facilis. Ad quia deleniti commodi odit eum accusamus, delectus labore eaque recusandae!
+                    </div>
                 }
                 {
-                    pair ? <div className="col-12 mb-4">
+                    (pair && isHealthyPair) ? useLpToken ? getLpToken() : getMultipleTokens() : <div/>
+                }
+                {
+                    (pair && isHealthyPair) ? <div className="col-12 mb-4">
                         <div className="row justify-content-center">
                             <b>For</b>
                         </div>
@@ -308,7 +341,7 @@ const Mint = (props) => {
                     </div> : <div/>
                 }
                 {
-                    pair ? getButtons() : <div/>
+                    (pair && isHealthyPair) ? getButtons() : <div/>
                 }
             </div>
         </div>

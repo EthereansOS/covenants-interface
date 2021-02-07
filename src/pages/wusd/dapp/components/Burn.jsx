@@ -22,6 +22,8 @@ const Burn = (props) => {
     const [estimatedLpToken, setEstimatedLpToken] = useState(0);
     const [wusdExtensionController, setWusdExtensionController] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [isHealthyPair, setIsHealthyPair] = useState(true);
+    const [burnLoading, setBurnLoading] = useState(false);
 
     useEffect(() => {
         getController();
@@ -89,6 +91,37 @@ const Burn = (props) => {
         }
     }
 
+
+    const setChosenPair = async (pairIndex) => {
+        setLoading(true);
+        try {
+            if (pairIndex) {
+                const chosenPair = pairs[pairIndex];
+
+                const res = await chosenPair.ammContract.methods.byLiquidityPool(chosenPair.liquidityPool).call();
+
+                const tokensAmounts = res[1];
+                const updatedFirstTokenAmount = props.dfoCore.formatNumber(props.dfoCore.normalizeValue(tokensAmounts[0], chosenPair.token0decimals));
+                const updatedSecondTokenAmount = props.dfoCore.formatNumber(props.dfoCore.normalizeValue(tokensAmounts[1], chosenPair.token1decimals));
+
+                const ratio = parseInt(updatedFirstTokenAmount) > parseInt(updatedSecondTokenAmount) ? parseInt(updatedFirstTokenAmount) / parseInt(updatedSecondTokenAmount) : parseInt(updatedSecondTokenAmount) / parseInt(updatedFirstTokenAmount);
+                const maximumPairRatioPerBurn = await wusdExtensionController.methods.maximumPairRatioForBurn().call();
+                const oneHundred = await wusdExtensionController.methods.ONE_HUNDRED().call()
+        
+                if (parseFloat(ratio) > (parseInt(maximumPairRatioPerBurn) / parseInt(oneHundred))) {
+                    setIsHealthyPair(false);
+                } else {
+                    setIsHealthyPair(true);
+                }
+            }
+            setPair(pairIndex);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
     const clearTokens = () => {
         setEstimatedToken0({ value: 0, full: 0 });
         setEstimatedToken1({ value: 0, full: 0 });
@@ -113,7 +146,11 @@ const Burn = (props) => {
         const updatedSecondTokenAmount = props.dfoCore.formatNumber(props.dfoCore.normalizeValue(tokensAmounts[1], token1decimals));
 
         const ratio = updatedFirstTokenAmount > updatedSecondTokenAmount ? updatedFirstTokenAmount / updatedSecondTokenAmount : updatedSecondTokenAmount / updatedFirstTokenAmount;
-        if (ratio > 1.1) {
+        const maximumPairRatioPerBurn = await wusdExtensionController.methods.maximumPairRatioForBurn().call();
+        const oneHundred = await wusdExtensionController.methods.ONE_HUNDRED().call()
+
+        if (parseFloat(ratio) > (parseInt(maximumPairRatioPerBurn) / parseInt(oneHundred))) {
+            setIsHealthyPair(false);
             return;
         }
 
@@ -134,21 +171,28 @@ const Burn = (props) => {
     }
 
     const burnWUSD = async () => {
-        const info = await wusdExtensionController.methods.wusdInfo().call();
-        const collectionAddress = info['0'];
-        const wusdObjectId = info['1'];
-
-        const wusdCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), collectionAddress);
-
-        const { token0decimals, token1decimals } = pairs[pair];
-        const wusd = window.web3.utils.toBN(props.dfoCore.normalizeValue(estimatedToken0, token0decimals)).add(window.web3.utils.toBN(props.dfoCore.normalizeValue(estimatedToken1, token1decimals))).toString();
-
-        const burnData = abi.encode(["uint256","uint256","uint256","bool"], [pairs[pair].ammIndex, pairs[pair].lpIndex, estimatedLpToken, getLpToken])
-        const data = abi.encode(["uint256", "bytes"], [0, burnData]);
-        const gasLimit = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusd], abi.encode(["bytes[]"], [[data]])).estimateGas({ from: props.dfoCore.address});
-        const res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusd], abi.encode(["bytes[]"], [[data]])).send({ from: props.dfoCore.address, gasLimit });
-        console.log(res);
-        await getController();
+        setBurnLoading(true);
+        try {
+            const info = await wusdExtensionController.methods.wusdInfo().call();
+            const collectionAddress = info['0'];
+            const wusdObjectId = info['1'];
+    
+            const wusdCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), collectionAddress);
+    
+            const { token0decimals, token1decimals } = pairs[pair];
+            const wusd = window.web3.utils.toBN(props.dfoCore.normalizeValue(estimatedToken0, token0decimals)).add(window.web3.utils.toBN(props.dfoCore.normalizeValue(estimatedToken1, token1decimals))).toString();
+    
+            const burnData = abi.encode(["uint256","uint256","uint256","bool"], [pairs[pair].ammIndex, pairs[pair].lpIndex, estimatedLpToken, getLpToken])
+            const data = abi.encode(["uint256", "bytes"], [0, burnData]);
+            const gasLimit = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusd], abi.encode(["bytes[]"], [[data]])).estimateGas({ from: props.dfoCore.address});
+            const res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusd], abi.encode(["bytes[]"], [[data]])).send({ from: props.dfoCore.address, gasLimit });
+            console.log(res);
+            await getController();
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setBurnLoading(false);
+        }
     }
 
     const getWUSDToken = () => {
@@ -206,9 +250,13 @@ const Burn = (props) => {
                         </div> : <div/>
                         */
                     }
-                    <div className="col-12 col-md-6">
-                        <button onClick={() => burnWUSD()} disabled={!amount.full || !amount.value} className="btn btn-secondary">Burn</button>
-                    </div>
+                        <div className="col-12 col-md-6">
+                            {
+                                burnLoading ? <button className="btn btn-secondary" disabled={burnLoading}>
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                </button> : <button onClick={() => burnWUSD()} disabled={!amount.full || !amount.value} className="btn btn-secondary">Burn</button>
+                            }
+                        </div>
                 </div>
             </div>
         )
@@ -232,7 +280,7 @@ const Burn = (props) => {
         <div className="burn-component">
             <div className="row">
                 <div className="col-12 mb-4">
-                    <select className="custom-select wusd-pair-select" value={pair} onChange={(e) => setPair(e.target.value)}>
+                    <select className="custom-select wusd-pair-select" value={pair} onChange={(e) => setChosenPair(e.target.value)}>
                         <option value="">Choose pair..</option>
                         {
                             pairs.map((pair, index) => {
@@ -240,19 +288,27 @@ const Burn = (props) => {
                             })
                         }
                     </select>
-                    <div className="form-check mt-4">
-                        <input className="form-check-input" type="checkbox" value={getLpToken} onChange={(e) => setGetLpToken(e.target.checked)} id="getLpToken" disabled={!pair} />
-                        <label className="form-check-label" htmlFor="getLpToken">
-                            Get liquidity pool token
-                        </label>
-                    </div>
+                    {
+                        isHealthyPair && 
+                        <div className="form-check mt-4">
+                            <input className="form-check-input" type="checkbox" value={getLpToken} onChange={(e) => setGetLpToken(e.target.checked)} id="getLpToken" disabled={!pair} />
+                            <label className="form-check-label" htmlFor="getLpToken">
+                                Get liquidity pool token
+                            </label>
+                        </div>
+                    }
                 </div>
                 {
-                    pair ? getWUSDToken() : <div/>
+                    !isHealthyPair && <div className="col-12">
+                        Lorem, ipsum dolor sit amet consectetur adipisicing elit. Facere error, dicta nobis consequatur voluptas culpa dignissimos ipsam laudantium facilis. Ad quia deleniti commodi odit eum accusamus, delectus labore eaque recusandae!
+                    </div>
                 }
-                { getBurnAmount() }
                 {
-                    pair ? getButtons() : <div/>
+                    (pair && isHealthyPair) ? getWUSDToken() : <div/>
+                }
+                { isHealthyPair && getBurnAmount() }
+                {
+                    (isHealthyPair && pair) ? getButtons() : <div/>
                 }
             </div>
         </div>
