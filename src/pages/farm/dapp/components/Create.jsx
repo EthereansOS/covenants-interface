@@ -513,8 +513,8 @@ const Create = (props) => {
                     <select className="custom-select wusd-pair-select" value={lockedPeriod} onChange={(e) => setLockedPeriod(e.target.value)}>
                         <option value={0}>Choose locked period</option>
                         {
-                            Object.keys(props.dfoCore.getContextElement("farmingBlockIntervals")).map((key) => {
-                                return <option value={props.dfoCore.getContextElement("farmingBlockIntervals")[key]}>{key}</option>
+                            Object.keys(props.dfoCore.getContextElement("blockIntervals")).map((key) => {
+                                return <option value={props.dfoCore.getContextElement("blockIntervals")[key]}>{key}</option>
                             })
                         }
                     </select>
