@@ -141,7 +141,7 @@ const Stats = (props) => {
     }
 
     const onUpdateUsdRebalanceByDebit = (value) => {
-        setUsdRebalanceByDebit(value ? props.dfoCore.fromDecimals(value) : 0);
+        setUsdRebalanceByDebit(value ? value : 0);
     }
 
     const rebalanceByCredit = async () => {
@@ -386,7 +386,7 @@ const Stats = (props) => {
                             <div className="input-group-prepend">
                                 <button className="btn btn-secondary" type="button">MAX</button>
                             </div>
-                            <input type="number" className="form-control" value={props.dfoCore.toDecimals(usdRebalanceByDebit)} min={0} onChange={(e) => onUpdateUsdRebalanceByDebit(e.target.value)} />
+                            <input type="number" className="form-control" value={usdRebalanceByDebit} min={0} onChange={(e) => onUpdateUsdRebalanceByDebit(e.target.value)} />
                             <div className="input-group-append">
                                 <span className="input-group-text" id=""> uSD</span>
                             </div>

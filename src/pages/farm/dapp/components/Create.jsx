@@ -159,7 +159,7 @@ const Create = (props) => {
     const initializeDeployData = async () => {
         setDeployLoading(true);
         try {
-            const host = selectedHost === "no-host" ? props.dfoCore.voidEthereumAddress : selectedHost === 'wallet' ? hostWalletAddress : hostDeployedContract;
+            const host = selectedHost === 'wallet' ? hostWalletAddress : hostDeployedContract;
             const hasExtension = (selectedHost === "deployed-contract" && hostDeployedContract && !deployContract);
             const data = { setups: [], rewardTokenAddress: selectedRewardToken.address, byMint, hasLoadBalancer, pinnedSetupIndex, deployContract, host, hasExtension, extensionInitData: extensionPayload || '' };
             const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
@@ -723,7 +723,6 @@ const Create = (props) => {
                             <option value="">Choose an host..</option>
                             <option value="deployed-contract">Contract</option>
                             <option value="wallet">Wallet</option>
-                            <option value="no-host">No host</option>
                         </select>
                     </div>
                 </div>
