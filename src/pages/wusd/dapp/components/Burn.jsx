@@ -30,8 +30,8 @@ const Burn = (props) => {
     const getController = async () => {
         setLoading(true);
         try {
+            clearTokens();
             const contract = await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDExtensionControllerABI"), props.dfoCore.getContextElement("WUSDExtensionControllerAddress"));
-            console.log(contract);
             setWusdExtensionController(contract);
             const allowedAMMS = await contract.methods.allowedAMMs().call();
             let allowedPairs = [];
@@ -64,12 +64,11 @@ const Burn = (props) => {
                 }));
                 allowedPairs = [...allowedPairs, ...pools ];
             }))
-            const wusdInfo = await contract.methods.wusdInfo().call();  
+            allowedPairs = allowedPairs.sort((a, b) => a.ammName.localeCompare(b.ammName));
             const wusdContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("ERC20ABI"), props.dfoCore.getContextElement("WUSDAddress"));
             const balance = await wusdContract.methods.balanceOf(props.dfoCore.address).call();
             const approval = await wusdContract.methods.allowance(props.dfoCore.address, props.dfoCore.getContextElement("WUSDExtensionControllerAddress")).call();
             setWusdContract(wusdContract);
-            console.log(approval);
             setWusdApproved(parseInt(approval) !== 0);
             setWusdBalance(props.dfoCore.toDecimals(balance, await wusdContract.methods.decimals().call()));
             setPairs(allowedPairs);
@@ -91,18 +90,14 @@ const Burn = (props) => {
     }
 
     const clearTokens = () => {
-        setEstimatedToken0(0);
-        setEstimatedToken1(0);
-        setEstimatedLpToken(0);
+        setEstimatedToken0({ value: 0, full: 0 });
+        setEstimatedToken1({ value: 0, full: 0 });
+        setEstimatedLpToken({ value: 0, full: 0});
     }
 
     const onWUSDAmountChange = async (amount) => {
         setAmount(amount);
-        if (!amount) {
-            clearTokens();
-            return;
-        }
-        if (parseInt(amount) <= 0) {
+        if (!amount || parseFloat(amount) <= 0) {
             clearTokens();
             return;
         }
@@ -132,10 +127,10 @@ const Burn = (props) => {
         const text = props.dfoCore.numberToString(props.dfoCore.formatNumber(token0) * rate).split('.')[0];
 
         const lpResult = await ammContract.methods.byTokenAmount(liquidityPool, liquidityPoolTokens[0], text).call();
-
-        setEstimatedToken0(lpResult[1][0], token0decimals);
-        setEstimatedToken1(lpResult[1][1], token1decimals);
-        setEstimatedLpToken(lpResult[0], decimalsLp);
+        console.log({ full: lpResult[0], value:  props.dfoCore.toDecimalsNormalizedFixed(lpResult[0], decimalsLp)});
+        setEstimatedToken0({ full: props.dfoCore.normalizeValue(lpResult[1][0], token0decimals), value: props.dfoCore.toDecimals(props.dfoCore.normalizeValue(lpResult[1][0], token0decimals), 18)});
+        setEstimatedToken1({ full: props.dfoCore.normalizeValue(lpResult[1][1], token1decimals), value: props.dfoCore.toDecimals(props.dfoCore.normalizeValue(lpResult[1][1], token1decimals), 18)});
+        setEstimatedLpToken({ full: lpResult[0], value: props.dfoCore.toDecimals(props.dfoCore.normalizeValue(lpResult[0], decimalsLp), 18)});
     }
 
     const burnWUSD = async () => {
@@ -159,7 +154,7 @@ const Burn = (props) => {
     const getWUSDToken = () => {
         return (
             <div className="col-12 mb-4">
-                <Input showMax={true} value={amount} balance={wusdBalance} min={0} onChange={(e) => onWUSDAmountChange(e.target.value)} address={props.dfoCore.getContextElement("WUSDAddress")} showCoin={true} showBalance={true} name="WUSD" />
+                <Input showMax={true} value={amount.value} balance={wusdBalance} min={0} onChange={(e) => onWUSDAmountChange(e.target.value)} address={props.dfoCore.getContextElement("WUSDAddress")} showCoin={true} showBalance={true} name="WUSD" />
             </div>
         )
     }
@@ -176,7 +171,7 @@ const Burn = (props) => {
                         <b>For</b>
                     </div>
                     <div className="row justify-content-center">
-                        { props.dfoCore.toDecimals(estimatedLpToken, pairs[pair].decimalsLp) } { pairs[pair].symbol0 }/{ pairs[pair].symbol1 }
+                        { estimatedLpToken.value } { pairs[pair].symbol0 }/{ pairs[pair].symbol1 }
                     </div>
                 </div>
             )
@@ -187,14 +182,13 @@ const Burn = (props) => {
                     <b>For</b>
                 </div>
                 <div className="row justify-content-center">
-                    { props.dfoCore.toDecimals(estimatedToken0,  pairs[pair].token0decimals) } { pairs[pair].symbol0 } / { props.dfoCore.toDecimals(estimatedToken1, pairs[pair].token1decimals) } { pairs[pair].symbol1 }
+                    { estimatedToken0.value } { pairs[pair].symbol0 } / { estimatedToken1.value } { pairs[pair].symbol1 }
                 </div>
             </div>
         )
     }
 
     const getButtons = () => {
-        console.log(pairs[pair]);
         return (
             <div className="col-12 mb-4">
                 <div className="row justify-content-center">
@@ -213,7 +207,7 @@ const Burn = (props) => {
                         */
                     }
                     <div className="col-12 col-md-6">
-                        <button onClick={() => burnWUSD()} disabled={!window.amount} className="btn btn-secondary">Burn</button>
+                        <button onClick={() => burnWUSD()} disabled={!amount.full || !amount.value} className="btn btn-secondary">Burn</button>
                     </div>
                 </div>
             </div>

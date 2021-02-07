@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { ChevronDownIcon, ChevronUpIcon } from '@primer/octicons-react';
+import { Input } from '../../../../components';
 import { ethers } from 'ethers';
 
 const abi = new ethers.utils.AbiCoder();
@@ -18,10 +19,11 @@ const Stats = (props) => {
     const [rebalanceReward, setRebalanceReward] = useState(50);
     const [currentBlock, setCurrentBlock] = useState(0);
     const [rebalanceBlock, setRebalanceBlock] = useState(0);
-    const [usdRebalanceByDebit, setUsdRebalanceByDebit] = useState(0);
+    const [usdRebalanceByDebit, setUsdRebalanceByDebit] = useState({ value: 0, full: 0});
     const [selectedUsdn, setSelectedUsdn] = useState("");
     const [totalSupply, setTotalSupply] = useState(0);
     const [wusdContract, setWusdContract] = useState(null);
+    const [wusdBalance, setWusdBalance] = useState(0);
     const [wusdDecimals, setWusdDecimals] = useState(18);
     const [x2USDContract, setx2USDContract] = useState(null);
     const [x5USDContract, setx5USDContract] = useState(null);
@@ -34,6 +36,7 @@ const Stats = (props) => {
     const [wusdExtensionController, setWusdExtensionController] = useState(null);
     const [collateralData, setCollateralData] = useState([]);
     const [percentages, setPercentages] = useState([]);
+    const [multipliers, setMultipliers] = useState([2, 5]);
 
     // TODO add health calc
     useEffect(() => {
@@ -49,8 +52,10 @@ const Stats = (props) => {
             setWusdContract(wusdContract);
             const supply = await wusdContract.methods.totalSupply().call();
             const decimals = await wusdContract.methods.decimals().call();
+            const balance = await wusdContract.methods.balanceOf(props.dfoCore.address).call();
             setWusdDecimals(decimals);
             setTotalSupply(supply);
+            setWusdBalance(balance);
             const differences = await contract.methods.differences().call();
             
             setCredit(props.dfoCore.toDecimals(differences.credit, decimals));
@@ -66,6 +71,9 @@ const Stats = (props) => {
             const x5USDcontract = await props.dfoCore.getContract(props.dfoCore.getContextElement("IEthItemInteroperableInterfaceABI"), wusdNote5Info[2]);
             const x2USDNoteController = await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDNoteControllerABI"), wusdNote2Info[3]);
             const x5USDNoteController = await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDNoteControllerABI"), wusdNote5Info[3]);
+
+            const mul = [parseInt(await x2USDNoteController.methods.multiplier().call()), parseInt(await x5USDNoteController.methods.multiplier().call())];
+            setMultipliers(mul);
             
             setx2USDContract(x2USDcontract);
             setx2USDContract(x5USDcontract);
@@ -143,8 +151,7 @@ const Stats = (props) => {
     }
 
     const onUpdateUsdRebalanceByDebit = (value) => {
-        console.log({ value, full: props.dfoCore.fromDecimals(value || 0, wusdDecimals)});
-        setUsdRebalanceByDebit({ value, full: props.dfoCore.fromDecimals(value || 0, wusdDecimals)});
+        setUsdRebalanceByDebit({ value, full: props.dfoCore.fromDecimals(parseFloat(value).toString() || "0", wusdDecimals)});
     }
 
     const rebalanceByCredit = async () => {
@@ -167,8 +174,8 @@ const Stats = (props) => {
 
             const byDebtData = abi.encode(["uint256"], [selectedUsdn === "x2" ? 2 : 5]);
             const data = abi.encode(["uint256", "bytes"], [1, byDebtData]);
-            const gasLimit = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [props.dfoCore.web3.utils.toBN(usdRebalanceByDebit).toString()], abi.encode(["bytes[]"], [[data]])).estimateGas({ from: props.dfoCore.address});
-            const res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [props.dfoCore.web3.utils.toBN(usdRebalanceByDebit).toString()], abi.encode(["bytes[]"], [[data]])).send({ from: props.dfoCore.address, gasLimit });
+            const gasLimit = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [props.dfoCore.web3.utils.toBN(props.dfoCore.toFixed(usdRebalanceByDebit.full)).toString()], abi.encode(["bytes[]"], [[data]])).estimateGas({ from: props.dfoCore.address});
+            const res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [props.dfoCore.web3.utils.toBN(props.dfoCore.toFixed(usdRebalanceByDebit.full)).toString()], abi.encode(["bytes[]"], [[data]])).send({ from: props.dfoCore.address, gasLimit });
             await getStats();
         } catch (error) {
             console.error(error);
@@ -383,7 +390,10 @@ const Stats = (props) => {
             return (
                 <>
                 <div className="row mb-4">
-                    <div className="col-6 text-left">
+                    <div className="col-12 mb-4">
+                        <Input showMax={true} label={"Rebalance by debit"} value={usdRebalanceByDebit.value} balance={wusdBalance} min={0} onChange={(e) => onUpdateUsdRebalanceByDebit(e.target.value)} address={props.dfoCore.getContextElement("WUSDAddress")} showCoin={true} showBalance={true} name="uSD" />
+                        {
+                            /* 
                         <b>Rebalance by debit</b>
                         <div className="input-group mt-4">
                             <div className="input-group-prepend">
@@ -394,9 +404,10 @@ const Stats = (props) => {
                                 <span className="input-group-text" id=""> uSD</span>
                             </div>
                         </div>
-                        <small className="form-text text-muted">Balance: 0 uSD</small>
+                        <small className="form-text text-muted">Balance: 0 uSD</small> */
+                        }
                     </div>
-                    <div className="col-6">
+                    <div className="col-12">
                         <div className="row mb-2">
                             <div className="col-12">
                                 <select className="custom-select wusd-pair-select" value={selectedUsdn} onChange={(e) => setSelectedUsdn(e.target.value)}>
@@ -409,7 +420,7 @@ const Stats = (props) => {
                                     <div className="mt-2">
                                         For
                                         <br/>
-                                        {`${usdRebalanceByDebit.value} ${selectedUsdn}USD`}
+                                        {`${usdRebalanceByDebit.value || 0} ${selectedUsdn}USD`} = {usdRebalanceByDebit.value * multipliers[selectedUsdn === 'x2' ? 0 : 1]} WUSD
                                     </div> : <div/>
                                 }
                                 
@@ -418,7 +429,7 @@ const Stats = (props) => {
                         {
                             selectedUsdn ? 
                             <div className="row justify-content-center">
-                                <button className="btn btn-outline-secondary" onClick={() => rebalanceByDebit()} disabled={usdRebalanceByDebit === 0}>Rebalance</button>
+                                <button className="btn btn-outline-secondary" onClick={() => rebalanceByDebit()} disabled={!usdRebalanceByDebit.value || !usdRebalanceByDebit.full}>Rebalance</button>
                             </div> : <div/>
                         }
                     </div>

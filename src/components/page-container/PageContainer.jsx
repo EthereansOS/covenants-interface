@@ -21,7 +21,10 @@ const PageContainer = (props) => {
                         <Link to={props.link}>
                             <button className="btn btn-Fantasy">DAPP</button>
                         </Link>
-                    </div> : <div/>
+                    </div> :  
+                    <div className="IndexRegularBTN">
+                        <button className="btn btn-Fantasy" onClick={() => props.onClick()}>{ props.buttonText}</button>
+                    </div>
                 }
             </div>
     )

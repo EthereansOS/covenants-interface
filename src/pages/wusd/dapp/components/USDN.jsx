@@ -8,6 +8,7 @@ const USDN = (props) => {
     const [wusdContract, setWusdContract] = useState(null);
     const [x2USDContract, setx2USDContract] = useState(null);
     const [x5USDContract, setx5USDContract] = useState(null);
+    const [decimals, setDecimals] = useState(0);
     const [x2USDNoteControllerContract, setx2USDNoteControllerContract] = useState(null);
     const [x5USDNoteControllerContract, setx5USDNoteControllerContract] = useState(null);
     const [wusdExtensionController, setWusdExtensionController] = useState(null);
@@ -39,6 +40,8 @@ const USDN = (props) => {
         const wusdNote5Info = await contract.methods.wusdNote5Info().call();
         setx2USDNoteInfo(wusdNote2Info);
         setx2USDNoteInfo(wusdNote5Info);
+        const wusdCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement("INativeV1ABI"), wusdNote2Info[0]);
+        setDecimals(await wusdCollection.methods.decimals().call());
 
         const x2USDcontract = await props.dfoCore.getContract(props.dfoCore.getContextElement("IERC1155ABI"), wusdNote2Info[2]);
         const x5USDcontract = await props.dfoCore.getContract(props.dfoCore.getContextElement("IERC1155ABI"), wusdNote5Info[2]);
@@ -74,11 +77,8 @@ const USDN = (props) => {
         if (x2Amount > x2USDTreasury) return;
         const x2USDCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), x2USDNoteInfo['0']);
         const x2WeiAmount = props.dfoCore.fromDecimals(x2Amount, 18).toString();
-        console.log(x2WeiAmount);
-        /*
         await x2USDCollection.methods.safeBatchTransferFrom(props.dfoCore.address, x2USDNoteControllerContract.options.address, [x2USDNoteInfo['1']], [x2WeiAmount], "");
         await getData();
-        */
     }
 
     const redeemX5 = async () => {
@@ -86,6 +86,16 @@ const USDN = (props) => {
         const x5USDCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), x2USDNoteInfo['0']);
         await x5USDCollection.methods.safeBatchTransferFrom(props.dfoCore.address, x5USDNoteControllerContract.options.address, [x5USDNoteInfo['1']], [props.dfoCore.fromDecimals(x5Amount, 18).toString()], "");
         await getData();
+    }
+
+    const onUpdateX2Value = (value) => {
+        console.log({ value, full: props.dfoCore.fromDecimals(parseFloat(value).toString() || "0", decimals)});
+        setx2Amount({ value, full: props.dfoCore.fromDecimals(parseFloat(value).toString() || "0", decimals)})
+    }
+
+    const onUpdateX5Value = (value) => {
+        console.log({ value, full: props.dfoCore.fromDecimals(parseFloat(value).toString() || "0", decimals)});
+        setx5Amount({ value, full: props.dfoCore.fromDecimals(parseFloat(value).toString() || "0", decimals)})
     }
 
     const onTokenApproval = (type) => {
@@ -103,7 +113,7 @@ const USDN = (props) => {
         return (
             <>
             <div className="col-12 mb-4">
-                <Input showMax={true} value={x2Amount} balance={x2Balance} extra={`| Treasury ${x2USDTreasury} WUSD`} min={0} onChange={(e) => setx2Amount(e.target.value)} showCoin={true} showBalance={true} name="x2USD" />
+                <Input showMax={true} value={x2Amount.value} balance={x2Balance} extra={`| Treasury ${x2USDTreasury} WUSD`} min={0} onChange={(e) => onUpdateX2Value(e.target.value)} showCoin={true} showBalance={true} name="x2USD" />
             </div>
             {
                 x2Amount ? 
@@ -112,7 +122,7 @@ const USDN = (props) => {
                         For
                     </div>
                     <div className="row justify-content-center">
-                        {x2Amount * multipliers[0]} uSD
+                        {x2Amount.value * multipliers[0]} uSD
                     </div>
                 </div> : <div/>
             }
@@ -144,7 +154,7 @@ const USDN = (props) => {
         return (
             <>
                 <div className="col-12 mb-4">
-                    <Input showMax={true} value={x5Amount} balance={x5Balance} extra={`| Treasury ${x5USDTreasury} WUSD`} min={0} onChange={(e) => setx5Amount(e.target.value)} showCoin={true} showBalance={true} name="x5USD" />
+                    <Input showMax={true} value={x5Amount.value} balance={x5Balance} extra={`| Treasury ${x5USDTreasury} WUSD`} min={0} onChange={(e) => onUpdateX5Value(e.target.value)} showCoin={true} showBalance={true} name="x5USD" />
                 </div>
                 {
                     x5Amount ?
@@ -153,7 +163,7 @@ const USDN = (props) => {
                             For
                         </div>
                         <div className="row justify-content-center">
-                            {x5Amount * multipliers[0]} uSD
+                            {x5Amount.value * multipliers[1]} uSD
                         </div>
                     </div> : <div/>
                 }

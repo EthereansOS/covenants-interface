@@ -36,6 +36,64 @@ export default {
     "blockSearchSection": 9000000,
     "transactionConfirmations": 0,
     "transactionConfirmationsTimeoutMillis": 7000,
+    "defaultItemData" : {
+      "Native" : {
+          "collection" : {
+              "image" : "assets/img/native-collection.png",
+              "modelCode" : {
+                  "1" : "ipfs://ipfs/QmWTas1y3RuAkApRh6HaHPM1SancvKiefmnfxNKcFMSRYw"
+              }
+          },
+          "item" : {
+              "image" : "assets/img/native-item.png",
+              "code" : {
+                  "1" : "ipfs://ipfs/QmWTas1y3RuAkApRh6HaHPM1SancvKiefmnfxNKcFMSRYw"
+              }
+          }
+      },
+      "W1155" : {
+          "collection" : {
+              "image" : "assets/img/1155-collection.png",
+              "modelCode" : {
+                  "1" : "ipfs://ipfs/QmbZ1HUgH1NFQvDUjRMrTp6r7j2Z6brLAPZzqQrLGLY6gE"
+              }
+          },
+          "item" : {
+              "image" : "assets/img/1155-item.png",
+              "code" : {
+                  "1" : "ipfs://ipfs/QmWTas1y3RuAkApRh6HaHPM1SancvKiefmnfxNKcFMSRYw"
+              }
+          }
+      },
+      "W721" : {
+          "collection" : {
+              "image" : "assets/img/721-collection.png",
+              "modelCode" : {
+                  "1" : "ipfs://ipfs/QmezxWeR5gcR1jbfdq59HacFyps7mRvcqsYNAeFUritdwB"
+              }
+          },
+          "item" : {
+              "image" : "assets/img/721-item.png",
+              "code" : {
+                  "1" : "ipfs://ipfs/QmWTas1y3RuAkApRh6HaHPM1SancvKiefmnfxNKcFMSRYw"
+              }
+          }
+      },
+      "W20" : {
+          "collection" : {
+              "image" : "assets/img/erc20-penguin.png",
+              "modelCode" : {
+                  "1" : "ipfs://ipfs/QmTUSevGbSZcCWiyUg5ureLLxkrTA2JH87PW9r8BdBEGyz"
+              }
+          },
+          "item" : {
+              "image" : "assets/img/erc20-item.png",
+              "code" : {
+                  "1" : "ipfs://ipfs/QmWTas1y3RuAkApRh6HaHPM1SancvKiefmnfxNKcFMSRYw"
+              }
+          }
+      }
+  },
     "indexesURL": "https://raw.githubusercontent.com/b-u-i-d-l/bazar-tokens-list/master/dist/indexes.json",
     "decentralizedFlexibleOrganizationsURL": "https://raw.githubusercontent.com/b-u-i-d-l/bazar-tokens-list/master/dist/decentralizedFlexibleOrganizations.json",
     "decentralizedFlexibleOrganizationsURLRopsten": "https://raw.githubusercontent.com/b-u-i-d-l/bazar-tokens-list/master/dist/programmableEquities.json",

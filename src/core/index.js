@@ -290,15 +290,17 @@ export default class DFOCore {
     }
 
     fromDecimals = (amount, decimals = 18) => {
-        return decimals === 18 ? this.web3.utils.toWei(toFixed(amount), 'ether') : parseInt(toFixed(amount)) * 10**decimals;
+        return decimals === 18 ? this.web3.utils.toWei(toFixed(amount), 'ether') : parseFloat(toFixed(amount)) * 10**decimals;
     }
 
     toFixed = (amount) => {
         return toFixed(amount);
     }
 
-    toDecimals = (amount, decimals = 18, precision = 4) => {
-        if (parseInt(amount) === 0) return 0;
+    toDecimals = (amount, decimals = 18, precision) => {
+        if (parseFloat(amount) === 0) return 0;
+        precision = -Math.floor( Math.log10(amount) + 1);
+        if (precision < 0) precision = 4;
         const res = decimals === 18 ? this.web3.utils.fromWei(amount, 'ether') : parseInt(amount) / 10**decimals;
         return parseFloat(res).toFixed(precision);
     }
@@ -318,6 +320,56 @@ export default class DFOCore {
             j = (j = i.length) > 3 ? j % 3 : 0;
         var result = sign + (j ? i.substr(0, j) + thouSeparator : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thouSeparator) + (decPlaces ? decSeparator + Math.abs(n - i).toFixed(decPlaces).slice(2) : "");
         return this.eliminateFloatingFinalZeroes(result, decSeparator);
+    }
+
+    formatLink = (link) => {
+        link = (link ? link instanceof Array ? link[0] : link : '');
+        if (link.indexOf('assets') === 0 || link.indexOf('/assets') === 0) {
+            return link;
+        }
+        for (var temp of this.context.ipfsUrlTemplates) {
+            link = link.split(temp).join(this.context.ipfsUrlChanger);
+        }
+        while (link && link.startsWith('/')) {
+            link = link.substring(1);
+        }
+        if (link.endsWith('.eth')) {
+            link += ".link";
+        }
+        return (!link ? '' : link.indexOf('http') === -1 ? ('https://' + link) : link).split('https:').join('').split('http:').join('');
+    };
+
+    tryRetrieveMetadata = async (item) => {
+        if (item.metadataLink) {
+            return;
+        }
+        var clearMetadata = true;
+        try {
+            try {
+                item.metadataLink = await item.methods.uri().call();
+            } catch (err) {
+                item.metadataLink = await item.methods.uri(item.objectId).call();
+            }
+            if (item.metadataLink !== "") {
+                item.image = this.formatLink(item.metadataLink);
+                try {
+                    item.metadata = await window.AJAXRequest(this.formatLink(item.metadataLink));
+                    if (typeof item.metadata !== "string") {
+                        Object.entries(item.metadata).forEach(it => item[it[0]] = it[1]);
+                        item.name = item.item_name || item.name;
+                        item.description = item.description && item.description.split('\n\n').join(' ');
+                    }
+                } catch(e) {
+                    delete item.image;
+                    item.image = this.getElementImage(item);
+                    item.metadataMessage = `Could not retrieve metadata, maybe due to CORS restriction policies for the link (<a href="${item.metadataLink}" target="_blank">${item.metadataLink}</a>), check it on <a href="${item.collection ? window.context.openSeaItemLinkTemplate.format(item.collection.address, item.objectId) : window.context.openSeaCollectionLinkTemplate.format(item.address)}" target="_blank">Opensea</a>`
+                    console.error(item.metadataMessage);
+                }
+                clearMetadata = false;
+            }
+        } catch (e) {}
+        clearMetadata && delete item.metadata;
+        clearMetadata && (item.metadataLink = clearMetadata ? "blank" : item.metadataLink);
     }
 
     eliminateFloatingFinalZeroes = (value, decSeparator) => {

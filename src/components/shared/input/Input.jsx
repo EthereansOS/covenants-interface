@@ -12,21 +12,27 @@ const Input = (props) => {
         //onChange && onChange(value);
     }, [value])
 
+    const onRealChange = (value) => {
+        setVal(value);
+        console.log(parseFloat(value) > parseFloat(balance))
+        onChange(onDetectedChange(value));
+    }
+
     const onDetectedChange = (value) => {
-        if (!value) return { target: { value: balance }};
+        if (!value) return { target: { value: 0 }};
         return { target: { value } };
     } 
 
     return (
         <>
             { label && <h6><b>{label}</b></h6> }
-            <div className="input-group" onBlur={() => onChange(onDetectedChange(val))} tabIndex={0}>
+            <div className="input-group" tabIndex={0}>
                 {
                     showMax && <div className="input-group-prepend">
                         <button className="btn btn-secondary" onClick={() => onChange(onDetectedChange())} type="button">MAX</button>
                     </div>
                 }
-                <input type="number" className={`form-control input-form-field ${parseFloat(val) > parseFloat(balance) ? 'is-invalid' : ''}`} value={val} min={min} max={max || balance} onChange={(e) => setVal(e.target.value)}/>
+                <input type="number" className={`form-control input-form-field ${parseFloat(val) > parseFloat(balance) ? 'is-invalid' : ''}`} value={val} min={min} max={max || balance} onChange={(e) => onRealChange(e.target.value)}/>
                 {
                     showCoin && <div className={`input-group-append no-border-right`}>
                         <span className={`input-group-text ${parseFloat(val) > parseFloat(balance) ? 'is-invalid' : ''}`} id=""><Coin address={address} /> {name}</span>
