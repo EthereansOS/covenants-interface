@@ -73,7 +73,10 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        setCore: (dfoCore) => dispatch(setDFOCore(dfoCore)),
+        setCore: (dfoCore) => {
+            document.body.className = `${!dfoCore ? 'fantasy' : window.localStorage.magicMode === "true" ? 'magic' : 'penguin'}`;
+            dispatch(setDFOCore(dfoCore));
+        },
         removeCore: () => dispatch(removeDFOCore()),
     }
 }

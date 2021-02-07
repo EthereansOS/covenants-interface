@@ -1,8 +1,5 @@
 import Web3 from "web3";
 import Web3Modal from "web3modal";
-import { ethers } from "ethers";
-
-const abi = new ethers.utils.AbiCoder();
 
 export default class DFOCore {
     address = '0x0000000000000000000000000000000000000000';
@@ -73,6 +70,7 @@ export default class DFOCore {
         }
         // set the core as initialized
         this.initialized = true;
+        window.web3 = this.web3;
     }
 
     /**
@@ -106,6 +104,42 @@ export default class DFOCore {
         return this.context[`${elementName}${network}`];
     }
 
+    numberToString = (num, locale) => {
+        if (num === undefined || num === null) {
+            num = 0;
+        }
+        if ((typeof num).toLowerCase() === 'string') {
+            return num;
+        }
+        let numStr = String(num);
+    
+        if (Math.abs(num) < 1.0) {
+            let e = parseInt(num.toString().split('e-')[1]);
+            if (e) {
+                let negative = num < 0;
+                if (negative) num *= -1
+                num *= Math.pow(10, e - 1);
+                numStr = '0.' + (new Array(e)).join('0') + num.toString().substring(2);
+                if (negative) numStr = "-" + numStr;
+            }
+        } else {
+            let e = parseInt(num.toString().split('+')[1]);
+            if (e > 20) {
+                e -= 20;
+                num /= Math.pow(10, e);
+                numStr = num.toString() + (new Array(e + 1)).join('0');
+            }
+        }
+        if (locale === true) {
+            var numStringSplitted = numStr.split(' ').join('').split('.');
+            return parseInt(numStringSplitted[0]).toLocaleString() + (numStringSplitted.length === 1 ? '' : ('.' + numStringSplitted[1]))
+        }
+        return numStr;
+    }
+
+    formatNumber = (value) => {
+        return parseFloat(this.numberToString(value).split(',').join(''));
+    }
     /**
      * returns the sending options for the given method and value.
      * if no params are used, the {from: address, gas: '99999999'} object is returned.
@@ -150,16 +184,23 @@ export default class DFOCore {
      * retrieves all the deployed liquidity mining contracts from the given factory address.
      */
     loadDeployedLiquidityMiningContracts = async (factoryAddress) => {
-        if (this.deployedLiquidityMiningContracts.length > 0) return;
         try {
             if (!factoryAddress) factoryAddress = this.getContextElement("liquidityMiningFactoryAddress");
             const factoryContract = new this.web3.eth.Contract(this.getContextElement("LiquidityMiningFactoryABI"), factoryAddress);
             const events = await factoryContract.getPastEvents('LiquidityMiningDeployed', { fromBlock: 11790157 });
+            this.deployedLiquidityMiningContracts = [];
             await Promise.all(events.map(async (event) => {
-                this.deployedLiquidityMiningContracts.push({ address: event.returnValues.liquidityMiningAddress, sender: event.returnValues.sender });
+                try {
+                    const contract = new this.web3.eth.Contract(this.getContextElement("LiquidityMiningABI"), event.returnValues.liquidityMiningAddress);
+                    const extensionAddress = await contract.methods._extension().call();
+                    const extensionContract = new this.web3.eth.Contract(this.getContextElement("LiquidityMiningExtensionABI"), extensionAddress);
+                    const { host } = await extensionContract.methods.data().call();
+                    this.deployedLiquidityMiningContracts.push({ address: event.returnValues.liquidityMiningAddress, sender: host });
+                } catch (error) {
+                    console.error(error);
+                }
             }));
         } catch (error) {
-            console.error(error);
             this.deployedLiquidityMiningContracts = [];
         }
     }
@@ -168,9 +209,11 @@ export default class DFOCore {
         return this.deployedLiquidityMiningContracts.filter((item) => item.sender.toLowerCase() === this.address.toLowerCase());
     }
 
-    loadPositions = async (force = false) => {
-        console.log(this.positions);
-        if (this.positions > 0 && !force) return;
+    isValidPosition = (position) => {
+        return position.uniqueOwner !== this.voidEthereumAddress && position.creationBlock !== '0';
+    }
+
+    loadPositions = async () => {
         try {
             this.positions = [];
             await this.loadDeployedLiquidityMiningContracts();
@@ -182,11 +225,14 @@ export default class DFOCore {
                     const { positionId } = returnValues;
                     const position = await contract.methods.position(positionId).call();
                     const setup = (await contract.methods.setups().call())[position.setupIndex];
-                    this.positions.push({ ...setup, contract, position, positionId });
+                    if (this.isValidPosition(position) && !this.positions.includes({ ...setup, contract, setupIndex: position.setupIndex })) {
+                        this.positions.push({ ...setup, contract, setupIndex: position.setupIndex });
+                    }
                 }))
             }));
         } catch (error) {
             console.error(error);
+            this.positions = [];
         }
     }
 
@@ -230,13 +276,37 @@ export default class DFOCore {
 
     toDecimals = (amount, decimals = 18, precision = 4) => {
         if (parseInt(amount) === 0) return 0;
-       
         const res = decimals === 18 ? this.web3.utils.fromWei(amount, 'ether') : parseInt(amount) / 10**decimals;
         return parseFloat(res).toFixed(precision);
     }
 
+    formatMoney = (value, decPlaces, thouSeparator, decSeparator) => {
+        value = (typeof value).toLowerCase() !== 'number' ? parseFloat(value) : value;
+        var n = value,
+            decPlaces = isNaN(decPlaces = Math.abs(decPlaces)) ? 2 : decPlaces,
+            decSeparator = decSeparator == undefined ? "." : decSeparator,
+            thouSeparator = thouSeparator == undefined ? "," : thouSeparator,
+            sign = n < 0 ? "-" : "",
+            i = parseInt(n = Math.abs(+n || 0).toFixed(decPlaces)) + "",
+            j = (j = i.length) > 3 ? j % 3 : 0;
+        var result = sign + (j ? i.substr(0, j) + thouSeparator : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thouSeparator) + (decPlaces ? decSeparator + Math.abs(n - i).toFixed(decPlaces).slice(2) : "");
+        return this.eliminateFloatingFinalZeroes(result, decSeparator);
+    }
+
+    eliminateFloatingFinalZeroes = (value, decSeparator) => {
+        decSeparator = decSeparator || '.';
+        if (value.indexOf(decSeparator) === -1) {
+            return value;
+        }
+        var split = value.split(decSeparator);
+        while (split[1].endsWith('0')) {
+            split[1] = split[1].substring(0, split[1].length - 1);
+        }
+        return split[1].length === 0 ? split[0] : split.join(decSeparator);
+    }
+
     normalizeValue = (amount, decimals) => {
-        return amount * 10**(18-decimals);
+        return this.web3.utils.toBN(amount).mul(this.web3.utils.toBN(10**(18 - decimals))).toString();
     }
 
     normalizeFixed = (amount, decimals) => {
@@ -245,26 +315,6 @@ export default class DFOCore {
 
     toDecimalsNormalizedFixed = (amount, decimals = 18, precision = 4) => {
         return this.toDecimals(this.normalizeFixed(amount, decimals), decimals, precision);
-    }
-
-    deployLiquidityMiningContract = async (data, sender) => {
-        const factoryAddress = data.factoryAddress || this.getContextElement("liquidityMiningFactoryAddress");
-        const liquidityMiningFactory = await this.getContract(this.getContextElement("LiquidityMiningFactoryABI"), factoryAddress);
-        const cloneExtensionTransaction = await liquidityMiningFactory.methods.cloneLiquidityMiningDefaultExtension().send({ from: sender, gasLimit: 10000000 });
-        const cloneExtensionReceipt = await this.web3.eth.getTransactionReceipt(cloneExtensionTransaction.transactionHash);
-        const clonedDefaultLiquidityMiningExtensionAddress = this.web3.eth.abi.decodeParameter("address", cloneExtensionReceipt.logs.filter(it => it.topics[0] === this.web3.utils.sha3('ExtensionCloned(address)'))[0].topics[1])
-        const { setups, rewardTokenAddress, byMint, hasLoadBalancer, pinnedSetupIndex } = data;
-        const types = ["address", "bytes", "address", "address", "bytes", "bool", "uint256"];
-        const encodedSetups = abi.encode(["tuple(address,uint256,address,address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,bool,uint256,uint256,bool)[]"], [setups]);
-        const liquidityMiningExtension = new this.web3.eth.Contract(this.getContextElement("LiquidityMiningExtensionABI"), clonedDefaultLiquidityMiningExtensionAddress);
-        console.log(clonedDefaultLiquidityMiningExtensionAddress);
-        const extensionInitData = liquidityMiningExtension.methods.init(byMint, sender).encodeABI()
-        const params = [clonedDefaultLiquidityMiningExtensionAddress, extensionInitData, this.getContextElement("ethItemOrchestratorAddress"), rewardTokenAddress, encodedSetups, hasLoadBalancer, pinnedSetupIndex || 0];
-        const payload = this.web3.utils.sha3(`init(${types.join(',')})`).substring(0, 10) + (this.web3.eth.abi.encodeParameters(types, params).substring(2));
-        console.log(payload);
-        console.log(extensionInitData);
-        const deployTransaction = await liquidityMiningFactory.methods.deploy(payload).send({ from: sender, gasLimit: 10000000 });
-        console.log(deployTransaction);
     }
 
     /**

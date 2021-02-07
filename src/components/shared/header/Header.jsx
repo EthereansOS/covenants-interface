@@ -34,7 +34,7 @@ const Header = (props) => {
     return (
         <nav className="navbar navbar-light bg-transparent">
             <div className="container-fluid">
-                <Link to={"/"} className="navbar-brand">
+                <Link to={"/"} onClick={() => document.body.className = "fantasy"} className="navbar-brand">
                     <span  className="LogoM" src={wizardLogo} alt=""></span>
                     <span className="mx-3 TitleCov"><b>Covenants</b></span>
                 </Link>

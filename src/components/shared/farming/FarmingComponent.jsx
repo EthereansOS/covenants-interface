@@ -8,47 +8,56 @@ const FarmingComponent = (props) => {
     const { className, dfoCore, contract, goBack, hasBorder, hostedBy } = props;
     const [metadata, setMetadata] = useState(null);
 
-    console.log(contract);
-
     useEffect(() => {
         getContractMetadata();
     }, []);
 
     const getContractMetadata = async () => {
-        const rewardToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), await contract.methods._rewardTokenAddress().call());
+        const rewardTokenAddress = await contract.methods._rewardTokenAddress().call();
+        const rewardToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), rewardTokenAddress);
         const symbol = await rewardToken.methods.symbol().call();
         const extensionAddress = await contract.methods._extension().call();
         const extensionContract = await dfoCore.getContract(dfoCore.getContextElement('LiquidityMiningExtensionABI'), extensionAddress);
         const { host, byMint } = await extensionContract.methods.data().call();
-
+        
         const setups = await contract.methods.setups().call();
         const freeSetups = setups.filter((setup) => setup.free).length;
         const lockedSetups = setups.length - freeSetups;
-        const { data } = await axios.get(dfoCore.getContextElement("coingeckoEthereumPriceURL"));
-        const [ ethData ] = data;
 
+        const { data } = await axios.get(dfoCore.getContextElement("coingeckoCoinPriceURL") + rewardTokenAddress);
+        console.log(data);
+        const rewardTokenPriceUsd = data[rewardTokenAddress.toLowerCase()].usd;
+        const yearlyBlocks = 36000;
+
+        let valueLocked = 0;
         let rewardPerBlock = 0;
         await Promise.all(setups.map(async (setup) => {
+            console.log(setup);
             rewardPerBlock += parseInt(setup.rewardPerBlock);
+            console.log(dfoCore.toDecimals(setup.currentStakedLiquidity, 18, 18));
+            if (setup.free) {
+                valueLocked += parseInt(dfoCore.toDecimals(setup.totalSupply, 18, 18));
+            } else {
+                console.log(setup.currentStakedLiquidity);
+                valueLocked += parseInt(dfoCore.toDecimals(setup.currentStakedLiquidity, 18, 18));
+            }
         }))
-        const uniswapV2Router = await dfoCore.getContract(dfoCore.getContextElement('uniswapV2RouterABI'), dfoCore.getContextElement('uniswapV2RouterAddress'));
-        console.log(setups);
-        let valueLocked = 0;
+
+        const apy = (rewardPerBlock * rewardTokenPriceUsd * yearlyBlocks * 100) / valueLocked;
+        console.log(apy);
+        
         await Promise.all(setups.map(async (setup) => {
-            if (parseInt(setup.totalSupply) === 0 || parseInt(setup.currentStakedLiquidity) === 0) return;
-            const amounts = await uniswapV2Router.methods.getAmountsOut(setup.totalSupply, [dfoCore.getContextElement('wethTokenAddress'), setup.liquidityPoolTokenAddress]).call();
-            console.log(amounts);
-            valueLocked += setup.free ? parseInt(setup.totalSupply) : parseInt(setup.currentStakedLiquidity);
+            const { rewardPerBlock } = setup;
+            console.log(rewardPerBlock);
         }))
-        valueLocked = valueLocked * ethData.current_price;
 
         setMetadata({
             name: `Farm ${symbol}`,
             contractAddress: contract.options.address,
             rewardTokenAddress: rewardToken.options.address,
-            apy: '10% yearly',
-            valueLocked: `$ ${valueLocked}`,
-            rewardPerBlock: `${dfoCore.toDecimals(rewardPerBlock.toString())} ${symbol}`,
+            apy: `${dfoCore.toFixed(apy)}% yearly`,
+            valueLocked: `$ 0`,
+            rewardPerBlock: `${(dfoCore.toDecimals(dfoCore.toFixed(rewardPerBlock).toString()))} ${symbol}`,
             byMint,
             freeSetups,
             lockedSetups,

@@ -1,43 +1,8 @@
 import { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { useHistory, useParams } from 'react-router';
+import { useParams } from 'react-router';
 import { FarmingComponent, SetupComponent } from '../../../../components';
 
-const setups = [
-    {
-        type: 'Free farm',
-        mainToken: null,
-        secondaryToken: null,
-        rewardToken: null,
-        sharedRewardFrom: 'Uniswap V2',
-        mainTokenLiquidity: 10,
-        secondaryTokenLiquidity: 1000,
-        estimated: '1 SSJ/block = 1 ETH + 1,000 BUIDL',
-        manage: true,
-    },
-    {
-        type: 'Free farm',
-        mainToken: null,
-        secondaryToken: null,
-        rewardToken: null,
-        sharedRewardFrom: 'Uniswap V2',
-        mainTokenLiquidity: 10,
-        secondaryTokenLiquidity: 1000,
-        estimated: '1 SSJ/block = 1 ETH + 1,000 BUIDL',
-        redeem: true,
-    },
-    {
-        type: 'Free farm',
-        mainToken: null,
-        secondaryToken: null,
-        rewardToken: null,
-        sharedRewardFrom: 'Uniswap V2',
-        mainTokenLiquidity: 10,
-        secondaryTokenLiquidity: 1000,
-        estimated: '1 SSJ/block = 1 ETH + 1,000 BUIDL',
-        farm: true,
-    }
-];
 
 const ExploreFarmingContract = (props) => {
     const { address } = useParams();
@@ -50,10 +15,10 @@ const ExploreFarmingContract = (props) => {
 
     const getContractMetadata = async () => {
         const lmContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('LiquidityMiningABI'), address);
-        console.log(await lmContract.methods._extension().call());
         const rewardTokenAddress = await lmContract.methods._rewardTokenAddress().call();
         setContract(lmContract);
         const setups = await lmContract.methods.setups().call();
+        console.log(rewardTokenAddress);
         setFarmingSetups(setups.map((setup) => { return {...setup, rewardTokenAddress }}));
     }
 

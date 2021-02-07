@@ -21,6 +21,7 @@ const USDN = (props) => {
     const [x5USDTreasury, setx5USDTreasury] = useState(0);
     const [x2USDNoteInfo, setx2USDNoteInfo] = useState(null);
     const [x5USDNoteInfo, setx5USDNoteInfo] = useState(null);
+    const [multipliers, setMultipliers] = useState([2, 5]);
 
     useEffect(() => {
         getData();
@@ -39,15 +40,18 @@ const USDN = (props) => {
         setx2USDNoteInfo(wusdNote2Info);
         setx2USDNoteInfo(wusdNote5Info);
 
-        const x2USDcontract = await props.dfoCore.getContract(props.dfoCore.getContextElement("ERC20ABI"), wusdNote2Info[2]);
-        const x5USDcontract = await props.dfoCore.getContract(props.dfoCore.getContextElement("ERC20ABI"), wusdNote5Info[2]);
+        const x2USDcontract = await props.dfoCore.getContract(props.dfoCore.getContextElement("IERC1155ABI"), wusdNote2Info[2]);
+        const x5USDcontract = await props.dfoCore.getContract(props.dfoCore.getContextElement("IERC1155ABI"), wusdNote5Info[2]);
         const x2USDNoteController = await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDNoteControllerABI"), wusdNote2Info[3]);
         const x5USDNoteController = await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDNoteControllerABI"), wusdNote5Info[3]);
         
         setx2USDContract(x2USDcontract);
-        setx2USDContract(x5USDcontract);
+        setx5USDContract(x5USDcontract);
         setx2USDNoteControllerContract(x2USDNoteController);
         setx5USDNoteControllerContract(x5USDNoteController);
+
+        const mul = [parseInt(await x2USDNoteController.methods.multiplier().call()), parseInt(await x5USDNoteController.methods.multiplier().call())];
+        setMultipliers(mul);
 
         setx2USDSupply(props.dfoCore.toDecimals(await x2USDcontract.methods.totalSupply().call(), decimals));
         setx5USDSupply(props.dfoCore.toDecimals(await x5USDcontract.methods.totalSupply().call(), decimals));
@@ -69,9 +73,12 @@ const USDN = (props) => {
     const redeemX2 = async () => {
         if (x2Amount > x2USDTreasury) return;
         const x2USDCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), x2USDNoteInfo['0']);
-        console.log(x2USDCollection);
-        await x2USDCollection.methods.safeBatchTransferFrom(props.dfoCore.address, x2USDNoteControllerContract.options.address, [x2USDNoteInfo['1']], [props.dfoCore.fromDecimals(x2Amount, 18).toString()], "");
+        const x2WeiAmount = props.dfoCore.fromDecimals(x2Amount, 18).toString();
+        console.log(x2WeiAmount);
+        /*
+        await x2USDCollection.methods.safeBatchTransferFrom(props.dfoCore.address, x2USDNoteControllerContract.options.address, [x2USDNoteInfo['1']], [x2WeiAmount], "");
         await getData();
+        */
     }
 
     const redeemX5 = async () => {
@@ -105,7 +112,7 @@ const USDN = (props) => {
                         For
                     </div>
                     <div className="row justify-content-center">
-                        700 uSD
+                        {x2Amount * multipliers[0]} uSD
                     </div>
                 </div> : <div/>
             }
@@ -118,13 +125,15 @@ const USDN = (props) => {
             <div className="col-12 mb-4">
                 <div className="row">
                     {
+                        /*
                         !x2Approved ? 
                         <div className="col">
                             <ApproveButton contract={x2USDContract} isERC1155={true} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")}  onError={(error) => console.log(error)} onApproval={() => onTokenApproval('x2')} text={"Approve x2USD"} />
                         </div> : <></>
+                        */
                     }
                     <div className="col">
-                        <button onClick={() => redeemX2()} className="btn btn-secondary">Redeem</button>
+                        <button onClick={() => redeemX2()} disabled={!x2Amount} className="btn btn-secondary">Redeem</button>
                     </div>
                 </div>
             </div>
@@ -144,7 +153,7 @@ const USDN = (props) => {
                             For
                         </div>
                         <div className="row justify-content-center">
-                            700 uSD
+                            {x5Amount * multipliers[0]} uSD
                         </div>
                     </div> : <div/>
                 }
@@ -157,13 +166,15 @@ const USDN = (props) => {
             <div className="col-12 mb-4">
                 <div className="row">
                     {
+                        /*
                         !x5Approved ? 
                         <div className="col">
                             <ApproveButton contract={x5USDContract} isERC1155={true} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")}  onError={(error) => console.log(error)} onApproval={() => onTokenApproval('x5')} text={"Approve x5USD"} />
                         </div> : <></>
+                        */
                     }
-                    <div className="col-12 col-md-6">
-                        <button onClick={() => redeemX5()} className="btn btn-secondary">Redeem</button>
+                    <div className="col">
+                        <button onClick={() => redeemX5()} disabled={!x5Amount} className="btn btn-secondary">Redeem</button>
                     </div>
                 </div>
             </div>

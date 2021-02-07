@@ -19,41 +19,41 @@ const App = (props) => {
             <Sidemenu />
           </div>
           <div className="col-md-10 col-12">
-          <Switch>
-          <Route path="/arbitrage">
-            <ArbitragePage />
-          </Route>
-          <Route path="/bazaar">
-            <BazaarPage />
-          </Route>
-          <Route path="/crafting">
-            <CraftingPage />
-          </Route>
-          <Route path="/grimoire">
-            <GrimoirePage />
-          </Route>
-          <Route path="/farm">
-            <FarmPage />
-          </Route>
-          <Route path="/more">
-            <MorePage />
-          </Route>
-          <Route path="/multiswap">
-            <MultiswapPage />
-          </Route>
-          <Route path="/inflation">
-            <InflationPage />
-          </Route>
-          <Route path="/wusd">
-            <WUSDPage />
-          </Route>
-          <Route path="/">
-            <IndexPage />
-          </Route>
-          <Route path="*">
-            <PageNotFound />
-          </Route>
-        </Switch>
+            <Switch>
+            <Route path="/arbitrage">
+              <ArbitragePage />
+            </Route>
+            <Route path="/bazaar">
+              <BazaarPage />
+            </Route>
+            <Route path="/crafting">
+              <CraftingPage />
+            </Route>
+            <Route path="/grimoire">
+              <GrimoirePage />
+            </Route>
+            <Route path="/farm">
+              <FarmPage />
+            </Route>
+            <Route path="/more">
+              <MorePage />
+            </Route>
+            <Route path="/multiswap">
+              <MultiswapPage />
+            </Route>
+            <Route path="/inflation">
+              <InflationPage />
+            </Route>
+            <Route path="/wusd">
+              <WUSDPage />
+            </Route>
+            <Route path="/">
+              <IndexPage />
+            </Route>
+            <Route path="*">
+              <PageNotFound />
+            </Route>
+          </Switch>
           </div>
         </div>
         

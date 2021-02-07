@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Coin, Input, TokenInput } from '../../../../components/shared';
 import { setFarmingContractStep, updateFarmingContract, addFarmingSetup, removeFarmingSetup  } from '../../../../store/actions';
-import Editor from 'react-simple-code-editor';
-import { highlight, languages } from 'prismjs/components/prism-core';
-import 'prismjs/components/prism-clike';
-import 'prismjs/components/prism-solidity';
+import Editor from "@monaco-editor/react";
+import { ethers } from "ethers";
+import ContractEditor from '../../../../components/editor/ContractEditor';
+
+const abi = new ethers.utils.AbiCoder();
 
 const code = `function add(a, b) {
     return a + b;
@@ -15,10 +16,12 @@ const Create = (props) => {
     const [currentBlockNumber, setCurrentBlockNumber] = useState(0);
     const [selectedRewardToken, setSelectedRewardToken] = useState(null);
     const [selectedFarmingType, setSelectedFarmingType] = useState(null);
-    const [selectedHost, setSelectedHost] = useState(null);
+    const [selectedHost, setSelectedHost] = useState("");
     const [hostWalletAddress, setHostWalletAddress] = useState(null);
     const [hostDeployedContract, setHostDeployedContract] = useState(null);
-    const [deployContractCode, setDeployContractCode] = useState("");
+    const [deployContract, setDeployContract] = useState(null);
+    const [deployedContractVerified, setDeployedContractVerified] = useState(false);
+    const [useDeployedContract, setUseDeployedContract] = useState(false);
     const [hasLoadBalancer, setHasLoadBalancer] = useState(false);
     const [pinnedSetupIndex, setPinnedSetupIndex] = useState(null);
     const [byMint, setByMint] = useState(false);
@@ -40,6 +43,9 @@ const Create = (props) => {
     const [editIndex, setEditIndex] = useState(null);
     const [isAddLoadBalancer, setIsAddLoadBalancer] = useState(false);
     const [isDeploy, setIsDeploy] = useState(false);
+    const [deployLoading, setDeployLoading] = useState(false);
+    const [deployStep, setDeployStep] = useState(0);
+    const [deployData, setDeployData] = useState(null);
 
     useEffect(() => {
         if (props.farmingContract?.rewardToken) {
@@ -125,9 +131,9 @@ const Create = (props) => {
             setLockedMainToken(setup.data);
             setLockedMaxLiquidity(setup.maxLiquidity);
             setLockedRewardPerBlock(setup.rewardPerBlock);
-            setLockedHasPenaltyFee(setup.penaltyFee !== 0);
+            setLockedHasPenaltyFee(parseInt(setup.penaltyFee) !== 0);
             setLockedPenaltyFee(setup.penaltyFee);
-            setLockedIsRenewable(setup.renewTimes !== 0);
+            setLockedIsRenewable(parseInt(setup.renewTimes) !== 0);
             setLockedRenewTimes(setup.renewTimes);
             setLockedSecondaryToken(setup.secondaryToken);
             setSelectedFarmingType('locked');
@@ -147,40 +153,137 @@ const Create = (props) => {
         setLoading(false);
     }
 
-    const deployContract = async () => {
-        const data = { setups: [], rewardTokenAddress: selectedRewardToken.address, byMint, hasLoadBalancer, pinnedSetupIndex };
-        const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
-        await Promise.all(props.farmingSetups.map(async (setup) => {
-            const isFree = !setup.endBlock;
-            const result = await ammAggregator.methods.findByLiquidityPool(isFree ? setup.data.address : setup.secondaryToken).call();
-            const { amm } = result;
-            data.setups.push(
-                [
-                    amm,//uniswapAMM.options.address,
-                    0,
-                    isFree ? setup.data.address : setup.secondaryToken,
-                    isFree ? setup.data.token0 : setup.data.address,
-                    isFree ? 0 : setup.startBlock,
-                    isFree ? 0 : (setup.startBlock + parseInt(setup.period)),
-                    props.dfoCore.fromDecimals(setup.rewardPerBlock),
-                    isFree ? props.dfoCore.fromDecimals(setup.rewardPerBlock) : 0,
-                    0,
-                    0,
-                    isFree ? 0 : props.dfoCore.fromDecimals(setup.maxLiquidity),
-                    0,
-                    isFree,
-                    isFree ? 0 : setup.renewTimes,
-                    isFree ? 0 : setup.penaltyFee,
-                    false//mainToken == utilities.voidEthereumAddress || secondaryToken == utilities.voidEthereumAddress
-                ]
-            )
-        }))
-        console.log(data);
-        await props.dfoCore.deployLiquidityMiningContract(data, props.dfoCore.address);
+    const verifyContract = async () => {
+        try {
+            setDeployedContractVerified(true);
+        } catch (error) {
+            setDeployedContractVerified(false);
+        }
+    }
+
+    const initializeDeployData = async () => {
+        setDeployLoading(true);
+        try {
+            const host = selectedHost === "no-host" ? props.dfoCore.voidEthereumAddress : selectedHost === 'wallet' ? hostWalletAddress : hostDeployedContract;
+            const hasExtension = (selectedHost === "deployed-contract" && hostDeployedContract && !deployContract);
+            const data = { setups: [], rewardTokenAddress: selectedRewardToken.address, byMint, hasLoadBalancer, pinnedSetupIndex, deployContract, host, hasExtension, extensionInitData: "" };
+            const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
+            await Promise.all(props.farmingSetups.map(async (setup) => {
+                const isFree = !setup.endBlock;
+                const result = await ammAggregator.methods.findByLiquidityPool(isFree ? setup.data.address : setup.secondaryToken).call();
+                const { amm } = result;
+                const ammContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMABI'), amm);
+                const res = await ammContract.methods.byLiquidityPool(isFree ? setup.data.address : setup.secondaryToken).call();
+                const involvingETH = res['2'].filter((address) => isWeth(address)).length > 0 ;
+                data.setups.push(
+                    [
+                        amm,//uniswapAMM.options.address,
+                        0,
+                        isFree ? setup.data.address : setup.secondaryToken,
+                        isFree ? setup.data.token0 : setup.data.address,
+                        isFree ? 0 : setup.startBlock,
+                        isFree ? 0 : (setup.startBlock + parseInt(setup.period)),
+                        props.dfoCore.fromDecimals(setup.rewardPerBlock),
+                        isFree ? props.dfoCore.fromDecimals(setup.rewardPerBlock) : 0,
+                        0,
+                        0,
+                        isFree ? 0 : props.dfoCore.fromDecimals(setup.maxLiquidity),
+                        0,
+                        isFree,
+                        isFree ? 0 : setup.renewTimes,
+                        isFree ? 0 : setup.penaltyFee,
+                        involvingETH
+                    ]
+                )
+            }))
+            console.log(data);
+            setDeployData(data);
+        } catch (error) {
+            console.error(error);
+            setDeployData(null);
+        } finally {
+            setDeployLoading(false);
+        }
+    }
+
+    const deploy = async () => {
+        let error = false;
+        let deployTransaction = null;
+        setDeployLoading(true);
+        try {
+            const { setups, rewardTokenAddress, hasLoadBalancer, pinnedSetupIndex, extensionAddress, extensionInitData } = deployData;
+            const factoryAddress = props.dfoCore.getContextElement("liquidityMiningFactoryAddress");
+            const liquidityMiningFactory = await props.dfoCore.getContract(props.dfoCore.getContextElement("LiquidityMiningFactoryABI"), factoryAddress);
+            const types = ["address", "bytes", "address", "address", "bytes", "bool", "uint256"];
+            const encodedSetups = abi.encode(["tuple(address,uint256,address,address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,bool,uint256,uint256,bool)[]"], [setups]);
+            const params = [extensionAddress ? extensionAddress : hostDeployedContract, extensionInitData ? extensionInitData : "0x", props.dfoCore.getContextElement("ethItemOrchestratorAddress"), rewardTokenAddress, encodedSetups, hasLoadBalancer, pinnedSetupIndex || 0];
+            console.log(params)
+            console.log(extensionInitData);
+            const payload = props.dfoCore.web3.utils.sha3(`init(${types.join(',')})`).substring(0, 10) + (props.dfoCore.web3.eth.abi.encodeParameters(types, params).substring(2));
+            console.log(payload);
+            const gasLimit = await liquidityMiningFactory.methods.deploy(payload).estimateGas({ from: props.dfoCore.address });
+            deployTransaction = await liquidityMiningFactory.methods.deploy(payload).send({ from: props.dfoCore.address, gasLimit });
+            console.log(deployTransaction);
+        } catch (error) {
+            console.error(error);
+            error = true;
+        } finally {
+            if (!error && deployTransaction) {
+                props.updateFarmingContract(null);
+                await Promise.all(props.farmingSetups.map(async (_, i) => {
+                    props.removeFarmingSetup(i);
+                }));
+                props.setFarmingContractStep(0);
+                setSelectedRewardToken(null);
+                setByMint(false);
+                setIsDeploy(false);
+                setIsAddLoadBalancer(false);
+            }
+            setDeployLoading(false);
+        }
+    }
+
+    const deployExtension = async () => {
+        let error = false;
+        setDeployLoading(true);
+        try {
+            const { byMint, host, deployContract } = deployData;
+            if (!deployContract) {
+                const factoryAddress = props.dfoCore.getContextElement("liquidityMiningFactoryAddress");
+                const liquidityMiningFactory = await props.dfoCore.getContract(props.dfoCore.getContextElement("LiquidityMiningFactoryABI"), factoryAddress);
+                const cloneGasLimit = await liquidityMiningFactory.methods.cloneLiquidityMiningDefaultExtension().estimateGas({ from: props.dfoCore.address });
+                const cloneExtensionTransaction = await liquidityMiningFactory.methods.cloneLiquidityMiningDefaultExtension().send({ from: props.dfoCore.address, gasLimit: cloneGasLimit });
+                const cloneExtensionReceipt = await props.dfoCore.web3.eth.getTransactionReceipt(cloneExtensionTransaction.transactionHash);
+                const extensionAddress = props.dfoCore.web3.eth.abi.decodeParameter("address", cloneExtensionReceipt.logs.filter(it => it.topics[0] === props.dfoCore.web3.utils.sha3('ExtensionCloned(address)'))[0].topics[1])
+                const liquidityMiningExtension = new props.dfoCore.web3.eth.Contract(props.dfoCore.getContextElement("LiquidityMiningExtensionABI"), extensionAddress);
+                const extensionInitData = liquidityMiningExtension.methods.init(byMint, host).encodeABI()
+                setDeployData({ ...deployData, extensionAddress, extensionInitData });
+            } else {
+                const { contract, payload } = deployContract;
+                const { abi, bytecode } = contract;
+                const gasLimit = await new props.dfoCore.web3.eth.Contract(abi).deploy({ data: bytecode }).estimateGas({ from: props.dfoCore.address });
+                const extension = await new props.dfoCore.web3.eth.Contract(abi).deploy({ data: bytecode }).send({ from: props.dfoCore.address, gasLimit });
+                console.log(extension.options.address);
+                setDeployData({ ...deployData, extensionAddress: extension.options.address, extensionInitData: payload });
+            }
+        } catch (error) {
+            console.error(error);
+            error = false;
+        } finally {
+            setDeployLoading(false);
+            setDeployStep(!error ? deployStep + 1 : deployStep);
+        }
     }
 
     const getCreationComponent = () => {
         return <div className="col-12">
+            {
+                deployStep === 3 && <div className="row justify-content-center mb-4">
+                    <div className="col-12">
+                        <h3 className="text-secondary"><b>Deploy successful!</b></h3>
+                    </div>
+                </div>
+            }
             <div className="row justify-content-center mb-4">
                 <div className="col-9">
                     <TokenInput placeholder={"Reward token"} onClick={(address) => onSelectRewardToken(address)} text={"Load"} />
@@ -213,7 +316,10 @@ const Create = (props) => {
                 }
                 {
                     selectedRewardToken && <div className="col-12">
-                        <button className="btn btn-secondary" onClick={() => props.updateFarmingContract({ rewardToken: { ...selectedRewardToken, byMint } })}>Start</button>
+                        <button className="btn btn-secondary" onClick={() => {
+                            props.updateFarmingContract({ rewardToken: { ...selectedRewardToken, byMint } });
+                            setDeployStep(0);
+                        }}>Start</button>
                     </div>
                 }
                 </>
@@ -285,7 +391,7 @@ const Create = (props) => {
     }
 
     const onSelectFreeLiquidityPoolToken = async (address) => {
-        if (!address) address = "0xb0fb35cc576034b01bed6f4d0333b1bd3859615c";
+        if (!address) return;
         try {
             setLoading(true);
             const liquidityPoolToken = await props.dfoCore.getContract(props.dfoCore.getContextElement('uniswapV2PairABI'), address);
@@ -360,7 +466,7 @@ const Create = (props) => {
                         freeLiquidityPoolToken && <>
                             <div className="row justify-content-center mb-4">
                                 <div className="col-6">
-                                    <Input min={0} showCoin={true} address={selectedRewardToken.address} value={freeRewardPerBlock} name={selectedRewardToken.symbol} onChange={(e) => setFreeRewardPerBlock(e.target.value)} />
+                                    <Input min={0} showCoin={true} address={selectedRewardToken.address} value={freeRewardPerBlock} name={selectedRewardToken.symbol} label={"Reward per block"} onChange={(e) => setFreeRewardPerBlock(e.target.value)} />
                                 </div>
                             </div>
                             <div className="row justify-content-center align-items-center flex-column mb-2">
@@ -370,12 +476,12 @@ const Create = (props) => {
                             <div className="row mb-4">
                                 <p className="text-center">*Monthly/yearly reward are calculated in a forecast based on 3000 Blocks/m and 36000/y.</p>
                             </div>
-                            <div className="row justify-content-center mb-4">
-                                <button onClick={() => goToFirstStep() } className="btn btn-light mr-4">Cancel</button>
-                                <button onClick={() => addFreeFarmingSetup() } disabled={!freeLiquidityPoolToken || freeRewardPerBlock <= 0} className="btn btn-secondary ml-4">Add</button>
-                            </div>
                         </>
                     }
+                    <div className="row justify-content-center mb-4">
+                        <button onClick={() => goToFirstStep() } className="btn btn-light mr-4">Cancel</button>
+                        <button onClick={() => addFreeFarmingSetup() } disabled={!freeLiquidityPoolToken || freeRewardPerBlock <= 0} className="btn btn-secondary ml-4">{isEdit ? 'Edit' : 'Add'}</button>
+                    </div>
                 </>
             }
         </div>
@@ -435,8 +541,11 @@ const Create = (props) => {
                                 </div>
                             </div>
                             {
-                                lockedSecondaryToken && <div key={lockedSecondaryToken} className="row align-items-center justify-content-around mb-2">
-                                    { /* <Coin address={secondaryToken} className="mr-2" />  */ } <p>{lockedSecondaryToken}</p> <button className="btn btn-outline-danger btn-sm" onClick={() => setLockedSecondaryToken(null)}>Remove</button>
+                                lockedSecondaryToken && <div key={lockedSecondaryToken} className="row align-items-center mb-2">
+                                    <div className="col-md-9 col-12">{lockedSecondaryToken}</div>
+                                    <div className="col-md-3 col-12">
+                                        <button className="btn btn-outline-danger btn-sm" onClick={() => setLockedSecondaryToken(null)}>Remove</button>
+                                    </div>
                                 </div>
                             }
                             <div className="row justify-content-center mt-4 mb-4">
@@ -563,6 +672,37 @@ const Create = (props) => {
     }
 
     const getLockedFourthStep = () => {
+
+        if (deployLoading) {
+            return <div className="col-12">
+                <div className="row justify-content-center">
+                    <div className="spinner-border text-secondary" role="status">
+                        <span className="visually-hidden"></span>
+                    </div>
+                </div>
+            </div>
+        }
+
+        if (deployStep === 1) {
+            return <div className="col-12 flex flex-column justify-content-center align-items-center">
+                <div className="row mb-4">
+                    <h6><b>Deploy extension</b></h6>
+                </div>
+                <div className="row">
+                    <button onClick={() => deployExtension()} className="btn btn-secondary">Deploy extension</button>
+                </div>
+            </div>
+        } else if (deployStep === 2) {
+            return <div className="col-12 flex flex-column justify-content-center align-items-center">
+                <div className="row mb-4">
+                    <h6><b>Deploy Farming Cotnract</b></h6>
+                </div>
+                <div className="row">
+                    <button onClick={() => deploy()} className="btn btn-secondary">Deploy contract</button>
+                </div>
+            </div>
+        }
+
         return (
             <div className="col-12">
                 <div className="row">
@@ -575,9 +715,8 @@ const Create = (props) => {
                     <div className="col-12 p-0">
                         <select className="custom-select wusd-pair-select" value={selectedHost} onChange={(e) => setSelectedHost(e.target.value)}>
                             <option value="">Choose an host..</option>
-                            <option value="deployed-contract">Deployed Contract</option>
+                            <option value="deployed-contract">Contract</option>
                             <option value="wallet">Wallet</option>
-                            <option value="deploy-contract">Deploy Contract</option>
                             <option value="no-host">No host</option>
                         </select>
                     </div>
@@ -591,26 +730,30 @@ const Create = (props) => {
                             <p className="text-left text-small">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Omnis delectus incidunt laudantium distinctio velit reprehenderit quaerat, deserunt sint fugit ex consectetur voluptas suscipit numquam. Officiis maiores quaerat quod necessitatibus perspiciatis!</p>
                         </div>
                     </> : selectedHost === 'deployed-contract' ? <>
-                        <div className="row mb-2">
-                            <input type="text" className="form-control" value={hostDeployedContract} onChange={(e) => setHostDeployedContract(e.target.value.toString())} placeholder={"Deployed contract address"} aria-label={"Deployed contract address"}/>
+                        <div className="form-check my-4">
+                            <input className="form-check-input" type="checkbox" value={useDeployedContract} onChange={(e) => setUseDeployedContract(e.target.checked)} id="setIsDeploy" />
+                            <label className="form-check-label" htmlFor="setIsDeploy">
+                                Use deployed contract
+                            </label>
                         </div>
-                        <div className="row mb-4 justify-content-between">
-                            <button className="btn btn-sm btn-dark">Choose file</button>
-                            <button className="btn btn-sm btn-secondary">VERIFY</button>
-                        </div>
-                    </> : selectedHost === 'deploy-contract' ? <>
-                        <Editor
-                            className="deploy-contract-editor"
-                            value={deployContractCode}
-                            onValueChange={code => setDeployContractCode(code)}
-                            highlight={code => highlight(code, languages.sol)}
-                            padding={10}
-                            style={{
-                                fontFamily: '"Fira code", "Fira Mono", monospace',
-                                fontSize: 14,
-                                minHeight: 500
-                            }}
-                        />
+                        {
+                            !useDeployedContract ? <ContractEditor dfoCore={props.dfoCore} onFinish={(contract, payload) => setDeployContract({contract, payload})} /> : <>
+                                <div className="row mb-2">
+                                    <input type="text" className="form-control" value={hostDeployedContract} onChange={(e) => setHostDeployedContract(e.target.value.toString())} placeholder={"Deployed contract address"} aria-label={"Deployed contract address"}/>
+                                </div>
+                                <div className="row mb-2">
+                                    <div className="col-md-6 p-0 col-12">
+                                        <div class="custom-file">
+                                            <input type="file" class="custom-file-input" id="customFile" onChange={(e) => console.log(e)} />
+                                            <label class="custom-file-label" for="customFile">Choose file</label>
+                                        </div>
+                                    </div>
+                                    <div className="col-md-6 col-12">
+                                        <button onClick={() => verifyContract()} className="btn btn-sm btn-secondary">VERIFY</button>
+                                    </div>
+                                </div>
+                            </>
+                        }
                     </> : <div/>
                 }
                 <div className="row justify-content-center my-4">
@@ -620,9 +763,9 @@ const Create = (props) => {
                         setIsDeploy(false);
                     } } className="btn btn-light mr-4">Cancel</button>
                     <button onClick={() => {
-                        // setIsDeploy(false);
-                        deployContract();
-                    }} className="btn btn-secondary ml-4" disabled={!selectedHost || (selectedHost === 'wallet' && (!hostWalletAddress || !isValidAddress(hostWalletAddress))) || (selectedHost === 'deployed-contract' && (!hostDeployedContract || !isValidAddress(hostDeployedContract)))}>Deploy</button>
+                        initializeDeployData();
+                        setDeployStep((selectedHost === 'deployed-contract' && hostDeployedContract && !deployContract) ? 2 : 1);
+                    }} className="btn btn-secondary ml-4" disabled={!selectedHost || (selectedHost === 'wallet' && (!hostWalletAddress || !isValidAddress(hostWalletAddress))) || (selectedHost === 'deployed-contract' && ((!useDeployedContract && (!deployContract || !deployContract.contract)) || (useDeployedContract && (!hostDeployedContract || !deployedContractVerified))))}>Deploy</button>
                 </div>
             </div>
         )
