@@ -500,7 +500,7 @@ const Create = (props) => {
                         <option value={2250}>3 weeks</option>
                         <option value={3000}>1 month</option>
                         <option value={6000}>2 months</option>
-                        <option value={9000}>3 months</option>
+                        <option value={576000}>3 months</option>
                         <option value={18000}>6 months</option>
                         <option value={36000}>1 year</option>
                     </select>
