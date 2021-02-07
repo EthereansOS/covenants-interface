@@ -1,6 +1,11 @@
+import city from "../../../assets/images/city.png"
 const Footer = () => {
     return (
-        <div/>
+
+        <div className="Footer">
+            <p>SFeeqr re gqer qgw rrwq  rwqg rgqweg</p>
+            <img src={city}></img>
+        </div>
     )
 }
 

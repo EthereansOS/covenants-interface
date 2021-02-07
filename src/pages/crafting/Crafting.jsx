@@ -1,5 +1,5 @@
 import { PageContainer } from "../../components";
-import dragonImage from '../../assets/images/dragon.png';
+import dragonImage from '../../assets/images/4.png';
 import { Route, Switch } from "react-router-dom";
 import CraftingDapp from './dapp/dapp';
 

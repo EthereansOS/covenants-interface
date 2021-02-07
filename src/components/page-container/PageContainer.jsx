@@ -3,23 +3,23 @@ import PropTypes from 'prop-types';
 
 const PageContainer = (props) => {
     return (
-            <div className="page-container">
-                <div className="page-container-row">
-                    <div className="col-md-6 col-12 flex flex-column mb-4 mb-md-0" style={{justifyContent: 'space-evenly'}}>
+            <div className="page-container IndexRegular">
+                <div className="IndexRegularContents">
+                    <div className="IndexRegularText">
                         { props.title ? <h3><b>{props.title}</b></h3> : '' }
                         { props.text ? <p>{props.text}</p> : props.children }
                     </div>
                     { props.image ? 
-                        <div className="col-md-6 col-12 flex justify-content-center align-items-center my-4 my-md-0">
+                        <div className="IndexRegularImg">
                             <img src={props.image} height={props.imageHeight || 350} />
                         </div> : '' 
                     }
                 </div>
                 {
                     props.launchDapp ? 
-                    <div className="page-container-row">
+                    <div className="IndexRegularBTN">
                         <Link to={props.link}>
-                            <button className="btn btn-primary">DAPP</button>
+                            <button className="btn btn-Fantasy">DAPP</button>
                         </Link>
                     </div> : <div/>
                 }

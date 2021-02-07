@@ -1,5 +1,5 @@
 import { PageContainer } from "../../components";
-import wusdHomeImage from '../../assets/images/home-wusd.png';
+import wusdHomeImage from '../../assets/images/3.png';
 import { Route, Switch } from "react-router-dom";
 import DappWUSD from './dapp/dapp';
 

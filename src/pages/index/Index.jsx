@@ -1,4 +1,4 @@
-import dragonImage from '../../assets/images/dragon.png';
+import dragonImage from '../../assets/images/index.png';
 
 const lorem = 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Eaque quia consequuntur id magnam tempore animi eveniet quod dolor ipsa illo? Iure illo alias rem sapiente illum error laborum voluptatum quasi!';
 
