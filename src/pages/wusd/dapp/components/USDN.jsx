@@ -39,7 +39,7 @@ const USDN = (props) => {
         const wusdNote2Info = await contract.methods.wusdNote2Info().call();
         const wusdNote5Info = await contract.methods.wusdNote5Info().call();
         setx2USDNoteInfo(wusdNote2Info);
-        setx2USDNoteInfo(wusdNote5Info);
+        setx5USDNoteInfo(wusdNote5Info);
         const wusdCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement("INativeV1ABI"), wusdNote2Info[0]);
         setDecimals(await wusdCollection.methods.decimals().call());
 
@@ -76,25 +76,42 @@ const USDN = (props) => {
     const redeemX2 = async () => {
         if (x2Amount > x2USDTreasury) return;
         const x2USDCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), x2USDNoteInfo['0']);
-        const x2WeiAmount = props.dfoCore.fromDecimals(x2Amount, 18).toString();
-        await x2USDCollection.methods.safeBatchTransferFrom(props.dfoCore.address, x2USDNoteControllerContract.options.address, [x2USDNoteInfo['1']], [x2WeiAmount], "");
+        const from = props.dfoCore.address;
+        const to = x2USDNoteControllerContract.options.address;
+        const objectId = x2USDNoteInfo['1'];
+        const amount = props.dfoCore.toFixed(x2Amount.full).toString();
+        console.log(`from ${from}`);
+        console.log(`to ${to}`);
+        console.log(`object id ${objectId}`);
+        console.log(`amount ${amount}`);
+        const gasLimit = await x2USDCollection.methods.safeBatchTransferFrom(from, to, [objectId], [amount], "0x").estimateGas({ from: props.dfoCore.address});
+        const result = await x2USDCollection.methods.safeBatchTransferFrom(from, to, [objectId], [amount], "0x").send({ from: props.dfoCore.address, gasLimit });
+        console.log(result);
         await getData();
     }
 
     const redeemX5 = async () => {
         if (x5Amount > x5USDTreasury) return;
-        const x5USDCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), x2USDNoteInfo['0']);
-        await x5USDCollection.methods.safeBatchTransferFrom(props.dfoCore.address, x5USDNoteControllerContract.options.address, [x5USDNoteInfo['1']], [props.dfoCore.fromDecimals(x5Amount, 18).toString()], "");
+        const x5USDCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), x5USDNoteInfo['0']);
+        const from = props.dfoCore.address;
+        const to = x5USDNoteControllerContract.options.address;
+        const objectId = x5USDNoteInfo['1'];
+        const amount = props.dfoCore.toFixed(x5Amount.full).toString();
+        console.log(`from ${from}`);
+        console.log(`to ${to}`);
+        console.log(`object id ${objectId}`);
+        console.log(`amount ${amount}`);
+        const gasLimit = await x5USDCollection.methods.safeBatchTransferFrom(from, to, [objectId], [amount], "0x").estimateGas({ from: props.dfoCore.address })
+        const result = await x5USDCollection.methods.safeBatchTransferFrom(from, to, [objectId], [amount], "0x").send({ from: props.dfoCore.address, gasLimit });
+        console.log(result);
         await getData();
     }
 
     const onUpdateX2Value = (value) => {
-        console.log({ value, full: props.dfoCore.fromDecimals(parseFloat(value).toString() || "0", decimals)});
         setx2Amount({ value, full: props.dfoCore.fromDecimals(parseFloat(value).toString() || "0", decimals)})
     }
 
     const onUpdateX5Value = (value) => {
-        console.log({ value, full: props.dfoCore.fromDecimals(parseFloat(value).toString() || "0", decimals)});
         setx5Amount({ value, full: props.dfoCore.fromDecimals(parseFloat(value).toString() || "0", decimals)})
     }
 
