@@ -42,7 +42,9 @@ const Dapp = (props) => {
             <div className="dapp-container">
                 <div className="row">
                     <div className="col-12 dapp-col text-center justify-content-center">
+                        <p>You need a <a target="_blank" href="https://etherscan.io/directory/Wallet">web3-enabler</a> to use this Dapp - If you have problems connecting, refresh the page.</p>
                         <button className="btn btn-primary mx-4" onClick={() => connectCore()}>Connect</button>
+                        <p className="disclamer">Covenats is a protocol by <a href="https://ethereansos.eth.link">EthOS</a>. This is an R&D project <b>use it at your own risk!</b> This protocol is ruled by the <a href="https://dapp.dfohub.com/?addr=0xeFAa6370A2ebdC47B12DBfB5a07F91A3182B5684">Covenants DFO</a> A Fully On-Chain Organization, without any real world legal entity involved. If you find a bug, please help us to improve by our <a href="https://github.com/b-u-i-d-l">Github</a></p>
                     </div>
                 </div>
             </div>

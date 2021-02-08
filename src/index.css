@@ -49,15 +49,22 @@
 .CovLinks {margin-top: 10px; display: inline-block;}
 .CovLinks h5 {font-size: 15px; display: inline-block; font-weight: bold; width: 100%; margin-top: 20px;}
 .CovLinks a {font-size: 13px; display: inline-block; margin: 5px 5px; text-decoration: underline !important; cursor: pointer;}
-
+.ConnectBTN {display: inline-block;margin: 30px auto;text-align: center;cursor: pointer; background-image: linear-gradient(90deg, #00C0FF 0%, #FFCF00 49%, #FC4F4F 80%, #00C0FF 100%);color: #ffffff !important;text-shadow: #c0c0c0 1px 1px;text-decoration: none;cursor: auto;box-shadow: none;border: 1px solid transparent;outline: none;opacity: 1;padding: 10px 30px;border-radius: 12px;font-weight: 500;text-decoration: none;display: inline-block;animation: slidebg 10s linear infinite;}
+.Web3 {width: 80%; font-size: 15px; text-align: center;}
+.Web3 a {text-decoration: underline !important; color: #636363; font-weight: bold;}
 .CovAMMs {width: 30%; display: inline-block; vertical-align: middle; border: 1px solid #000000; border-radius: 8px; margin-left: 8%; padding: 20px 2%;}
 .CovAMMs a {font-size: 13px; display: inline-block; margin: 5px 5px; text-decoration: underline !important; cursor: pointer; width: 100%;}
-
+.disclamer {font-size: 9px; color: #636363; width: 60%; text-align: center;}
+.disclamer a {text-decoration: underline !important;}
 .fantasy {background-color: #4d4c4a !important;}
 .fantasy .LogoM {background-position: 0 -50px;}
 .fantasy .page-container {background-image: url(./assets/images/index.jpg) !important;}
 .fantasy .dapp-container {background-image: url(./assets/images/index.jpg) !important;}
-
+@keyframes slidebg {
+   to {
+     background-position:20vw;
+   }
+ }
 .fantasy .TitleCov {color: #ffffff;}
 .fantasy .fantasyMenu:hover, .fantasy .fantasyMenu {color: #ffffff;}
 .fantasy .BtnConnectAfter, .fantasy .BtnConnect,.fantasy .menuIconEth, .fantasy .ChangeMod {display: none !important;}
@@ -79,9 +86,9 @@
 .penguin .TitleCov {color: #ffffff;}
 .penguin .fantasyMenu:hover, .penguin .fantasyMenu {color: #ffffff;}
 .penguin .form-check-label, .penguin .infoList, .penguin .StatsBro, .penguin .StatsBroO {color: #ffffff;}
-.penguin .IndexRegular {color: #ffffff;}
+.penguin .IndexRegular, .penguin .Web3, .penguin .disclamer {color: #ffffff;}
 .penguin .Footer p {color: #adadad;}
-.penguin .Footer p a {font-weight: bold; color: #ffffff !important;}
+.penguin .Footer p a, .penguin .disclamer a {font-weight: bold; color: #ffffff !important;}
 .penguin .card {border: 1px solid #000000; color: #ffffff;}
 
 
@@ -97,5 +104,5 @@
 .magic .form-check-label {color: #000000;}
 .magic .IndexRegular {color: #000000;}
 .magic .Footer p {color: #636363;}
-.magic .Footer p a {font-weight: bold; color: #000000 !important;}
+.magic .Footer p a, .magic .disclamer a {font-weight: bold; color: #000000 !important;}
 .magic .card {border: 1px solid #aaaaaa; color: #000000;}
