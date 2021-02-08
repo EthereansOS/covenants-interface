@@ -125,8 +125,8 @@ const Burn = (props) => {
         }
         const chosenPair = pairs[pair];
         const { ammContract, liquidityPool, token0decimals, token1decimals, decimalsLp } = chosenPair;
-        const wusdAmount = props.dfoCore.fromDecimals(amount.toString(), 18);
-        console.log(wusdAmount);
+        setWusdAmount(props.dfoCore.fromDecimals(amount.toString(), 18));
+
         const res = await ammContract.methods.byLiquidityPool(liquidityPool).call();
 
         const tokensAmounts = res[1];
@@ -134,29 +134,25 @@ const Burn = (props) => {
         const updatedFirstTokenAmount = props.dfoCore.formatNumber(props.dfoCore.normalizeValue(tokensAmounts[0], token0decimals));
         const updatedSecondTokenAmount = props.dfoCore.formatNumber(props.dfoCore.normalizeValue(tokensAmounts[1], token1decimals));
 
-        const ratio = updatedFirstTokenAmount > updatedSecondTokenAmount ? updatedFirstTokenAmount / updatedSecondTokenAmount : updatedSecondTokenAmount / updatedFirstTokenAmount;
+        const liquidityPoolMaxRatio = updatedFirstTokenAmount > updatedSecondTokenAmount ? updatedFirstTokenAmount / updatedSecondTokenAmount : updatedSecondTokenAmount / updatedFirstTokenAmount;
         const maximumPairRatioPerBurn = await wusdExtensionController.methods.maximumPairRatioForBurn().call();
         const oneHundred = await wusdExtensionController.methods.ONE_HUNDRED().call()
 
-        if (parseFloat(ratio) > (parseInt(maximumPairRatioPerBurn) / parseInt(oneHundred))) {
-            setIsHealthyPair(false);
-            return;
+        if (parseFloat(liquidityPoolMaxRatio) > (parseInt(maximumPairRatioPerBurn) / parseInt(oneHundred))) {
+            return setIsHealthyPair(false);
         }
 
-        const wusdRealAmount =  props.dfoCore.numberToString((props.dfoCore.formatNumber(wusdAmount) * ratio) / 2).split('.')[0];
+        var token0WusdAmount = props.dfoCore.fromDecimals(amount.toString(), token0decimals);
 
-        const result = await ammContract.methods.byTokenAmount(liquidityPool, liquidityPoolTokens[0], wusdRealAmount).call();
-        const [token0, token1] = result.tokensAmounts;
-        const stableCoinOutput = window.web3.utils.toBN(props.dfoCore.normalizeValue(token0, token0decimals)).add(window.web3.utils.toBN(props.dfoCore.normalizeValue(token1, token1decimals))).toString();
-        const rate =  props.dfoCore.formatNumber(wusdAmount) / props.dfoCore.formatNumber(stableCoinOutput);
+        var byTokenAmountValue = await ammContract.methods.byTokenAmount(liquidityPool, liquidityPoolTokens[0], token0WusdAmount.toString()).call();
 
-        const text = props.dfoCore.numberToString(props.dfoCore.formatNumber(token0) * rate).split('.')[0];
+        var token0Amount = window.web3.utils.toBN(byTokenAmountValue[1][0]).div(window.web3.utils.toBN(2)).toString();
+        var token1Amount = window.web3.utils.toBN(byTokenAmountValue[1][1]).div(window.web3.utils.toBN(2)).toString();
+        var lpTokenAmount = window.web3.utils.toBN(byTokenAmountValue[0]).div(window.web3.utils.toBN(2)).toString();
 
-        const lpResult = await ammContract.methods.byTokenAmount(liquidityPool, liquidityPoolTokens[0], text).call();
-        console.log({ full: lpResult[0], value:  props.dfoCore.toDecimalsNormalizedFixed(lpResult[0], decimalsLp)});
-        setEstimatedToken0({ full: props.dfoCore.normalizeValue(lpResult[1][0], token0decimals), value: props.dfoCore.toDecimals(props.dfoCore.normalizeValue(lpResult[1][0], token0decimals), 18)});
-        setEstimatedToken1({ full: props.dfoCore.normalizeValue(lpResult[1][1], token1decimals), value: props.dfoCore.toDecimals(props.dfoCore.normalizeValue(lpResult[1][1], token1decimals), 18)});
-        setEstimatedLpToken({ full: lpResult[0], value: props.dfoCore.toDecimals(props.dfoCore.normalizeValue(lpResult[0], decimalsLp), 18)});
+        setEstimatedToken0({ full: props.dfoCore.normalizeValue(token0Amount, token0decimals), value: props.dfoCore.toDecimals(token0Amount , token0decimals)});
+        setEstimatedToken1({ full: props.dfoCore.normalizeValue(token1Amount, token1decimals), value: props.dfoCore.toDecimals(token1Amount, token1decimals)});
+        setEstimatedLpToken({ full: lpTokenAmount, value: props.dfoCore.toDecimals(lpTokenAmount, decimalsLp)});
     }
 
     const burnWUSD = async () => {
@@ -165,16 +161,13 @@ const Burn = (props) => {
             const info = await wusdExtensionController.methods.wusdInfo().call();
             const collectionAddress = info['0'];
             const wusdObjectId = info['1'];
-    
+
             const wusdCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), collectionAddress);
-    
-            const { token0decimals, token1decimals } = pairs[pair];
-            const wusd = window.web3.utils.toBN(props.dfoCore.normalizeValue(estimatedToken0.full, token0decimals)).add(window.web3.utils.toBN(props.dfoCore.normalizeValue(estimatedToken1.full, token1decimals))).toString();
-            console.log(wusd);
             const burnData = abi.encode(["uint256","uint256","uint256","bool"], [pairs[pair].ammIndex, pairs[pair].lpIndex, estimatedLpToken.full, getLpToken])
             const data = abi.encode(["uint256", "bytes"], [0, burnData]);
-            const gasLimit = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusd], abi.encode(["bytes[]"], [[data]])).estimateGas({ from: props.dfoCore.address});
-            const res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusd], abi.encode(["bytes[]"], [[data]])).send({ from: props.dfoCore.address, gasLimit });
+
+            const gasLimit = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusdAmount], abi.encode(["bytes[]"], [[data]])).estimateGas({ from: props.dfoCore.address});
+            const res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusdAmount], abi.encode(["bytes[]"], [[data]])).send({ from: props.dfoCore.address, gasLimit });
             console.log(res);
             await getController();
         } catch (error) {
