@@ -126,7 +126,7 @@ const Burn = (props) => {
         const chosenPair = pairs[pair];
         const { ammContract, liquidityPool, token0decimals, token1decimals, decimalsLp } = chosenPair;
         const wusdAmount = props.dfoCore.fromDecimals(amount.toString(), 18);
-
+        console.log(wusdAmount);
         const res = await ammContract.methods.byLiquidityPool(liquidityPool).call();
 
         const tokensAmounts = res[1];
@@ -169,9 +169,9 @@ const Burn = (props) => {
             const wusdCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), collectionAddress);
     
             const { token0decimals, token1decimals } = pairs[pair];
-            const wusd = window.web3.utils.toBN(props.dfoCore.normalizeValue(estimatedToken0, token0decimals)).add(window.web3.utils.toBN(props.dfoCore.normalizeValue(estimatedToken1, token1decimals))).toString();
-    
-            const burnData = abi.encode(["uint256","uint256","uint256","bool"], [pairs[pair].ammIndex, pairs[pair].lpIndex, estimatedLpToken, getLpToken])
+            const wusd = window.web3.utils.toBN(props.dfoCore.normalizeValue(estimatedToken0.full, token0decimals)).add(window.web3.utils.toBN(props.dfoCore.normalizeValue(estimatedToken1.full, token1decimals))).toString();
+            console.log(wusd);
+            const burnData = abi.encode(["uint256","uint256","uint256","bool"], [pairs[pair].ammIndex, pairs[pair].lpIndex, estimatedLpToken.full, getLpToken])
             const data = abi.encode(["uint256", "bytes"], [0, burnData]);
             const gasLimit = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusd], abi.encode(["bytes[]"], [[data]])).estimateGas({ from: props.dfoCore.address});
             const res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusd], abi.encode(["bytes[]"], [[data]])).send({ from: props.dfoCore.address, gasLimit });
@@ -242,7 +242,7 @@ const Burn = (props) => {
                         <div className="col-12 col-md-6">
                             {
                                 burnLoading ? <button className="btn btn-secondary" disabled={burnLoading}>
-                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                 </button> : <button onClick={() => burnWUSD()} disabled={!amount.full || !amount.value || amount.value === 0 || amount.full === 0} className="btn btn-secondary">Burn</button>
                             }
                         </div>

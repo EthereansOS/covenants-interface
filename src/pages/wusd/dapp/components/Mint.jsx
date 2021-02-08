@@ -281,8 +281,7 @@ const Mint = (props) => {
                     <div className={`col-12 ${(!useLpToken && firstTokenApproved && secondTokenApproved) || (useLpToken && lpTokenApproved) ? "" : "col-md-6"}`}>
                         {
                             mintLoading ? <button className="btn btn-secondary" disabled={mintLoading}>
-                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                <span class="sr-only">Loading...</span>
+                                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                             </button>
                             : 
                             <button className="btn btn-secondary" onClick={() => mintWUSD()} disabled={((!firstAmount.value || !secondAmount.value) && !lpTokenAmount.value) || !firstTokenApproved || !secondTokenApproved}>Mint</button>
