@@ -34,6 +34,10 @@ code {
   box-shadow: unset !important;
 }
 
+.spinner-border-sm {
+  margin-bottom: 3px;
+}
+
 .custom-select:focus {
   box-shadow: unset !important;
   border-color: $secondary;

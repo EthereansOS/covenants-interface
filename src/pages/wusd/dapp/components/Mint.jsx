@@ -61,7 +61,7 @@ const Mint = (props) => {
                             setSecondTokenBalance(props.dfoCore.toDecimals(balance1, parseInt(token1decimals)));
                             pools.push({ ammContract, ammName: ammInfo[0], ammIndex, lpIndex, totalAmount, symbolLp, token0Amount, token1Amount, lpContract, liquidityPool, token0, token1, symbol0, symbol1, token0decimals, token1decimals, decimalsLp, token0Contract, token1Contract });
                         } catch (error) {
-                            console.log(error);
+                            console.error(error);
                         }
                     }));
                     allowedPairs = [...allowedPairs, ...pools ];
@@ -69,7 +69,7 @@ const Mint = (props) => {
                     console.error(error);
                 }
             }))
-            allowedPairs = allowedPairs.sort((a, b) => a.ammName.localeCompare(b.ammName));
+            allowedPairs = allowedPairs.sort((a, b) => (a.ammName + a.symbol0 + a.symbol1).localeCompare(b.ammName + b.symbol0 + b.symbol1));
             setPairs(allowedPairs);
         } catch (error) {
             console.error(error);
@@ -125,7 +125,7 @@ const Mint = (props) => {
                 const maximumPairRatioForMint = await wusdExtensionController.methods.maximumPairRatioForMint().call();
                 const oneHundred = await wusdExtensionController.methods.ONE_HUNDRED().call()
                 
-                console.log(parseFloat(ratio), (parseInt(maximumPairRatioForMint) / parseInt(oneHundred)));
+                
                 if (parseFloat(ratio) > (parseInt(maximumPairRatioForMint) / parseInt(oneHundred))) {
                     setIsHealthyPair(false);
                 } else {
@@ -146,11 +146,11 @@ const Mint = (props) => {
             if ((firstAmount.value > 0 && secondAmount.value > 0) || lpTokenAmount.value > 0) {
                 const chosenPair = pairs[pair];
                 const { ammIndex, lpIndex, token0Contract, token1Contract, token0decimals, token1decimals } = chosenPair;
-                console.log(`amm index: ${ammIndex}`);
-                console.log(`lp index ${lpIndex}`);
-                console.log(`lp amount ${lpTokenAmount.full.toString()}`);
-                console.log(`first token amount ${firstAmount.full.toString()}`);
-                console.log(`second token amount ${firstAmount.full.toString()}`);
+                
+                
+                
+                
+                
                 const gasLimit = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), false).estimateGas({ from: props.dfoCore.address });
                 const result = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), false).send({ from: props.dfoCore.address, gasLimit });
                 const balance0 = await token0Contract.methods.balanceOf(props.dfoCore.address).call();
@@ -266,16 +266,16 @@ const Mint = (props) => {
                     <div className="col-12 col-md-6">
                         {
                             (!useLpToken && !firstTokenApproved) ? 
-                                <ApproveButton contract={pairs[pair].token0Contract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.log(error)} onApproval={() => onTokenApproval('first')} text={`Approve ${pairs[pair].symbol0}`} />
+                                <ApproveButton contract={pairs[pair].token0Contract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={() => onTokenApproval('first')} text={`Approve ${pairs[pair].symbol0}`} />
                                 :
                                 (!useLpToken && !secondTokenApproved) ?
-                                    <ApproveButton contract={pairs[pair].token1Contract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.log(error)} onApproval={() => onTokenApproval('second')} text={`Approve ${pairs[pair].symbol1}`} />
+                                    <ApproveButton contract={pairs[pair].token1Contract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={() => onTokenApproval('second')} text={`Approve ${pairs[pair].symbol1}`} />
                                 : <div/>
                         }
                         
                         {
                             (useLpToken && !lpTokenApproved) && 
-                                <ApproveButton contract={pairs[pair].lpContract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.log(error)} onApproval={() => onTokenApproval('first')} text={`Approve ${pairs[pair].symbolLp}`} />
+                                <ApproveButton contract={pairs[pair].lpContract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={() => onTokenApproval('first')} text={`Approve ${pairs[pair].symbolLp}`} />
                         }
                     </div>
                     <div className={`col-12 ${(!useLpToken && firstTokenApproved && secondTokenApproved) || (useLpToken && lpTokenApproved) ? "" : "col-md-6"}`}>

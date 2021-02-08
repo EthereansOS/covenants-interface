@@ -6,6 +6,7 @@ const Farm = (props) => {
     const [loading, setLoading] = useState(false);
     const [farmingContracts, setFarmingContracts] = useState([]);
 
+    /*
     useEffect(() => {
         getFarmingSetups();
     }, []);
@@ -20,6 +21,7 @@ const Farm = (props) => {
             setLoading(false);
         }
     }
+    */
 
     if (loading) {
         return (
@@ -38,17 +40,24 @@ const Farm = (props) => {
     return (
         <div className="dapp-container">
             <div className="row">
+                <div className="col-12 text-left">
+                    <h6><b>No farming contract available!</b></h6>
+                </div>
                 {
-                    farmingContracts.length === 0 && <div className="col-12 text-left">
-                        <h6><b>No farming contract available!</b></h6>
-                    </div>
-                }
-                {
-                    farmingContracts.length > 0 && farmingContracts.map((farmingContract) => {
-                        return (
-                            <FarmingComponent className="col-12 mb-4" dfoCore={props.dfoCore} contract={farmingContract} hasBorder />
-                        )
-                    })
+                    /* 
+                        {
+                            farmingContracts.length === 0 && <div className="col-12 text-left">
+                                <h6><b>No farming contract available!</b></h6>
+                            </div>
+                        }
+                        {
+                            farmingContracts.length > 0 && farmingContracts.map((farmingContract) => {
+                                return (
+                                    <FarmingComponent className="col-12 mb-4" dfoCore={props.dfoCore} contract={farmingContract} hasBorder />
+                                )
+                            })
+                        }
+                    */
                 }
             </div>
         </div>

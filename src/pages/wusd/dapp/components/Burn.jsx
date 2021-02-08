@@ -66,7 +66,7 @@ const Burn = (props) => {
                 }));
                 allowedPairs = [...allowedPairs, ...pools ];
             }))
-            allowedPairs = allowedPairs.sort((a, b) => a.ammName.localeCompare(b.ammName));
+            allowedPairs = allowedPairs.sort((a, b) => (a.ammName + a.symbol0 + a.symbol1).localeCompare(b.ammName + b.symbol0 + b.symbol1));
             const wusdContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("ERC20ABI"), props.dfoCore.getContextElement("WUSDAddress"));
             const balance = await wusdContract.methods.balanceOf(props.dfoCore.address).call();
             const approval = await wusdContract.methods.allowance(props.dfoCore.address, props.dfoCore.getContextElement("WUSDExtensionControllerAddress")).call();

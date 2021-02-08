@@ -15,7 +15,6 @@ const Stats = (props) => {
     const [farmTreasury, setFarmTreasury] = useState(0);
     const [farmReward, setFarmReward] = useState(0);
     const [newFarmReward, setNewFarmReward] = useState(0);
-    const [unifiTreasury, setUnifiTreasury] = useState(0);
     const [rebalanceReward, setRebalanceReward] = useState(0);
     const [currentBlock, setCurrentBlock] = useState(0);
     const [rebalanceBlock, setRebalanceBlock] = useState(0);
@@ -100,9 +99,9 @@ const Stats = (props) => {
             farmTotalPercentage = props.dfoCore.toDecimals(props.dfoCore.toFixed(farmTotalPercentage));
             perc[2] = props.dfoCore.toDecimals(info[2]);
             perc[3] = farmTotalPercentage;
+            
             setPercentages(perc);
 
-            setUnifiTreasury(0);
             const lastRebalanceBlock = await contract.methods.lastRebalanceByCreditBlock().call();
             const interval = await contract.methods.rebalanceByCreditBlockInterval().call();
             setCurrentBlock(await props.dfoCore.getBlockNumber());
@@ -111,7 +110,8 @@ const Stats = (props) => {
             } else {
                 setRebalanceBlock(parseInt(lastRebalanceBlock) + parseInt(interval));
             }
-            setShowCredit(parseInt(differences.credit) && (parseInt(lastRebalanceBlock) + parseInt(interval) <= await props.dfoCore.getBlockNumber()));
+            // setShowCredit(parseInt(differences.credit) && (parseInt(lastRebalanceBlock) + parseInt(interval) <= await props.dfoCore.getBlockNumber()));
+            setShowCredit(true);
             await getCollateralData(contract, supply);
         } catch (error) {
             console.error(error);
@@ -163,35 +163,41 @@ const Stats = (props) => {
     }
 
     const rebalanceByCredit = async () => {
+        setLoading(true);
         try {
             const gasLimit = await wusdExtensionController.methods.rebalanceByCredit().estimateGas({ from: props.dfoCore.address });
             await wusdExtensionController.methods.rebalanceByCredit().send({ from: props.dfoCore.address, gasLimit });
             await getStats();
         } catch (error) {
             console.error(error);
+        } finally {
+            setLoading(false);
         }
     }
 
     const rebalanceByDebit = async () => {
+        setLoading(true);
         try {
             const info = await wusdExtensionController.methods.wusdInfo().call();
             const collectionAddress = info['0'];
             const wusdObjectId = info['1'];
 
             const wusdCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), collectionAddress);
-            console.log(`selected usdn is ${selectedUsdn === "x2" ? 2 : 5}`);
+            
             const byDebtData = abi.encode(["uint256"], [selectedUsdn === "x2" ? 2 : 5]);
-            console.log(`by debt data is ${byDebtData}`);
+            
             const data = abi.encode(["uint256", "bytes"], [1, byDebtData]);
-            console.log(`final encoded data is ${data}`);
-            console.log(`wusd object id ${wusdObjectId}`);
+            
+            
             const amount = props.dfoCore.web3.utils.toBN(props.dfoCore.toFixed(usdRebalanceByDebit.full)).toString();
-            console.log(`sending amount ${amount}`);
+            
             const gasLimit = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [amount], abi.encode(["bytes[]"], [[data]])).estimateGas({ from: props.dfoCore.address});
             const res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [amount], abi.encode(["bytes[]"], [[data]])).send({ from: props.dfoCore.address, gasLimit });
             await getStats();
         } catch (error) {
             console.error(error);
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -218,7 +224,7 @@ const Stats = (props) => {
                                 <b>Supply</b>
                             </div>
                             <div className="col-12 infoList">
-                                { totalSupply ? props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(totalSupply), 18), 4) : totalSupply } WUSD
+                                { totalSupply ? props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(totalSupply), 18), 2) : totalSupply } WUSD
                             </div>
                         </div>
                         <hr />
@@ -230,7 +236,7 @@ const Stats = (props) => {
                                 {
                                     (collateralData && collateralData.collateral) ?
                                         Object.entries(collateralData.collateral).map((entry, i) => {
-                                            return <p key={entry[0]}>{props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(entry[1]).toString()), 4)} {entry[0]}</p>
+                                            return <p key={entry[0]}>{props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(entry[1]).toString()), 2)} {entry[0]}</p>
                                         })
                                     : <div/>
                                 }
@@ -361,16 +367,24 @@ const Stats = (props) => {
                     <div className="row mb-4">
                         <div className="col-6 text-left">
                             <b>Available credit</b>
+                            {
+                                /* 
+                                    <br/>
+                                    {props.dfoCore.formatMoney(farmTreasury * percentages[2], 2)} uSD Farm treasury
+                             */
+                            }
                             <br/>
-                            {farmTreasury} uSD Farm treasury
+                            {props.dfoCore.formatMoney(props.dfoCore.toDecimals(credit * percentages[0], wusdDecimals), 2)} x2USD treasury
                             <br/>
-                            {x2USDTreasury} x2USD treasury
+                            {props.dfoCore.formatMoney(props.dfoCore.toDecimals(credit * percentages[1], wusdDecimals), 2)} x5USD treasury
                             <br/>
-                            {x5USDTreasury} x5USD treasury
+                            {
+                            props.dfoCore.formatMoney(props.dfoCore.toDecimals(credit, wusdDecimals) 
+                                - props.dfoCore.toDecimals(credit * percentages[0], wusdDecimals) 
+                                - props.dfoCore.toDecimals(credit * percentages[1], wusdDecimals) 
+                                - props.dfoCore.toDecimals(credit * percentages[2], wusdDecimals), 2)} Unifi treasury
                             <br/>
-                            {unifiTreasury} Unifi treasury
-                            <br/>
-                            {parseFloat(credit) - parseFloat(unifiTreasury) - parseFloat(x2USDTreasury) - parseFloat(x5USDTreasury) - parseFloat(farmTreasury)} uSD rebalance reward
+                            {props.dfoCore.formatMoney(props.dfoCore.toDecimals(credit * percentages[2], wusdDecimals), 2)} uSD rebalance reward
                         </div>
                         <div className="col-6">
                             {
@@ -386,7 +400,7 @@ const Stats = (props) => {
                                         <button className="btn btn-outline-secondary" onClick={() => rebalanceByCredit()} disabled={rebalanceBlock > currentBlock}>Rebalance</button>
                                     </div>
                                     <div className="row justify-content-center">
-                                       Reward: {credit * (2/100)}
+                                       Reward: {props.dfoCore.formatMoney(props.dfoCore.toDecimals(credit * percentages[2], wusdDecimals), 2)}
                                     </div>
                                 </> : <div className="row mb-2">
                                     <div className="col-12">
@@ -400,7 +414,7 @@ const Stats = (props) => {
                             
                         </div>
                     </div>    
-                    <hr/>
+                    { /* <hr/> */ }
                 </>
             );
         } else if (showDebt) {
@@ -437,7 +451,7 @@ const Stats = (props) => {
                         }
                     </div>
                 </div>   
-                <hr/>
+                { /* <hr/> */ }
                 </>
             );
         } else {

@@ -93,7 +93,7 @@ export default {
               }
           }
       }
-  },
+    },
     "indexesURL": "https://raw.githubusercontent.com/b-u-i-d-l/bazar-tokens-list/master/dist/indexes.json",
     "decentralizedFlexibleOrganizationsURL": "https://raw.githubusercontent.com/b-u-i-d-l/bazar-tokens-list/master/dist/decentralizedFlexibleOrganizations.json",
     "decentralizedFlexibleOrganizationsURLRopsten": "https://raw.githubusercontent.com/b-u-i-d-l/bazar-tokens-list/master/dist/programmableEquities.json",
@@ -154,11 +154,13 @@ export default {
     "dfoProxyAddress": "0xeFAa6370A2ebdC47B12DBfB5a07F91A3182B5684",
     "uniswapAmmAddress": "0x2c56AD11c59A92F467966064121066913b2c1522",
     "WUSDAddress": "0x7c974104df9dd7fb91205ab3d66d15aff1049de8",
-    "WUSDIcon": "https://ipfs.io/ipfs/QmXjPmCChUCNeMSoRpSb3wKUARxbucZSQ3W5sZwMf749RX",
+    "icons": {
+        "0x7c974104df9dd7fb91205ab3d66d15aff1049de8": "https://gateway.ipfs.io/ipfs/QmXjPmCChUCNeMSoRpSb3wKUARxbucZSQ3W5sZwMf749RX",
+        "0xa4d9c768e1c6cabb127a6326c0668b49235639e8": "https://gateway.ipfs.io/ipfs/QmS377M8hhRYEMrDNuko1h5htnhHAjT5gFUHWAgB2UP765",
+        "0x0473f6ea742448ec9433b87ac410d79c08198abe": "https://gateway.ipfs.io/ipfs/QmeT8f6M4dgKWWKzeUXLRrxSVam5NbYA2yxsHgS3vbBAmF"
+    },
     "x2USDAddress": "0xa4d9c768e1c6cabb127a6326c0668b49235639e8",
-    "x2USDIcon": "https://ipfs.io/ipfs/QmS377M8hhRYEMrDNuko1h5htnhHAjT5gFUHWAgB2UP765",
     "x5USDAddress": "0x0473f6ea742448ec9433b87ac410d79c08198abe",
-    "x5USDAddress": "https://ipfs.io/ipfs/QmeT8f6M4dgKWWKzeUXLRrxSVam5NbYA2yxsHgS3vbBAmF",
     "x2USDNoteControllerAddress": "0x88a012e4d2b8600cf82e21f0685ec2ebcf643847",
     "x5USDNoteControllerAddress": "0x7fcb2c6bed43029e8a8a0d700539f47ecb6e0f4c",
     "ammAggregatorAddress": "0x81391d117a03A6368005e447197739D06550D4CD",
