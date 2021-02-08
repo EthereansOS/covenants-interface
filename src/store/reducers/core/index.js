@@ -1,15 +1,15 @@
 import { 
     SET_DFO_CORE, 
     REMOVE_DFO_CORE, 
-    ADD_PENDING_TRANSACTION, 
-    REMOVE_PENDING_TRANSACTION,
-    CLEAR_PENDING_TRANSACTIONS,
+    ADD_TRANSACTION, 
+    REMOVE_TRANSACTION,
+    CLEAR_TRANSACTIONS,
     SET_MAGIC_VISUAL_MODE
 } from '../../types';
 
 const initialState = {
     dfoCore: null,
-    pendingTransactions: []
+    transactions: []
 }
 
 export const coreReducer = (state = initialState, action) => {
@@ -29,18 +29,20 @@ export const coreReducer = (state = initialState, action) => {
                 ...state,
                 magicMode: action.payload,
             }
-        case ADD_PENDING_TRANSACTION:
-            state.pendingTransactions.push(action.payload.transaction);
-            return state;
-        case REMOVE_PENDING_TRANSACTION:
+        case ADD_TRANSACTION:
             return {
                 ...state,
-                pendingTransactions: state.pendingTransactions.filter((t, i) => i !== action.payload.transactionIndex),
+                transactions: state.transactions.concat(action.payload.transaction),
             }
-        case CLEAR_PENDING_TRANSACTIONS:
+        case REMOVE_TRANSACTION:
             return {
                 ...state,
-                pendingTransactions: []
+                transactions: state.transactions.filter((t, i) => i !== action.payload.transactionIndex),
+            }
+        case CLEAR_TRANSACTIONS:
+            return {
+                ...state,
+                transactions: []
             }
         default:
             return state;

@@ -1,10 +1,13 @@
 import PropTypes from 'prop-types';
+import { useState } from 'react';
 
 const ApproveButton = (props) => {
     const { contract, spender, from, text, onApproval, isERC1155, onError, disabled } = props;
+    const [loading, setLoading] = useState(false);
 
     const approveContract = async () => {
         console.log(spender, from);
+        setLoading(true);
         if (!isERC1155) {
             try {
                 const approval = await contract.methods.allowance(from, spender).call();
@@ -15,23 +18,29 @@ const ApproveButton = (props) => {
                 const totalSupply = await contract.methods.totalSupply().call();
                 const gas = await contract.methods.approve(spender, totalSupply).estimateGas({ from });
                 const approve = await contract.methods.approve(spender, totalSupply).send({ from, gas });
+                setLoading(false);
                 onApproval(approve);
             } catch (error) {
+                setLoading(false);
                 onError(error);
             }
         } else {
             try {
                 const gas = await contract.methods.setApprovalForAll(spender, true).estimateGas({ from });
                 const approve = await contract.methods.setApprovalForAll(spender, true).send({ from, gas });
+                setLoading(false);
                 onApproval(approve);
             } catch (error) {
+                setLoading(false);
                 onError(error);
             }
         }
     }
 
     return (
-        <button onClick={() => approveContract()} disabled={disabled} className="btn btn-primary approve-btn">{ text || "Approve" }</button>
+        loading ? <button className="btn btn-primary approve-btn" disabled={loading}>
+            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        </button> : <button onClick={() => approveContract()} disabled={disabled} className="btn btn-primary approve-btn">{ text || "Approve" }</button>
     )
 }
 

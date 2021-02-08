@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { connect } from 'react-redux';
 import { useEffect } from 'react/cjs/react.development';
 import { ApproveButton, Input } from '../../../../components';
+import { addTransaction } from '../../../../store/actions';
 
 const Mint = (props) => {
     const [pair, setPair] = useState("");
@@ -84,7 +85,8 @@ const Mint = (props) => {
         setLpTokenAmount({ value: 0, full: 0});
     }
 
-    const onTokenApproval = (type) => {
+    const onTokenApproval = (type, res) => {
+        props.addTransaction(res);
         switch (type) {
             case 'first':
                 setFirstTokenApproved(true);
@@ -147,12 +149,9 @@ const Mint = (props) => {
                 const chosenPair = pairs[pair];
                 const { ammIndex, lpIndex, token0Contract, token1Contract, token0decimals, token1decimals } = chosenPair;
                 
-                
-                
-                
-                
                 const gasLimit = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), false).estimateGas({ from: props.dfoCore.address });
                 const result = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), false).send({ from: props.dfoCore.address, gasLimit });
+                props.addTransaction(result);
                 const balance0 = await token0Contract.methods.balanceOf(props.dfoCore.address).call();
                 const balance1 = await token1Contract.methods.balanceOf(props.dfoCore.address).call();
                 setFirstTokenBalance(props.dfoCore.toDecimals(balance0, parseInt(token0decimals)));
@@ -266,16 +265,16 @@ const Mint = (props) => {
                     <div className="col-12 col-md-6">
                         {
                             (!useLpToken && !firstTokenApproved) ? 
-                                <ApproveButton contract={pairs[pair].token0Contract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={() => onTokenApproval('first')} text={`Approve ${pairs[pair].symbol0}`} />
+                                <ApproveButton contract={pairs[pair].token0Contract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('first', res)} text={`Approve ${pairs[pair].symbol0}`} />
                                 :
                                 (!useLpToken && !secondTokenApproved) ?
-                                    <ApproveButton contract={pairs[pair].token1Contract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={() => onTokenApproval('second')} text={`Approve ${pairs[pair].symbol1}`} />
+                                    <ApproveButton contract={pairs[pair].token1Contract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('second', res)} text={`Approve ${pairs[pair].symbol1}`} />
                                 : <div/>
                         }
                         
                         {
                             (useLpToken && !lpTokenApproved) && 
-                                <ApproveButton contract={pairs[pair].lpContract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={() => onTokenApproval('first')} text={`Approve ${pairs[pair].symbolLp}`} />
+                                <ApproveButton contract={pairs[pair].lpContract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('first', res)} text={`Approve ${pairs[pair].symbolLp}`} />
                         }
                     </div>
                     <div className={`col-12 ${(!useLpToken && firstTokenApproved && secondTokenApproved) || (useLpToken && lpTokenApproved) ? "" : "col-md-6"}`}>
@@ -358,4 +357,10 @@ const mapStateToProps = (state) => {
     return { dfoCore: core.dfoCore };
 }
 
-export default connect(mapStateToProps)(Mint);
+const mapDispatchToProps = (dispatch) => {
+    return {
+        addTransaction: (index) => dispatch(addTransaction(index))
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Mint);

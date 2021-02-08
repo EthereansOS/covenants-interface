@@ -11,7 +11,7 @@ const Grimoire = () => {
 
     return (
         <>
-            <PageContainer image={homeInflationImage} onClick={() => setShowGrimoire(!showGrimoire)} imageHeight={300} text={lorem} title={"Grimoire"}  buttonText={!showGrimoire ? "Read" : "Hide"} />
+            <PageContainer image={homeInflationImage} buttonEnabled={true} onClick={() => setShowGrimoire(!showGrimoire)} imageHeight={300} text={lorem} title={"Grimoire"}  buttonText={!showGrimoire ? "Read" : "Hide"} />
             {
                 showGrimoire && <div style={{width: 400, height: 400, backgroundColor: 'white'}}>
                     Dio porco 

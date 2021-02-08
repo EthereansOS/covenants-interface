@@ -1,0 +1,33 @@
+import { connect } from 'react-redux';
+import { removeTransaction } from '../../../store/actions';
+
+const Transactions = (props) => {
+    const { etherscanURL } = require('../../../data/context.json').default;
+
+    return <div>
+        {
+            props.transactions.map((transaction, index) => {
+                console.log(transaction);
+                return <div className="success">
+                    <p>Lorem ipsum</p>
+                    <a href={`${etherscanURL}tx/${transaction.transactionHash}`} className="link">View on Etherscan</a>
+                    <a onClick={() => props.removeTransaction(index)} className="close">X</a>
+                </div>
+            })
+        }
+    </div>
+}
+
+const mapStateToProps = (state) => {
+    const { core } = state;
+    const { transactions } = core;
+    return { transactions };
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        removeTransaction: (index) => dispatch(removeTransaction(index))
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Transactions);
