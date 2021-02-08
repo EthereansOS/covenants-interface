@@ -81,17 +81,6 @@ const Burn = (props) => {
         }
     }
 
-    const onTokenApproval = (type) => {
-        switch (type) {
-            case 'wusd':
-                setWusdApproved(true);
-            default:
-                setPairs(pairs.map((pair, i) => i === parseInt(type) ? {...pair, lpTokenApproved: true} : pair));
-                return;
-        }
-    }
-
-
     const setChosenPair = async (pairIndex) => {
         setLoading(true);
         try {
@@ -129,7 +118,7 @@ const Burn = (props) => {
     }
 
     const onWUSDAmountChange = async (amount) => {
-        setAmount(amount);
+        setAmount({ value: amount, full: props.dfoCore.fromDecimals(amount.toString(), 18)});
         if (!amount || parseFloat(amount) <= 0) {
             clearTokens();
             return;
@@ -254,7 +243,7 @@ const Burn = (props) => {
                             {
                                 burnLoading ? <button className="btn btn-secondary" disabled={burnLoading}>
                                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                </button> : <button onClick={() => burnWUSD()} disabled={!amount.full || !amount.value} className="btn btn-secondary">Burn</button>
+                                </button> : <button onClick={() => burnWUSD()} disabled={!amount.full || !amount.value || amount.value === 0 || amount.full === 0} className="btn btn-secondary">Burn</button>
                             }
                         </div>
                 </div>

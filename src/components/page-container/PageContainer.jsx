@@ -23,7 +23,7 @@ const PageContainer = (props) => {
                         </Link>
                     </div> : !props.hideButton ?
                     <div className="IndexRegularBTN">
-                        <button className="btn btn-Fantasy" onClick={() => props.onClick ? props.onClick() : console.log('Coming soon.')}>{ props.buttonText}</button>
+                        <button className="btn btn-Fantasy" disabled={!props.buttonEnabled} onClick={() => props.onClick ? props.onClick() : console.log('Coming soon.')}>{ props.buttonText}</button>
                     </div> : <div/>
                 }
             </div>
