@@ -1,9 +1,9 @@
 import { 
     SET_DFO_CORE, 
     REMOVE_DFO_CORE, 
-    ADD_PENDING_TRANSACTION, 
-    REMOVE_PENDING_TRANSACTION,
-    CLEAR_PENDING_TRANSACTIONS,
+    ADD_TRANSACTION, 
+    REMOVE_TRANSACTION,
+    CLEAR_TRANSACTIONS,
     SET_MAGIC_VISUAL_MODE
 } from '../../types';
 
@@ -34,22 +34,22 @@ export const removeMagicVisualMode = () => {
     }
 }
 
-export const addPendingTransaction = (transaction) => {
+export const addTransaction = (transaction) => {
     return {
-        type: ADD_PENDING_TRANSACTION,
+        type: ADD_TRANSACTION,
         payload: { transaction },
     }
 }
 
-export const removePendingTransaction = (transactionIndex) => {
+export const removeTransaction = (transactionIndex) => {
     return {
-        type: REMOVE_PENDING_TRANSACTION,
+        type: REMOVE_TRANSACTION,
         payload: { transactionIndex },
     }
 }
 
-export const clearPendingTransactions = () => {
+export const clearTransactions = () => {
     return {
-        type: CLEAR_PENDING_TRANSACTIONS,
+        type: CLEAR_TRANSACTIONS,
     }
 }

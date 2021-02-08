@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { useState } from 'react';
-import { Header, Footer, PageNotFound, Sidemenu } from './components';
+import { Header, Footer, PageNotFound, Sidemenu, Transactions } from './components';
 import { ArbitragePage, BazaarPage, CraftingPage, GrimoirePage, MorePage, IndexPage, MultiswapPage, FarmPage, InflationPage, WUSDPage } from './pages';
 import { useEffect } from 'react/cjs/react.development';
 
@@ -37,6 +37,7 @@ const App = (props) => {
 
   return (
     <div className={`app`}>
+      <Transactions />
       <Header />
       <div className="container app-container">
         <div className="row app-row w-100 align-items-start">

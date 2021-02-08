@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { ApproveButton, Input } from '../../../../components';
+import { addTransaction } from '../../../../store/actions';
 
 const USDN = (props) => {
     const [x2Amount, setx2Amount] = useState(0);
@@ -99,7 +100,7 @@ const USDN = (props) => {
             console.log(`amount ${amount}`);
             const gasLimit = await x2USDCollection.methods.safeBatchTransferFrom(from, to, [objectId], [amount], "0x").estimateGas({ from: props.dfoCore.address});
             const result = await x2USDCollection.methods.safeBatchTransferFrom(from, to, [objectId], [amount], "0x").send({ from: props.dfoCore.address, gasLimit });
-            console.log(result);
+            props.addTransaction(result);
             await getData();
         } catch (error) {
             console.error(error);
@@ -124,7 +125,7 @@ const USDN = (props) => {
             console.log(`amount ${amount}`);
             const gasLimit = await x5USDCollection.methods.safeBatchTransferFrom(from, to, [objectId], [amount], "0x").estimateGas({ from: props.dfoCore.address })
             const result = await x5USDCollection.methods.safeBatchTransferFrom(from, to, [objectId], [amount], "0x").send({ from: props.dfoCore.address, gasLimit });
-            console.log(result);
+            props.addTransaction(result);
             await getData();
         } catch (error) {
             console.error(error);
@@ -149,17 +150,6 @@ const USDN = (props) => {
                 return parseInt(x5Amount.full) * multipliers[1] > parseInt(props.dfoCore.toFixed(props.dfoCore.fromDecimals(x5USDTreasury)));
             default:
                 return true;
-        }
-    }
-
-    const onTokenApproval = (type) => {
-        switch (type) {
-            case 'x2':
-                setx2Approved(true);
-            case 'x5':
-                setx5Approved(true);
-            default:
-                return;
         }
     }
 
@@ -286,4 +276,10 @@ const mapStateToProps = (state) => {
     return { dfoCore: core.dfoCore };
 }
 
-export default connect(mapStateToProps)(USDN);
+const mapDispatchToProps = (dispatch) => {
+    return {
+        addTransaction: (index) => dispatch(addTransaction(index))
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(USDN);

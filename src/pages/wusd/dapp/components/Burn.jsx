@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { ApproveButton, Input } from '../../../../components';
 import { ethers } from 'ethers';
+import { addTransaction } from '../../../../store/actions';
 
 const abi = new ethers.utils.AbiCoder();
 
@@ -168,7 +169,7 @@ const Burn = (props) => {
 
             const gasLimit = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusdAmount], abi.encode(["bytes[]"], [[data]])).estimateGas({ from: props.dfoCore.address});
             const res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusdAmount], abi.encode(["bytes[]"], [[data]])).send({ from: props.dfoCore.address, gasLimit });
-            console.log(res);
+            props.addTransaction(res);
             await getController();
         } catch (error) {
             console.error(error);
@@ -302,4 +303,10 @@ const mapStateToProps = (state) => {
     return { dfoCore: core.dfoCore };
 }
 
-export default connect(mapStateToProps)(Burn);
+const mapDispatchToProps = (dispatch) => {
+    return {
+        addTransaction: (index) => dispatch(addTransaction(index))
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Burn);

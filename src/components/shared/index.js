@@ -9,5 +9,6 @@ import FarmingComponent from './farming/FarmingComponent';
 import SetupComponent from './farming/SetupComponent';
 import TokenInput from './token-input/TokenInput';
 import FixedInflationComponent from './inflation/FixedInflationComponent';
+import Transactions from './transactions/Transactions';
 
-export { ApproveButton, Coin, DappMenu, Header, Input, FixedInflationComponent, FarmingComponent, Footer, Sidemenu, SetupComponent, TokenInput };
+export { ApproveButton, Coin, DappMenu, Header, Input, FixedInflationComponent, Transactions, FarmingComponent, Footer, Sidemenu, SetupComponent, TokenInput };
