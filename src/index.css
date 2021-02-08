@@ -42,6 +42,16 @@
 .page-container, .dapp-container {z-index: 5; position: relative;margin-bottom: 100px;}
 .card {background-color: transparent;}
 .navbar {z-index: 5;}
+.CoveExpl {width: 99%; margin: 30px auto; display: inline-block;}
+.CovDesc {width: 50%; text-align: left;display: inline-block;vertical-align: middle;}
+.CovDesc h3 {font-size: 24px; margin-bottom: 20px; display: inline-block; font-weight: bold; width: 100%;}
+.CovDesc p {font-size: 13px; margin-bottom: 10px; display: inline-block;}
+.CovLinks {margin-top: 10px; display: inline-block;}
+.CovLinks h5 {font-size: 15px; display: inline-block; font-weight: bold; width: 100%; margin-top: 20px;}
+.CovLinks a {font-size: 13px; display: inline-block; margin: 5px 5px; text-decoration: underline !important; cursor: pointer;}
+
+.CovAMMs {width: 30%; display: inline-block; vertical-align: middle; border: 1px solid #000000; border-radius: 8px; margin-left: 8%; padding: 20px 2%;}
+.CovAMMs a {font-size: 13px; display: inline-block; margin: 5px 5px; text-decoration: underline !important; cursor: pointer; width: 100%;}
 
 .fantasy {background-color: #4d4c4a !important;}
 .fantasy .LogoM {background-position: 0 -50px;}
