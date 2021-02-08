@@ -13,8 +13,6 @@ const mapStateToProps = (state) => {
 const App = (props) => {
   const location = useLocation();
 
-  console.log(location);
-
   useEffect(() => {
     
     if (location.pathname.includes('/dapp')) {

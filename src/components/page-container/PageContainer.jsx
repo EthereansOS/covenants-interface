@@ -21,10 +21,10 @@ const PageContainer = (props) => {
                         <Link to={props.link}>
                             <button className="btn btn-Fantasy">DAPP</button>
                         </Link>
-                    </div> :  
+                    </div> : !props.hideButton ?
                     <div className="IndexRegularBTN">
-                        <button className="btn btn-Fantasy" onClick={() => props.onClick()}>{ props.buttonText}</button>
-                    </div>
+                        <button className="btn btn-Fantasy" onClick={() => props.onClick ? props.onClick() : console.log('Coming soon.')}>{ props.buttonText}</button>
+                    </div> : <div/>
                 }
             </div>
     )

@@ -2,7 +2,7 @@ import { PageContainer } from "../../components";
 
 const Covenants = () => {
     return (
-        <PageContainer>
+        <PageContainer hideButton={true}>
             More page
         </PageContainer>
     )

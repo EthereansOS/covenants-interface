@@ -2,10 +2,10 @@ import { Link, useLocation } from 'react-router-dom';
 
 const menu = [
     {
-        name: 'Farm', path: '/farm', asset: require('../../../assets/images/farm.png').default, hasDapp: true,
+        name: 'Farm', path: '/farm', asset: require('../../../assets/images/farm.png').default, hasDapp: false,
     },
     {
-        name: 'Inflation', path: '/inflation', asset: require('../../../assets/images/cloud.png').default, hasDapp: true,
+        name: 'Inflation', path: '/inflation', asset: require('../../../assets/images/cloud.png').default, hasDapp: false,
     },
     {
         name: 'WUSD', path: '/wusd', asset: require('../../../assets/images/wusd.png').default, hasDapp: true,
