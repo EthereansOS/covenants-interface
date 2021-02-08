@@ -8,9 +8,13 @@ const Transactions = (props) => {
         {
             props.transactions.map((transaction, index) => {
                 console.log(transaction);
-                return <div className="success">
+                setTimeout(() => {
+                    props.removeTransaction(index);
+                }, 8000);
+
+                return <div key={transaction.transactionHash} className="success">
                     <p>Lorem ipsum</p>
-                    <a href={`${etherscanURL}tx/${transaction.transactionHash}`} className="link">View on Etherscan</a>
+                    <a href={`${etherscanURL}tx/${transaction.transactionHash}`} rel="noopener noreferrer" target="blank" className="link">View on Etherscan</a>
                     <a onClick={() => props.removeTransaction(index)} className="close">X</a>
                 </div>
             })
