@@ -52,8 +52,9 @@
 .ConnectBTN {display: inline-block;margin: 30px auto;text-align: center;cursor: pointer; background-image: linear-gradient(90deg, #00C0FF 0%, #FFCF00 49%, #FC4F4F 80%, #00C0FF 100%);color: #ffffff !important;text-shadow: #c0c0c0 1px 1px;text-decoration: none;cursor: auto;box-shadow: none;border: 1px solid transparent;outline: none;opacity: 1;padding: 10px 30px;border-radius: 12px;font-weight: 500;text-decoration: none;display: inline-block;animation: slidebg 10s linear infinite;}
 .Web3 {width: 80%; font-size: 15px; text-align: center;}
 .Web3 a {text-decoration: underline !important; color: #636363; font-weight: bold;}
-.CovAMMs {width: 30%; display: inline-block; vertical-align: middle; border: 1px solid #000000; border-radius: 8px; margin-left: 8%; padding: 20px 2%;}
-.CovAMMs a {font-size: 13px; display: inline-block; margin: 5px 5px; text-decoration: underline !important; cursor: pointer; width: 100%;}
+.CovAMMs {width: 30%; display: inline-block; vertical-align: middle; background-color: #5f5b53; border-radius: 8px; margin-left: 8%; padding: 20px 2%;font-weight: bold !important;box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px, rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px;}
+.CovAMMs h5 {font-size: 15px; display: inline-block; font-weight: bold; width: 100%; margin-bottom: 20px; color: #ffffff;}
+.CovAMMs a {font-size: 13px; display: inline-block; text-decoration: none !important; font-weight: bold !important; cursor: pointer; width: 100%; text-align: left;color: #ffffff !important;}
 .disclamer {font-size: 9px; color: #636363; width: 60%; text-align: center;}
 .disclamer a {text-decoration: underline !important;}
 .IndexRegularText iframe {border: 2px solid #9e6915; border-radius: 8px;}

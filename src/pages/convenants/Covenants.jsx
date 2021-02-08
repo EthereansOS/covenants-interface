@@ -29,10 +29,10 @@ const Covenants = () => {
             </div>
             <div className="CovAMMs">
                 <h5>Supported AMMs</h5>
-                <a target="blank">UniSwapV2</a>
-                <a target="blank">BalancerV1</a>
-                <a target="blank">MooniSwapV1</a>
-                <a target="blank">SushiSwapV1</a>
+                <a target="blank">&#129412; UniSwapV2</a>
+                <a target="blank">&#9878;&#65039; BalancerV1</a>
+                <a target="blank">&#127769; MooniSwapV1</a>
+                <a target="blank">&#127843; SushiSwapV1</a>
             </div>
         </div>
     </div>
