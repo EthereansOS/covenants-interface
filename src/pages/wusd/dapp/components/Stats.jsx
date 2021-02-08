@@ -87,10 +87,10 @@ const Stats = (props) => {
             setx2USDNoteControllerContract(x2USDNoteController);
             setx5USDNoteControllerContract(x5USDNoteController);
 
-            setx2USDSupply(props.dfoCore.toDecimals(await x2USDcontract.methods.totalSupply().call(), decimals));
-            setx5USDSupply(props.dfoCore.toDecimals(await x5USDcontract.methods.totalSupply().call(), decimals));
-            setx2USDTreasury(props.dfoCore.toDecimals(await wusdContract.methods.balanceOf(x2USDNoteController.options.address).call(), decimals));
-            setx5USDTreasury(props.dfoCore.toDecimals(await wusdContract.methods.balanceOf(x5USDNoteController.options.address).call(), decimals));
+            setx2USDSupply(props.dfoCore.toDecimals(await x2USDcontract.methods.totalSupply().call(), decimals, 2));
+            setx5USDSupply(props.dfoCore.toDecimals(await x5USDcontract.methods.totalSupply().call(), decimals, 2));
+            setx2USDTreasury(props.dfoCore.toDecimals(await wusdContract.methods.balanceOf(x2USDNoteController.options.address).call(), decimals, 2));
+            setx5USDTreasury(props.dfoCore.toDecimals(await wusdContract.methods.balanceOf(x5USDNoteController.options.address).call(), decimals, 2));
             
             const info = await contract.methods.rebalanceByCreditReceiversInfo().call();
             let farmTotalPercentage = 0;
@@ -155,7 +155,7 @@ const Stats = (props) => {
 
     const getHealth = async (data, supply) => {
         const ratio = data.total / parseInt(supply);
-        setHealth(props.dfoCore.toDecimals(100 * ratio, 0, 2));
+        setHealth(props.dfoCore.formatMoney(100 * ratio, 2));
     }
 
     const onUpdateUsdRebalanceByDebit = (value) => {
@@ -270,12 +270,12 @@ const Stats = (props) => {
                     <div className="col-6">
                         <b>Credit</b>
                         <br/>
-                        {props.dfoCore.toDecimals(credit, wusdDecimals)} uSD
+                        {props.dfoCore.toDecimals(credit, wusdDecimals, 2)} uSD
                     </div>
                     <div className="col-6">
                         <b>Debt</b>
                         <br/>
-                        {props.dfoCore.toDecimals(debit, wusdDecimals)} uSD
+                        {props.dfoCore.toDecimals(debit, wusdDecimals, 2)} uSD
                     </div>
                 </div>
                 <div className="row mb-4 StatsBroO">
