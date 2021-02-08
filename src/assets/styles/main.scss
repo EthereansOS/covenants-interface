@@ -239,7 +239,7 @@ code {
   align-items: flex-start;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-device-width: 768px) {
   .app-container {
     flex-direction: column;
     padding-top: 0;
@@ -269,7 +269,7 @@ code {
   flex-direction: column;
 }
 
-@media (min-width: 375px) {
+@media (min-device-width: 375px) {
   .page-container, .dapp-container {
     max-width: 310px;
     width: 310px;
@@ -280,7 +280,7 @@ code {
   }
 }
   
-@media (min-width: 576px) {
+@media (min-device-width: 576px) {
   .page-container, .dapp-container {
     max-width: 520px;
     width: 520px;
@@ -291,7 +291,7 @@ code {
   }
 }
 
-@media (min-width: 768px) {
+@media (min-device-width: 768px) {
   .page-container, .dapp-container {
     max-width: 650px;
     width: 650px;
@@ -302,7 +302,7 @@ code {
   }
 }
 
-@media (min-width: 992px) {
+@media (min-device-width: 992px) {
   .page-container, .dapp-container {
     max-width: 750px;
     width: 750px;
@@ -353,7 +353,7 @@ code {
     font-weight: bold;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-device-width: 768px) {
   .sidebar-menu {
       display: flex;
       overflow: scroll;
@@ -397,7 +397,7 @@ code {
   padding: 0 5rem;
 }
 
-@media screen and(max-width: 767px) {
+@media screen and(max-device-width: 767px) {
   .index-paragraph {
     padding: 0 !important;
   }

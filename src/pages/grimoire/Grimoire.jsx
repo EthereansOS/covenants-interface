@@ -3,7 +3,7 @@ import homeInflationImage from '../../assets/images/1.png';
 import { Route, Switch } from "react-router-dom";
 import { useState } from "react/cjs/react.development";
 
-const lorem = 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Eaque quia consequuntur id magnam tempore animi eveniet quod dolor ipsa illo? Iure illo alias rem sapiente illum error laborum voluptatum quasi!';
+const lorem = 'Issued by the School of Responsible Wizardry, the official Covenant spellbook will teach you how to cast Covenant magic correctly.';
 
 const Grimoire = () => {
     const [showGrimoire, setShowGrimoire] = useState(false);

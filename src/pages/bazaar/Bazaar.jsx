@@ -3,7 +3,7 @@ import homeBazaarImage from '../../assets/images/5.png';
 import { Route, Switch } from "react-router-dom";
 import BazaarDapp from './dapp/dapp';
 
-const lorem = 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Eaque quia consequuntur id magnam tempore animi eveniet quod dolor ipsa illo? Iure illo alias rem sapiente illum error laborum voluptatum quasi!';
+const lorem = 'Take a walk through the Bazar, bustling with busy DeFi creatures, and browse a mélange of services making creative use of the Aggregator. Mint, burn and create your very own Index Tokens. Conduct on-chain, cross-AMM arbitrage and multi-Swaps.';
 
 const Bazaar = () => {
     return (

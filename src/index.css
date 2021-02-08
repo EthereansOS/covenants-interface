@@ -115,3 +115,8 @@
 .magic .Footer p {color: #636363;}
 .magic .Footer p a, .magic .disclamer a {font-weight: bold; color: #000000 !important;}
 .magic .card {border: 1px solid #aaaaaa; color: #000000;}
+
+
+@media only screen and (max-device-width: 750px) {
+   .IndexRegularText iframe {display: none;}
+}
