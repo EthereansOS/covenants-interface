@@ -144,7 +144,7 @@ const Burn = (props) => {
 
         var token0WusdAmount = props.dfoCore.fromDecimals(amount.toString(), token0decimals);
 
-        var byTokenAmountValue = await ammContract.methods.byTokenAmount(liquidityPool, liquidityPoolTokens[0], token0WusdAmount.toString()).call();
+        var byTokenAmountValue = await ammContract.methods.byTokenAmount(liquidityPool, liquidityPoolTokens[0], props.dfoCore.toFixed(token0WusdAmount).toString()).call();
 
         var token0Amount = window.web3.utils.toBN(byTokenAmountValue[1][0]).div(window.web3.utils.toBN(2)).toString();
         var token1Amount = window.web3.utils.toBN(byTokenAmountValue[1][1]).div(window.web3.utils.toBN(2)).toString();
