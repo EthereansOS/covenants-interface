@@ -8,12 +8,6 @@ window.solidityImportRule = new RegExp("import( )+\"(\\d+)\"( )*;", "gs");
 window.pragmaSolidityRule = new RegExp("pragma( )+solidity( )*(\\^|>)\\d+.\\d+.\\d+;", "gs");
 window.base64Regex = new RegExp("data:([\\S]+)\\/([\\S]+);base64", "gs");
 
-window.Main = async function Main() {
-    await window.loadContext();
-    await window.onEthereumUpdate(0);
-    window.tryLoadSection();
-};
-
 window.connectFromHomepage = async function connectFromHomepage(button) {
     button && button.dataset.section && window.setHomepageLink(`?section=spa/${button.dataset.section}`);
     window.choosePage();
@@ -715,12 +709,6 @@ window.asNumber = function asNumber(value) {
         value = value.split(',').join('');
     } catch (e) {}
     return parseFloat(window.numberToString(value));
-};
-
-window.onload = function() {
-    Main().catch(function(e) {
-        return alert(e.message || e);
-    });
 };
 
 window.extractComment = function extractComment(code, element) {
