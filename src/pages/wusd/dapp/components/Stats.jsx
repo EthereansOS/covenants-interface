@@ -110,8 +110,7 @@ const Stats = (props) => {
             } else {
                 setRebalanceBlock(parseInt(lastRebalanceBlock) + parseInt(interval));
             }
-            // setShowCredit(parseInt(differences.credit) && (parseInt(lastRebalanceBlock) + parseInt(interval) <= await props.dfoCore.getBlockNumber()));
-            setShowCredit(true);
+            setShowCredit(parseInt(differences.credit) > 0);
             await getCollateralData(contract, supply);
         } catch (error) {
             console.error(error);
