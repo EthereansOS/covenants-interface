@@ -237,7 +237,7 @@ const Mint = (props) => {
 
         return (
             <div className="col-12 mb-4">
-                <Input showMax={true} step={0.0001} value={lpTokenAmount.value} balance={lpTokenBalance} min={0} onChange={(e) => updateLpAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={`${chosenPair.symbol0}/${chosenPair.symbol1}`} />
+                <Input showMax={true} step={0.0001} address={chosenPair.lpContract.options.address} value={lpTokenAmount.value} balance={lpTokenBalance} min={0} onChange={(e) => updateLpAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={`${chosenPair.symbol0}/${chosenPair.symbol1}`} />
             </div>
         )
     }

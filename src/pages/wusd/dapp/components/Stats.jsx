@@ -155,7 +155,7 @@ const Stats = (props) => {
 
     const getHealth = async (data, supply) => {
         const ratio = data.total / parseInt(supply);
-        setHealth(props.dfoCore.formatMoney(100 * ratio, 2));
+        setHealth(props.dfoCore.formatMoney(100 * ratio, 1));
     }
 
     const onUpdateUsdRebalanceByDebit = (value) => {
