@@ -56,25 +56,28 @@
 .CovAMMs a {font-size: 13px; display: inline-block; margin: 5px 5px; text-decoration: underline !important; cursor: pointer; width: 100%;}
 .disclamer {font-size: 9px; color: #636363; width: 60%; text-align: center;}
 .disclamer a {text-decoration: underline !important;}
-.fantasy {background-color: #4d4c4a !important;}
-.fantasy .LogoM {background-position: 0 -50px;}
-.fantasy .page-container {background-image: url(./assets/images/index.jpg) !important;}
-.fantasy .dapp-container {background-image: url(./assets/images/index.jpg) !important;}
+.IndexRegularText iframe {border: 2px solid #9e6915; border-radius: 8px;}
 @keyframes slidebg {
    to {
      background-position:20vw;
    }
  }
+
+
+.fantasy {background-color: #4d4c4a !important;}
+.fantasy .LogoM {background-position: 0 -50px;}
+.fantasy .page-container {background-image: url(./assets/images/index.jpg) !important;box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px, rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px;}
+.fantasy .dapp-container {background-image: url(./assets/images/index.jpg) !important;box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px, rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px;}
 .fantasy .TitleCov {color: #ffffff;}
 .fantasy .fantasyMenu:hover, .fantasy .fantasyMenu {color: #ffffff;}
 .fantasy .BtnConnectAfter, .fantasy .BtnConnect,.fantasy .menuIconEth, .fantasy .ChangeMod {display: none !important;}
 .fantasy .IndexRegular {color: #000000;}
 .fantasy .Footer img {display: block; position: absolute; bottom: 0; left: 0; min-width: 100%; width: 100%; height: auto; z-index: 1;}
-.fantasy .Footer p {color: #252525;}
+.fantasy .Footer p {color: #252525; display: none;}
 .fantasy .Footer p a {font-weight: bold; color: #000000 !important;}
 
 .penguin {background: rgb(58,60,106);background: linear-gradient(135deg, rgba(58,60,106,1) 0%, rgba(0,0,0,1) 41%);}
-.penguin .dapp-container {background-color: #2d2e40 !important;}
+.penguin .dapp-container {background-color: #2d2e40 !important;box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px, rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px;}
 .penguin .sidebar-menu-link {color: #ffffff;}
 .penguin .nav-link {color: #ffffff;}
 .penguin .custom-control-label::before, .penguin .custom-file-label, .penguin .custom-select, .penguin .custom-select:focus {transition: none; background: url("./assets/images/arrowdown.png") right 0.75rem center/15px 10px no-repeat;border-color: #9e6915 !important; box-shadow: none;}
@@ -93,7 +96,7 @@
 
 
 .magic {background: rgb(210,208,247);background: linear-gradient(135deg, rgba(210,208,247,1) 0%, rgba(253,247,245,1) 41%);}
-.magic .dapp-container {background-color: #ffffff !important;}
+.magic .dapp-container {background-color: #ffffff !important;box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px, rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px;}
 .magic .custom-control-label::before, .magic .custom-file-label, .magic .custom-select, .magic .custom-select:focus {transition: none; background: url("./assets/images/arrowdownblack.png") right 0.75rem center/15px 10px no-repeat;}
 .magic .wusd-pair-select, .magic .token-filter-input {background-color: #ffffff !important; color: #000000;}
 .magic .LogoM {background-position: 0 -50px;}

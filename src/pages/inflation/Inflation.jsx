@@ -3,7 +3,7 @@ import homeInflationImage from '../../assets/images/1.png';
 import { Route, Switch } from "react-router-dom";
 import InflationDapp from './dapp/dapp';
 
-const lorem = 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Eaque quia consequuntur id magnam tempore animi eveniet quod dolor ipsa illo? Iure illo alias rem sapiente illum error laborum voluptatum quasi!';
+const lorem = 'Covenant Inflation contracts allow Ethereans to fund projects in a fair and safe way. Anyone can set one up to inflate any variety of tokens at daily, weekly and monthly intervals via minting, swapping and transferring. Free yourself from dependence on ICOs and investors.';
 
 const Inflation = () => {
     return (

@@ -1,6 +1,6 @@
 import dragonImage from '../../assets/images/index.png';
 
-const lorem = 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Eaque quia consequuntur id magnam tempore animi eveniet quod dolor ipsa illo? Iure illo alias rem sapiente illum error laborum voluptatum quasi!';
+const lorem = 'Here you will find Covenants. Empowered by The Aggregator, these contracts allow anyone to create, control and customize their own DeFi experience.';
 
 const Index = () => {
     return (
@@ -9,7 +9,7 @@ const Index = () => {
                 <div className="page-container-row index-container-row">
                     <div className="page-container-col index-container-col">
                         <img src={dragonImage} className="index-image" />
-                        <h2 className="index-title">COVENANTS</h2>
+                        <h2 className="index-title">Covenants</h2>
                     </div>
                     <div className="page-container-col">
                         <p className="index-paragraph">{lorem}</p>

@@ -7,7 +7,7 @@ const Covenants = () => {
         <div className="CoveExpl">
             <div className="CovDesc">
                 <h3>AMMs Aggregator</h3>
-                <p>At the heart of every Covenant is The Aggregator. Equipped with AMM-standardizing APIs, it allows any wallet, dApp, DFO, DAO or customized smart contract to interact with multiple AMMs at once.</p>
+                <p>At the heart of every Covenant is The Aggregator. Equipped with AMM-standardizing APIs, it allows any wallet, DAPP, DFO, DAO or customized smart contract to farm, arbitrage and so much more across multiple AMMs at the same time.</p>
                 <div className="CovLinks">
                     <h5>Governance</h5>
                     <a target="blank">Covenants DFO</a>
