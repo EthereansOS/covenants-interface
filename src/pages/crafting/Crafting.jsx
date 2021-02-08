@@ -8,11 +8,15 @@ const lorem = 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Eaque q
 const Crafting = () => {
     return (
         <Switch>
-            <Route path="/crafting/dapp">
-                <CraftingDapp />
-            </Route>
+            {
+                /*
+                    <Route path="/crafting/dapp">
+                        <CraftingDapp />
+                    </Route>
+                */
+            }
             <Route path="/crafting/">
-                <PageContainer image={dragonImage} imageHeight={300} text={lorem} launchDapp={true} title={"Crafting"} link={"/crafting/dapp"} />
+                <PageContainer image={dragonImage} imageHeight={300} text={lorem} launchDapp={false} title={"Crafting"} buttonText={"Coming soon"} />
             </Route>
         </Switch>
     )

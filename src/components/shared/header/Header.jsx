@@ -63,7 +63,6 @@ const mapDispatchToProps = (dispatch) => {
             dispatch(setDFOCore(dfoCore));
         },
         removeCore: () => {
-            document.body.className = "fantasy";
             dispatch(removeDFOCore())
         },
         setMagicMode : () => {
