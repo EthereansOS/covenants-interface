@@ -112,6 +112,11 @@
 .Web3ActionBTN {padding: 8px 17px; background-color: #7474f7; color: #ffffff; border-radius: 20px; font-size: 16px; font-weight: bold; cursor: pointer;}
 .Web3ActionBTN:hover {color: #ffffff; text-decoration: none;}
 .Web3ActionBTN:disabled {font-weight: normal !important;}
+.Rebalance {width: 100%; display: inline-block; text-align: center;}
+.Rebalance aside {width: 45%; padding-right: 5%; display: inline-block; text-align: left;}
+.Rebalance aside h6 {font-size: 18px; margin: 10px auto; display: inline-block; width: 100%;}
+.Rebalance aside p {font-size: 11.5px; margin: 2px auto; display: inline-block; width: 100%;}
+.CreditAction {width: 45%; display: inline-block; text-align: center;}
 
 .MintBurn {width: 100%; display: inline-block;}
 .PairSelector {width: 80%; margin: 10px auto; display: inline-block; vertical-align: middle;}

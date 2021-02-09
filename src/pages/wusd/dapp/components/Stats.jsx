@@ -379,50 +379,37 @@ const Stats = (props) => {
         if (showCredit) {
             return (
                 <>
-                    <div className="row mb-4">
-                        <div className="col-6 text-left">
-                            <b>Available credit</b>
+                    <div className="Rebalance">
+                        <aside>
+                            <h6><b>Rebalance Credit</b></h6>
                             {
                                 /* 
                                     <br/>
                                     {props.dfoCore.formatMoney(farmTreasury * percentages[2], 2)} uSD Farm treasury
                              */
                             }
-                            <br/>
-                            {props.dfoCore.formatMoney(props.dfoCore.toDecimals(credit * percentages[0], wusdDecimals), 2)} x2USD treasury
-                            <br/>
-                            {props.dfoCore.formatMoney(props.dfoCore.toDecimals(credit * percentages[1], wusdDecimals), 2)} x5USD treasury
-                            <br/>
-                            {
+                            <p>x2Treasury: {props.dfoCore.formatMoney(props.dfoCore.toDecimals(credit * percentages[0], wusdDecimals), 2)} WUSD</p>
+                            
+                            <p>x5Treasury: {props.dfoCore.formatMoney(props.dfoCore.toDecimals(credit * percentages[1], wusdDecimals), 2)} WUSD</p>
+                            <p>DFO Treasury: {
                             props.dfoCore.formatMoney(props.dfoCore.toDecimals(credit, wusdDecimals) 
                                 - props.dfoCore.toDecimals(credit * percentages[0], wusdDecimals) 
                                 - props.dfoCore.toDecimals(credit * percentages[1], wusdDecimals) 
-                                - props.dfoCore.toDecimals(credit * percentages[2], wusdDecimals), 2)} Unifi treasury
-                            <br/>
-                            {props.dfoCore.formatMoney(props.dfoCore.toDecimals(credit * percentages[2], wusdDecimals), 2)} uSD rebalance reward
-                        </div>
-                        <div className="col-6">
+                                - props.dfoCore.toDecimals(credit * percentages[2], wusdDecimals), 2)} WUSD</p>
+                            <p>Executor: {props.dfoCore.formatMoney(props.dfoCore.toDecimals(credit * percentages[2], wusdDecimals), 2)} WUSD</p>
+                        </aside>
+                        <div className="CreditAction">
                             {
                                 rebalanceBlock <= currentBlock ? <>
-                                    <div className="row mb-2">
-                                        <div className="col-12">
-                                            <b>Rebalance by credit</b>
-                                            <br/>
-                                            Rebalance block: #{rebalanceBlock}
-                                        </div>
-                                    </div>
+                                    
                                     <div className="row justify-content-center mb-2">
-                                        <button className="btn btn-outline-secondary" onClick={() => rebalanceByCredit()} disabled={rebalanceBlock > currentBlock}>Rebalance</button>
+                                        <a className="Web3ActionBTN" onClick={() => rebalanceByCredit()} disabled={rebalanceBlock > currentBlock}>Rebalance</a>
                                     </div>
-                                    <div className="row justify-content-center">
-                                       Reward: {props.dfoCore.formatMoney(props.dfoCore.toDecimals(credit * percentages[2], wusdDecimals), 2)}
+                                    <div className="Resultsregular">
+                                    <p>Reward: <b> {props.dfoCore.formatMoney(props.dfoCore.toDecimals(credit * percentages[2], wusdDecimals), 2)} WUSD</b></p>
                                     </div>
-                                </> : <div className="row mb-2">
-                                    <div className="col-12">
-                                        <b>Rebalance by credit</b>
-                                        <br/>
-                                        Next rebalance block: #{rebalanceBlock}
-                                    </div>
+                                </> : <div className="Resultsregular">
+                                <p>Next rebalance block: <b><a target="_blank" href={"https://etherscan.io/block/" + rebalanceBlock}>#{rebalanceBlock}</a></b></p>
                                 </div>
                                 
                             }
@@ -435,33 +422,28 @@ const Stats = (props) => {
         } else if (showDebt) {
             return (
                 <>
-                <div className="row mb-4">
-                    <div className="col-12 mb-4">
-                        <Input showMax={true} label={"Rebalance by debit"} value={usdRebalanceByDebit.value} balance={props.dfoCore.toDecimals(wusdBalance, wusdDecimals)} min={0} onChange={(e) => onUpdateUsdRebalanceByDebit(e.target.value)} address={props.dfoCore.getContextElement("WUSDAddress")} showCoin={true} showBalance={true} name="uSD" />
+                <div className="Rebalance">
+                <div className="InputTokensRegular">
+                    <div className="InputTokenRegular">
+                        <Input showMax={true} label={"Rebalance by debit"} value={usdRebalanceByDebit.value} balance={props.dfoCore.toDecimals(wusdBalance, wusdDecimals)} min={0} onChange={(e) => onUpdateUsdRebalanceByDebit(e.target.value)} address={props.dfoCore.getContextElement("WUSDAddress")} showCoin={true} showBalance={true} name="uSD" />       
                     </div>
-                    <div className="col-12">
-                        <div className="row mb-2">
-                            <div className="col-12">
-                                <select className="custom-select wusd-pair-select" value={selectedUsdn} onChange={(e) => setSelectedUsdn(e.target.value)}>
-                                    <option value="">Choose uSD..</option>
+                </div>
+                <div className="PairSelector">
+                                <select className="SelectRegular" value={selectedUsdn} onChange={(e) => setSelectedUsdn(e.target.value)}>
+                                    <option value="">Select the Moltiplicator..</option>
                                     <option value="x2">x2USD</option>
                                     <option value="x5">x5USD</option>
                                 </select>
                                 {
                                     selectedUsdn ? 
-                                    <div className="mt-2">
-                                        For
-                                        <br/>
-                                        {`${usdRebalanceByDebit.value || 0} ${selectedUsdn}USD`}
+                                    <div className="Resultsregular">
+                                        <p>For <b>{`${usdRebalanceByDebit.value || 0} ${selectedUsdn}USD`}</b></p>
                                     </div> : <div/>
                                 }
-                                
-                            </div>
-                        </div>
                         {
                             selectedUsdn ? 
-                            <div className="row justify-content-center">
-                                <button className="btn btn-outline-secondary" onClick={() => rebalanceByDebit()} disabled={!usdRebalanceByDebit.value || !usdRebalanceByDebit.full}>Rebalance</button>
+                            <div className="Web3BTNs">
+                                <a className="Web3ActionBTN" onClick={() => rebalanceByDebit()} disabled={!usdRebalanceByDebit.value || !usdRebalanceByDebit.full}>Rebalance</a>
                             </div> : <div/>
                         }
                     </div>
