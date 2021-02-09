@@ -69,6 +69,7 @@ const Stats = (props) => {
             setDebit(differences.debt);
 
             setShowDebt(parseInt(differences.debt) > parseInt(rbda));
+            setShowCredit(parseInt(differences.credit) > 0);
 
             const perc = [];
 
@@ -113,7 +114,6 @@ const Stats = (props) => {
             } else {
                 setRebalanceBlock(parseInt(lastRebalanceBlock) + parseInt(interval));
             }
-            setShowCredit(parseInt(differences.credit) > 0);
             await getCollateralData(contract, supply);
         } catch (error) {
             console.error(error);
