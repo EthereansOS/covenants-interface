@@ -3,6 +3,9 @@ import { connect } from 'react-redux';
 import { ChevronDownIcon, ChevronUpIcon } from '@primer/octicons-react';
 import { Input } from '../../../../components';
 import { ethers } from 'ethers';
+import WUSDLogo from '../../../../assets/images/x1WUSD.png';
+import x2USDLogo from '../../../../assets/images/x2WUSD.png';
+import x5USDLogo from '../../../../assets/images/x5WUSD.png';
 
 const abi = new ethers.utils.AbiCoder();
 
@@ -202,61 +205,46 @@ const Stats = (props) => {
 
     const getHealthBarStatus = () => {
         return {
-            border: `1px ${health > 90 ? "#1abc9c" : health > 50 ? "#f1c40f" : "#e74c3c"} solid`,
-            background: `linear-gradient(90deg, ${health > 90 ? "#1abc9c" : health > 50 ? "#f1c40f" : "#e74c3c"} 65%, #fff 35%)`
+            background: `${health > 100 ? "#6aeac8" : health > 90 ? "#7474f7" : health > 50 ? "#9e6915" : "#e74c3c"}`,
+            width: `${health / 2}%`
         }
+    }
+
+    const getZeroCol = () => {
+        return (
+        <div className="HealthContainer">
+            <div className="health-bar">
+                <aside style={getHealthBarStatus()}>
+                    <span>Health: {health}%</span>
+                </aside> 
+            </div>
+        </div>
+        )
     }
 
     const getFirstCol = () => {
         return (
-            <div className="col-3 text-left StatsBro">
-                {/*}<div className="row">
-                    <div className="col-12">
-                        <p><b>Price:</b></p>
-                        <p>$1</p>
-                    </div>
-                </div>{*/}
-                <div className="row">
-                    <div className="col-12">
-                        <div className="row mb-3">
-                            <div className="col-12">
-                                <b>Supply</b>
-                            </div>
-                            <div className="col-12 infoList">
-                                { totalSupply ? props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(totalSupply), 18), 2) : totalSupply } WUSD
-                            </div>
-                        </div>
-                        <hr />
-                        <div className="row mb-3">
-                            <div className="col-12">
-                                <b>Collateral</b>
-                            </div>
-                            <div className="col-12 infoList">
-                                {
-                                    (collateralData && collateralData.collateral) ?
-                                        Object.entries(collateralData.collateral).map((entry, i) => {
-                                            return <p key={entry[0]}>{props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(entry[1]).toString()), 2)} {entry[0]}</p>
-                                        })
-                                    : <div/>
-                                }
-                            </div>
-                        </div>
-                        <hr />
-                        <div className="row mb-3">
-                            <div className="col-12">
-                                <b>Liquidity</b>
-                            </div>
-                            <div className="col-12 infoList">
-                                {
-                                    (collateralData && collateralData.liquidity) ?
-                                        Object.entries(collateralData.liquidity).map((entry, i) => {
-                                            return <p key={entry[0]}>{entry[0]}: {props.dfoCore.formatMoney((parseInt(entry[1]) / parseInt(collateralData.total))*100)}%</p>
-                                        })
-                                    : <div/>
-                                }
-                            </div>
-                        </div>
-                    </div>
+            <div className="StatsBro">
+                <b>Collateral</b>
+                <div className="infoList">
+                    {
+                        (collateralData && collateralData.collateral) ?
+                            Object.entries(collateralData.collateral).map((entry, i) => {
+                                return <p key={entry[0]}>{props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(entry[1]).toString()), 2)} {entry[0]}</p>
+                            })
+                        : <div/>
+                    }
+                </div>
+                <hr />
+                <b>Liquidity</b>
+                <div className="infoList">
+                    {
+                        (collateralData && collateralData.liquidity) ?
+                            Object.entries(collateralData.liquidity).map((entry, i) => {
+                                return <p key={entry[0]}>{entry[0]}: {props.dfoCore.formatMoney((parseInt(entry[1]) / parseInt(collateralData.total))*100)}%</p>
+                            })
+                        : <div/>
+                    }
                 </div>
             </div>
         )
@@ -264,47 +252,75 @@ const Stats = (props) => {
 
     const getSecondCol = () => {
         return (
-            <div className="col-9 text-left">
-                <div className="row mb-4">
-                    <div className="col-12 health-bar" style={getHealthBarStatus()}>
-                        Health: {health}%
+            <div className="StatsSis">
+                <h5 className="xTitle"><img src={WUSDLogo}></img>WUSD</h5>
+                <div className="StatsBroO">
+                    <div className="StatsIndicator">
+                        <h6><b>Supply</b></h6>
+                        <p>{ totalSupply ? props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(totalSupply), 18), 2) : totalSupply } WUSD</p>
+                    </div>
+                    <div className="StatsIndicator">
+                        <h6><b>Farm APY</b></h6>
+                        <p>0%</p>
+                    </div>
+                    <div className="StatsIndicator">
+                        <h6><b>System Credit</b></h6>
+                        <p>{props.dfoCore.toDecimals(credit, wusdDecimals, 2)} WUSD</p>
+                    </div>
+                    <div className="StatsIndicator">
+                        <h6><b>System Debt</b></h6>
+                        <p>{props.dfoCore.toDecimals(debit, wusdDecimals, 2)} WUSD</p>
+                    </div>
+                    <div className="StatsLink">
+                        <a target="_blank" href="https://etherscan.io/token/0x7C974104DF9dd7fb91205ab3D66d15AFf1049DE8">Etherscan</a>
+                        <a target="_blank" href="https://etherscan.io/address/0x37bde7F133171A5B737506Cc402471Ce0e2b03ca">Collateral</a>
+                        <a target="_blank" href="https://ethitem.com/?interoperable=0x7C974104DF9dd7fb91205ab3D66d15AFf1049DE8">ITEM</a>
+                        <a target="_blank" href="https://info.uniswap.org/token/0x7C974104DF9dd7fb91205ab3D66d15AFf1049DE8">Uniswap</a>
+                        <a target="_blank" href="https://mooniswap.info/token/0x7c974104df9dd7fb91205ab3d66d15aff1049de8">Mooniswap</a>
+                        <a target="_blank" href="https://sushiswap.fi/token/0x7c974104df9dd7fb91205ab3d66d15aff1049de8">Sushiswap</a>
+                        <a target="_blank" href="https://1inch.exchange/#/ETH/0x7c974104df9dd7fb91205ab3d66d15aff1049de8">1Inch</a>
                     </div>
                 </div>
-                <div className="my-4" />
-                <div className="row mb-4 StatsBroO">
-                    <div className="col-6">
-                        <b>Credit</b>
-                        <br/>
-                        {props.dfoCore.toDecimals(credit, wusdDecimals, 2)} uSD
+                <h5 className="xTitle"><img src={x2USDLogo}></img>x2USD</h5>
+                <div className="StatsBroO">
+                    <div className="StatsIndicator">
+                        <h6><b>Supply</b></h6>
+                        <p>{x2USDSupply} x2USD</p>
                     </div>
-                    <div className="col-6">
-                        <b>Debt</b>
-                        <br/>
-                        {props.dfoCore.toDecimals(debit, wusdDecimals, 2)} uSD
+                    <div className="StatsIndicator">
+                        <h6><b>Debt Treasury</b></h6>
+                        <p target="_blank" href="">{x2USDTreasury} WUSD</p>
                     </div>
-                </div>
-                <div className="row mb-4 StatsBroO">
-                    <div className="col-6">
-                        <b>x2USD supply</b>
-                        <br/>
-                        {x2USDSupply}
+                    <div className="StatsLink">
+                    <div className="StatsLink">
+                        <a target="_blank" href="https://etherscan.io/token/0xA4d9C768E1c6cabB127a6326c0668b49235639e8">Etherscan</a>
+                        <a target="_blank" href="https://etherscan.io/address/0x88a012e4d2b8600cf82e21f0685ec2ebcf643847">Treasury</a>
+                        <a target="_blank" href="https://ethitem.com/?interoperable=0xA4d9C768E1c6cabB127a6326c0668b49235639e8">ITEM</a>
+                        <a target="_blank" href="https://info.uniswap.org/token/0xA4d9C768E1c6cabB127a6326c0668b49235639e8">Uniswap</a>
+                        <a target="_blank" href="https://mooniswap.info/token/0xA4d9C768E1c6cabB127a6326c0668b49235639e8">Mooniswap</a>
+                        <a target="_blank" href="https://sushiswap.fi/token/0xA4d9C768E1c6cabB127a6326c0668b49235639e8">Sushiswap</a>
+                        <a target="_blank" href="https://1inch.exchange/#/ETH/0xA4d9C768E1c6cabB127a6326c0668b49235639e8">1Inch</a>
                     </div>
-                    <div className="col-6">
-                        <b>x2USD treasury</b>
-                        <br/>
-                        {x2USDTreasury}
                     </div>
                 </div>
-                <div className="row mb-4 StatsBroO">
-                    <div className="col-6">
-                        <b>x5USD supply</b>
-                        <br/>
-                        {x5USDSupply}
+                <h5 className="xTitle"><img src={x5USDLogo}></img>x5USD</h5>
+                <div className="StatsBroO">
+                    <div className="StatsIndicator">
+                        <h6><b>Supply</b></h6>
+                        <p>{x5USDSupply} x5USD</p>
                     </div>
-                    <div className="col-6">
-                        <b>x5USD treasury</b>
-                        <br/>
-                        {x5USDTreasury}
+                    <div className="StatsIndicator">
+                        <h6><b>Debt Treasury</b></h6>
+                        <p target="_blank" href="">{x5USDTreasury} WUSD</p>
+                    </div>
+                    <div className="StatsLink">
+                        <a target="_blank" href="https://etherscan.io/token/0x0473F6Ea742448ec9433b87aC410d79C08198abe">Etherscan</a>
+                        <a target="_blank" href="https://etherscan.io/address/0x7fcb2c6bed43029e8a8a0d700539f47ecb6e0f4c">Treasury</a>
+                        <a target="_blank" href="https://ethitem.com/?interoperable=0x0473F6Ea742448ec9433b87aC410d79C08198abe">ITEM</a>
+                        <a target="_blank" href="https://info.uniswap.org/token/0x0473F6Ea742448ec9433b87aC410d79C08198abe">Uniswap</a>
+                        <a target="_blank" href="https://mooniswap.info/token/0x0473F6Ea742448ec9433b87aC410d79C08198abe">Mooniswap</a>
+                        <a target="_blank" href="https://sushiswap.fi/token/0x0473F6Ea742448ec9433b87aC410d79C08198abe">Sushiswap</a>
+                        <a target="_blank" href="https://1inch.exchange/#/ETH/0x0473F6Ea742448ec9433b87aC410d79C08198abe">1Inch</a>
                     </div>
                 </div>
                 {/*
@@ -471,6 +487,7 @@ const Stats = (props) => {
     return (
         <div className="stats-container">
             <div className="row">
+                { getZeroCol() }
                 { getFirstCol() }
                 { getSecondCol() }
             </div>

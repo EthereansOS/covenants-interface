@@ -38,9 +38,9 @@ const ApproveButton = (props) => {
     }
 
     return (
-        loading ? <button className="btn btn-primary approve-btn" disabled={loading}>
+        loading ? <a className="ApproveBTN" disabled={loading}>
             <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-        </button> : <button onClick={() => approveContract()} disabled={disabled} className="btn btn-primary approve-btn">{ text || "Approve" }</button>
+        </a> : <a onClick={() => approveContract()} disabled={disabled} className="ApproveBTN">{ text || "Approve" }</a>
     )
 }
 

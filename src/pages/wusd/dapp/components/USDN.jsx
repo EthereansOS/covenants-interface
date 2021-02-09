@@ -156,18 +156,15 @@ const USDN = (props) => {
     const getx2Input = () => {
         return (
             <>
-            <div className="col-12 mb-4">
-                <Input showMax={true} address={x2USDContract?.options.address} value={x2Amount.value || 0} balance={props.dfoCore.toDecimals(x2Balance, decimals)} extra={`| Treasury ${props.dfoCore.formatMoney(x2USDTreasury, 2)} WUSD`} min={0} onChange={(e) => onUpdateX2Value(e.target.value)} showCoin={true} showBalance={true} name="x2USD" />
+            <div className="InputTokensRegular">
+                <div className="InputTokenRegular">
+                    <Input showMax={true} address={x2USDContract?.options.address} value={x2Amount.value || 0} balance={props.dfoCore.toDecimals(x2Balance, decimals)} extra={`| Available: ${props.dfoCore.formatMoney(x2USDTreasury, 2)} WUSD`} min={0} onChange={(e) => onUpdateX2Value(e.target.value)} showCoin={true} showBalance={true} name="x2USD" />           
+                </div>
             </div>
             {
                 x2Amount ? 
-                <div className="col-12 mb-4">
-                    <div className="row justify-content-center">
-                        For
-                    </div>
-                    <div className="row justify-content-center">
-                        {x2Amount.value * multipliers[0]} uSD
-                    </div>
+                <div className="Resultsregular">
+                    <p>For <b>{x2Amount.value * multipliers[0]} WUSD</b></p>
                 </div> : <div/>
             }
             </>
@@ -176,8 +173,7 @@ const USDN = (props) => {
 
     const getx2Buttons = () => {
         return (
-            <div className="col-12 mb-4">
-                <div className="row">
+            <div className="Web3BTNs">
                     {
                         /*
                         !x2Approved ? 
@@ -186,14 +182,11 @@ const USDN = (props) => {
                         </div> : <></>
                         */
                     }
-                    <div className="col">
                         {
-                            x2Loading ? <button className="btn btn-secondary" disabled={x2Loading}>
+                            x2Loading ? <a className="Web3ActionBTN" disabled={x2Loading}>
                                 <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            </button> : <button onClick={() => redeemX2()} disabled={!x2Amount.full || exceedsBalance('x2')} className="btn btn-secondary">Redeem</button>
+                            </a> : <a onClick={() => redeemX2()} disabled={!x2Amount.full || exceedsBalance('x2')} className="Web3ActionBTN">Redeem</a>
                         }
-                    </div>
-                </div>
             </div>
         )
     }
@@ -201,18 +194,15 @@ const USDN = (props) => {
     const getx5Input = () => {
         return (
             <>
-                <div className="col-12 mb-4">
-                    <Input showMax={true} address={x5USDContract?.options.address} value={x5Amount.value || 0} balance={props.dfoCore.toDecimals(x5Balance, decimals)} extra={`| Treasury ${props.dfoCore.formatMoney(x5USDTreasury, 2)} WUSD`} min={0} onChange={(e) => onUpdateX5Value(e.target.value)} showCoin={true} showBalance={true} name="x5USD" />
+                <div className="InputTokensRegular">
+                    <div className="InputTokenRegular">
+                        <Input showMax={true} address={x5USDContract?.options.address} value={x5Amount.value || 0} balance={props.dfoCore.toDecimals(x5Balance, decimals)} extra={`| Available: ${props.dfoCore.formatMoney(x5USDTreasury, 2)} WUSD`} min={0} onChange={(e) => onUpdateX5Value(e.target.value)} showCoin={true} showBalance={true} name="x5USD" />
+                    </div>
                 </div>
                 {
                     x5Amount ?
-                    <div className="col-12 mb-4">
-                        <div className="row justify-content-center">
-                            For
-                        </div>
-                        <div className="row justify-content-center">
-                            {x5Amount.value * multipliers[1]} uSD
-                        </div>
+                    <div className="Resultsregular">
+                        <p>For <b>{x5Amount.value * multipliers[1]} WUSD</b></p>
                     </div> : <div/>
                 }
             </>
@@ -221,8 +211,7 @@ const USDN = (props) => {
 
     const getx5Buttons = () => {
         return (
-            <div className="col-12 mb-4">
-                <div className="row">
+            <div className="Web3BTNs">
                     {
                         /*
                         !x5Approved ? 
@@ -231,14 +220,11 @@ const USDN = (props) => {
                         </div> : <></>
                         */
                     }
-                    <div className="col">
                         {
-                            x5Loading ? <button className="btn btn-secondary" disabled={x5Loading}>
+                            x5Loading ? <a className="Web3ActionBTN" disabled={x5Loading}>
                                 <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            </button> : <button onClick={() => redeemX5()} disabled={!x5Amount.full || exceedsBalance('x5')} className="btn btn-secondary">Redeem</button>
+                            </a> : <a onClick={() => redeemX5()} disabled={!x5Amount.full || exceedsBalance('x5')} className="Web3ActionBTN">Redeem</a>
                         }
-                    </div>
-                </div>
             </div>
         )
     }

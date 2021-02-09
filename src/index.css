@@ -9,6 +9,7 @@
  }
 
 .body {position: relative;}
+.spinner-border, .spinner-border-sm, .text-secondary  {color: #7474f7 !important;}
 .fantasyMenu {font-size: 13px;z-index: 5; position: relative;}
 .fantasyMenuLi {position: relative; cursor: pointer;}
 .mr-2, .mx-2 {margin-right: 1rem;}
@@ -23,11 +24,11 @@
 .fantasyMenuLi:hover .Ditone {display: block !important; z-index: 10;left: -15px;}
 .sidebar-menu-link-selected .Ditone {display: block !important; z-index: 10;}
 .infoList {font-size: 13px; margin-bottom: 5px;margin-block-start: 0em;margin-block-end: 0em;}
-.infoList p {margin-bottom: 5px;margin-block-start: 0em;margin-block-end: 0em;}
+.infoList p {margin: 0px;margin-block-start: 0em;margin-block-end: 0em; display: inline-block; width: 100%;padding: 4px 0;}
 .row {margin-left: 0; margin-right: 0;}
 .IndexRegular {display: inline-block; text-align: center;}
 .IndexRegular .IndexRegularContents {width: 95%; display: inline-block;}
-.IndexRegular .IndexRegularBTN {width: 95%; display: inline-block; margin-bottom: 30px;}
+.IndexRegular .IndexRegularBTN {width: 95%; display: inline-block; margin-bottom: 0px;}
 .IndexRegular .IndexRegularText {width: 50%; display: inline-block; text-align: left;vertical-align: middle;}
 .IndexRegular .IndexRegularText p {width: 95%; font-size: 13px;}
 .IndexRegular .IndexRegularText h3 {width: 95%; font-size: 20px;}
@@ -36,9 +37,10 @@
 .btn-Fantasy {border: 2px solid #4d4c4a; color: #ffffff;background-color: #4d4c4a;}
 .btn-Fantasy:hover {color: #ffffff; border-color: #4d4c4a;}
 .Footer {width: 100%; min-width: 100%; display: inline-block; text-align: center; position: fixed; bottom: 0; left: 0;}
-.Footer p {padding: 30px; display: inline-block; width: 50%; font-size: 13px;}
-.Footer p a {text-decoration: underline;}
 .Footer img {display: none;}
+.FooterP { width: 80%; margin: 20px auto 0px auto; display: inline-block; text-align: center;}
+.FooterP p {padding: 5px 5px 5px 5px; display: inline-block; width: 100%; font-size: 10px;}
+.FooterP p a {text-decoration: underline;}
 .page-container, .dapp-container {z-index: 5; position: relative;margin-bottom: 100px;}
 .card {background-color: transparent;}
 .navbar {z-index: 5;}
@@ -48,12 +50,13 @@
 .CovDesc p {font-size: 13px; margin-bottom: 10px; display: inline-block;}
 .CovLinks {margin-top: 10px; display: inline-block;}
 .CovLinks h5 {font-size: 15px; display: inline-block; font-weight: bold; width: 100%; margin-top: 20px;}
-.CovLinks a {font-size: 13px; display: inline-block; margin: 5px 5px; text-decoration: underline !important; cursor: pointer;}
+.CovLinks a {font-size: 13px; display: inline-block; margin: 5px 5px; text-decoration: underline !important; cursor: pointer; color: #000000;}
 .ConnectBTN {display: inline-block;margin: 30px auto;text-align: center;cursor: pointer; background-image: linear-gradient(90deg, #00C0FF 0%, #FFCF00 49%, #FC4F4F 80%, #00C0FF 100%);color: #ffffff !important;text-shadow: #c0c0c0 1px 1px;text-decoration: none;cursor: auto;box-shadow: none;border: 1px solid transparent;outline: none;opacity: 1;padding: 10px 30px;border-radius: 12px;font-weight: 500;text-decoration: none;display: inline-block;animation: slidebg 10s linear infinite;}
 .Web3 {width: 80%; font-size: 15px; text-align: center;}
-.Web3 a {text-decoration: underline !important; color: #636363; font-weight: bold;}
-.CovAMMs {width: 30%; display: inline-block; vertical-align: middle; border: 1px solid #000000; border-radius: 8px; margin-left: 8%; padding: 20px 2%;}
-.CovAMMs a {font-size: 13px; display: inline-block; margin: 5px 5px; text-decoration: underline !important; cursor: pointer; width: 100%;}
+.Web3 a {text-decoration: underline !important; color: #7474f7; font-weight: bold;}
+.CovAMMs {width: 30%; display: inline-block; vertical-align: middle; background-color: #5f5b53; border-radius: 8px; margin-left: 8%; padding: 20px 2%;font-weight: bold !important;box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px, rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px;}
+.CovAMMs h5 {font-size: 15px; display: inline-block; font-weight: bold; width: 100%; margin-bottom: 20px; color: #ffffff;}
+.CovAMMs a {font-size: 13px; display: inline-block; text-decoration: none !important; font-weight: bold !important; cursor: pointer; width: 100%; text-align: left;color: #ffffff !important;}
 .disclamer {font-size: 9px; color: #636363; width: 60%; text-align: center;}
 .disclamer a {text-decoration: underline !important;}
 .IndexRegularText iframe {border: 2px solid #9e6915; border-radius: 8px;}
@@ -69,6 +72,51 @@
 .CovTITLE {margin: 20px auto; display: inline-block; width: 90%; text-align: center;}
 .CovTITLE figure {width: 40%; display: inline-block; height: auto;}
 .CovTITLE figure img {width: 100%; display: inline-block; height: auto;}
+.LogoWUSD {width: 80%; margin: 10px auto;display: inline-block;}
+.LogoWUSD img {width: 100%; display: inline-block; height: auto;}
+.xTitle {width: 100%; display: inline-block; text-align: left; font-weight: bold; margin: 0px auto 10px auto; font-size: 17px;}
+.xTitle img {margin-right: 10px; width: 35px; height: 35px;}
+.HealthContainer {width:80%; display: inline-block; margin: 10px auto 40px auto;}
+.StatsIndicator {width: 45%; padding: 4px 0% 4px 5%; height: auto; display: inline-block;}
+.StatsBro {display: inline-block; text-align: left; width: 22%; padding-left: 3%; margin-right: 10% !important;vertical-align: middle !important;}
+.StatsBroO {margin-bottom: 20px;}
+.StatsSis {width: 65%;text-align: left; display: inline-block; vertical-align: middle !important;}
+.StatsIndicator p, .StatsIndicator a {font-size: 13px;}
+.StatsIndicator h6 {font-size: 14px;}
+.StatsLink {display: inline-block; width: 90%; margin: 5px auto; text-align: center;}
+.StatsLink a {font-size: 11px; margin: 5px 5px; display: inline-block; padding: 2px 5px; border-radius: 5px; cursor: pointer;}
+.health-bar {border-radius: 8px; width: 100%;text-align: left;font-weight: bold;padding: 4px 0;font-size: 14px;}
+.health-bar aside {border-radius: 8px; text-align: center; padding: 5px 0;}
+.health-bar aside span {background-color: transparent; color: #ffffff;}
+
+
+.SelectRegular {width: 100%; display: inline-block; font-size: 13px; font-weight: bold; padding: 7px 2%;border: 1px solid; border-radius: 8px; background-color: transparent;max-width: 370px;}
+.QuestionRegular {width: 100%; display: inline-block; font-size: 14px; margin: 15px auto 0px auto;}
+.QuestionRegular input {display: inline-block; vertical-align: middle;}
+.QuestionRegular label {display: inline-block; margin: 0 0 0 10px; vertical-align: middle;}
+.Resultsregular {display: inline-block; margin: 10px auto; width: 100%;}
+.Resultsregular p {font-size: 16px;}
+.Resultsregular img {display: inline-block; margin: auto 5px; width: 25px; height: 25px;}
+.DisclamerRegular {width: 100%; display: inline-block; margin: 50px auto;}
+.DisclamerRegular p {display: inline-block; width: 80%; font-size: 15px;}
+.InputTokensRegular {display: inline-block; width: 80%; margin: 15px auto; max-width: 370px;}
+.InputTokensRegular p {display: inline-block; width: 80%; font-size: 15px; margin: 10px auto;}
+.InputTokenRegular {width: 100%;max-width: 370px;}
+.InputTokenRegular section {width: 100%; display: inline-block;}
+.InputTokenRegular aside {width: 100%; display: inline-block; margin-top: 3px; text-align: left;}
+.InputTokenRegular aside a {display: inline-block; padding: 2px 4px; background-color: #9e6915; color: #ffffff !important; border-radius: 8px; font-size: 10px; font-weight: bold;vertical-align: middle;}
+.InputTokenRegular aside p {display: inline-block; font-size: 12px; margin-left: 10px; vertical-align: middle; color: #5f5b53;}
+.ApproveBTN {padding: 8px 17px; background-color: #9e6915; color: #ffffff; border-radius: 20px; font-size: 16px; font-weight: bold; cursor: pointer;}
+.ApproveBTN:hover {color: #ffffff; text-decoration: none;}
+.ApproveBTN:disabled {font-weight: normal;}
+.Web3ActionBTN {padding: 8px 17px; background-color: #7474f7; color: #ffffff; border-radius: 20px; font-size: 16px; font-weight: bold; cursor: pointer;}
+.Web3ActionBTN:hover {color: #ffffff; text-decoration: none;}
+.Web3ActionBTN:disabled {font-weight: normal !important;}
+
+.MintBurn {width: 100%; display: inline-block;}
+.PairSelector {width: 80%; margin: 10px auto; display: inline-block; vertical-align: middle;}
+.Web3BTNs {display: inline-block; width: 80%; margin: 15px auto; max-width: 370px; text-align: center;}
+.Web3BTNs a {margin: 5px 20px;}
 
 .fantasy {background-color: #4d4c4a !important;}
 .fantasy .LogoM {background-position: 0 -50px;}
@@ -81,24 +129,29 @@
 .fantasy .Footer img {display: block; position: absolute; bottom: 0; left: 0; min-width: 100%; width: 100%; height: auto; z-index: 1;}
 .fantasy .Footer p {color: #252525; display: none;}
 .fantasy .Footer p a {font-weight: bold; color: #000000 !important;}
+.fantasy .FooterP p {color: #000000;}
+.fantasy .FooterP p a, .penguin .disclamer a {font-weight: bold; color: #000000 !important;}
 
 .penguin {background: rgb(58,60,106);background: linear-gradient(135deg, rgba(58,60,106,1) 0%, rgba(0,0,0,1) 41%);}
 .penguin .dapp-container {background-color: #2d2e40 !important;box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px, rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px;}
-.penguin .sidebar-menu-link {color: #ffffff;}
-.penguin .nav-link {color: #ffffff;}
+.penguin .sidebar-menu-link, .penguin .nav-link, .penguin .fantasyMenu:hover, .penguin .fantasyMenu, .penguin .form-check-label, .penguin .infoList, .penguin .StatsBro, .penguin .StatsBroO, .penguin .IndexRegular, .penguin .Web3, .penguin .disclamer, .penguin .TitleCov, .penguin .xTitle, .penguin .StatsIndicator a, .penguin .QuestionRegular label,.penguin .DisclamerRegular p, .penguin .InputTokensRegular p, .penguin .Resultsregular p, .penguin .Resultsregular p {color: #ffffff;}
 .penguin .custom-control-label::before, .penguin .custom-file-label, .penguin .custom-select, .penguin .custom-select:focus {transition: none; background: url("./assets/images/arrowdown.png") right 0.75rem center/15px 10px no-repeat;border-color: #9e6915 !important; box-shadow: none;}
 .penguin .token-filter-input {border-color: #9e6915 !important;}
 .penguin .wusd-pair-select, .penguin .token-filter-input {background-color: #2d2e40 !important; color: #ffffff;}
 .penguin .LogoM {background-position: 0 0px;}
 .penguin .BtnConnect {border: 1px solid #7474f7; color: #7474f7;}
 .penguin .BtnConnectAfter {border: 1px solid #9e6915; color: #9e6915;}
-.penguin .TitleCov {color: #ffffff;}
-.penguin .fantasyMenu:hover, .penguin .fantasyMenu {color: #ffffff;}
-.penguin .form-check-label, .penguin .infoList, .penguin .StatsBro, .penguin .StatsBroO {color: #ffffff;}
-.penguin .IndexRegular, .penguin .Web3, .penguin .disclamer {color: #ffffff;}
-.penguin .Footer p {color: #adadad;}
-.penguin .Footer p a, .penguin .disclamer a {font-weight: bold; color: #ffffff !important;}
+.penguin .FooterP p {color: #adadad;}
+.penguin .FooterP p a, .penguin .disclamer a {font-weight: bold; color: #adadad !important;}
 .penguin .card {border: 1px solid #000000; color: #ffffff;}
+.penguin .StatsLink a {border: 1px solid #9e6915; color: #9e6915;text-decoration: none;}
+.penguin .StatsLink a:hover {color: #9e6915; text-decoration: none !important;}
+.penguin .nav-item-selected {border-bottom: 8px solid #7474f7;}
+.penguin .health-bar {background-color: #1c1c27;}
+.penguin .SelectRegular {border-color: #9e6915; color: #9e6915;}
+.penguin .input-group-text {background-color: transparent;border-top: 1px solid #9e6915; border-right: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-left: 0px solid #9e6915; color: #ffffff;}
+.penguin .form-control, .penguin .form-control:focus {background-color: transparent;border-top: 1px solid #9e6915; border-left: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-right: 0px solid #9e6915; color: #ffffff;}
+
 
 
 .magic {background: rgb(210,208,247);background: linear-gradient(135deg, rgba(210,208,247,1) 0%, rgba(253,247,245,1) 41%);}
@@ -108,10 +161,23 @@
 .magic .LogoM {background-position: 0 -50px;}
 .magic .BtnConnect {border: 1px solid #7474f7; color: #7474f7;}
 .magic .BtnConnectAfter {border: 1px solid #9e6915; color: #9e6915;}
-.magic .TitleCov {color: #000000;}
+.magic .TitleCov, .magic .StatsIndicator a {color: #000000;}
 .magic .fantasyMenu:hover, .magic .fantasyMenu {color: #000000;}
 .magic .form-check-label {color: #000000;}
 .magic .IndexRegular {color: #000000;}
-.magic .Footer p {color: #636363;}
-.magic .Footer p a, .magic .disclamer a {font-weight: bold; color: #000000 !important;}
+.magic .FooterP p {color: #636363;}
+.magic .FooterP p a, .magic .disclamer a {font-weight: bold; color: #636363 !important;}
 .magic .card {border: 1px solid #aaaaaa; color: #000000;}
+.magic .StatsLink a {border: 1px solid #9e6915; color: #9e6915;}
+.magic .StatsLink a:hover {color: #9e6915;text-decoration: none !important;}
+.magic .nav-item-selected {border-bottom: 8px solid #7474f7;}
+.magic .health-bar {background-color: #ebebeb;}
+.magic .SelectRegular {border-color: #9e6915; color: #9e6915;}
+.magic .input-group-text {background-color: transparent;border-top: 1px solid #9e6915; border-right: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-left: 0px solid #9e6915; color: #000000;}
+.magic .form-control, .magic .form-control:focus {background-color: transparent;border-top: 1px solid #9e6915; border-left: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-right: 0px solid #9e6915; color: #000000;}
+
+
+
+@media only screen and (max-device-width: 750px) {
+   .IndexRegularText iframe {display: none;}
+}

@@ -38,10 +38,9 @@ const Farm = (props) => {
     }
 
     return (
-        <div className="wusd-farm-container">
-            <div className="row">
-                <div className="col-12 text-left">
-                    <h6><b>No farming contract available!</b></h6>
+        <>
+                <div className="DisclamerRegular">
+                <p><b>No farming contract available!</b></p>
                 </div>
                 {
                     /* 
@@ -59,8 +58,7 @@ const Farm = (props) => {
                         }
                     */
                 }
-            </div>
-        </div>
+        </>
     )
 }
 
