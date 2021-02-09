@@ -196,7 +196,7 @@ const USDN = (props) => {
             <>
                 <div className="InputTokensRegular">
                     <div className="InputTokenRegular">
-                        <Input showMax={true} address={x5USDContract?.options.address} value={x5Amount.value || 0} balance={props.dfoCore.toDecimals(x5Balance, decimals)} extra={`| Treasury ${props.dfoCore.formatMoney(x5USDTreasury, 2)} WUSD`} min={0} onChange={(e) => onUpdateX5Value(e.target.value)} showCoin={true} showBalance={true} name="x5USD" />
+                        <Input showMax={true} address={x5USDContract?.options.address} value={x5Amount.value || 0} balance={props.dfoCore.toDecimals(x5Balance, decimals)} extra={`| Available: ${props.dfoCore.formatMoney(x5USDTreasury, 2)} WUSD`} min={0} onChange={(e) => onUpdateX5Value(e.target.value)} showCoin={true} showBalance={true} name="x5USD" />
                     </div>
                 </div>
                 {
