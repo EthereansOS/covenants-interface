@@ -1,6 +1,5 @@
 import Editor from "@monaco-editor/react";
-import { useState } from "react";
-import { useEffect } from "react/cjs/react.development";
+import { useState, useEffect } from "react";
 
 const ContractEditor = (props) => {
     const { onChange, dfoCore, onFinish } = props;

@@ -1,7 +1,6 @@
 import Coin from '../coin/Coin';
 import PropTypes from 'prop-types';
-import { useState } from 'react';
-import { useEffect } from 'react/cjs/react.development';
+import { useState, useEffect } from 'react';
 
 const Input = (props) => {
     const { label, min, max, value, onChange, showBalance, balance, showMax, showCoin, address, name, step, extra } = props;

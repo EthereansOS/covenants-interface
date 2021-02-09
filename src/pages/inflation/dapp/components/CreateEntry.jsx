@@ -1,8 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { addEntry  } from '../../../../store/actions';
 import { Coin, Input, TokenInput } from '../../../../components/shared';
-import { useEffect } from 'react/cjs/react.development';
 
 const CreateEntry = (props) => {
     const { setup, onCancel, onFinish, entry } = props;

@@ -1,7 +1,7 @@
 import { PageContainer } from "../../components";
 import homeInflationImage from '../../assets/images/1.png';
 import { Route, Switch } from "react-router-dom";
-import { useState } from "react/cjs/react.development";
+import { useState } from "react";
 
 const lorem = 'Issued by the School of Responsible Wizardry, the official Covenant spellbook will teach you how to cast Covenant magic correctly.';
 

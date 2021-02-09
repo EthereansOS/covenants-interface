@@ -2,6 +2,7 @@
   "name": "covenants-fe",
   "version": "0.1.0",
   "private": true,
+  "homepage": "./",
   "dependencies": {
     "@monaco-editor/react": "^4.0.9",
     "@primer/octicons-react": "^11.2.0",

@@ -1,6 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { useEffect } from 'react/cjs/react.development';
 import { ApproveButton, Input } from '../../../../components';
 import { addTransaction } from '../../../../store/actions';
 import WUSDLogo from '../../../../assets/images/x1WUSD.png';
