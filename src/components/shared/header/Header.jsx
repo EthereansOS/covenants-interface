@@ -47,7 +47,7 @@ const Header = (props) => {
                     }
                     <img className="menuIconEth" src={diamond} alt=""/>
                 </div>
-                <a onClick={() => props.toggleSidemenu()}>Toggle</a>
+                <a className="MobileMenu" onClick={() => props.toggleSidemenu()}>Menu</a>
             </div>
         </nav>
     )

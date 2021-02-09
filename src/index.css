@@ -14,7 +14,7 @@
  }
 
 .body {position: relative;}
-.MenuMobile {display: none;}
+.MobileMenu {display: none;}
 .spinner-border, .spinner-border-sm, .text-secondary  {color: #7474f7 !important;}
 .fantasyMenu {font-size: 13px;z-index: 5; position: relative;}
 .fantasyMenuLi {position: relative; cursor: pointer;}
@@ -214,8 +214,26 @@
    .Menuone li:hover .Ditone {display: none !important;}
    .Ditone {display: none !important;}
    .sidebar-menu-link-selected .Ditone {display: none !important;}
+   .Menuone {display: none;}
+   .sidemenu-active {display: inline-block; position: fixed; z-index: 30; right: 10px; top: 10px; background-color: #2d2e40; border-radius: 8px;top: 55px;}
+   .MobileMenu {display: inline-block; font-size: 13px; background-color: #7474f7; padding: 3px 5px; border-radius: 5px; color: #ffffff;text-decoration: none;}
+   .MobileMenu:hover, .MobileMenu:after {color: #ffffff; text-decoration: none;}
+   .ChangeMod {position: fixed;bottom: 5px;right: 5px;z-index: 50; background-color: #7474f7; padding: 3px 6px; border-radius: 50%;}
+   .app-container {z-index: 0;}
+   .app-container .row {z-index: 0;}
+   .BtnConnect, .BtnConnectAfter {font-size: 10px;}
+   .magic .fantasyMenu, .fantasy .fantasyMenu {color: #ffffff;}
 }
 
 @media only screen and (min-device-width: 751px) and (max-device-width: 1024px) {
-   .MenuMobile {display: inline-block;}
+   .Menuone {display: none;}
+   .sidemenu-active {display: inline-block;}
+   .Menuone li:hover .Ditone {display: none !important;}
+   .Ditone {display: none !important;}
+   .sidebar-menu-link-selected .Ditone {display: none !important;}
+   .MobileMenu {display: inline-block;}
+   .MobileMenu {display: inline-block; font-size: 15px; background-color: #7474f7; padding: 3px 5px; border-radius: 5px; color: #ffffff;text-decoration: none;}
+   .MobileMenu:hover, .MobileMenu:after {color: #ffffff; text-decoration: none;}
+   .sidemenu-active {display: inline-block; position: fixed; z-index: 30; right: 10px; top: 10px; background-color: #2d2e40; border-radius: 8px;top: 55px;}
+   .magic .fantasyMenu, .fantasy .fantasyMenu {color: #ffffff;}
 }
