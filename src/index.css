@@ -123,11 +123,24 @@
 .Rebalance aside h6 {font-size: 18px; margin: 10px auto; display: inline-block; width: 100%;}
 .Rebalance aside p {font-size: 11.5px; margin: 2px auto; display: inline-block; width: 100%;}
 .CreditAction {width: 45%; display: inline-block; text-align: center;}
-
+.grimoireBox {z-index: 20; position: relative; display: inline-block; width: 85%; margin: 5px auto; border-radius: 12px;}
+.grimoireAll {width: 100%; display: inline-block; padding: 20px 2%; text-align: center;}
 .MintBurn {width: 100%; display: inline-block;}
 .PairSelector {width: 80%; margin: 10px auto; display: inline-block; vertical-align: middle;}
 .Web3BTNs {display: inline-block; width: 80%; margin: 15px auto; max-width: 370px; text-align: center;}
 .Web3BTNs a {margin: 5px 20px;}
+.GrimoureContent {width: 92%; margin: 5px auto; display: inline-block;text-align: left;}
+.GrimoureContent h1 {font-size: 35px; margin: 20px auto; display: inline-block; width: 100%; text-align: center; font-weight: bold !important;}
+.GrimoureContent article {width: 100%; display: inline-block; margin: 20px auto;}
+.GrimoureContent header {width: 80%; display: inline-block; margin: 10px auto;}
+.GrimoureContent span {width: 20%; display: inline-block; margin: 10px auto;vertical-align: top;}
+.GrimoureContent span img {display: inline-block; width: 90px; height: 90px;}
+.GrimoureContent h2 {font-size: 18px; font-weight: bold !important;}
+.GrimoureContent p {font-size: 13px; font-weight: normal !important;}
+.GrimoureContent figure {width: 100%; display: inline-block; margin: 10px auto;}
+.GrimoureContent figure img {display: inline-block; width: 100%; height: auto;}
+.GrimoureContent header h2 {font-size: 27px; font-weight: bold !important;}
+.GrimoureContent header p {font-size: 13px; font-weight: normal !important;}
 
 .fantasy {background-color: #4d4c4a !important;}
 .fantasy .LogoM {background-position: 0 -50px;}
@@ -142,6 +155,9 @@
 .fantasy .Footer p a {font-weight: bold; color: #000000 !important;}
 .fantasy .FooterP p {color: #000000;}
 .fantasy .FooterP p a, .penguin .disclamer a {font-weight: bold; color: #000000 !important;}
+.fantasy .grimoireBox {background-color: #4d4c4a; border: 1px solid #9e6915;}
+.fantasy .GrimoureContent {color: #ffffff;}
+
 
 .penguin {background: rgb(58,60,106);background: linear-gradient(135deg, rgba(58,60,106,1) 0%, rgba(0,0,0,1) 41%);}
 .penguin .dapp-container {background-color: #2d2e40 !important;box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px, rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px;}
@@ -223,6 +239,10 @@
    .app-container .row {z-index: 0;}
    .BtnConnect, .BtnConnectAfter {font-size: 10px;}
    .magic .fantasyMenu, .fantasy .fantasyMenu {color: #ffffff;}
+   .grimoireBox {max-width: 270px;width: 270px;}
+   .GrimoureContent header {width: 100%; display: inline-block; margin: 10px auto;}
+   .GrimoureContent span {width: 100%; display: inline-block; margin: 10px auto;vertical-align: top; text-align: center;}
+   .GrimoureContent span img {text-align: center;}
 }
 
 @media only screen and (min-device-width: 751px) and (max-device-width: 1024px) {
@@ -236,4 +256,5 @@
    .MobileMenu:hover, .MobileMenu:after {color: #ffffff; text-decoration: none;}
    .sidemenu-active {display: inline-block; position: fixed; z-index: 30; right: 10px; top: 10px; background-color: #2d2e40; border-radius: 8px;top: 55px;}
    .magic .fantasyMenu, .fantasy .fantasyMenu {color: #ffffff;}
+   .grimoireBox {max-width: 650px;width: 650px;}
 }
