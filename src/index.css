@@ -9,6 +9,7 @@
  }
 
 .body {position: relative;}
+.MenuMobile {display: none;}
 .spinner-border, .spinner-border-sm, .text-secondary  {color: #7474f7 !important;}
 .fantasyMenu {font-size: 13px;z-index: 5; position: relative;}
 .fantasyMenuLi {position: relative; cursor: pointer;}
@@ -106,10 +107,10 @@
 .InputTokenRegular aside {width: 100%; display: inline-block; margin-top: 3px; text-align: left;}
 .InputTokenRegular aside a {display: inline-block; padding: 2px 4px; background-color: #9e6915; color: #ffffff !important; border-radius: 8px; font-size: 10px; font-weight: bold;vertical-align: middle;}
 .InputTokenRegular aside p {display: inline-block; font-size: 12px; margin-left: 10px; vertical-align: middle; color: #5f5b53;}
-.ApproveBTN {padding: 8px 17px; background-color: #9e6915; color: #ffffff; border-radius: 20px; font-size: 16px; font-weight: bold; cursor: pointer;}
+.ApproveBTN {display: inline-block; padding: 8px 17px; background-color: #9e6915; color: #ffffff; border-radius: 20px; font-size: 16px; font-weight: bold; cursor: pointer;}
 .ApproveBTN:hover {color: #ffffff; text-decoration: none;}
 .ApproveBTN:disabled {font-weight: normal;}
-.Web3ActionBTN {padding: 8px 17px; background-color: #7474f7; color: #ffffff; border-radius: 20px; font-size: 16px; font-weight: bold; cursor: pointer;}
+.Web3ActionBTN {display: inline-block; padding: 8px 17px; background-color: #7474f7; color: #ffffff; border-radius: 20px; font-size: 16px; font-weight: bold; cursor: pointer;}
 .Web3ActionBTN:hover {color: #ffffff; text-decoration: none;}
 .Web3ActionBTN:disabled {font-weight: normal !important;}
 .Rebalance {width: 100%; display: inline-block; text-align: center;}
@@ -139,7 +140,7 @@
 
 .penguin {background: rgb(58,60,106);background: linear-gradient(135deg, rgba(58,60,106,1) 0%, rgba(0,0,0,1) 41%);}
 .penguin .dapp-container {background-color: #2d2e40 !important;box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px, rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px;}
-.penguin .sidebar-menu-link, .penguin .nav-link, .penguin .fantasyMenu:hover, .penguin .fantasyMenu, .penguin .form-check-label, .penguin .infoList, .penguin .StatsBro, .penguin .StatsBroO, .penguin .IndexRegular, .penguin .Web3, .penguin .disclamer, .penguin .TitleCov, .penguin .xTitle, .penguin .StatsIndicator a, .penguin .QuestionRegular label,.penguin .DisclamerRegular p, .penguin .InputTokensRegular p, .penguin .Resultsregular p, .penguin .Resultsregular p {color: #ffffff;}
+.penguin .sidebar-menu-link, .penguin .nav-link, .penguin .fantasyMenu:hover, .penguin .fantasyMenu, .penguin .form-check-label, .penguin .infoList, .penguin .StatsBro, .penguin .StatsBroO, .penguin .IndexRegular, .penguin .Web3, .penguin .disclamer, .penguin .TitleCov, .penguin .xTitle, .penguin .StatsIndicator a, .penguin .QuestionRegular label,.penguin .DisclamerRegular p, .penguin .InputTokensRegular p, .penguin .Resultsregular p, .penguin .Resultsregular p, .penguin .Rebalance aside h6, .penguin .Rebalance aside p {color: #ffffff;}
 .penguin .custom-control-label::before, .penguin .custom-file-label, .penguin .custom-select, .penguin .custom-select:focus {transition: none; background: url("./assets/images/arrowdown.png") right 0.75rem center/15px 10px no-repeat;border-color: #9e6915 !important; box-shadow: none;}
 .penguin .token-filter-input {border-color: #9e6915 !important;}
 .penguin .wusd-pair-select, .penguin .token-filter-input {background-color: #2d2e40 !important; color: #ffffff;}
@@ -185,10 +186,31 @@
 
 @media only screen and (max-device-width: 750px) {
    .IndexRegularText iframe {display: none;}
-   .Menuone {display: none;}
-   .page-container {width: 270px !important; display: inline-block; margin: 20px auto;}
+   .page-container, .dapp-container {width: 270px !important; display: inline-block; margin: 20px auto;}
+   .TitleCov {display: none;}
+   .CovTITLE figure {width: 90%;}
+   .DescCov p {font-size: 12px;}
+   .IndexRegular .IndexRegularText p {display: none;}
+   .page-container .FooterP {display: none;}
+   .IndexRegular .IndexRegularImg {width: 90%;}
+   .dapp-container, .page-container {padding: 2px !important;}
+   .StatsBro {display: none;}
+   .StatsSis {width: 100%;}
+   .nav-link {font-size: 10px;}
+   .HealthContainer {width: 100%;display: inline-block;margin: 10px auto 40px auto;}
+   .StatsIndicator {width: 100%;}
+   .StatsLink {text-align: left;}
+   .ApproveBTN {display: inline-block; margin: 10px auto; font-size: 13px;}
+   .InputTokenRegular aside p {width: 75%; margin-left: 5%;}
+   .StatsIndicator h6 {font-size: 20px;}
+   .xTitle {font-size: 22px;}
+   .CovDesc {width: 90%;}
+   .CovAMMs {width: 90%; margin-top: 10px; margin-left: 0;}
+   .Menuone li:hover .Ditone {display: none !important;}
+   .Ditone {display: none !important;}
+   .sidebar-menu-link-selected .Ditone {display: none !important;}
 }
 
 @media only screen and (min-device-width: 751px) and (max-device-width: 1024px) {
-   .Menuone {display: none;}
+   .MenuMobile {display: inline-block;}
 }
