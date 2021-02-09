@@ -1,7 +1,6 @@
 import { PageContainer } from "../../components";
 import homeInflationImage from '../../assets/images/1.png';
 import { Route, Switch } from "react-router-dom";
-import { useState } from "react/cjs/react.development";
 import chap1 from '../../assets/images/sword.png';
 import chap2 from '../../assets/images/wusd.png';
 import chap3 from '../../assets/images/farm.png';
@@ -13,6 +12,7 @@ import info3 from '../../assets/images/infographics/wusd.png';
 import info4 from '../../assets/images/infographics/farming.png';
 import info5 from '../../assets/images/infographics/inflation.png';
 import info6 from '../../assets/images/infographics/indexes.png';
+import { useState } from "react";
 
 const lorem = 'Issued by the School of Responsible Wizardry, the official Covenant spellbook will teach you how to cast Covenant magic correctly.';
 

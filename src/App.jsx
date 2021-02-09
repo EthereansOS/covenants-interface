@@ -1,9 +1,8 @@
 import { connect } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { Header, Footer, PageNotFound, Sidemenu, Transactions } from './components';
 import { ArbitragePage, BazaarPage, CraftingPage, GrimoirePage, MorePage, IndexPage, MultiswapPage, FarmPage, InflationPage, WUSDPage } from './pages';
-import { useEffect } from 'react/cjs/react.development';
 
 const mapStateToProps = (state) => {
   const { core } = state;
@@ -28,6 +27,9 @@ const App = (props) => {
       })
       props.dfoCore.provider.on('chainChanged', (chainId) => {
          window.location.reload();
+      })
+      props.dfoCore.provider.on('disconnect', (error) => {
+        window.location.reload();
       })
   }
 

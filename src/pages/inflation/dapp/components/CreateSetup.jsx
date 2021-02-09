@@ -1,6 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { useEffect } from 'react/cjs/react.development';
 import { Input } from '../../../../components';
 import { addInflationSetup, removeEntry, removeInflationSetup  } from '../../../../store/actions';
 import CreateEntry from './CreateEntry';

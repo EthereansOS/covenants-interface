@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
-import { useEffect } from 'react/cjs/react.development';
+import { useState, useEffect } from 'react';
 
 const FixedInflationComponent = (props) => {
     const { className, dfoCore, contract, entry, operations, showButton, hasBorder } = props;
