@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { connect } from 'react-redux';
 
 const menu = [
     {
@@ -24,11 +25,11 @@ const menu = [
     }
 ]
 
-const Sidemenu = () => {
+const Sidemenu = (props) => {
     const location = useLocation();
 
     return (
-        <ul className="nav app-sidemenu flex-column Menuone">
+        <ul className={`nav app-sidemenu flex-column Menuone ${props.sidemenuClass}`}>
         {
             menu.map(
                 (menuItem, index) => (
@@ -44,4 +45,9 @@ const Sidemenu = () => {
     )
 }
 
-export default Sidemenu;
+const mapStateToProps = (state) => {
+    const { core } = state;
+    return { sidemenuClass: core.sidemenuClass };
+}
+
+export default connect(mapStateToProps)(Sidemenu);

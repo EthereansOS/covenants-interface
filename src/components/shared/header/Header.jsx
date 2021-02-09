@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import DFOCore from '../../../core';
-import { setDFOCore, removeDFOCore, setMagicVisualMode, removeMagicVisualMode } from '../../../store/actions';
+import { setDFOCore, removeDFOCore, setMagicVisualMode, removeMagicVisualMode, toggleSidemenu } from '../../../store/actions';
 import map from '../../../assets/images/map.svg';
 import diamond from '../../../assets/images/ethereum.png';
 import wizardLogo from '../../../assets/images/covlogo.png';
@@ -47,6 +47,7 @@ const Header = (props) => {
                     }
                     <img className="menuIconEth" src={diamond} alt=""/>
                 </div>
+                <a onClick={() => props.toggleSidemenu()}>Toggle</a>
             </div>
         </nav>
     )
@@ -59,22 +60,19 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        setCore: (dfoCore) => {
-            dispatch(setDFOCore(dfoCore));
-        },
-        removeCore: () => {
-            dispatch(removeDFOCore())
-        },
-        setMagicMode : () => {
+        setCore: (dfoCore) => dispatch(setDFOCore(dfoCore)),
+        removeCore: () => dispatch(removeDFOCore()),
+        setMagicMode: () => {
             window.localStorage.setItem("magicMode", true);
             document.body.className = "magic";
             dispatch(setMagicVisualMode())
         },
-        removeMagicMode : () => {
+        removeMagicMode: () => {
             window.localStorage.removeItem("magicMode", true);
             document.body.className = "penguin";
             dispatch(removeMagicVisualMode())
-        }
+        },
+        toggleSidemenu: () => dispatch(toggleSidemenu())
     }
 }
 

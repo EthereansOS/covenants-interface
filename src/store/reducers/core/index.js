@@ -4,12 +4,14 @@ import {
     ADD_TRANSACTION, 
     REMOVE_TRANSACTION,
     CLEAR_TRANSACTIONS,
-    SET_MAGIC_VISUAL_MODE
+    SET_MAGIC_VISUAL_MODE,
+    TOGGLE_SIDEMENU
 } from '../../types';
 
 const initialState = {
     dfoCore: null,
-    transactions: []
+    transactions: [],
+    sidemenuClass: '',
 }
 
 export const coreReducer = (state = initialState, action) => {
@@ -43,6 +45,11 @@ export const coreReducer = (state = initialState, action) => {
             return {
                 ...state,
                 transactions: []
+            }
+        case TOGGLE_SIDEMENU:
+            return {
+                ...state,
+                sidemenuClass: state.sidemenuClass === '' ? 'sidemenu-active' : '',
             }
         default:
             return state;

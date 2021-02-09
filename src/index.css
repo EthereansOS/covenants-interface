@@ -8,6 +8,11 @@
     font-weight: bold;
  }
 
+ /* ALE UPDATE THIS */
+ .sidemenu-active {
+    background-color: white;
+ }
+
 .body {position: relative;}
 .MenuMobile {display: none;}
 .spinner-border, .spinner-border-sm, .text-secondary  {color: #7474f7 !important;}

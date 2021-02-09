@@ -4,7 +4,8 @@ import {
     ADD_TRANSACTION, 
     REMOVE_TRANSACTION,
     CLEAR_TRANSACTIONS,
-    SET_MAGIC_VISUAL_MODE
+    SET_MAGIC_VISUAL_MODE,
+    TOGGLE_SIDEMENU,
 } from '../../types';
 
 export const setDFOCore = (dfoCore) => {
@@ -51,5 +52,11 @@ export const removeTransaction = (transactionIndex) => {
 export const clearTransactions = () => {
     return {
         type: CLEAR_TRANSACTIONS,
+    }
+}
+
+export const toggleSidemenu = () => {
+    return {
+        type: TOGGLE_SIDEMENU
     }
 }
