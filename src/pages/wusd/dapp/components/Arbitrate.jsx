@@ -2,12 +2,8 @@ import { connect } from 'react-redux';
 
 const Arbitrate = (props) => {
     return (
-        <div className="wusd-arbitrate-container">
-            <div className="row">
-                <div className="col-12 dapp-col text-center justify-content-center">
-                    <p>Coming soon!</p>
-                </div>
-            </div>
+        <div className="DisclamerRegular">
+            <p><b>Coming Soon</b></p>
         </div>
     )
 }

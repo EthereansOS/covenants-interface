@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { useEffect } from 'react/cjs/react.development';
 import { ApproveButton, Input } from '../../../../components';
 import { addTransaction } from '../../../../store/actions';
+import WUSDLogo from '../../../../assets/images/x1WUSD.png';
 
 const Mint = (props) => {
     const [pair, setPair] = useState("");
@@ -235,8 +236,10 @@ const Mint = (props) => {
         const chosenPair = pairs[pair];
 
         return (
-            <div className="col-12 mb-4">
-                <Input showMax={true} step={0.0001} address={chosenPair.lpContract.options.address} value={lpTokenAmount.value} balance={lpTokenBalance} min={0} onChange={(e) => updateLpAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={`${chosenPair.symbol0}/${chosenPair.symbol1}`} />
+            <div className="InputTokensRegular">
+                <div className="InputTokenRegular">
+                    <Input showMax={true} step={0.0001} address={chosenPair.lpContract.options.address} value={lpTokenAmount.value} balance={lpTokenBalance} min={0} onChange={(e) => updateLpAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={`${chosenPair.symbol0}/${chosenPair.symbol1}`} />
+                </div>
             </div>
         )
     }
@@ -244,25 +247,22 @@ const Mint = (props) => {
     const getMultipleTokens = () => {
         
         return (
-            <>
-                <div className="col-12 mb-4">
+            <div className="InputTokensRegular">
+                <p>Wrap</p>
+                <div className="InputTokenRegular">
                     <Input showMax={true} step={0.0001}  value={firstAmount.value} address={pairs[pair].token0} balance={firstTokenBalance} min={0} onChange={(e) => updateFirstAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol0} />
                 </div>
-                <div className="col-12 mb-2">
-                    <p><b>And</b></p>
-                </div>
-                <div className="col-12 mb-4">
+                <p>And</p>
+                <div className="InputTokenRegular">
                     <Input showMax={true} step={0.0001}  value={secondAmount.value} address={pairs[pair].token1} balance={secondTokenBalance} min={0} onChange={(e) => updateSecondAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol1} />
                 </div>
-            </>
+            </div>
         )
     }
 
     const getButtons = () => {
         return (
-            <div className="col-12 mb-4">
-                <div className="row">
-                    <div className="col-12 col-md-6">
+            <div className="Web3BTNs">
                         {
                             (!useLpToken && !firstTokenApproved) ? 
                                 <ApproveButton contract={pairs[pair].token0Contract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('first', res)} text={`Approve ${pairs[pair].symbol0}`} />
@@ -276,17 +276,13 @@ const Mint = (props) => {
                             (useLpToken && !lpTokenApproved) && 
                                 <ApproveButton contract={pairs[pair].lpContract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('first', res)} text={`Approve ${pairs[pair].symbolLp}`} />
                         }
-                    </div>
-                    <div className={`col-12 ${(!useLpToken && firstTokenApproved && secondTokenApproved) || (useLpToken && lpTokenApproved) ? "" : "col-md-6"}`}>
                         {
-                            mintLoading ? <button className="btn btn-secondary" disabled={mintLoading}>
+                            mintLoading ? <a className="Web3ActionBTN" disabled={mintLoading}>
                                 <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            </button>
+                            </a>
                             : 
-                            <button className="btn btn-secondary" onClick={() => mintWUSD()} disabled={((!firstAmount.value || !secondAmount.value) && !lpTokenAmount.value) || !firstTokenApproved || !secondTokenApproved}>Mint</button>
+                            <a className="Web3ActionBTN" onClick={() => mintWUSD()} disabled={((!firstAmount.value || !secondAmount.value) && !lpTokenAmount.value) || !firstTokenApproved || !secondTokenApproved}>Mint</a>
                         }
-                    </div>
-                </div>
             </div>
         )
     }
@@ -294,23 +290,20 @@ const Mint = (props) => {
     if (loading) {
         return (
             <div className="mint-component">
-                <div className="row">
                     <div className="col-12 justify-content-center">
                         <div className="spinner-border text-secondary" role="status">
                             <span className="visually-hidden"></span>
                         </div>
                     </div>
-                </div>
             </div>
         )
     }
 
     return (
-        <div className="mint-component">
-            <div className="row">
-                <div className="col-12 mb-4">
-                    <select className="custom-select wusd-pair-select" value={pair} onChange={(e) => { clear(); setChosenPair(e.target.value); }}>
-                        <option value="">Choose pair..</option>
+        <div className="MintBurn">
+                <div className="PairSelector">
+                    <select className="SelectRegular" value={pair} onChange={(e) => { clear(); setChosenPair(e.target.value); }}>
+                        <option value="">Select a pair..</option>
                         {
                             pairs.map((pair, index) => {
                                 return <option key={pair.ammName + pair.symbol0 + pair.symbol1} value={index}>{pair.ammName} - {pair.symbol0}/{pair.symbol1}</option>
@@ -318,36 +311,28 @@ const Mint = (props) => {
                         }
                     </select>
                     {
-                        isHealthyPair && <div className="form-check mt-4">
-                            <input className="form-check-input" type="checkbox" value={useLpToken} onChange={(e) => setUseLpToken(e.target.checked)} id="useLpToken" disabled={!pair} />
-                            <label className="form-check-label" htmlFor="useLpToken">
-                                Use liquidity pool token
-                            </label>
+                        isHealthyPair && <div className="QuestionRegular">
+                            <input type="checkbox" value={useLpToken} onChange={(e) => setUseLpToken(e.target.checked)} id="useLpToken" disabled={!pair} />
+                            <label htmlFor="useLpToken">Use liquidity pool token</label>
                         </div>
                     }
                 </div>
                 {
-                    !isHealthyPair && <div className="col-12">
-                        Lorem, ipsum dolor sit amet consectetur adipisicing elit. Facere error, dicta nobis consequatur voluptas culpa dignissimos ipsam laudantium facilis. Ad quia deleniti commodi odit eum accusamus, delectus labore eaque recusandae!
+                    !isHealthyPair && <div className="DisclamerRegular">
+                        <p><b>This pair is not healthy at the moment!</b> <br></br> Select a different pair or try again at another time.</p>
                     </div>
                 }
                 {
                     (pair && isHealthyPair) ? useLpToken ? getLpToken() : getMultipleTokens() : <div/>
                 }
                 {
-                    (pair && isHealthyPair) ? <div className="col-12 mb-4">
-                        <div className="row justify-content-center">
-                            <b>For</b>
-                        </div>
-                        <div className="row justify-content-center">
-                            { getEstimatedAmount() } WUSD
-                        </div>
+                    (pair && isHealthyPair) ? <div className="Resultsregular">
+                            <p>For <b>{ getEstimatedAmount() } <img src={WUSDLogo}></img>WUSD</b></p>
                     </div> : <div/>
                 }
                 {
                     (pair && isHealthyPair) ? getButtons() : <div/>
                 }
-            </div>
         </div>
     )
 }

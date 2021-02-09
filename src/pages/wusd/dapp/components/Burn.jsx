@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { ApproveButton, Input } from '../../../../components';
 import { ethers } from 'ethers';
 import { addTransaction } from '../../../../store/actions';
+import WUSDLogo from '../../../../assets/images/x1WUSD.png';
 
 const abi = new ethers.utils.AbiCoder();
 
@@ -180,8 +181,10 @@ const Burn = (props) => {
 
     const getWUSDToken = () => {
         return (
-            <div className="col-12 mb-4">
-                <Input showMax={true} value={amount.value} balance={wusdBalance} min={0} onChange={(e) => onWUSDAmountChange(e.target.value)} address={props.dfoCore.getContextElement("WUSDAddress")} showCoin={true} showBalance={true} name="WUSD" />
+            <div className="InputTokensRegular">
+                <div className="InputTokenRegular">
+                    <Input showMax={true} value={amount.value} balance={wusdBalance} min={0} onChange={(e) => onWUSDAmountChange(e.target.value)} address={props.dfoCore.getContextElement("WUSDAddress")} showCoin={true} showBalance={true} name="WUSD" />
+                </div>
             </div>
         )
     }
@@ -193,32 +196,21 @@ const Burn = (props) => {
         
         if (getLpToken) {
             return (
-                <div className="col-12 mb-4">
-                    <div className="row justify-content-center">
-                        <b>For</b>
-                    </div>
-                    <div className="row justify-content-center">
-                        { estimatedLpToken.value } { pairs[pair].symbol0 }/{ pairs[pair].symbol1 }
-                    </div>
+                <div className="Resultsregular">
+                        <p>For <b> { estimatedLpToken.value } { pairs[pair].symbol0 }/{ pairs[pair].symbol1 } </b></p>
                 </div>
             )
         }
         return (
-            <div className="col-12 mb-4">
-                <div className="row justify-content-center">
-                    <b>For</b>
-                </div>
-                <div className="row justify-content-center">
-                    { estimatedToken0.value } { pairs[pair].symbol0 } / { estimatedToken1.value } { pairs[pair].symbol1 }
-                </div>
+            <div className="Resultsregular">
+                    <p>For <b> { estimatedToken0.value } { pairs[pair].symbol0 } / { estimatedToken1.value } { pairs[pair].symbol1 }</b></p>
             </div>
         )
     }
 
     const getButtons = () => {
         return (
-            <div className="col-12 mb-4">
-                <div className="row justify-content-center">
+            <div className="Web3BTNs">
                     {
                         /*
                         !wusdApproved ? <div className="col-12 col-md-6">
@@ -233,14 +225,11 @@ const Burn = (props) => {
                         </div> : <div/>
                         */
                     }
-                        <div className="col-12 col-md-6">
                             {
-                                burnLoading ? <button className="btn btn-secondary" disabled={burnLoading}>
+                                burnLoading ? <a className="Web3ActionBTN" disabled={burnLoading}>
                                     <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                </button> : <button onClick={() => burnWUSD()} disabled={!amount.full || !amount.value || amount.value === 0 || amount.full === 0} className="btn btn-secondary">Burn</button>
+                                </a> : <a onClick={() => burnWUSD()} disabled={!amount.full || !amount.value || amount.value === 0 || amount.full === 0} className="Web3ActionBTN">Burn</a>
                             }
-                        </div>
-                </div>
             </div>
         )
     }
@@ -260,11 +249,10 @@ const Burn = (props) => {
     }
 
     return (
-        <div className="burn-component">
-            <div className="row">
-                <div className="col-12 mb-4">
-                    <select className="custom-select wusd-pair-select" value={pair} onChange={(e) => setChosenPair(e.target.value)}>
-                        <option value="">Choose pair..</option>
+        <div className="MintBurn">
+                <div className="PairSelector">
+                    <select className="SelectRegular" value={pair} onChange={(e) => setChosenPair(e.target.value)}>
+                        <option value="">Select a pair..</option>
                         {
                             pairs.map((pair, index) => {
                                 return <option key={pair.ammName + pair.symbol0 + pair.symbol1} value={index}>{pair.ammName} - {pair.symbol0}/{pair.symbol1}</option>
@@ -272,18 +260,15 @@ const Burn = (props) => {
                         }
                     </select>
                     {
-                        isHealthyPair && 
-                        <div className="form-check mt-4">
-                            <input className="form-check-input" type="checkbox" value={getLpToken} onChange={(e) => setGetLpToken(e.target.checked)} id="getLpToken" disabled={!pair} />
-                            <label className="form-check-label" htmlFor="getLpToken">
-                                Get liquidity pool token
-                            </label>
+                        isHealthyPair && <div className="QuestionRegular">
+                            <input type="checkbox" value={getLpToken} onChange={(e) => setGetLpToken(e.target.checked)} id="getLpToken" disabled={!pair} />
+                            <label htmlFor="getLpToken">Use liquidity pool token</label>
                         </div>
                     }
                 </div>
                 {
-                    !isHealthyPair && <div className="col-12">
-                        Lorem, ipsum dolor sit amet consectetur adipisicing elit. Facere error, dicta nobis consequatur voluptas culpa dignissimos ipsam laudantium facilis. Ad quia deleniti commodi odit eum accusamus, delectus labore eaque recusandae!
+                    !isHealthyPair && <div className="DisclamerRegular">
+                        <p><b>This pair is not healthy at the moment!</b> <br></br> Select a different pair or try again at another time.</p>
                     </div>
                 }
                 {
@@ -293,7 +278,6 @@ const Burn = (props) => {
                 {
                     (isHealthyPair && pair) ? getButtons() : <div/>
                 }
-            </div>
         </div>
     )
 }

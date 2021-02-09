@@ -28,19 +28,20 @@ const Input = (props) => {
         <>
             { label && <h6><b>{label}</b></h6> }
             <div className="input-group" tabIndex={0}>
+                <input type="number" lang="en-US" step="any" className={`form-control ${parseFloat(val) > parseFloat(balance) ? 'is-invalid' : ''}`} value={val} min={min} max={max || balance} onChange={(e) => onRealChange(e.target.value)}/>
                 {
-                    showMax && <div className="input-group-prepend">
-                        <button className="btn btn-secondary" onClick={() => onChange(onDetectedChange(0, balance))} type="button">MAX</button>
-                    </div>
-                }
-                <input type="number" lang="en-US" step="any" className={`form-control input-form-field ${parseFloat(val) > parseFloat(balance) ? 'is-invalid' : ''}`} value={val} min={min} max={max || balance} onChange={(e) => onRealChange(e.target.value)}/>
-                {
-                    showCoin && <div className={`input-group-append no-border-right`}>
+                    showCoin && <div className={`input-group-append`}>
                         <span className={`input-group-text ${parseFloat(val) > parseFloat(balance) ? 'is-invalid' : ''}`} id=""><Coin address={address} /> {name}</span>
                     </div>
                 }
             </div>
-            { showBalance && <small className="form-text text-muted">Balance: {balance} {name} {extra ? extra : ''}</small> }
+            <aside>
+            {
+                showMax && 
+                    <a onClick={() => onChange(onDetectedChange(0, balance))} type="button">MAX</a>
+            }
+            { showBalance && <p>Balance: {balance} {name} {extra ? extra : ''}</p> }
+            </aside>
         </>
     )
 }

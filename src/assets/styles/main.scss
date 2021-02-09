@@ -67,9 +67,6 @@ code {
   @include button-outline-variant($warning, #fff, lighten($warning, 3%), $warning);
 }
 
-.text-secondary {
-  color: $secondary !important;
-}
 
 .btn {
   border-radius: 1.5rem;
