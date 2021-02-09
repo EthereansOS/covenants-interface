@@ -39,7 +39,7 @@ export default class DFOCore {
             // initialize the web3 instance
             this.web3 = new Web3(window.ethereum || await new Web3Modal({
                 providerOptions,
-            }.connect()));
+            }).connect());
             // retrieve the provider
             const provider = this.web3.currentProvider;
             provider.on = provider.on || function() {};
