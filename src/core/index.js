@@ -36,34 +36,30 @@ export default class DFOCore {
         // retrieve the web3 passed in the function
         this.web3 = web3;
         if (!this.web3) {
-            // no web3 instance is passed, we create it by opening the modal
-            const web3Modal = new Web3Modal({
-                providerOptions,
-            });
-            // retrieve the provider
-            const provider = await web3Modal.connect();
             // initialize the web3 instance
-            this.web3 = new Web3(provider);
+            this.web3 = new Web3(window.ethereum || await new Web3Modal({
+                providerOptions,
+            }.connect()));
+            // retrieve the provider
+            const provider = this.web3.currentProvider;
+            provider.on = provider.on || function() {};
             // set the address
             const accounts = await this.web3.eth.getAccounts();
             this.address = accounts[0];
             // check for accounts changes
             provider.on('accountsChanged', (accounts) => {
                 this.address = accounts[0] || this.voidEthereumAddress;
-                
             });
             // check for chain id changes
             provider.on('chainChanged', (chainId) => {
                 this.chainId = this.context.ethereumNetwork[chainId] ? chainId : 0;
-                
-            })
+            });
             // check for connection
             provider.on('connect', ({ chainId }) => {
                 this.chainId = chainId;
             });
             // check for disconnect
             provider.on('disconnect', ({ code, message }) => {
-                
                 this.address = this.voidEthereumAddress;
                 this.chainId = 0;
             });
