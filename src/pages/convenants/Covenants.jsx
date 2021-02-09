@@ -29,10 +29,10 @@ const Covenants = () => {
             </div>
             <div className="CovAMMs">
                 <h5>Supported AMMs</h5>
-                <a target="blank">&#129412; UniSwapV2</a>
-                <a target="blank">&#9878;&#65039; BalancerV1</a>
-                <a target="blank">&#127769; MooniSwapV1</a>
-                <a target="blank">&#127843; SushiSwapV1</a>
+                <a target="blank" href="https://uniswap.org/">&#129412; UniSwapV2</a>
+                <a target="blank" href="https://balancer.finance/">&#9878;&#65039; BalancerV1</a>
+                <a target="blank" href="https://mooniswap.info/home">&#127769; MooniSwapV1</a>
+                <a target="blank" href="https://sushiswap.fi/">&#127843; SushiSwapV1</a>
             </div>
         </div>
     </div>
