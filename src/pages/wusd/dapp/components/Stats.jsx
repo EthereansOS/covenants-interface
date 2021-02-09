@@ -68,8 +68,7 @@ const Stats = (props) => {
             setCredit(differences.credit);
             setDebit(differences.debt);
 
-            // setShowDebt(parseInt(differences.debt) > parseInt(rbda));
-            setShowDebt(true);
+            setShowDebt(parseInt(differences.debt) > parseInt(rbda));
             setShowCredit(parseInt(differences.credit) > 0);
 
             const perc = [];
