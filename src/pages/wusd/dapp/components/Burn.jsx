@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { ApproveButton, Input } from '../../../../components';
+import { Input } from '../../../../components';
 import { ethers } from 'ethers';
 import { addTransaction } from '../../../../store/actions';
 import WUSDLogo from '../../../../assets/images/x1WUSD.png';
@@ -197,7 +197,7 @@ const Burn = (props) => {
         if (getLpToken) {
             return (
                 <div className="Resultsregular">
-                        <p>For <b> { estimatedLpToken.value } { pairs[pair].symbol0 }/{ pairs[pair].symbol1 } </b></p>
+                        <p>For <b> { estimatedLpToken.value } { pairs[pair].lpSymbol } </b></p>
                 </div>
             )
         }
@@ -262,7 +262,7 @@ const Burn = (props) => {
                     {
                         isHealthyPair && <div className="QuestionRegular">
                             <input type="checkbox" value={getLpToken} onChange={(e) => setGetLpToken(e.target.checked)} id="getLpToken" disabled={!pair} />
-                            <label htmlFor="getLpToken">Use liquidity pool token</label>
+                            <label htmlFor="getLpToken">Get liquidity pool token</label>
                         </div>
                     }
                 </div>
