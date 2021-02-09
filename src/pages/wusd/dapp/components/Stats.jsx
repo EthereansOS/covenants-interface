@@ -272,13 +272,13 @@ const Stats = (props) => {
                         <p>{props.dfoCore.toDecimals(debit, wusdDecimals, 2)} WUSD</p>
                     </div>
                     <div className="StatsLink">
-                        <a>Etherscan</a>
-                        <a>Collateral</a>
-                        <a>ITEM</a>
-                        <a>Uniswap</a>
-                        <a>Mooniswap</a>
-                        <a>Sushiswap</a>
-                        <a>1Inch</a>
+                        <a target="_blank" href="https://etherscan.io/token/0x7C974104DF9dd7fb91205ab3D66d15AFf1049DE8">Etherscan</a>
+                        <a target="_blank" href="https://etherscan.io/address/0x37bde7F133171A5B737506Cc402471Ce0e2b03ca">Collateral</a>
+                        <a target="_blank" href="https://ethitem.com/?interoperable=0x7C974104DF9dd7fb91205ab3D66d15AFf1049DE8">ITEM</a>
+                        <a target="_blank" href="https://info.uniswap.org/token/0x7C974104DF9dd7fb91205ab3D66d15AFf1049DE8">Uniswap</a>
+                        <a target="_blank" href="https://mooniswap.info/token/0x7c974104df9dd7fb91205ab3d66d15aff1049de8">Mooniswap</a>
+                        <a target="_blank" href="https://sushiswap.fi/token/0x7c974104df9dd7fb91205ab3d66d15aff1049de8">Sushiswap</a>
+                        <a target="_blank" href="https://1inch.exchange/#/ETH/0x7c974104df9dd7fb91205ab3d66d15aff1049de8">1Inch</a>
                     </div>
                 </div>
                 <h5 className="xTitle"><img src={x2USDLogo}></img>x2USD</h5>
@@ -292,13 +292,15 @@ const Stats = (props) => {
                         <p target="_blank" href="">{x2USDTreasury} WUSD</p>
                     </div>
                     <div className="StatsLink">
-                        <a>Etherscan</a>
-                        <a>Collateral</a>
-                        <a>ITEM</a>
-                        <a>Uniswap</a>
-                        <a>Mooniswap</a>
-                        <a>Sushiswap</a>
-                        <a>1Inch</a>
+                    <div className="StatsLink">
+                        <a target="_blank" href="https://etherscan.io/token/0xA4d9C768E1c6cabB127a6326c0668b49235639e8">Etherscan</a>
+                        <a target="_blank" href="https://etherscan.io/address/0x88a012e4d2b8600cf82e21f0685ec2ebcf643847">Treasury</a>
+                        <a target="_blank" href="https://ethitem.com/?interoperable=0xA4d9C768E1c6cabB127a6326c0668b49235639e8">ITEM</a>
+                        <a target="_blank" href="https://info.uniswap.org/token/0xA4d9C768E1c6cabB127a6326c0668b49235639e8">Uniswap</a>
+                        <a target="_blank" href="https://mooniswap.info/token/0xA4d9C768E1c6cabB127a6326c0668b49235639e8">Mooniswap</a>
+                        <a target="_blank" href="https://sushiswap.fi/token/0xA4d9C768E1c6cabB127a6326c0668b49235639e8">Sushiswap</a>
+                        <a target="_blank" href="https://1inch.exchange/#/ETH/0xA4d9C768E1c6cabB127a6326c0668b49235639e8">1Inch</a>
+                    </div>
                     </div>
                 </div>
                 <h5 className="xTitle"><img src={x5USDLogo}></img>x5USD</h5>
@@ -312,13 +314,13 @@ const Stats = (props) => {
                         <p target="_blank" href="">{x5USDTreasury} WUSD</p>
                     </div>
                     <div className="StatsLink">
-                        <a>Etherscan</a>
-                        <a>Collateral</a>
-                        <a>ITEM</a>
-                        <a>Uniswap</a>
-                        <a>Mooniswap</a>
-                        <a>Sushiswap</a>
-                        <a>1Inch</a>
+                        <a target="_blank" href="https://etherscan.io/token/0x0473F6Ea742448ec9433b87aC410d79C08198abe">Etherscan</a>
+                        <a target="_blank" href="https://etherscan.io/address/0x7fcb2c6bed43029e8a8a0d700539f47ecb6e0f4c">Treasury</a>
+                        <a target="_blank" href="https://ethitem.com/?interoperable=0x0473F6Ea742448ec9433b87aC410d79C08198abe">ITEM</a>
+                        <a target="_blank" href="https://info.uniswap.org/token/0x0473F6Ea742448ec9433b87aC410d79C08198abe">Uniswap</a>
+                        <a target="_blank" href="https://mooniswap.info/token/0x0473F6Ea742448ec9433b87aC410d79C08198abe">Mooniswap</a>
+                        <a target="_blank" href="https://sushiswap.fi/token/0x0473F6Ea742448ec9433b87aC410d79C08198abe">Sushiswap</a>
+                        <a target="_blank" href="https://1inch.exchange/#/ETH/0x0473F6Ea742448ec9433b87aC410d79C08198abe">1Inch</a>
                     </div>
                 </div>
                 {/*

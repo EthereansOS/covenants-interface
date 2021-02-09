@@ -144,8 +144,8 @@
 .penguin .FooterP p {color: #adadad;}
 .penguin .FooterP p a, .penguin .disclamer a {font-weight: bold; color: #adadad !important;}
 .penguin .card {border: 1px solid #000000; color: #ffffff;}
-.penguin .StatsLink a {border: 1px solid #9e6915; color: #9e6915;}
-.penguin .StatsLink a:hover {color: #9e6915;}
+.penguin .StatsLink a {border: 1px solid #9e6915; color: #9e6915;text-decoration: none;}
+.penguin .StatsLink a:hover {color: #9e6915; text-decoration: none;}
 .penguin .nav-item-selected {border-bottom: 8px solid #7474f7;}
 .penguin .health-bar {background-color: #1c1c27;}
 .penguin .SelectRegular {border-color: #9e6915; color: #9e6915;}
