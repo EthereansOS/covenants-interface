@@ -68,7 +68,8 @@ const Stats = (props) => {
             setCredit(differences.credit);
             setDebit(differences.debt);
 
-            setShowDebt(parseInt(differences.debt) > parseInt(rbda));
+            // setShowDebt(parseInt(differences.debt) > parseInt(rbda));
+            setShowDebt(true);
             setShowCredit(parseInt(differences.credit) > 0);
 
             const perc = [];
@@ -164,6 +165,10 @@ const Stats = (props) => {
         setUsdRebalanceByDebit({ value, full: props.dfoCore.fromDecimals(parseFloat(value).toString() || "0", wusdDecimals)});
     }
 
+    const rebalanceByDebitDisabled = () => {
+        return !usdRebalanceByDebit.value || parseInt(usdRebalanceByDebit.value) === 0 || !usdRebalanceByDebit.full || parseInt(usdRebalanceByDebit.full) === 0 || (parseInt(usdRebalanceByDebit.full) > (parseInt(debit)));
+    }
+
     const rebalanceByCredit = async () => {
         setLoading(true);
         try {
@@ -178,6 +183,7 @@ const Stats = (props) => {
     }
 
     const rebalanceByDebit = async () => {
+        if (rebalanceByDebitDisabled()) return;
         setLoading(true);
         try {
             const info = await wusdExtensionController.methods.wusdInfo().call();
@@ -443,7 +449,7 @@ const Stats = (props) => {
                         {
                             selectedUsdn ? 
                             <div className="Web3BTNs">
-                                <a className="Web3ActionBTN" onClick={() => rebalanceByDebit()} disabled={!usdRebalanceByDebit.value || !usdRebalanceByDebit.full}>Rebalance</a>
+                                <a className="Web3ActionBTN" onClick={() => rebalanceByDebit()} disabled={rebalanceByDebitDisabled()}>Rebalance</a>
                             </div> : <div/>
                         }
                     </div>
