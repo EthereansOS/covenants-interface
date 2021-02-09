@@ -28,7 +28,7 @@ const Sidemenu = () => {
     const location = useLocation();
 
     return (
-        <ul className="nav app-sidemenu flex-column">
+        <ul className="nav app-sidemenu flex-column Menuone">
         {
             menu.map(
                 (menuItem, index) => (

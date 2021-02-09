@@ -180,4 +180,10 @@
 
 @media only screen and (max-device-width: 750px) {
    .IndexRegularText iframe {display: none;}
+   .Menuone {display: none;}
+   .page-container {width: 270px !important; display: inline-block; margin: 20px auto;}
+}
+
+@media only screen and (min-device-width: 751px) and (max-device-width: 1024px) {
+   .Menuone {display: none;}
 }
