@@ -33,41 +33,53 @@ export default class DFOCore {
     init = async (web3, providerOptions = {}) => {
         // return if already initialized
         if (this.initialized) return;
-        // retrieve the web3 passed in the function
-        this.web3 = web3;
-        if (!this.web3) {
-            // initialize the web3 instance
-            this.web3 = new Web3(window.ethereum || await new Web3Modal({
-                providerOptions,
-            }).connect());
-            // retrieve the provider
-            const provider = this.web3.currentProvider;
-            provider.on = provider.on || function() {};
-            // set the address
-            const accounts = await this.web3.eth.getAccounts();
-            this.address = accounts[0];
-            // check for accounts changes
-            provider.on('accountsChanged', (accounts) => {
-                this.address = accounts[0] || this.voidEthereumAddress;
-            });
-            // check for chain id changes
-            provider.on('chainChanged', (chainId) => {
-                this.chainId = this.context.ethereumNetwork[chainId] ? chainId : 0;
-            });
-            // check for connection
-            provider.on('connect', ({ chainId }) => {
-                this.chainId = chainId;
-            });
-            // check for disconnect
-            provider.on('disconnect', ({ code, message }) => {
-                this.address = this.voidEthereumAddress;
-                this.chainId = 0;
-            });
-            this.provider = provider;
+        try {
+            // retrieve the web3 passed in the function
+            this.web3 = web3;
+            if (!this.web3) {
+                // initialize the web3 instance
+                if (!window.ethereum) {
+                    const web3Modal = new Web3Modal({
+                        providerOptions,
+                    });
+                    const prov = await web3Modal.connect();
+                    this.web3 = new Web3(prov);
+                } else {
+                    this.web3 = new Web3(window.ethereum);
+                    window.ethereum.enable();
+                }
+                // retrieve the provider
+                const provider = this.web3.currentProvider;
+                provider.on = provider.on || function() {};
+                // set the address
+                const accounts = await this.web3.eth.getAccounts();
+                this.address = accounts[0];
+                // check for accounts changes
+                provider.on('accountsChanged', (accounts) => {
+                    this.address = accounts[0] || this.voidEthereumAddress;
+                });
+                // check for chain id changes
+                provider.on('chainChanged', (chainId) => {
+                    this.chainId = this.context.ethereumNetwork[chainId] ? chainId : 0;
+                });
+                // check for connection
+                provider.on('connect', ({ chainId }) => {
+                    this.chainId = chainId;
+                });
+                // check for disconnect
+                provider.on('disconnect', ({ code, message }) => {
+                    this.address = this.voidEthereumAddress;
+                    this.chainId = 0;
+                });
+                this.provider = provider;
+            }
+            console.log(this.web3);
+            // set the core as initialized
+            this.initialized = true;
+            window.web3 = this.web3;
+        } catch (error) {
+            this.initialized = false;
         }
-        // set the core as initialized
-        this.initialized = true;
-        window.web3 = this.web3;
     }
 
     /**

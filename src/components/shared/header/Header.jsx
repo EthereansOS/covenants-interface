@@ -1,7 +1,6 @@
 import { connect } from 'react-redux';
 import DFOCore from '../../../core';
 import { setDFOCore, removeDFOCore, setMagicVisualMode, removeMagicVisualMode, toggleSidemenu } from '../../../store/actions';
-import map from '../../../assets/images/map.svg';
 import diamond from '../../../assets/images/ethereum.png';
 import wizardLogo from '../../../assets/images/covlogo.png';
 import { default as context } from '../../../data/context.json';
@@ -12,9 +11,12 @@ const Header = (props) => {
     const [address, setAddress] = useState(null);
     const location = useLocation();
 
-    if (props.dfoCore) {
+    if (props.dfoCore && props.dfoCore.initialized && props.dfoCore.address !== props.dfoCore.voidEthereumAddress) {
         props.dfoCore.provider.on('accountsChanged', (accounts) => {
-            setAddress(formatAddress(accounts[0]));
+            if (accounts && accounts[0]) {
+                console.log(accounts[0]);
+                setAddress(formatAddress(accounts[0]));
+            }
         })
     }
 
@@ -43,7 +45,7 @@ const Header = (props) => {
                     {location.pathname.includes('/dapp') && !window.localStorage.magicMode && <a className="ChangeMod" onClick={props.setMagicMode}>&#10024;</a>}
                     {location.pathname.includes('/dapp') && window.localStorage.magicMode && <a className="ChangeMod" onClick={props.removeMagicMode}>&#128188;</a>}
                     {
-                        props.dfoCore ? <a className="BtnConnectAfter" onClick={() => disconnectCore()}>{formatAddress(props.dfoCore.address)}</a> : <a className="BtnConnect" onClick={() => connectCore()}>Connect</a>
+                        props.dfoCore && props.dfoCore.initialized && props.dfoCore.address ? <a className="BtnConnectAfter" onClick={() => disconnectCore()}>{formatAddress(props.dfoCore.address)}</a> : <a className="BtnConnect" onClick={() => connectCore()}>Connect</a>
                     }
                     <img className="menuIconEth" src={diamond} alt=""/>
                 </div>

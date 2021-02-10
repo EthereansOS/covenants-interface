@@ -36,7 +36,7 @@ const Dapp = (props) => {
         }
     }
 
-    if (!props.dfoCore) {
+    if (!props.dfoCore || !props.dfoCore.initialized || !props.dfoCore.address || props.dfoCore.address === props.dfoCore.voidEthereumAddress) {
         return (
             <div className="dapp-container">
                 <div className="row">
