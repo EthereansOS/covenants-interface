@@ -6,6 +6,7 @@ import chap2 from '../../assets/images/wusd.png';
 import chap3 from '../../assets/images/farm.png';
 import chap4 from '../../assets/images/cloud.png';
 import chap5 from '../../assets/images/bread.png';
+import chap6 from '../../assets/images/ethereum.png';
 import info1 from '../../assets/images/infographics/orchestrator.png';
 import info2 from '../../assets/images/infographics/orchestrator_1.png';
 import info3 from '../../assets/images/infographics/wusd.png';
@@ -14,7 +15,7 @@ import info5 from '../../assets/images/infographics/inflation.png';
 import info6 from '../../assets/images/infographics/indexes.png';
 import { useState } from "react";
 
-const lorem = 'Issued by the School of Responsible Wizardry, the official Covenant spellbook will teach you how to cast Covenant magic correctly.';
+const lorem = 'Issued by the School of Responsible Wizardry, the Grimoire is the official Covenant spellbook. It will teach you all about Covenant magic so that you can tap into its full potential.';
 
 const Grimoire = () => {
     const [showGrimoire, setShowGrimoire] = useState(false);
@@ -27,36 +28,32 @@ const Grimoire = () => {
                 showGrimoire && <div className="grimoireBox">
                     <article className="grimoireAll">
                         <section className="GrimoureContent">
-                            <h1>The Grimoire Vol 1</h1>
+                            <h1>Grimoire Vol. 1 For General Users</h1>
                             <article>
                                 <span>
                                     <img src={chap1}></img>
                                 </span>
                                 <header>
                                     <h2>The Aggregator</h2>
-                                    <p>At the heart of every Covenant is The Aggregator. Equipped with AMM-standardizing APIs, it allows any wallet, DAPP, DFO, DAO or customized smart contract to farm, arbitrage and so much more across multiple AMMs at the same time.</p>
+                                    <p>At the heart of every Covenant is the Aggregator. By liberating on-chain AMM aggregation, it allows any wallet, DAPP, DFO, DAO or customized smart contract to farm, inflate, multi-swap, arbitrage, craft liquidity, collateralize stablecoins and more across multiple AMMs at the same time.</p>
                                 </header>
                             </article>
                             <article>
                                 <h2>On-Chain Aggregators vs Semi On-Chain Aggregators</h2>
-                                <p>All other AMM aggregators—1inch, for example—operate semi on-chain. While excellent at finding the best prices for trades, they process all transactions via their off-chain frontends. Smart contracts cannot read frontends, so they can’t interact with these aggregators. Only human individual wallets and off-chain arbitration bots can, and only for basic token swaps.</p>
-                                <p>The Covenant Aggregator is free from such limitations. It is equipped with AMM-standardizing Solidity APIs that smart contracts can read. This means that any wallet, dApp, DAO, DFO or customized smart contract can use it, and for much more than just token swaps. It unlocks multi-AMM farming, arbitrage, token inflation, liquidity crafting, stablecoin collateralization etc.</p>
+                                <p>TThe Aggregator is the first ever on-chain AMM aggregator.All other aggregators—1inch, for example—operate semi on-chain. While excellent at finding the best prices for trades, they process all transactions via their off-chain frontends. Smart contracts cannot read frontends, so they can’t interact with these aggregators. Only human individual wallets and off-chain arbitration bots can, and only for basic token swaps.</p>
+                                <p>The Covenant Aggregator is free from such limitations. It is equipped with AMM-standardizing Solidity APIs that smart contracts can read. This means that any wallet, dApp, DAO, DFO or customized smart contract can use it, and for much more than just token swaps. It unlocks multi-AMM farming, on-chain arbitrage, token inflation, liquidity crafting, stablecoin collateralization and more.</p>
                                 <figure>
                                     <img src={info1}></img>
                                 </figure>
                             </article>
                             <article>
                                 <h2>AMM-Standardizing APIs</h2>
-                                <p>All AMMs implement the same three basic functions—swap liquidity, add liquidity and remove liquidity—in different ways. Uniswap routes users to liquidity pools via hard-coded lists; Mooniswap connects users directly; Balancer allows for pools with more than two tokens; etc. </p>
-                                <p>However, they all follow the same rules of behavior. The Aggregator is programmed with APIs encoded with the logic of these rules, which allows it to facilitate fully on-chain, standardized AMM aggregation. These not only dApps, DAOs etc. to integrate AMM aggregation, but also interact with all AMMs whitelisted by the Aggregator without having to account for unique logic.</p>
+                                <p>All AMMs implement the same three basic functions—swap liquidity, add liquidity and remove liquidity—in different ways. Uniswap routes users to liquidity pools via hard-coded lists; Mooniswap connects users directly; Balancer allows for multi-token pools; and so on.</p>
+                                <p>However, they all do this using the same standard logic. The Aggregator’s APIs interact with each AMM via the pathways of this logic, and this is how it can facilitate fully on-chain aggregation and the unprecedented possibilities instantiated by Covenant contracts.</p>
                                 <p>The Covenants DFO, governed by $UniFi holders, is responsible for all listing.</p>
                                 <figure>
                                     <img src={info2}></img>
                                 </figure>
-                            </article>
-                            <article>
-                                <h2>The Orchestrator</h2>
-                                <p>This is the Aggregator’s extendible knowledge base. It keeps track of all listed AMMs and allows them to be upgraded / downgraded via a plugin system. Every AMM can have multiple plugins, and each plugin has its own version number plus associated features and bug fixes.</p>
                             </article>
                             <article>
                                 <h2>API List</h2>
@@ -74,8 +71,13 @@ const Grimoire = () => {
                                 <p>Read how many liquidity pool tokens correspond to the amount of a single token</p>
                             </article>
                             <article>
+                                <h2>The Orchestrator</h2>
+                                <p>This is the Aggregator’s extendible knowledge base. It keeps track of all whitelisted AMMs and allows them to be upgraded / downgraded via a plugin system. There are multiple plugins for each AMM, each with its own version number, upgradable features and previous bug fixes.</p>
+                            </article>
+                            <article>
                                 <h2>Integrate Your dApp With the Aggregator</h2>
-                                <p>All Ethereum dApps can integrate the Aggregator, allowing them to interact with every AMM it has whitelisted, and automatically with any AMM whitelisted in the future. You can find guidelines on dApp-Aggregator integration in <b>Grimoire Volume 2: Developer’s Documentation (coming Soon)</b></p>
+                                <p>All Ethereum dApps can be integrated with the Aggregator, a fully decentralized protocol. And whenever $UniFi holders—via governance of the Covenants DFO—whitelist the Aggregator with a new AMM, integrated dApps can interact with it immediately and automatically.</p> 
+                                <p>You can find guidelines on how to do this in the <b>Grimoire Volume 2: Developer’s Documentation (coming Soon)</b></p>
                             </article>
                             <article>
                                 <span>
@@ -83,18 +85,19 @@ const Grimoire = () => {
                                 </span>
                                 <header>
                                     <h2>Wrapped USD</h2>
-                                    <p>One stablecoin to pool them all. $WUSD is minted at the confluence of other stablecoins, which pool out as its collateral to AMMs everywhere. $WUSD is the most decentralized and resilient stablecoin.</p>
+                                    <p>One stablecoin to pool them all in all the pools of DeFi. $WUSD is minted at the confluence of other stablecoins, which stream out and collateralize it in the pools of AMMs everywhere. Free from any oracle or issuer, it is the most resilient and decentralized stablecoin out there—and the first you can farm.</p>
                                 </header>
                             </article>
                             <article>
                                 <h2>The Basics </h2>
-                                <p>$WUSD is designed to be the most resilient stablecoin on Ethereum. Governed by a fully on-chain decentralized organization, no state, issuer or any other off-chain centralized intermediary can censor or manipulate it. $WUSD is as unstoppable as Ethereum itself.</p>
+                                <p>$WUSD is minted by collateralizing pairs of whitelisted stablecoins in the pools of whitelisted AMMs. By decentralizing the distribution of its collateral, and capable of rebalancing it for stability, $WUSD is not vulnerable to any single point of failure; it can only fail if the entire stablecoin industry collapses. The protocol is governed exclusively by $UniFi holders via the Covenants DFO, and cannot be censored or manipulated by any state, issuer or any other off-chain centralized intermediary.</p>
+                                <p>$WUSD the most resilient stablecoin there is, and is unstoppable as Ethereum itself.</p>
                             </article>
                             <article>
                                 <h2>Minting & Burning </h2>
                                 <p>Anyone can mint and burn $WUSD anytime using the Covenants frontend (or by calling the smart contracts themselves).</p>
                                 <p><b>Minting</b></p>
-                                <p>$WUSD is minted by collateralizing whitelisted stablecoins across multiple whitelisted AMM pools at a 1:1 ratio. The Covenants DFO, governed by $UniFi holders, is responsible for all whitelisting.</p>
+                                <p>$WUSD is minted by collateralizing stablecoins that have been whitelisted by the Covenants DFO across Aggregator-whitelisted AMM pools at a 1:1 ratio.</p>
                                 <p>Example</p>
                                 <p>Mint 2x $WUSD by adding 1x Stablecoin A and 1x Stablecoin B </p>
                                 <p><b>Burning</b></p>
@@ -104,9 +107,9 @@ const Grimoire = () => {
                             </article>
                             <article>
                                 <h2>Rebalancing</h2>
-                                <p>In certain events, the $WUSD : collateral equilibrium can destabilize. When this happens, the $WUSD protocol can restore it using two secure rebalancing methods, profiting in the process.</p>
+                                <p>Certain events can destabilize the $WUSD : collateral supply equilibrium. The protocol can restore it using two secure rebalancing methods, and profits in the process.</p>
                                 <p><b>Credit Rebalancing</b></p>
-                                <p>The $WUSD protocol, by providing its stablecoin collateral to liquidity pools, earns additional stablecoins as trading fees; these increase the collateral supply relative to $WUSD supply.</p>
+                                <p>The $WUSD protocol, by providing its stablecoin collateral to liquidity pools, earns additional stablecoins from trading fees. These are equal to an excess in the collateral supply relative to the $WUSD supply.</p>
                                 <p>To restore equilibrium, the $WUSD protocol can mint the equivalent amount of $WUSD. Called ‘Credit Rebalancing’, this can be manually executed by anyone via the DFO once a fortnight. The executor is rewarded with 2% of the newly minted $WUSD.</p>
                                 <p>The rest is distributed as follows:</p>
                                 <p>8% to the Covenants treasury, owned and ruled by $UniFi holders</p>
@@ -114,9 +117,9 @@ const Grimoire = () => {
                                 <p>20% to the $2XUSD treasury, reserved for Debit Rebalancing</p>
                                 <p>10% to the $5XUSD treasury, also reserved for Debit Rebalancing</p>
                                 <p><b>Debit Rebalancing</b></p>
-                                <p>If one of the $WUSD protocol’s collateralized stablecoins fails and loses value, this will lead to  a lower collateral supply relative to the $WUSD supply. Such an event may trigger the $WUSD protocol to enable the burning of $WUSD to mint Multiplier Tokens until equilibrium is restored.</p>
+                                <p>If one of the $WUSD protocol’s collateralized stablecoins fails and loses value, this will lead to  a lower collateral supply relative to the $WUSD supply. If it falls ten or more units lower, this will trigger the $WUSD protocol to enable the burning of $WUSD to mint Multiplier Tokens until equilibrium is restored.</p>
                                 <p>Here’s an example of how this would play out:</p>
-                                <p>1. CZ rugs. The BUSD protocol dies. $BUSD’s price tanks and it loses all value. Nobody will be available to mint/burn $WUSD using $BUSD because the ration in pairs allowed becomes more than 1.1/0.9</p>
+                                <p>1. CZ rugs. The $BUSD protocol fails. $BUSD’s price tanks and it loses all value.</p>
                                 <p>2. $UniFi holders vote to remove pools that contain it from the collateral whitelist, resulting in a collateral supply that is less than ten or more units of the $WUSD supply.</p>
                                 <p>3. Triggered by the imbalance, the protocol initiates Debit Rebalancing. Holders are now able to burn $WUSD to mint Multiplier Tokens at a 1:1 ratio:</p>
                                 <p>1x burnt $WUSD mints 1x $2XUSD</p>
@@ -133,11 +136,11 @@ const Grimoire = () => {
                                 </figure>
                             </article>
                             <article>
-                                <h2>$WUSD Security and Emergency Strategies</h2>
+                                <h2>Other $WUSD Security and Emergency Strategies</h2>
                                 <p>1. $WUSD pool collateral is locked in an external smart contract that cannot be unlocked by anyone—not even the Covenants DFO, preventing voter fraud by bad-faith actors.</p>
                                 <p>2. In the event of a bug, exploit or generally problematic update, $UniFi holders can vote via the Covenants DFO to pause the smart contract. This prevents the minting or rebalancing of $WUSD. Holders can still redeem $WUSD for pooled collateral.</p>
                                 <p>3. In such an event, $UniFi holders can also vote to revert the smart contract to an earlier version with established security. Again, holders can still redeem $WUSD for collateral.</p>
-                                <p>4. $UniFi holders cannot change the X2 and X5 treasuries in any way, nor the rate at which they accumulate $WUSD. This prevents any bad-faith governance attacks on the DFO.</p>
+                                <p>4. $UniFi holders cannot change the X2 and X5 treasuries in any way, nor the rate at which they accumulate $WUSD. This prevents exploitative governance attacks on the DFO.</p>
                             </article>
                             <article>
                                 <h2>Farm $WUSD (coming Soon)</h2>
@@ -148,21 +151,22 @@ const Grimoire = () => {
                                 <p>x = $WUSD in the Farm treasury</p>
                                 <p>y = two weeks in blocks</p>
                                 <p>z = $WUSD staked in Free Farming setups.</p>
-                                <p>It is then distributed pro rata to all Free Farmers as per the Free Farming rules.</p>
+                                <p>The calculated total is distributed to farmers in line with Free Farming rules.</p>
                                 <p>By distributing rewards based on a three week budget (y x 1.5), the FARM treasury ensures a surplus of $WUSD so that there’s always enough available to reward all $WUSD free farming.</p>
                             </article>
                             <article>
-                                <h2>Implementing dApps With the $WUSD Protocol</h2>
-                                <p>dApps can be implemented with $WUSD auto- wrap/unwrap and other functionalities. Guidelines for this can be found in the <b>Grimoire Volume 2: Developer’s Documentation (coming Soon)</b></p>
+                                <h2>Integrating dApps With the $WUSD Protocol</h2>
+                                <p>ddApps can be implemented with $WUSD auto- wrap/unwrap and other functionalities.</p> 
+                                <p>Guidelines for this can be found in the <b>Grimoire Volume 2: Developer’s Documentation (coming Soon)</b></p>
                             </article>
                             <article>
                                 <span>
                                     <img src={chap3}></img>
                                 </span>
                                 <header>
-                                    <h2>General Purpose Farming Contracts</h2>
-                                    <p>Ethereans love to farm. They do it all day and night—apes, penguins and wizards alike. But farming in the State of DeFi is not so well-managed, and the hard-earned harvests of farmers are often at risk.</p>
-                                    <p>Covenant farming contracts free Ethereans to farm safely and on their own terms. Anyone can host or participate in free and locked setups that access multiple AMMs at once, and The Aggregator secures integration with each.</p>
+                                    <h2>Covenant Farming</h2>
+                                    <p>Ethereans love to farm. They do it all day and night—apes, penguins and wizards alike. But farming in DeFi is not always well-managed, and the hard-earned harvests of farmers are often at risk. </p>
+                                    <p>Covenant farming contracts allow us to farm safely and on our own terms. Anyone can host or participate in Free and Locked setups that pool tokens across multiple AMMs at once, and even free-locked hybrids using the Load Balancer.</p>
                                 </header>
                             </article>
                             <article>
@@ -172,43 +176,46 @@ const Grimoire = () => {
                                     <img src={info4}></img>
                                 </figure>
                                 <p><b>Hosting</b></p>
-                                <p>Any DAO, DFO, individual wallet or customized smart contract can host a farming setup. They can even have no host at all. This architecture is tio make it easy for hosts to set rules for distributing reward tokens (i.e from a treasury or by mint) without being able to manage farmer tokens or manipulate rewards for locked positions. This secures farmers from exploitation.</p>
+                                <p>Any DAO, DFO, individual wallet or customized smart contract can host a farming setup. You can even set it up to have no host at all. This flexible design makes it easy to set rules for distributing rewards (from a treasury or via minting) while preventing hosts from touching farmer tokens or manipulating rewards for locked positions, securing farmers from exploitation.</p>
                                 <p><b>Rewards</b></p>
-                                <p>All Covenant farming contracts distribute one reward token. It is the centrepiece of the setup, around which the rest of the contract is customized. This architecture makes calculating the token’s total inflation (based on rewards per block) simple; anyone can easily call all of the farming contract(s) that are using the token as a reward to compute that inflation data. It also makes it easy to manage the customizable extension for the reward method (mint or transfer).</p>
+                                <p>All setups reward farmers with one token. It is the centrepiece of the setup, around which the rest of the contract is customized. This simplifies managing the customizable extension for each setup’s reward method (Mint or Transfer) and makes it easy to calculate the total amount of the token being inflated via rewards. All anyone has to do is call the setup(s) using it as a reward and they will be provided with the relevant data.</p>
                                 <p><b>Setups</b></p>
-                                <p>Contracts can be set up as either free (open-ended) or locked (term-fixed). They can also implement the Load Balancer, which allows for dynamic Free-Locked systems.</p>
+                                <p>Farming setups can be either Free or Locked, and can implement the inflation Load Balancer, which allows for dynamic Free-Locked systems (scroll down for more).</p>
+                                <p>All setups can be customized to automatically renew immediately after they end. However, this does not automatically renew old positions; new ones must be opened manually.</p>
                             </article>
                             <article>
                                 <h2>Free Farming</h2>
                                 <p><b>Duration</b></p>
-                                <p>Open-ended; farmers can stake / un-stake liquidity anytime.</p>
+                                <p>Block-based fixed periods. Farmers can stake / un-stake liquidity anytime.</p>
                                 <p><b>Position Availability</b></p>
                                 <p>Any amount of farmers can participate anytime in a free farming setup.</p>
                                 <p><b>Rewards</b></p>
-                                <p>If rewards are not available the setup automatically reach the state "disactive".</p>
-                                <p><b>Distribution</b></p>
-                                <p>Block-to-block between active farmers pro rata to the % of total liquidity each provides.</p>
-                                <p><b>Redeeming</b></p>
+                                <p>Availability</p>
+                                <p>Provided by the host and locked in a treasury extension before the setup commences.</p>
+                                <p>Distribution</p>
+                                <p>Block-to-block among active farmers pro rata to the % of total liquidity each provides.</p>
+                                <p>Redemption</p>
                                 <p>Rewards can be redeemed anytime with no penalty.</p>
-                                <p><b>Hosts</b></p>
+                                <p><b>Hosting</b></p>
                                 <p>Hosts can alter the rewards per block anytime. This does not apply retroactively.</p>
                             </article>
                             <article>
                                 <h2>Locked Farming</h2>
                                 <p><b>Duration</b></p>
-                                <p>Block-based fixed terms. Farmers can stake anytime after the setup term commences. Liiquidity is locked until the period’s end block—unless withdrawn prematurely, in which case all rewards already redeemed must be returned. There may be an additional penalty (see Hosting below).</p>
-                                <p>Setups can be customized to automatically renew after the end block. However, this doesn’t automatically renew old positions; farmers wanting to open a new one must do so manually.</p>
+                                <p>Fixed block-based periods. Farmers can stake a position anytime after the period commences, but cannot unstake until it ends—at least not without incurring penalties (see below).</p>
+                                <p>Setups can be customized to automatically renew immediately after the period ends. However, this does not automatically renew old positions. Farmers who wish to open new ones must do so manually.</p>
                                 <p><b>Position Availability</b></p>
-                                <p>Limited by the amount of rewards still available.</p>
+                                <p>A position can be opened only if enough rewards are still available.</p>
                                 <p><b>Rewards</b></p>
-                                <p>If rewards are not available the setup automatically reach the state "disactive".</p>
-                                <p><b>Fixed Distribution</b></p>
-                                <p>Block to block. Farmers receive a fixed, guaranteed % of the total rewards based on</p>
+                                <p>Availability</p>
+                                <p>Provided by the host and locked a treasury extension before the setup commences.</p>
+                                <p>Distribution</p>
+                                <p>Block-to-block. Farmers receive guaranteed rewards based on:</p>
                                 <p>1. How much liquidity they stake.</p>
-                                <p>2. How many blocks are left in the term when they open the position</p>
-                                <p>Rewards are minted and/or transferred and secured for a farmer when their position is staked.</p>
-                                <p><b>Redeeming</b></p>
-                                <p>Redeemable anytime (but must be returned if a farmer unstakes prematurely).</p>
+                                <p>2. How many blocks are left when the position is staked before the period ends.</p>
+                                <p>Before a setup can commence, all rewards must be sent by the host to the contract's treasury extension, which distributes them to farmers as per the fixed block-to-block terms.</p>
+                                <p>Redemption</p>
+                                <p>Redeemable as they become available from the block-to-block distribution. (but must be returned if a farmer unstakes prematurely).</p>
                                 <p><b>Hosts</b></p>
                                 <p>Can alter the rewards per block anytime, but this doesn’t affect previously opened positions, only ones opened after the change is made. Hosts may apply an additional penalty fee to premature withdrawals.</p>
                             </article>
@@ -219,15 +226,18 @@ const Grimoire = () => {
                             </article>
                             <article>
                                 <h2>Farming Extensions</h2>
-                                <p>Covenant farming contracts are extendible. Indeed, they must have extensions to work. These set the parameters for both basic and more advanced functionalities.</p>
+                                <p>Covenant farming contracts are extendible. Extensions set the parameters for both basic and more advanced functionalities.</p>
                                 <p><b>Treasury</b></p>
-                                <p>This extension establishes a secure treasury for a setup’s reward token, and is programmed with the logic for how the token, via transfer or minting, will be received and dispensed.</p>
+                                <p>This extension establishes a secure treasury for a setup’s reward token, and is programmed with the logic for how the token—i.e, via transfer or mint—will be distributed.</p>
                                 <p><b>Hosting</b></p>
-                                <p>This extension ensures secure and resilient farming contracts that do not compromise farmer funds or rewards, and which are compliant with the ethOS team’s Responsible DeFi approach.</p>
-                                <p>Hosts can alter rewards per block for ongoing free and locked contracts, but any alteration is only implemented with the following block. This ensures that rewards for free farmers up until this block are not affected, nor are rewards for farmers with already opened locked positions.</p>
-                                <p>Hosts can also change which free contract is “pinned” to the Load Balancer, and they can also activate / deactivate the Load Balancer. Alterations are implemented with the following block.</p>
-                                <p>Any DFO, DAO, smart contract or individual wallet can be a host. Farming setups can also have no host; in this case, its rules are immutable. </p>
-                                <p>Guidelines on how to code farming extensions based on your needs can be found in <b>the Grimoire Volume 2: Developer’s Documentation (Coming Soon).</b></p>
+                                <p>This extension establishes a secure treasury for a setup’s reward token, and is programmed with the logic for how the token—i.e, via transfer or mint—will be distributed.</p>
+                                <p><b>Rewards</b></p>
+                                <p>Hosts can alter the rewards distributed per block for active Free and Locked setups, but this is only implemented with the next block. This does not affect already staked locked positions.</p>
+                                <p><b>Pinning</b></p>
+                                <p>Hosts can change for active setups which free contract is “pinned” to the Load Balancer as well as activate / deactivate the Load Balancer.</p>
+                                <p><b>Hosts</b></p>
+                                <p>Any dApp, DAO, DFO, individual wallet or customized smart contract can be a host. Setups can even have no host at all, in which case its rules are immutable.</p>
+                                <p>Guidelines on how to code farming extensions based on your needs can be found in the <b>the Grimoire Volume 2: Developer’s Documentation (Coming Soon).</b></p>
                             </article>
                             <article>
                                 <h2>Integrating Your dApp or Website With Covenant Farming</h2>
@@ -239,8 +249,8 @@ const Grimoire = () => {
                                     <img src={chap4}></img>
                                 </span>
                                 <header>
-                                    <h2>General Purpose Fixed Inflation Contracts</h2>
-                                    <p>Covenant inflation contracts allow Ethereans to fund projects in a fair and safe way. Anyone can set one up to inflate any variety of tokens at daily, weekly and monthly intervals via minting, swapping and transferring. Free yourself from dependence on ICOs and investors.</p>
+                                    <h2>Covenant Inflation</h2>
+                                    <p>Covenant inflation contracts allow Ethereans to fund their magical projects in a fair and safe way. Anyone can set one up to inflate any variety of tokens at daily, weekly and monthly intervals via minting, swapping and transferring. Don’t depend on ICOs or worry about soliciting investors anymore.</p>
                                 </header>
                             </article>
                             <article>
@@ -288,6 +298,29 @@ const Grimoire = () => {
                                 <h2>Integrate Your dApp or Website with Covenant Index Tokens</h2>
                                 <p>Covenant index tokens are designed for easy integration with external dApps.</p>
                                 <p>You can find guidelines for this in the <b>Grimoire Volume 2: Developer’s Documentation.</b></p>
+                            </article>
+                            <article>
+                                <span>
+                                    <img src={chap6}></img>
+                                </span>
+                                <header>
+                                    <h2>The Covenants Decentralized Flexible Organization (DFO)</h2>
+                                    <p>Covenants is a DFO, dedicated to researching, developing and governing a responsible Decentralized Finance protocol on Ethereum. </p>
+                                </header>
+                            </article>
+                            <article>
+                                <h2>The Basics</h2>
+                                <p>Built on the DFOhub standard, Covenants operates entirely on-chain and is completely independent from centralized entities. It is ruled by its on-chain equity $UniFi. $UniFi holders have full ownership of the protocol. They govern all of its assets and every line of code.</p>
+                            </article>
+                            <article>
+                                <h2>Earnings</h2>
+                                <p>The Covenants DFO earns from a few small fees. All are currently set to 0%, aside from the fee for $WUSD minting and burning. After DFOhub upgrades to v0.5, $UniFi holders will be able to increase and govern these fees using the subDAO system.</p>
+                                <p><b>List of active Covenants Organization's fees</b></p>
+                                <p>1. 8% of $WUSD Rebalance by Credit</p>
+                                <p><b>List of (presently) inactive Covenants Organization's fees</b></p>
+                                <p>1. 0.005% to 0.05% for unstaking farm positions</p>
+                                <p>2. 0.005% to 0.05% Fixed Inflation operation execution</p>
+                                <p>More fees will be introduced in the future as more functionalities are rolled out.</p>
                             </article>
                         </section>
                     </article> 

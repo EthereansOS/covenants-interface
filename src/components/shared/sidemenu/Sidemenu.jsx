@@ -12,10 +12,10 @@ const menu = [
         name: 'WUSD', path: '/wusd', asset: require('../../../assets/images/wusd.png').default, hasDapp: true,
     },
     {
-        name: 'Bazaar', path: '/bazaar', asset: require('../../../assets/images/bread.png').default, hasDapp: false,
+        name: 'Bazar', path: '/bazaar', asset: require('../../../assets/images/bread.png').default, hasDapp: false,
     },
     {
-        name: 'Crafting', path: '/crafting', asset: require('../../../assets/images/bottle.png').default, hasDapp: false,
+        name: 'Craft', path: '/crafting', asset: require('../../../assets/images/bottle.png').default, hasDapp: false,
     },
     {
         name: 'Grimoire', path: '/grimoire', asset: require('../../../assets/images/book.png').default, hasDapp: false,

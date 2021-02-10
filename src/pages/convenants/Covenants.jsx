@@ -6,8 +6,8 @@ const Covenants = () => {
     <div className="IndexRegularContents">
         <div className="CoveExpl">
             <div className="CovDesc">
-                <h3>AMMs Aggregator</h3>
-                <p>At the heart of every Covenant is The Aggregator. Equipped with AMM-standardizing APIs, it allows any wallet, DAPP, DFO, DAO or customized smart contract to farm, arbitrage and so much more across multiple AMMs at the same time.</p>
+                <h3>The Aggregator</h3>
+                <p>At the heart of every Covenant is the Aggregator. By liberating on-chain AMM aggregation, it allows any wallet, DAPP, DFO, DAO or customized smart contract to farm, inflate, multi-swap, arbitrage, craft liquidity, collateralize stablecoins and more across multiple AMMs at the same time.</p>
                 <div className="CovLinks">
                     <h5>Governance</h5>
                     <a target="blank" href="https://dapp.dfohub.com/?addr=0xeFAa6370A2ebdC47B12DBfB5a07F91A3182B5684">Covenants DFO</a>
@@ -15,7 +15,7 @@ const Covenants = () => {
                     <a target="blank" href="https://etherscan.io/token/0x9E78b8274e1D6a76a0dBbf90418894DF27cBCEb5">UniFi Token</a>
                     <a target="blank">Farm UniFi</a>
                     <a target="blank">UniFi Inflation</a>
-                    <h5>Footer</h5>
+                    <h5>More</h5>
                     <a target="blank" href="https://ethereansos.eth.link">EthOS</a>
                     <a target="blank" href="https://ethereansos.eth.link/organizations.html">On-Chain Organizations</a>
                     <a target="blank" href="https://ethereansos.eth.link/equities.html">Programmable Equities</a>

@@ -3,7 +3,7 @@ import dragonImage from '../../assets/images/2.png';
 import { Route, Switch, useParams } from "react-router-dom";
 import FarmDapp from './dapp/dapp';
 
-const lorem = 'Ethereans love to farm. They do it all day and—apes, penguins and wizards alike. But farming in the State of DeFi is not so well-managed, and the hard-earned harvests of farmers are often at risk.Covenants free Ethereans to farm safely and on their own terms. Anyone can host or participate in free and locked setups that access multiple AMMs at once, and The Aggregator secures interaction with each.';
+const lorem = 'Ethereans love to farm. They do it all day and night—apes, penguins and wizards alike. But farming in DeFi is not always well-managed, and the hard-earned harvests of farmers are often at risk. Covenant farming contracts allow us to farm safely and on our own terms. Anyone can host or participate in Free and Locked setups that pool tokens across multiple AMMs at once, and even free-locked hybrids using the Load Balancer.';
 
 const Farm = () => {
 
