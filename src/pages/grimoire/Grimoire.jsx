@@ -40,7 +40,8 @@ const Grimoire = () => {
                             </article>
                             <article>
                                 <h2>On-Chain Aggregators vs Semi On-Chain Aggregators</h2>
-                                <p>TThe Aggregator is the first ever on-chain AMM aggregator.All other aggregators—1inch, for example—operate semi on-chain. While excellent at finding the best prices for trades, they process all transactions via their off-chain frontends. Smart contracts cannot read frontends, so they can’t interact with these aggregators. Only human individual wallets and off-chain arbitration bots can, and only for basic token swaps.</p>
+                                <p>The Aggregator is the first ever on-chain AMM aggregator.</p>
+                                <p>All other aggregators—1inch, for example—operate semi on-chain. While excellent at finding the best prices for trades, they process all transactions via their off-chain frontends. Smart contracts cannot read frontends, so they can’t interact with these aggregators. Only human individual wallets and off-chain arbitration bots can, and only for basic token swaps.</p>
                                 <p>The Covenant Aggregator is free from such limitations. It is equipped with AMM-standardizing Solidity APIs that smart contracts can read. This means that any wallet, dApp, DAO, DFO or customized smart contract can use it, and for much more than just token swaps. It unlocks multi-AMM farming, on-chain arbitrage, token inflation, liquidity crafting, stablecoin collateralization and more.</p>
                                 <figure>
                                     <img src={info1}></img>
