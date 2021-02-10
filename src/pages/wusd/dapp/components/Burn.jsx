@@ -156,15 +156,19 @@ const Burn = (props) => {
         }
 
         var token0WusdAmount = props.dfoCore.fromDecimals(amount.toString(), token0decimals);
+        var byTokenAmount0Value = await ammContract.methods.byTokenAmount(liquidityPool, liquidityPoolTokens[0], props.dfoCore.toFixed(token0WusdAmount).toString()).call();
 
-        var byTokenAmountValue = await ammContract.methods.byTokenAmount(liquidityPool, liquidityPoolTokens[0], props.dfoCore.toFixed(token0WusdAmount).toString()).call();
+        var token1WusdAmount = props.dfoCore.fromDecimals(amount.toString(), token1decimals);
+        var byTokenAmount1Value = await ammContract.methods.byTokenAmount(liquidityPool, liquidityPoolTokens[1], props.dfoCore.toFixed(token1WusdAmount).toString()).call();
+
+        var byTokenAmountValue = parseInt(byTokenAmount0Value[0]) < parseInt(byTokenAmount1Value[0]) ? byTokenAmount0Value : byTokenAmount1Value;
 
         var token0Amount = window.web3.utils.toBN(byTokenAmountValue[1][0]).div(window.web3.utils.toBN(2)).toString();
         var token1Amount = window.web3.utils.toBN(byTokenAmountValue[1][1]).div(window.web3.utils.toBN(2)).toString();
         var lpTokenAmount = window.web3.utils.toBN(byTokenAmountValue[0]).div(window.web3.utils.toBN(2)).toString();
 
-        setEstimatedToken0({ full: props.dfoCore.normalizeValue(token0Amount, token0decimals), value: props.dfoCore.toDecimals(token0Amount , token0decimals)});
-        setEstimatedToken1({ full: props.dfoCore.normalizeValue(token1Amount, token1decimals), value: props.dfoCore.toDecimals(token1Amount, token1decimals)});
+        setEstimatedToken0({ full: props.dfoCore.normalizeValue(token0Amount, token0decimals), value: window.formatMoney(props.dfoCore.toDecimals(token0Amount , token0decimals), 2)});
+        setEstimatedToken1({ full: props.dfoCore.normalizeValue(token1Amount, token1decimals), value: window.formatMoney(props.dfoCore.toDecimals(token1Amount, token1decimals), 2)});
         setEstimatedLpToken({ full: lpTokenAmount, value: props.dfoCore.toDecimals(lpTokenAmount, decimalsLp)});
     }
 
