@@ -24,6 +24,29 @@ const Mint = (props) => {
 
     useEffect(() => {
         getController();
+
+        const interval = setInterval(() => {
+            if (pair && pairs[pair]) {
+                const chosenPair = pairs[pair];
+                chosenPair.token0Contract.methods.balanceOf(props.dfoCore.address).call()
+                    .then((result) => {
+                        setFirstTokenBalance(props.dfoCore.toDecimals(result, parseInt(chosenPair.token0decimals)));
+                    })
+                chosenPair.token1Contract.methods.balanceOf(props.dfoCore.address).call()
+                    .then((result) => {
+                        setSecondTokenBalance(props.dfoCore.toDecimals(result, parseInt(chosenPair.token1decimals)));
+                    })
+                chosenPair.lpContract.methods.balanceOf(props.dfoCore.address).call()
+                    .then((result) => {
+                        setLpTokenBalance(props.dfoCore.toDecimals(result, parseInt(chosenPair.lpDecimals)));
+                    })
+            }
+        }, 2000);
+
+        return () => {
+            console.log('clearing interval.');
+            clearInterval(interval);
+        }
     }, [])
 
     const getController = async () => {

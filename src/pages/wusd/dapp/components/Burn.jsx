@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import { Input } from '../../../../components';
 import { ethers } from 'ethers';
 import { addTransaction } from '../../../../store/actions';
-import WUSDLogo from '../../../../assets/images/x1WUSD.png';
 
 const abi = new ethers.utils.AbiCoder();
 
@@ -19,6 +18,7 @@ const Burn = (props) => {
     const [wusdContract, setWusdContract] = useState(null);
     const [wusdBalance, setWusdBalance] = useState(0);
     const [wusdApproved, setWusdApproved] = useState(false);
+    const [wusdDecimals, setWusdDecimals] = useState(18);
     const [estimatedToken0, setEstimatedToken0] = useState(0);
     const [estimatedToken1, setEstimatedToken1] = useState(0);
     const [estimatedLpToken, setEstimatedLpToken] = useState(0);
@@ -29,6 +29,19 @@ const Burn = (props) => {
 
     useEffect(() => {
         getController();
+
+        const interval = setInterval(() => {
+            if (wusdContract) {
+                wusdContract.methods.balanceOf(props.dfoCore.address).call()
+                    .then((result) => {            
+                        setWusdBalance(props.dfoCore.toDecimals(result, wusdDecimals));
+                    })
+            }
+        }, 2000);
+
+        return () => {
+            clearInterval(interval);
+        }
     }, [])
 
     const getController = async () => {
@@ -54,16 +67,12 @@ const Burn = (props) => {
                     const token1Contract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), token1);
                     const symbol0 = await token0Contract.methods.symbol().call();
                     const symbol1 = await token1Contract.methods.symbol().call();
-                    const balance0 = await token0Contract.methods.balanceOf(props.dfoCore.address).call();
                     const token0decimals = await token0Contract.methods.decimals().call();
-                    const balance1 = await token1Contract.methods.balanceOf(props.dfoCore.address).call();
                     const token1decimals = await token1Contract.methods.decimals().call();
                     const lpContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), liquidityPool);
                     const lpSymbol = await lpContract.methods.symbol().call();
                     const decimalsLp = await lpContract.methods.decimals().call();
                     const approval = await lpContract.methods.allowance(props.dfoCore.address, props.dfoCore.getContextElement("WUSDExtensionControllerAddress")).call();
-                    setFirstTokenBalance(props.dfoCore.toDecimals(balance0, parseInt(token0decimals)));
-                    setSecondTokenBalance(props.dfoCore.toDecimals(balance1, parseInt(token1decimals)));
                     pools.push({ ammName, ammContract, ammIndex, lpContract, lpIndex, lpSymbol, totalAmount, token0Amount, token1Amount, liquidityPool, token0, token1, symbol0, symbol1, token0decimals, token1decimals, decimalsLp, token0Contract, token1Contract, lpTokenApproved: parseInt(approval) !== 0 });
                 }));
                 allowedPairs = [...allowedPairs, ...pools ];
@@ -74,7 +83,9 @@ const Burn = (props) => {
             const approval = await wusdContract.methods.allowance(props.dfoCore.address, props.dfoCore.getContextElement("WUSDExtensionControllerAddress")).call();
             setWusdContract(wusdContract);
             setWusdApproved(parseInt(approval) !== 0);
-            setWusdBalance(props.dfoCore.toDecimals(balance, await wusdContract.methods.decimals().call()));
+            const decimals = await wusdContract.methods.decimals().call();
+            setWusdDecimals(decimals);
+            setWusdBalance(props.dfoCore.toDecimals(balance, decimals));
             setPairs(allowedPairs);
         } catch (error) {
             console.error(error);

@@ -428,7 +428,6 @@ const Create = (props) => {
     }
 
     const onSelectMainToken = async (address) => {
-        if (!address) address = "0x7b123f53421b1bF8533339BFBdc7C98aA94163db";
         setLoading(true);
         const mainTokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), address);
         const symbol = await mainTokenContract.methods.symbol().call();

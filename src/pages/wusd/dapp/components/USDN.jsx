@@ -30,6 +30,26 @@ const USDN = (props) => {
 
     useEffect(() => {
         getData();
+
+        const interval = setInterval(() => {
+            if (x2USDContract) {
+                x2USDContract.methods.balanceOf(props.dfoCore.address).call()
+                    .then((result) => {
+                        setx2Balance(result);
+                    })
+            }
+            if (x5USDContract) {
+                x5USDContract.methods.balanceOf(props.dfoCore.address).call()
+                    .then((result) => {
+                        setx5Balance(result);
+                    })
+            }
+        }, 2000);
+
+        return () => {
+            console.log('clearing interval.');
+            clearInterval(interval);
+        }
     }, []);
 
     const getData = async () => {
@@ -87,6 +107,7 @@ const USDN = (props) => {
 
     const redeemX2 = async () => {
         if (x2Amount.full > parseFloat(props.dfoCore.toFixed(props.dfoCore.fromDecimals(x2USDTreasury)))) return;
+        if (x2Amount.full === 0) return;
         setx2Loading(true);
         try {
             const x2USDCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), x2USDNoteInfo['0']);
@@ -110,8 +131,8 @@ const USDN = (props) => {
     }
 
     const redeemX5 = async () => {
-        console.log(parseFloat(props.dfoCore.toFixed(props.dfoCore.fromDecimals(x5USDTreasury))));
         if (x5Amount.full > parseFloat(props.dfoCore.toFixed(props.dfoCore.fromDecimals(x5USDTreasury)))) return;
+        if (x5Amount.full === 0) return;
         setx5Loading(true);
         try {
             const x5USDCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), x5USDNoteInfo['0']);
