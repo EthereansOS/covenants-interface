@@ -117,16 +117,9 @@ const Mint = (props) => {
 
     const onTokenApproval = (type, res) => {
         props.addTransaction(res);
-        switch (type) {
-            case 'first':
-                setFirstTokenApproved(true);
-            case 'second':
-                setSecondTokenApproved(true);
-            case 'lp':
-                setLpTokenApproved(true);
-            default:
-                return;
-        }
+        type === 'first' && setFirstTokenApproved(true);
+        type === 'second' && setSecondTokenApproved(true);
+        type === 'lp' && setLpTokenApproved(true);
     }
 
     const setChosenPair = async (pairIndex) => {
@@ -293,17 +286,17 @@ const Mint = (props) => {
         return (
             <div className="Web3BTNs">
                         {
-                            (!useLpToken && !firstTokenApproved) ? 
-                                <ApproveButton contract={pairs[pair].token0Contract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('first', res)} text={`Approve ${pairs[pair].symbol0}`} />
-                                :
-                                (!useLpToken && !secondTokenApproved) ?
-                                    <ApproveButton contract={pairs[pair].token1Contract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('second', res)} text={`Approve ${pairs[pair].symbol1}`} />
-                                : <div/>
+                            useLpToken ? <div/>
+                            :
+                            !firstTokenApproved ? <ApproveButton contract={pairs[pair].token0Contract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('first', res)} text={`Approve ${pairs[pair].symbol0}`} />
+                            :
+                            !secondTokenApproved ? <ApproveButton contract={pairs[pair].token1Contract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('second', res)} text={`Approve ${pairs[pair].symbol1}`} />
+                            : <div/>
                         }
                         
                         {
                             (useLpToken && !lpTokenApproved) && 
-                                <ApproveButton contract={pairs[pair].lpContract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('first', res)} text={`Approve ${pairs[pair].symbolLp}`} />
+                                <ApproveButton contract={pairs[pair].lpContract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('lp', res)} text={`Approve ${pairs[pair].symbolLp}`} />
                         }
                         {
                             mintLoading ? <a className="Web3ActionBTN" disabled={mintLoading}>
@@ -356,7 +349,7 @@ const Mint = (props) => {
                 }
                 {
                     (pair && isHealthyPair) ? <div className="Resultsregular">
-                            <p>For <b>{ getEstimatedAmount() } <img src={WUSDLogo}></img>WUSD</b></p>
+                            <p>For <b>{ window.formatMoney(getEstimatedAmount(), 2) } <img src={WUSDLogo}></img>WUSD</b></p>
                     </div> : <div/>
                 }
                 {
