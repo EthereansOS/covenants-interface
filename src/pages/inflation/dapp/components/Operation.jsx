@@ -4,7 +4,7 @@ import { Input } from '../../../../components';
 import { addInflationSetup, removeEntry, removeInflationSetup  } from '../../../../store/actions';
 import CreateEntry from './CreateEntry';
 
-const CreateSetup = (props) => {
+const Operation = (props) => {
     const { onFinish, onCancel, editSetup } = props;
     // first step
     const [title, setTitle] = useState("");
@@ -228,4 +228,4 @@ const mapDispatchToProps = (dispatch) => {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(CreateSetup);
+export default connect(mapStateToProps, mapDispatchToProps)(Operation);
