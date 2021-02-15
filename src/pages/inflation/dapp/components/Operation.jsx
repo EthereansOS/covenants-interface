@@ -210,10 +210,8 @@ const Operation = (props) => {
             }
             <div className="row justify-content-center">
                 <button onClick={() => {
-                    setInputToken(null);
-                    setInputTokenMethod("");
                     setStep(step - 1);
-                }} className="btn btn-light mr-4">Cancel</button>
+                }} className="btn btn-light mr-4">Back</button>
                 <button onClick={() => setStep(2)} disabled={!inputToken || !inputTokenMethod} className="btn btn-secondary">Next</button>
             </div>
         </div>
@@ -405,7 +403,7 @@ const Operation = (props) => {
         return <div className="col-12 flex flex-column align-items-center">
             {actionType === 'transfer' ? getTransferThirdStep() : getSwapThirdStep()}
             <div className="row justify-content-center">
-                <button onClick={() => setStep(step - 1)} className="btn btn-light mr-4">Cancel</button>
+                <button onClick={() => setStep(step - 1)} className="btn btn-light mr-4">Back</button>
                 <button onClick={() => props.saveEditOperation(getEntry())} disabled={(!amount && !percentage) || !transferType || receivers.length === 0 || !isValidPercentage()} className="btn btn-secondary">Add</button>
             </div>
         </div>
