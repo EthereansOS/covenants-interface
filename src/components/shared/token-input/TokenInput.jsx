@@ -3,7 +3,7 @@ import { useState } from 'react';
 
 const TokenInput = (props) => {
     const { onClick, placeholder, text, width, label } = props;
-    const [tokenAddress, setTokenAddress] = useState("");
+    const [tokenAddress, setTokenAddress] = useState(props.tokenAddress || "");
 
     return <div className={`row mb-3 w-${width || 100}`}>
         { label && <div className="col-12"><h6><b>{label}</b></h6></div> }

@@ -13,7 +13,6 @@ const Input = (props) => {
 
     const onRealChange = (value) => {
         setVal(value);
-        console.log(parseFloat(value) > parseFloat(balance))
         onChange(onDetectedChange(value));
     }
 
@@ -39,7 +38,7 @@ const Input = (props) => {
                 showMax && 
                     <a onClick={() => onChange(onDetectedChange(0, balance))} type="button">MAX</a>
             }
-            { showBalance && <p>Balance: {window.formatMoney(balance, 2)} {name} {extra ? extra : ''}</p> }
+            { showBalance && <span>Balance: {window.formatMoney(balance, 2)} {name} {extra ? extra : ''}</span> }
             </aside>
         </>
     )

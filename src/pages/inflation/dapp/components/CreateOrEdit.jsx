@@ -29,7 +29,7 @@ const CreateOrEdit = (props) => {
                 add : true,
                 create: true
             });
-            setEntries(entries);
+            setEntries(entries.map(it => it));
             entryIndex = entries.length - 1;
         }
         setEditingEntry(entryIndex);
@@ -41,19 +41,17 @@ const CreateOrEdit = (props) => {
         entries[editingEntry].blockInterval = blockInterval;
         entries[editingEntry].callerRewardPercentage = callerRewardPercentage;
         delete entries[editingEntry].create;
-        setEntries(entries);
+        setEntries(entries.map(it => it));
         setEditingEntry(null);
     }
 
     function copy(entry) {
         var copy = {
-            index : entry.index,
-            name: entry.name,
-            operations : [],
-            add : entry.add,
-            create : entry.create,
-            edit : true
         };
+        for(var key of Object.keys(entry)) {
+            copy[key] = entry[key];
+        }
+        copy.operations = [];
         for(var operation of entry.operations) {
             var operationCopy = {};
             Object.entries(operation).forEach(it => operationCopy[it[0]] = it[1]);
@@ -66,30 +64,29 @@ const CreateOrEdit = (props) => {
         entries[editingEntry].edit = false;
         setEditingEntry(null);
         entries[editingEntry].create && editingEntry === entries.length - 1 && entries.pop();
-        setEntries(entries);
+        setEntries(entries.map(it => it));
     }
 
     function removeEntry(entryIndex) {
         entries[entryIndex].remove = true;
         entries[entryIndex].edit = false;
         entries[entryIndex].add && entries.splice(entryIndex, 1);
-        setEntries(entries);
+        setEntries(entries.map(it => it));
     }
 
     function editOrAddEntryOperation(entryOperationIndex) {
         if(isNaN(entryOperationIndex)) {
             entryOperationIndex = entries[editingEntry].operations.length;
             entries[editingEntry].operations.push({add: true, receivers : [], pathTokens : []});
-            setEntries(entries);
+            setEntries(entries.map(it => it));
         }
         setEditingOperation(entryOperationIndex);
     }
 
     function cancelEditOperation() {
-        console.log('cancel');
         if(entries[editingEntry].operations[editingOperation].add && editingOperation === entries[editingEntry].operations.length - 1) {
             entries[editingEntry].operations.pop();
-            setEntries(entries);
+            setEntries(entries.map(it => it));
         }
         setEditingOperation(null);
     }
@@ -97,13 +94,13 @@ const CreateOrEdit = (props) => {
     function saveEditOperation(operation) {
         delete operation.add;
         entries[editingEntry].operations[editingOperation] = operation;
-        setEntries(entries);
+        setEntries(entries.map(it => it));
         setEditingOperation(null);
     }
 
     function removeEntryOperation(entryOperationIndex) {
         entries[editingEntry].operations.splice(entryOperationIndex, 1);
-        setEntries(entries);
+        setEntries(entries.map(it => it));
     }
 
     function render() {
@@ -118,7 +115,7 @@ const CreateOrEdit = (props) => {
                     </div>
                 </div>
             </>}
-            {editingEntry != null && editingOperation == null && <Entry entry={copy(entries[editingEntry])} entryIndex={editingEntry} cancelEditEntry={cancelEditEntry} editOrAddEntryOperation={editOrAddEntryOperation} removeEntryOperation={removeEntryOperation} saveEntry={saveEntry} />}
+            {editingEntry != null && <Entry visible={editingOperation == null} entry={copy(entries[editingEntry])} entryIndex={editingEntry} cancelEditEntry={cancelEditEntry} editOrAddEntryOperation={editOrAddEntryOperation} removeEntryOperation={removeEntryOperation} saveEntry={saveEntry} />}
             {editingOperation != null && <Operation entry={entries[editingEntry]} entryIndex={editingEntry} operation={entries[editingEntry].operations[editingOperation]} operationIndex={editingOperation} cancelEditOperation={cancelEditOperation} saveEditOperation={saveEditOperation} />}
         </>
     }
