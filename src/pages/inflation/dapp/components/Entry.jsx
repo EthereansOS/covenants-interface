@@ -14,7 +14,12 @@ const Entry = (props) => {
     }
 
     return (<>
-        <div className="row" style={{display : props.visible ? 'inline-block' : 'none'}}>
+        <div className="row">
+            <div className="col-12" style={{ display: props.visible ? 'inline-block' : 'none' }}>
+                <h6 className="text-secondary"><b>Entry:</b></h6>
+            </div>
+        </div>
+        <div className="row" style={{ display: props.visible ? 'inline-block' : 'none' }}>
             <div className="col-12">
                 <div className="row flex-column align-items-start mb-4">
                     <p>
@@ -34,8 +39,13 @@ const Entry = (props) => {
                         <Input label="Caller reward %:" min="0" max="100" onChange={e => setCallerRewardPercentage(e.target.value)} value={callerRewardPercentage} />
                     </p>
                 </div>
-                <div className="row flex-column align-items-start mb-4">
-                    <h6 className="text-secondary"><b>Operations:</b></h6>
+                <div className="row">
+                    <div className="col-5">
+                        <h6 className="text-secondary"><b>Operations:</b></h6>
+                    </div>
+                    <div className="col-3">
+                        <button onClick={props.editOrAddEntryOperation} className="btn btn-outline-secondary">Add</button>
+                    </div>
                 </div>
                 {props.entry.operations.length === 0 && <span>No operations</span>}
                 {props.visible && props.entry.operations.map((entryOperation, entryOperationIndex) => <div key={entryOperationIndex} className="row align-items-center text-left mb-md-2 mb-4">
@@ -49,11 +59,10 @@ const Entry = (props) => {
                 </div>)}
             </div>
         </div>
-        <div className="row justify-content-between mt-4" style={{display : props.visible ? 'inline-block' : 'none'}}>
+        <div className="row justify-content-between mt-4" style={{ display: props.visible ? 'inline-block' : 'none' }}>
             <div className="col-12 flex justify-content-start mb-4">
-                <button onClick={props.editOrAddEntryOperation} className="btn btn-light">Add Operation</button>
                 <button onClick={props.cancelEditEntry} className="btn btn-light">Cancel</button>
-                <button disabled={!canSave()} onClick={() => props.saveEntry(entryName, lastBlock, blockInterval, callerRewardPercentage)} className="btn btn-light">Save</button>
+                <button disabled={!canSave()} onClick={() => props.saveEntry(entryName, lastBlock, blockInterval, callerRewardPercentage)} className="btn btn-primary">Save</button>
             </div>
         </div>
     </>);

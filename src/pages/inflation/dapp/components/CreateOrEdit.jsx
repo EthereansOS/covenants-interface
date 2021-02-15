@@ -109,9 +109,8 @@ const CreateOrEdit = (props) => {
                 <Entries entries={entries} removeEntry={removeEntry} editOrAddEntry={editOrAddEntry}/>
                 <div className="row justify-content-between mt-4">
                     <div className="col-12 flex justify-content-start mb-4">
-                        <button onClick={editOrAddEntry} className="btn btn-light">Add Entry</button>
                         {props.fixedInflationContractAddress && <button onClick={props.cancelEdit} className="btn btn-light">Cancel</button>}
-                        <button disabled={!canContinue()} onClick={() => props.continue(entries)} className="btn btn-light">{props.fixedInflationContractAddress ? "Deploy" : "Continue"}</button>
+                        <button disabled={!canContinue()} onClick={() => props.continue(entries)} className="btn btn-primary">{props.fixedInflationContractAddress ? "Deploy" : "Continue"}</button>
                     </div>
                 </div>
             </>}
