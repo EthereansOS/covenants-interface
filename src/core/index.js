@@ -19,7 +19,7 @@ export default class DFOCore {
      * constructs the DFOCore object by passing the context json object.
      * @param {*} context app context.
      */
-    constructor(context) { 
+    constructor(context) {
         this.context = context;
     }
 
@@ -30,7 +30,7 @@ export default class DFOCore {
      * @param {*} web3 
      * @param {*} providerOptions 
      */
-    init = async (web3, providerOptions = {}) => {
+    init = async(web3, providerOptions = {}) => {
         // return if already initialized
         if (this.initialized) return;
         try {
@@ -51,6 +51,7 @@ export default class DFOCore {
                 // retrieve the provider
                 const provider = this.web3.currentProvider;
                 provider.on = provider.on || function() {};
+                this.chainId = await this.web3.eth.getChainId();
                 // set the address
                 const accounts = await this.web3.eth.getAccounts();
                 this.address = accounts[0];
@@ -88,7 +89,7 @@ export default class DFOCore {
      * @param {*} abi contract ABI.
      * @param {*} address contract address.
      */
-    getContract = async (abi, address) => {
+    getContract = async(abi, address) => {
         address = address || this.voidEthereumAddress;
         // create the key
         const key = address.toLowerCase();
@@ -101,7 +102,7 @@ export default class DFOCore {
      * @param {*} elementName name of the element to retrieve from the context.
      */
     getContextElement = (elementName) => {
-        return this.context[elementName];
+        return this.context[elementName + (this.context.ethereumNetwork[this.chainId] || "")] || this.context[elementName];
     }
 
     /**
@@ -121,7 +122,7 @@ export default class DFOCore {
             return num;
         }
         let numStr = String(num);
-    
+
         if (Math.abs(num) < 1.0) {
             let e = parseInt(num.toString().split('e-')[1]);
             if (e) {
@@ -147,15 +148,15 @@ export default class DFOCore {
     }
 
     formatNumber = (value) => {
-        return parseFloat(this.numberToString(value).split(',').join(''));
-    }
-    /**
-     * returns the sending options for the given method and value.
-     * if no params are used, the {from: address, gas: '99999999'} object is returned.
-     * @param {*} method contract method that will be called.
-     * @param {*} value eventual amount of ETH that will be sent.
-     */
-    getSendingOptions = async (method, value) => {
+            return parseFloat(this.numberToString(value).split(',').join(''));
+        }
+        /**
+         * returns the sending options for the given method and value.
+         * if no params are used, the {from: address, gas: '99999999'} object is returned.
+         * @param {*} method contract method that will be called.
+         * @param {*} value eventual amount of ETH that will be sent.
+         */
+    getSendingOptions = async(method, value) => {
         try {
             // if a method is provided we use it to estimate the gas
             if (method) {
@@ -168,14 +169,14 @@ export default class DFOCore {
                     gasPrice: this.web3.utils.toWei('13', 'gwei'),
                     value: value || 0,
                     gas: '7900000',
-                    gasLimit: '7900000',  
+                    gasLimit: '7900000',
                 });
                 // return the sending options
                 return { nonce, from: this.address, gas: gas || '7900000', value: value || 0, }
             }
         } catch (error) {
             // catch any error and log it
-            
+
         } finally {
             // return this after any error or if no method is provided
             return { from: this.address, gas: '99999999', };
@@ -185,20 +186,20 @@ export default class DFOCore {
     /**
      * returns the current block number.
      */
-    getBlockNumber = async () => {
+    getBlockNumber = async() => {
         return await this.web3.eth.getBlockNumber();
     }
 
     /**
      * retrieves all the deployed liquidity mining contracts from the given factory address.
      */
-    loadDeployedLiquidityMiningContracts = async (factoryAddress) => {
+    loadDeployedLiquidityMiningContracts = async(factoryAddress) => {
         try {
             if (!factoryAddress) factoryAddress = this.getContextElement("liquidityMiningFactoryAddress");
             const factoryContract = new this.web3.eth.Contract(this.getContextElement("LiquidityMiningFactoryABI"), factoryAddress);
             const events = await factoryContract.getPastEvents('LiquidityMiningDeployed', { fromBlock: 11806961 });
             this.deployedLiquidityMiningContracts = [];
-            await Promise.all(events.map(async (event) => {
+            await Promise.all(events.map(async(event) => {
                 try {
                     const contract = new this.web3.eth.Contract(this.getContextElement("LiquidityMiningABI"), event.returnValues.liquidityMiningAddress);
                     const extensionAddress = await contract.methods._extension().call();
@@ -214,13 +215,13 @@ export default class DFOCore {
         }
     }
 
-    loadDeployedFixedInflationContracts = async (factoryAddress) => {
+    loadDeployedFixedInflationContracts = async(factoryAddress) => {
         try {
             if (!factoryAddress) factoryAddress = this.getContextElement("fixedInflationFactoryAddress");
             const factoryContract = new this.web3.eth.Contract(this.getContextElement("FixedInflationFactoryABI"), factoryAddress);
             const events = await factoryContract.getPastEvents('FixedInflationDeployed', { fromBlock: 11806961 });
             this.deployedFixedInflationContracts = [];
-            await Promise.all(events.map(async (event) => {
+            await Promise.all(events.map(async(event) => {
                 try {
                     const contract = new this.web3.eth.Contract(this.getContextElement("FixedInflationABI"), event.returnValues.fixedInflationAddress);
                     const extensionAddress = await contract.methods._extension().call();
@@ -244,20 +245,20 @@ export default class DFOCore {
         return position.uniqueOwner !== this.voidEthereumAddress && position.creationBlock !== '0';
     }
 
-    loadPositions = async () => {
+    loadPositions = async() => {
         try {
             this.positions = [];
             await this.loadDeployedLiquidityMiningContracts();
-            await Promise.all(this.deployedLiquidityMiningContracts.map(async (c) => {
+            await Promise.all(this.deployedLiquidityMiningContracts.map(async(c) => {
                 const contract = new this.web3.eth.Contract(this.getContextElement("LiquidityMiningABI"), c.address);
                 const events = await contract.getPastEvents('Transfer', { filter: { to: this.address }, fromBlock: 11806961 });
-                await Promise.all(events.map(async (event) => {
+                await Promise.all(events.map(async(event) => {
                     const { returnValues } = event;
                     const { positionId } = returnValues;
                     const position = await contract.methods.position(positionId).call();
                     const setup = (await contract.methods.setups().call())[position.setupIndex];
-                    if (this.isValidPosition(position) && !this.positions.includes({ ...setup, contract, setupIndex: position.setupIndex })) {
-                        this.positions.push({ ...setup, contract, setupIndex: position.setupIndex });
+                    if (this.isValidPosition(position) && !this.positions.includes({...setup, contract, setupIndex: position.setupIndex })) {
+                        this.positions.push({...setup, contract, setupIndex: position.setupIndex });
                     }
                 }))
             }));
@@ -271,7 +272,7 @@ export default class DFOCore {
      * pushes the contract address inside the core array.
      * @param {*} contractAddress new liquidity mining contract address.
      */
-    addDeployedLiquidityMiningContract = async (contractAddress) => {
+    addDeployedLiquidityMiningContract = async(contractAddress) => {
         if (!this.deployedLiquidityMiningContracts.includes(contractAddress)) {
             this.deployedLiquidityMiningContracts.push(contractAddress);
         }
@@ -286,7 +287,7 @@ export default class DFOCore {
      * @param {*} filter event filter.
      * @param {*} fromBlock event from block.
      */
-    getEventEmitter = async (abi, address, eventName, filter, fromBlock) => {
+    getEventEmitter = async(abi, address, eventName, filter, fromBlock) => {
         const contract = await this.getContract(abi, address);
         if (!this.eventEmitters[address]) {
             this.eventEmitters[address] = {};
@@ -298,7 +299,7 @@ export default class DFOCore {
     }
 
     fromDecimals = (amount, decimals = 18) => {
-        return decimals === 18 ? this.web3.utils.toWei(toFixed(amount), 'ether') : parseFloat(toFixed(amount)) * 10**decimals;
+        return decimals === 18 ? this.web3.utils.toWei(toFixed(amount), 'ether') : parseFloat(toFixed(amount)) * 10 ** decimals;
     }
 
     toFixed = (amount) => {
@@ -312,12 +313,12 @@ export default class DFOCore {
         const res = decimals === 18 ? this.web3.utils.fromWei(amount, 'ether') : parseInt(amount) / 10**decimals;
         return parseFloat(res).toFixed(precision);*/
         var dec = window.fromDecimals(amount, decimals, true);
-        if(precision) {
+        if (precision) {
             dec = window.formatMoney(dec, precision);
         }
         return dec;
     }
-    
+
     isValidAddress = (address) => {
         return this.web3.utils.isAddress(address, this.chainId);
     }
@@ -352,7 +353,7 @@ export default class DFOCore {
         return (!link ? '' : link.indexOf('http') === -1 ? ('https://' + link) : link).split('https:').join('').split('http:').join('');
     };
 
-    tryRetrieveMetadata = async (item) => {
+    tryRetrieveMetadata = async(item) => {
         if (item.metadataLink) {
             return;
         }
@@ -372,7 +373,7 @@ export default class DFOCore {
                         item.name = item.item_name || item.name;
                         item.description = item.description && item.description.split('\n\n').join(' ');
                     }
-                } catch(e) {
+                } catch (e) {
                     delete item.image;
                     item.image = this.getElementImage(item);
                     item.metadataMessage = `Could not retrieve metadata, maybe due to CORS restriction policies for the link (<a href="${item.metadataLink}" target="_blank">${item.metadataLink}</a>), check it on <a href="${item.collection ? window.context.openSeaItemLinkTemplate.format(item.collection.address, item.objectId) : window.context.openSeaCollectionLinkTemplate.format(item.address)}" target="_blank">Opensea</a>`
@@ -398,7 +399,7 @@ export default class DFOCore {
     }
 
     normalizeValue = (amount, decimals) => {
-        return this.web3.utils.toBN(amount).mul(this.web3.utils.toBN(10**(18 - decimals))).toString();
+        return this.web3.utils.toBN(amount).mul(this.web3.utils.toBN(10 ** (18 - decimals))).toString();
     }
 
     normalizeFixed = (amount, decimals) => {
@@ -419,24 +420,24 @@ export default class DFOCore {
         // TODO retrieve DFO
     }
 
-    
+
 
 }
 
 function toFixed(x) {
     if (Math.abs(x) < 1.0) {
-      var e = parseInt(x.toString().split('e-')[1]);
-      if (e) {
-          x *= Math.pow(10,e-1);
-          x = '0.' + (new Array(e)).join('0') + x.toString().substring(2);
-      }
+        var e = parseInt(x.toString().split('e-')[1]);
+        if (e) {
+            x *= Math.pow(10, e - 1);
+            x = '0.' + (new Array(e)).join('0') + x.toString().substring(2);
+        }
     } else {
-      var e = parseInt(x.toString().split('+')[1]);
-      if (e > 20) {
-          e -= 20;
-          x /= Math.pow(10,e);
-          x += (new Array(e+1)).join('0');
-      }
+        var e = parseInt(x.toString().split('+')[1]);
+        if (e > 20) {
+            e -= 20;
+            x /= Math.pow(10, e);
+            x += (new Array(e + 1)).join('0');
+        }
     }
     return x;
-  }
+}

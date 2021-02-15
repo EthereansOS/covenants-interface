@@ -18,20 +18,31 @@ const CreateOrEdit = (props) => {
     }
 
     function canContinue() {
-        return entries.length > 0 && entries.filter(entry => entry.name === '' || entry.operations.length === 0).length !== 0;
+        return entries.length > 0;
     }
 
-    function addEntry(entryIndex) {
+    function editOrAddEntry(entryIndex) {
         if(isNaN(entryIndex)) {
             entries.push({
                 name : '',
                 operations : [],
-                add : true
+                add : true,
+                create: true
             });
             setEntries(entries);
             entryIndex = entries.length - 1;
         }
         setEditingEntry(entryIndex);
+    }
+
+    function saveEntry(entryName, lastBlock, blockInterval, callerRewardPercentage) {
+        entries[editingEntry].name = entryName;
+        entries[editingEntry].lastBlock = lastBlock;
+        entries[editingEntry].blockInterval = blockInterval;
+        entries[editingEntry].callerRewardPercentage = callerRewardPercentage;
+        delete entries[editingEntry].create;
+        setEntries(entries);
+        setEditingEntry(null);
     }
 
     function copy(entry) {
@@ -40,6 +51,7 @@ const CreateOrEdit = (props) => {
             name: entry.name,
             operations : [],
             add : entry.add,
+            create : entry.create,
             edit : true
         };
         for(var operation of entry.operations) {
@@ -53,7 +65,7 @@ const CreateOrEdit = (props) => {
     function cancelEditEntry() {
         entries[editingEntry].edit = false;
         setEditingEntry(null);
-        entries[editingEntry].add && editingEntry === entries.length - 1 && entries.pop();
+        entries[editingEntry].create && editingEntry === entries.length - 1 && entries.pop();
         setEntries(entries);
     }
 
@@ -66,22 +78,24 @@ const CreateOrEdit = (props) => {
 
     function editOrAddEntryOperation(entryOperationIndex) {
         if(isNaN(entryOperationIndex)) {
-            entryOperationIndex = entries.length;
-            entries[editingEntry].operations.push({add: true});
+            entryOperationIndex = entries[editingEntry].operations.length;
+            entries[editingEntry].operations.push({add: true, receivers : [], pathTokens : []});
             setEntries(entries);
         }
         setEditingOperation(entryOperationIndex);
     }
 
     function cancelEditOperation() {
-        setEditingOperation(null);
+        console.log('cancel');
         if(entries[editingEntry].operations[editingOperation].add && editingOperation === entries[editingEntry].operations.length - 1) {
             entries[editingEntry].operations.pop();
             setEntries(entries);
         }
+        setEditingOperation(null);
     }
 
     function saveEditOperation(operation) {
+        delete operation.add;
         entries[editingEntry].operations[editingOperation] = operation;
         setEntries(entries);
         setEditingOperation(null);
@@ -95,16 +109,16 @@ const CreateOrEdit = (props) => {
     function render() {
         return <>
             {editingEntry == null && editingOperation == null && <>
-                <Entries entries={entries} removeEntry={removeEntry} />
+                <Entries entries={entries} removeEntry={removeEntry} editOrAddEntry={editOrAddEntry}/>
                 <div className="row justify-content-between mt-4">
                     <div className="col-12 flex justify-content-start mb-4">
-                        <button onClick={addEntry} className="btn btn-light">Add Entry</button>
+                        <button onClick={editOrAddEntry} className="btn btn-light">Add Entry</button>
                         {props.fixedInflationContractAddress && <button onClick={props.cancelEdit} className="btn btn-light">Cancel</button>}
                         <button disabled={!canContinue()} onClick={() => props.continue(entries)} className="btn btn-light">{props.fixedInflationContractAddress ? "Deploy" : "Continue"}</button>
                     </div>
                 </div>
             </>}
-            {editingEntry != null && editingOperation == null && <Entry entry={copy(entries[editingEntry])} entryIndex={editingEntry} cancelEditEntry={cancelEditEntry} editOrAddEntryOperation={editOrAddEntryOperation} removeEntryOperation={removeEntryOperation} />}
+            {editingEntry != null && editingOperation == null && <Entry entry={copy(entries[editingEntry])} entryIndex={editingEntry} cancelEditEntry={cancelEditEntry} editOrAddEntryOperation={editOrAddEntryOperation} removeEntryOperation={removeEntryOperation} saveEntry={saveEntry} />}
             {editingOperation != null && <Operation entry={entries[editingEntry]} entryIndex={editingEntry} operation={entries[editingEntry].operations[editingOperation]} operationIndex={editingOperation} cancelEditOperation={cancelEditOperation} saveEditOperation={saveEditOperation} />}
         </>
     }

@@ -9,14 +9,12 @@ const Inflation = () => {
     return (
         <Switch>
             {
-                /*
-                    <Route path="/inflation/dapp">
-                        <InflationDapp />
-                    </Route>
-                */
+                <Route path="/inflation/dapp">
+                    <InflationDapp />
+                </Route>
             }
             <Route path="/inflation/">
-                <PageContainer image={homeInflationImage} imageHeight={300} text={lorem} launchDapp={false} title={"Inflation"} buttonText={"Coming soon"} />
+                <PageContainer image={homeInflationImage} imageHeight={300} text={lorem} launchDapp={true} title={"Inflation"} buttonText={"Coming soon"} link={'/inflation/dapp'} />
             </Route>
         </Switch>
     )

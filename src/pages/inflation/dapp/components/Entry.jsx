@@ -4,6 +4,9 @@ import { Input } from '../../../../components';
 const Entry = (props) => {
 
     const [entryName, setEntryName] = useState(props.entry.name || '');
+    const [lastBlock, setLastBlock] = useState(props.entry.lastBlock || 0);
+    const [blockInterval, setBlockInterval] = useState(props.entry.blockInterval || 0);
+    const [callerRewardPercentage, setCallerRewardPercentage] = useState(props.entry.callerRewardPercentage || 0);
 
     function canSave() {
         return entryName !== '' && props.entry.operations.length > 0;
@@ -13,7 +16,19 @@ const Entry = (props) => {
         <div className="row">
             <div className="col-12">
                 <div className="row flex-column align-items-start mb-4">
-                    <p><Input onChange={e => setEntryName(e.currentTarget.value)} value={entryName} /></p>
+                    <p>
+                        <label>Name:</label>
+                        <input onChange={e => setEntryName(e.currentTarget.value)} value={entryName} />
+                    </p>
+                    <p>
+                        <Input label="Start Block:" min="0" onChange={e => setLastBlock(e.target.value)} value={lastBlock} />
+                    </p>
+                    <p>
+                        <Input label="Block Interval:" onChange={e => setBlockInterval(e.target.value)} value={blockInterval} />
+                    </p>
+                    <p>
+                        <Input label="Caller reward %:" min="0" max="100" onChange={e => setCallerRewardPercentage(e.target.value)} value={callerRewardPercentage} />
+                    </p>
                 </div>
                 <div className="row flex-column align-items-start mb-4">
                     <h6 className="text-secondary"><b>Operations:</b></h6>
@@ -34,7 +49,7 @@ const Entry = (props) => {
             <div className="col-12 flex justify-content-start mb-4">
                 <button onClick={props.editOrAddEntryOperation} className="btn btn-light">Add Operation</button>
                 <button onClick={props.cancelEditEntry} className="btn btn-light">Cancel</button>
-                <button disabled={!canSave()} onClick={() => props.saveEntry(entryName)} className="btn btn-light">Save</button>
+                <button disabled={!canSave()} onClick={() => props.saveEntry(entryName, lastBlock, blockInterval, callerRewardPercentage)} className="btn btn-light">Save</button>
             </div>
         </div>
     </>);
