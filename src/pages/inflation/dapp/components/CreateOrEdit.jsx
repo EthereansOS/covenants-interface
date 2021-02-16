@@ -7,7 +7,7 @@ import Operation from './Operation';
 const CreateOrEdit = (props) => {
 
     const [loading, setLoading] = useState(true);
-    const [entries, setEntries] = useState([]);
+    const [entries, setEntries] = useState(props.entries || []);
     const [editingEntry, setEditingEntry] = useState(null);
     const [editingOperation, setEditingOperation] = useState(null);
 
@@ -107,10 +107,10 @@ const CreateOrEdit = (props) => {
         return <>
             {editingEntry == null && editingOperation == null && <>
                 <Entries entries={entries} removeEntry={removeEntry} editOrAddEntry={editOrAddEntry}/>
-                <div className="row justify-content-between mt-4">
-                    <div className="col-12 flex justify-content-start mb-4">
+                <div className="row">
+                    <div className="col-12">
                         {props.fixedInflationContractAddress && <button onClick={props.cancelEdit} className="btn btn-light">Cancel</button>}
-                        <button disabled={!canContinue()} onClick={() => props.continue(entries)} className="btn btn-primary">{props.fixedInflationContractAddress ? "Deploy" : "Continue"}</button>
+                        <button disabled={!canContinue()} onClick={() => props.continue(entries)} className="btn btn-primary">{props.fixedInflationContractAddress ? "Deploy" : "Next"}</button>
                     </div>
                 </div>
             </>}

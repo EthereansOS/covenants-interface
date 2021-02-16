@@ -26,7 +26,7 @@ const Input = (props) => {
         <>
             { label && <h6><b>{label}</b></h6> }
             <div className="input-group" tabIndex={0}>
-                <input type="number" lang="en-US" step="any" className={`form-control ${parseFloat(val) > parseFloat(balance) ? 'is-invalid' : ''}`} value={val} min={min} max={max || balance} onChange={(e) => onRealChange(e.target.value)}/>
+                <input disabled={props.disabled} type="number" lang="en-US" step="any" className={`form-control ${parseFloat(val) > parseFloat(balance) ? 'is-invalid' : ''}`} value={val} min={min} max={max || balance} onChange={(e) => onRealChange(e.target.value)}/>
                 {
                     showCoin && <div className={`input-group-append`}>
                         <span className={`input-group-text ${parseFloat(val) > parseFloat(balance) ? 'is-invalid' : ''}`} id=""><Coin address={address} /> {name}</span>
