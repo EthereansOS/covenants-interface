@@ -17,6 +17,11 @@ const Create = () => {
         setExtensionType(e.currentTarget.value);
     }
 
+    function creationComplete(newEntries) {
+        setEntries(newEntries);
+        setStep(0);
+    }
+
     var steps = [
         [
             function () {
@@ -25,14 +30,14 @@ const Create = () => {
                         <div className="col-12">
                             <h6>Host</h6>
                             <p>Quando mio figlio era criaturo ié 'ò purtàv a vré e scigne e iss mi ricév papà? Ma com'è possibile? Degli animali accussì scemi vogliono fare quello che fanno i cristiani?</p>
-                            <select className="custom-select wusd-pair-select" value={extensionType} onChange={onExtensionType}>
+                            <select className="custom-select wusd-pair-select" defaultValue={extensionType} onChange={onExtensionType}>
                                 <option value="wallet">Wallet</option>
                                 <option value="deployedContract">Deployed Contract</option>
                             </select>
                         </div>
                         <div className="row">
                             <div className="col-12">
-                                {extensionType === 'wallet' && <input type="text" value={walletAddress} onKeyUp={e => window.isEthereumAddress(e.currentTarget.value) && setWalletAddress(e.currentTarget.value)}/>}
+                                {extensionType === 'wallet' && <input type="text" defaultValue={walletAddress} onKeyUp={e => window.isEthereumAddress(e.currentTarget.value) && setWalletAddress(e.currentTarget.value)}/>}
                             </div>
                         </div>
                     </div>
@@ -74,7 +79,7 @@ const Create = () => {
         </>
     }
 
-    return isNaN(step) ? <CreateOrEdit entries={entries} continue={() => setStep(0) && setEntries(entries)} /> : render();
+    return isNaN(step) ? <CreateOrEdit entries={entries} continue={creationComplete} /> : render();
 }
 
 export default Create;
