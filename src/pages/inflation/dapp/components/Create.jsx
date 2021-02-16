@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { connect } from 'react-redux';
 import CreateOrEdit from './CreateOrEdit';
 import Loading from '../../../../components/shared/Loading';
+import ContractEditor from '../../../../components/editor/ContractEditor';
 
 const Create = (props) => {
 
@@ -90,9 +91,13 @@ const Create = (props) => {
             setDeployMessage(`${preDeployedContract ? "3/3" : "2/2"} - Enabling Extension...`);
 
             var extension = await props.dfoCore.getContract(props.dfoCore.getContextElement("FixedInflationExtensionABI"), preDeployedContract || extensionAddress);
-            await extension.methods.setActive(true).send({from: props.dfoCore.address});
+            await extension.methods.setActive(true).send({ from: props.dfoCore.address });
             setFixedInflationAddress(fixedInflationAddress);
         }
+    }
+
+    function setDeployContract(contract, payload) {
+        console.log(contract, payload);
     }
 
     var steps = [
@@ -115,10 +120,7 @@ const Create = (props) => {
                                 {extensionType === 'deployedContract' && <input type="text" placeholder="Insert extension address" defaultValue={extensionAddress} onKeyUp={e => setExtensionAddress(window.isEthereumAddress(e.currentTarget.value) ? e.currentTarget.value : "")} />}
                             </div>
                         </div>}
-                        {extensionType === 'fromSourceCode' && <div className="row">
-                            <div className="col-12">
-                            </div>
-                        </div>}
+                        {extensionType === 'fromSourceCode' && <ContractEditor dfoCore={props.dfoCore} onFinish={setDeployContract}/>}
                         {extensionType !== 'wallet' && <div className="row">
                             <div className="col-12">
                                 <input placeholder="Optional init payload" type="text" defaultValue={payload} onKeyUp={e => setPayload(e.currentTarget.value)} />
