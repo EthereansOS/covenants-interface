@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { FixedInflationComponent, FarmingComponent } from '../../../../components';
+import Loading from '../../../../components/shared/Loading';
 
 const Explore = (props) => {
     const [executable, setExecutable] = useState(false);
     const [fixedInflationContracts, setFixedInflationContracts] = useState([]);
     const [startingContracts, setStartingContracts] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (props.dfoCore) {
@@ -22,12 +23,12 @@ const Explore = (props) => {
             await Promise.all(
                 props.dfoCore.deployedFixedInflationContracts.map(async (contract) => { 
                     const fiContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('FixedInflationABI'), contract.address);
-                    const events = await fiContract.getPastEvents('Entry', { fromBlock: 11806961 });
+                    const events = await fiContract.getPastEvents('Entry', { fromBlock: 0 });
                     await Promise.all(events.map(async (event) => {
                         const { id } = event.returnValues;
                         const result = await fiContract.methods.entry(id).call();
-                        const [entry, operations] = result;
-                        mappedEntries.push({ contract: fiContract, entry, operations });
+                        const {entriesArray, operations} = result;
+                        mappedEntries.push({ contract: fiContract, entry : entriesArray, operations });
                     }))
                 })
             );
@@ -41,7 +42,7 @@ const Explore = (props) => {
         }
     }
 
-    return (
+    return loading ? <Loading/> : (
         <div className="explore-component">
             <div className="row mb-4 align-items-center">
                 <div className="col-12 col-md-6 mb-4 mb-md-0">

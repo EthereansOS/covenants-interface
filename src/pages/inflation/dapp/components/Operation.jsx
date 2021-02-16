@@ -41,7 +41,8 @@ const Operation = (props) => {
         setLoading(true);
         const inputTokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), address);
         const symbol = await inputTokenContract.methods.symbol().call();
-        setInputToken({ symbol, address });
+        const decimals = await inputTokenContract.methods.decimals().call();
+        setInputToken({ symbol, address, decimals });
         setLoading(false);
     }
 
@@ -110,7 +111,8 @@ const Operation = (props) => {
             }
             const pathTokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), address);
             const symbol = await pathTokenContract.methods.symbol().call();
-            setPathTokens(pathTokens.concat({ symbol, address, output: null, outputTokenAddress, lpTokensAddresses, symbols }));
+            const decimals = await pathTokenContract.methods.decimals().call();
+            setPathTokens(pathTokens.concat({ symbol, address, decimals, output: null, outputTokenAddress, lpTokensAddresses, symbols }));
         } catch (error) {
             console.error(error);
         } finally {

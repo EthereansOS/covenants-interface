@@ -1,11 +1,15 @@
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
+import Loading from '../Loading';
 
 const FixedInflationComponent = (props) => {
     const { className, dfoCore, contract, entry, operations, showButton, hasBorder } = props;
     const [metadata, setMetadata] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [executing, setExecuting] = useState(false);
+    const [earnByInput, setEarnByInput] = useState(false);
 
     useEffect(() => {
         getContractMetadata();
@@ -17,19 +21,42 @@ const FixedInflationComponent = (props) => {
             const period = Object.entries(dfoCore.getContextElement("blockIntervals")).filter(([key, value]) => value === entry.blockInterval);
             const oneHundred = await contract.methods.ONE_HUNDRED().call();
             const executorReward = (entry.callerRewardPercentage / oneHundred);
+            var blockNumber = parseInt(await window.web3.eth.getBlockNumber());
+            var nextBlock = parseInt(entry.lastBlock) + parseInt(entry.blockInterval);
+            var extensionContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("FixedInflationExtensionABI"), await contract.methods.extension().call());
+            var active = await extensionContract.methods.active().call();
             setMetadata({
+                entry,
                 name: entry.name,
                 period: period[0],
                 executorReward: `${executorReward}%`,
-                operations: [0, 0, 0],
-                host: '0x0000',
-                contractAddress: '0x0000'
+                operations,
+                extension: await contract.methods.extension().call(),
+                contractAddress: contract.options.address,
+                executable : active && blockNumber >= nextBlock,
+                active
             });
         } catch (error) {
             console.error(error);
         } finally {
             setLoading(false);
         }
+    }
+
+    async function execute() {
+        setExecuting(true);
+        var error;
+        try {
+            var sendingOptions = {from : props.dfoCore.address};
+            var method = contract.methods.execute([entry.id], [earnByInput]);
+            var gasLimit = await method.estimateGas(sendingOptions);
+            sendingOptions.gasLimit = gasLimit;
+            await method.send(sendingOptions);
+        } catch(e) {
+            error = e;
+        }
+        setExecuting(false);
+        error && alert(error.message);
     }
 
     return (
@@ -41,17 +68,24 @@ const FixedInflationComponent = (props) => {
                             metadata ? <>
                             <div className="col-12 col-md-6 flex flex-column justify-content-center">
                                 <div className="row mb-2">
-                                    <h4 className="mr-4"><b>{metadata.name}</b></h4> <b>({metadata.period})</b>
+                                    <h4 className="mr-4"><b>{metadata.name}</b></h4>
                                 </div>
                                 <div className="row">
-                                    <b style={{fontSize: 14}} className="text-secondary mr-1">Executor reward: 5% </b> <b style={{fontSize: 14, marginBottom: 4}}>for {metadata.operations.length} operations</b> 
+                                    {metadata.executorReward !== "0%" && <><b style={{fontSize: 14}} className="text-secondary mr-1">Executor reward: {window.formatMoney(metadata.executorReward)}% </b> <b style={{fontSize: 14, marginBottom: 4}}>for {metadata.operations.length} operations</b></>}
+                                    {metadata.executorReward === "0%" && <b style={{fontSize: 14, marginBottom: 4}}>{metadata.operations.length} operations</b>}
                                 </div>
                             </div>
                             <div className="col-12 col-md-6">
                                 <div className="row flex-column align-items-end">
-                                    <p className="fixed-inflation-paragraph"><b>Host</b>: {metadata.host}</p>
-                                    <p className="fixed-inflation-paragraph"><b>Contract</b>: {metadata.contractAddress}</p>
-                                    { !showButton ? <div/> : <Link to={`/inflation/dapp/${metadata.contractAddress}`} className="btn btn-secondary btn-sm">Open</Link>}
+                                    <p className="fixed-inflation-paragraph"><b>Extension</b>: <a href={`${props.dfoCore.getContextElement('etherscanURL')}address/${metadata.extension}`} target="_blank">{window.shortenWord(metadata.extension, 16)}</a></p>
+                                    <p className="fixed-inflation-paragraph"><b>Contract</b>: <a href={`${props.dfoCore.getContextElement('etherscanURL')}address/${metadata.contract}`} target="_blank">{window.shortenWord(metadata.contractAddress, 16)}</a></p>
+                                    {showButton && metadata.executable && <label>
+                                        Earn by input
+                                        <input type="checkbox" onChange={e => setEarnByInput(e.currentTarget.checked)}/>
+                                    </label>}
+                                    { !showButton ? <div/> : <Link to={`/inflation/dapp/${metadata.contractAddress}/${metadata.entry.id}`} className="btn btn-secondary btn-sm">Open</Link>}
+                                    {false && showButton && metadata.executable && !executing && <button className="btn btn-secondary btn-sm" onClick={execute}>Execute</button>}
+                                    {false && executing && <Loading/>}
                                 </div>
                             </div>
                             </> : <div className="col-12 justify-content-center">
@@ -73,4 +107,9 @@ FixedInflationComponent.propTypes = {
     hasBorder: PropTypes.bool
 };
 
-export default FixedInflationComponent;
+const mapStateToProps = (state) => {
+    const { core } = state;
+    return { dfoCore: core.dfoCore };
+}
+
+export default connect(mapStateToProps)(FixedInflationComponent);

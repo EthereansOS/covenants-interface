@@ -52,7 +52,7 @@ const Dapp = (props) => {
                     <DappMenu className="wusd-dapp-menu" onClick={(name) => setTab(name)} currentTab={currentTab} options={['Explore', 'Create']} />
                     <div className="wusd-dapp-content mt-4">
                             <Switch>
-                                <Route path="/inflation/dapp/:address">
+                                <Route path="/inflation/dapp/:address/:id">
                                     <ExploreInflationContract />
                                 </Route>
                                 <Route path="/inflation/dapp">
