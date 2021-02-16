@@ -287,13 +287,20 @@ const Operation = (props) => {
         </>
     }
 
+    function onTransferChange(e) {
+        setPercentage('');
+        setAmount('');
+        setTransferType(e.target.value);
+        console.log(e.target.value);
+    }
+
     const getSwapThirdStep = () => {
         return <>
             <div className="row mb-4">
                 <h6 className="text-secondary"><b>Swap</b></h6>
             </div>
             <div className="row w-50 mb-4">
-                <select value={transferType} onChange={(e) => setTransferType(e.target.value)} className="custom-select wusd-pair-select">
+                <select value={transferType} onChange={onTransferChange} className="custom-select wusd-pair-select">
                     <option value="">Select type</option>
                     <option value="percentage">Percentage</option>
                     <option value="amount">Amount</option>

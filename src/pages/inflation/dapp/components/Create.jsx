@@ -31,7 +31,7 @@ const Create = (props) => {
 
     var deployMethodologies = {
         async wallet() {
-            setDeployMessage("Cloning Extension...");
+            setDeployMessage("1/3 - Deploying Extension...");
 
             var transaction = await fixedInflationFactory.methods.cloneLiquidityMiningDefaultExtension().send({ from: props.dfoCore.address });
             var receipt = await window.web3.eth.getTransactionReceipt(transaction.transactionHash);
@@ -47,7 +47,7 @@ const Create = (props) => {
             await deployMethodologies.deployedContract(fixedInflationExtensionAddress, payload);
         },
         async deployedContract(preDeployedContract, builtPayload) {
-            setDeployMessage("Deploying Liqudity Mining Contract...");
+            setDeployMessage(`${preDeployedContract ? "2/3" : "1/2"} - Deploying Liqudity Mining Contract...`);
             var elaborateEntries = entries.map(entry => {
                 return {
                     id: window.web3.utils.sha3('0'),
@@ -61,9 +61,9 @@ const Create = (props) => {
                         receiversPercentages.pop();
                         return {
                             inputTokenAddress: operation.inputToken.address,
-                            inputTokenAmount: window.toDecimals((operation.amount || operation.percentage).toString(), operation.transferType === 'percentage' ? "18" : operation.inputToken.decimals),
-                            inputTokenAmountIsPercentage: operation.inputTokenAmountIsPercentage || false,
-                            inputTokenAmountIsByMint: operation.inputTokenAmountIsByMint || false,
+                            inputTokenAmount: window.toDecimals(window.numberToString(operation.amount || parseFloat(operation.percentage) / 100), operation.transferType === 'percentage' ? "18" : operation.inputToken.decimals),
+                            inputTokenAmountIsPercentage: operation.amount !== '',
+                            inputTokenAmountIsByMint: operation.inputTokenMethod === 'mint',
                             ammPlugin: operation.ammPlugin || window.voidEthereumAddress,
                             liquidityPoolAddresses: operation.liquidityPoolAddresses || [],
                             swapPath: operation.swapPath || [],
@@ -87,7 +87,7 @@ const Create = (props) => {
             result = await window.web3.eth.getTransactionReceipt(result.transactionHash);
             var fixedInflationAddress = window.web3.eth.abi.decodeParameter("address", result.logs.filter(it => it.topics[0] === window.web3.utils.sha3('FixedInflationDeployed(address,address,bytes)'))[0].topics[1]);
 
-            setDeployMessage("Enabling Extension...");
+            setDeployMessage(`${preDeployedContract ? "3/3" : "2/2"} - Enabling Extension...`);
 
             var extension = await props.dfoCore.getContract(props.dfoCore.getContextElement("FixedInflationExtensionABI"), preDeployedContract || extensionAddress);
             await extension.methods.setActive(true).send({from: props.dfoCore.address});

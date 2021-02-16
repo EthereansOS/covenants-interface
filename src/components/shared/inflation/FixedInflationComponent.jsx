@@ -20,7 +20,7 @@ const FixedInflationComponent = (props) => {
         try {
             const period = Object.entries(dfoCore.getContextElement("blockIntervals")).filter(([key, value]) => value === entry.blockInterval);
             const oneHundred = await contract.methods.ONE_HUNDRED().call();
-            const executorReward = (entry.callerRewardPercentage / oneHundred);
+            const executorReward = (entry.callerRewardPercentage / oneHundred) * 100;
             var blockNumber = parseInt(await window.web3.eth.getBlockNumber());
             var nextBlock = parseInt(entry.lastBlock) + parseInt(entry.blockInterval);
             var extensionContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("FixedInflationExtensionABI"), await contract.methods.extension().call());
@@ -29,7 +29,7 @@ const FixedInflationComponent = (props) => {
                 entry,
                 name: entry.name,
                 period: period[0],
-                executorReward: `${executorReward}%`,
+                executorReward,
                 operations,
                 extension: await contract.methods.extension().call(),
                 contractAddress: contract.options.address,
@@ -71,18 +71,14 @@ const FixedInflationComponent = (props) => {
                                     <h4 className="mr-4"><b>{metadata.name}</b></h4>
                                 </div>
                                 <div className="row">
-                                    {metadata.executorReward !== "0%" && <><b style={{fontSize: 14}} className="text-secondary mr-1">Executor reward: {window.formatMoney(metadata.executorReward)}% </b> <b style={{fontSize: 14, marginBottom: 4}}>for {metadata.operations.length} operations</b></>}
-                                    {metadata.executorReward === "0%" && <b style={{fontSize: 14, marginBottom: 4}}>{metadata.operations.length} operations</b>}
+                                    {metadata.executorReward !== 0 && <><b style={{fontSize: 14}} className="text-secondary mr-1">Executor reward: {window.formatMoney(metadata.executorReward)}% </b> <b style={{fontSize: 14, marginBottom: 4}}>for {metadata.operations.length} operations</b></>}
+                                    {metadata.executorReward === 0 && <b style={{fontSize: 14, marginBottom: 4}}>{metadata.operations.length} operations</b>}
                                 </div>
                             </div>
                             <div className="col-12 col-md-6">
                                 <div className="row flex-column align-items-end">
                                     <p className="fixed-inflation-paragraph"><b>Extension</b>: <a href={`${props.dfoCore.getContextElement('etherscanURL')}address/${metadata.extension}`} target="_blank">{window.shortenWord(metadata.extension, 16)}</a></p>
                                     <p className="fixed-inflation-paragraph"><b>Contract</b>: <a href={`${props.dfoCore.getContextElement('etherscanURL')}address/${metadata.contract}`} target="_blank">{window.shortenWord(metadata.contractAddress, 16)}</a></p>
-                                    {showButton && metadata.executable && <label>
-                                        Earn by input
-                                        <input type="checkbox" onChange={e => setEarnByInput(e.currentTarget.checked)}/>
-                                    </label>}
                                     { !showButton ? <div/> : <Link to={`/inflation/dapp/${metadata.contractAddress}/${metadata.entry.id}`} className="btn btn-secondary btn-sm">Open</Link>}
                                     {false && showButton && metadata.executable && !executing && <button className="btn btn-secondary btn-sm" onClick={execute}>Execute</button>}
                                     {false && executing && <Loading/>}
