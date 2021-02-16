@@ -64,14 +64,14 @@ const Entry = (props) => {
         [function () {
             return <>
                 <p>
-                    <Input label="Start Block:" min="0" onChange={e => setLastBlock(e.target.value)} value={lastBlock} />
+                    <Input label="Start Block:" min="0" onChange={e => setLastBlock(parseInt(e.target.value))} value={lastBlock} />
                 </p>
                 <p>
                     <label>
                         Execution reward
                         <input type="checkbox" checked={hasCallerRewardPercentage} onChange={e => setHasCallerRewardPercentage(e.currentTarget.checked)} />
                     </label>
-                    <Input disabled={!hasCallerRewardPercentage} label="Caller reward %:" min="0" max="100" onChange={e => setCallerRewardPercentage(e.target.value)} value={callerRewardPercentage} />
+                    <Input disabled={!hasCallerRewardPercentage} label="Caller reward %:" min="0" max="100" onChange={e => setCallerRewardPercentage(parseInt(e.target.value))} value={callerRewardPercentage} />
                 </p>
             </>
         },
