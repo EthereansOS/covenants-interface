@@ -204,7 +204,7 @@
 .penguin .TextRegular {border-color: #9e6915; color: #9e6915;}
 .penguin .input-group-text {background-color: transparent;border-top: 1px solid #9e6915; border-right: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-left: 0px solid #9e6915; color: #ffffff;}
 .penguin .form-control, .penguin .form-control:focus {background-color: transparent;border-top: 1px solid #9e6915; border-left: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-right: 0px solid #9e6915; color: #ffffff;}
-.penguin .FarmContract {border-color: #4d4c4a;}
+.penguin .FarmContract, .penguin .FarmContractOpen {border-color: #4d4c4a;}
 
 
 .magic {background: rgb(210,208,247);background: linear-gradient(135deg, rgba(210,208,247,1) 0%, rgba(253,247,245,1) 41%);}
@@ -229,7 +229,7 @@
 .magic .TextRegular {border-color: #9e6915; color: #9e6915;}
 .magic .input-group-text {background-color: transparent;border-top: 1px solid #9e6915; border-right: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-left: 0px solid #9e6915; color: #000000;}
 .magic .form-control, .magic .form-control:focus {background-color: transparent;border-top: 1px solid #9e6915; border-left: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-right: 0px solid #9e6915; color: #000000;}
-.magic .FarmContract {border-color: #ebebeb;}
+.magic .FarmContract, .magic .FarmContractOpen {border-color: #ebebeb;}
 
 
 @media only screen and (max-device-width: 750px) {

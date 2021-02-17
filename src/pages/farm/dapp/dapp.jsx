@@ -58,7 +58,6 @@ const Dapp = (props) => {
             <div className="row" style={{flexDirection: 'column'}}>
                 <div className="col-12 dapp-col text-center">
                     <DappMenu className="wusd-dapp-menu" onClick={(name) => setTab(name)} currentTab={currentTab} options={['Explore', 'Positions', 'Hosted', 'Create']} />
-                    <div className="wusd-dapp-content mt-4">
                         <div className="p-2">
                             <Switch>
                                 <Route path="/farm/dapp/:address">
@@ -70,7 +69,6 @@ const Dapp = (props) => {
                             </Switch>
                         </div>
                     </div>
-                </div>
             </div>
             <div className="FooterP">
             <p>Covenants is an <a href="https://ethereansos.eth.link">EthOS</a> research and development project. <b>Use it at your own risk!</b> This protocol is ruled by the <a href="https://dapp.dfohub.com/?addr=0xeFAa6370A2ebdC47B12DBfB5a07F91A3182B5684">Covenants DFO</a>  a fully decentralized organization that operates 100% on-chain without the involvement of any legal entity. If you find a bug, please notify us on our <a href="https://github.com/b-u-i-d-l">Github</a></p>
