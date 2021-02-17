@@ -629,8 +629,6 @@ const SetupComponent = (props) => {
 
     return (
         <div className={className}>
-            <div className={`card farming-card`}>
-                <div className="card-body">
                     {
                         loading ? <div className="row px-2 farming-component-main-row">
                             <div className="col-12 justify-content-center">
@@ -639,41 +637,29 @@ const SetupComponent = (props) => {
                                 </div>
                             </div>
                         </div> : <>
-                        <div className="row px-2 farming-component-main-row">
-                            <div className="col-12 col-md-7 setup-component-main-col">
-                                <div className="row mb-4">
-                                    <h5><b>{setup.free ? "Free farming" : "Locked farming"} {(!setup.free && parseInt(setup.endBlock) <= blockNumber) && <span className="text-danger">(ended)</span>}</b></h5>
-                                </div>
+                        <div className="FarmSetupMain">
+                                <h5><b>{setup.free ? "Free Farming" : "Locked Farming"} {(!setup.free && parseInt(setup.endBlock) <= blockNumber) && <span>(ended)</span>}</b></h5>
+                                <aside>
+                                        {/* @todo - Insert  APY Calc*/}
+                                        <p><b>APY</b>: 3%</p>
+                                        <p><b>block end</b>: {setup.endBlock}</p>
+                                </aside>
                                 {
                                     setup.free ? <>
-                                        <div className="row mb-4">
-                                            {setupTokens.map((token, i) => <span key={token.address}>{i !== 0 ? '+ ' : ''}<Coin address={token.address} className="mr-2 mb-1" /> </span>)} = {dfoCore.toDecimals(setup.rewardPerBlock).substring(0, 6)} <Coin address={rewardTokenInfo?.address} className="mx-2" />/block
+                                        <div className="SetupFarmingInstructions">
+                                            {setupTokens.map((token, i) => <span key={token.address}>{i !== 0 ? '+ ' : ''}<Coin address={token.address} /> </span>)} = {dfoCore.toDecimals(setup.rewardPerBlock).substring(0, 6)} <Coin address={rewardTokenInfo?.address} /><span>/block</span>
+                                            <p><b>Reward/Block:</b> {setup.free ? "Shared" : "Fixed"} | <b>AMM</b>: {AMM.name}</p>
                                         </div>
-                                        <div className="row">
-                                            <p className="mb-0 setup-component-small-p"><b>Shared reward</b>: {AMM.name}</p>
-                                        </div> 
                                     </> : <>
-                                        <div className="row mb-4">
-                                            {props.dfoCore.toDecimals(setup.rewardPerBlock)} <Coin address={setup.rewardTokenAddress} className="ml-2" />/block = {setupTokens.map((token, i) => <span key={token.address}>{i !== 0 ? '+' : ''}<Coin address={token.address} className="mx-2 mb-1" /></span>)}
-                                        </div>
-                                        <div className="row">
-                                            <p className="mb-0 setup-component-small-p text-left"><b>Fixed reward</b>: {AMM.name} - <span className="text-underline">block end: {setup.endBlock}</span></p>
-                                        </div> 
+                                        <div className="SetupFarmingInstructions">
+                                            {props.dfoCore.toDecimals(setup.rewardPerBlock)} <Coin address={setup.rewardTokenAddress} />/block = {setupTokens.map((token, i) => <span key={token.address}>{i !== 0 ? '+' : ''}<Coin address={token.address} /></span>)}
+                                            {/* @todo - Insert  Reward for main token staked and Available to stake*/}
+                                            <p><b>Reward for Buidl Staked</b>: {dfoCore.toDecimals(setup.rewardPerBlock)} {setup.rewardToken} - <span><b>Available to Stake:</b> {dfoCore.toDecimals((parseInt(setup.rewardPerBlock) - parseInt(setup.currentRewardPerBlock)).toString())} {setup.rewardToken}</span></p>
+                                            
+                                            </div>
                                     </>
                                 }
-                            </div>
                             <div className="col-12 col-md-5 setup-component-main-col align-items-end">
-                                <div className="row mb-4">
-                                    <div className="col-12">
-                                        <p className="mb-0 setup-component-small-p"><b>liquidity</b>: {setupTokens.map((token, i) => <span>{dfoCore.toDecimals(dfoCore.toFixed(dfoCore.normalizeValue(token.liquidity, token.decimals)).toString())} <Coin address={token.address} height={18} />{i !== setupTokens.length - 1 ? '+ ' : ''}</span> ) }</p>
-                                    </div>
-                                    {
-                                        !setup.free && 
-                                        <div className="col-12 mt-2">
-                                            <p className="mb-0 setup-component-small-p"><b>reward/block</b>: {dfoCore.toDecimals(setup.rewardPerBlock)} <Coin address={setup.rewardTokenAddress} height={18} /> - <span className="text-secondary"><b>available:</b> {dfoCore.toDecimals((parseInt(setup.rewardPerBlock) - parseInt(setup.currentRewardPerBlock)).toString())} <Coin address={setup.rewardTokenAddress} height={18} /></span></p>
-                                        </div>
-                                    }
-                                </div>
                                 <div className="row mt-4">
                                     { getButton() }
                                 </div>
@@ -688,8 +674,6 @@ const SetupComponent = (props) => {
                         </>
                     }
                     
-                </div>
-            </div>
         </div>
     )
 }
