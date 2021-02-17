@@ -55,7 +55,7 @@ const FarmingComponent = (props) => {
             name: `Farm ${symbol}`,
             contractAddress: contract.options.address,
             rewardTokenAddress: rewardToken.options.address,
-            apy: `${dfoCore.toFixed(apy)}% yearly`,
+            apy: `${dfoCore.toFixed(apy)}%`,
             valueLocked: `$ 0`,
             rewardPerBlock: `${(dfoCore.toDecimals(dfoCore.toFixed(rewardPerBlock).toString()))} ${symbol}`,
             byMint,
@@ -80,10 +80,10 @@ const FarmingComponent = (props) => {
                                 </aside>
                             </div>
                             <div className="FarmThings">
-                                    <p className="farming-component-paragraph"><b>APY</b>: {metadata.apy}</p>
-                                    <p className="farming-component-paragraph"><b>Rewards/block</b>: {metadata.rewardPerBlock}</p>
-                                    <p className="farming-component-paragraph"><b>Setups</b>: {metadata.freeSetups} free | {metadata.lockedSetups} Locked</p>
-                                    <p className="farming-component-paragraph"><b>Host</b>: <a target="_blank" href={"https://etherscan.io/address/" + metadata.fullhost}>{metadata.host}</a></p>
+                                    <p><b>APY</b>: {metadata.apy}</p>
+                                    <p><b>Rewards/block</b>: {metadata.rewardPerBlock}</p>
+                                    <p><b>Setups</b>: {metadata.freeSetups} free | {metadata.lockedSetups} Locked</p>
+                                    <p><b>Host</b>: <a target="_blank" href={"https://etherscan.io/address/" + metadata.fullhost}>{metadata.host}</a></p>
                             </div>
                             </> : <div className="col-12 justify-content-center">
                                 <div className="spinner-border text-secondary" role="status">

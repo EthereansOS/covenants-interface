@@ -23,11 +23,11 @@ const ExploreFarmingContract = (props) => {
     }
 
     return (
-        <div className="explore-farming-contract-component">
+        <div className="ListOfThings">
             {
                 contract ? 
                 <div className="row">
-                    <FarmingComponent dfoCore={props.dfoCore} contract={contract} goBack={true} hostedBy={true} />
+                    <FarmingComponent className="FarmContractOpen" dfoCore={props.dfoCore} contract={contract} goBack={true} hostedBy={true} />
                 </div> : <div/>
             }
             <div className="row">

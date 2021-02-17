@@ -66,7 +66,7 @@ const Explore = (props) => {
 
     return (
         <div className="MainExploration">
-            <div className="SortSection">
+            {/*<div className="SortSection">
                     <select className="SelectRegular">
                         <option value="">Sort by..</option>
                         <option value="1">One</option>
@@ -74,7 +74,7 @@ const Explore = (props) => {
                         <option value="3">Three</option>
                     </select>
                     <input type="text" className="TextRegular" placeholder="Token Address.." value={tokenFilter} onChange={(e) => onChangeTokenFilter(e.target.value)} />
-            </div>
+            </div> */}
             <div className="ListOfThings">
                 {
                     farmingContracts.length === 0 && <div className="col-12 text-left">
