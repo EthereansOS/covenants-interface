@@ -638,31 +638,37 @@ const SetupComponent = (props) => {
                             </div>
                         </div> : <>
                         <div className="FarmSetupMain">
-                                <h5><b>{setup.free ? "Free Farming" : "Locked Farming"} {(!setup.free && parseInt(setup.endBlock) <= blockNumber) && <span>(ended)</span>}</b></h5>
+                                <h5><b>{setup.free ? "Free Farming" : "Locked Farming"} {(!setup.free && parseInt(setup.endBlock) <= blockNumber) && <span>(ended)</span>}</b> <a>{AMM.name}</a></h5>
                                 <aside>
-                                        {/* @todo - Insert  APY Calc*/}
-                                        <p><b>APY</b>: 3%</p>
                                         <p><b>block end</b>: {setup.endBlock}</p>
+                                        {/* @todo - Setup Reward Token Symbol don't work*/}
+                                        <p><b>Reward/Block</b>: {props.dfoCore.toDecimals(setup.rewardPerBlock)} {setup.rewardToken} {setup.free ? "(Shared)" : "(Fixed)"}</p>
                                 </aside>
                                 {
                                     setup.free ? <>
                                         <div className="SetupFarmingInstructions">
-                                            {setupTokens.map((token, i) => <span key={token.address}>{i !== 0 ? '+ ' : ''}<Coin address={token.address} /> </span>)} = {dfoCore.toDecimals(setup.rewardPerBlock).substring(0, 6)} <Coin address={rewardTokenInfo?.address} /><span>/block</span>
-                                            <p><b>Reward/Block:</b> {setup.free ? "Shared" : "Fixed"} | <b>AMM</b>: {AMM.name}</p>
+                                            {/* @todo - Insert  APY Calc*/}
+                                            <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}<Coin address={token.address} /> </figure>)} = <b>APY</b>: 3% <span>(Unstable)</span></p>
                                         </div>
                                     </> : <>
                                         <div className="SetupFarmingInstructions">
-                                            {props.dfoCore.toDecimals(setup.rewardPerBlock)} <Coin address={setup.rewardTokenAddress} />/block = {setupTokens.map((token, i) => <span key={token.address}>{i !== 0 ? '+' : ''}<Coin address={token.address} /></span>)}
-                                            {/* @todo - Insert  Reward for main token staked and Available to stake*/}
-                                            <p><b>Reward for Buidl Staked</b>: {dfoCore.toDecimals(setup.rewardPerBlock)} {setup.rewardToken} - <span><b>Available to Stake:</b> {dfoCore.toDecimals((parseInt(setup.rewardPerBlock) - parseInt(setup.currentRewardPerBlock)).toString())} {setup.rewardToken}</span></p>
-                                            
+                                            {/* @todo - Insert  APY Calc*/}
+                                            <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+' : ''}<Coin address={token.address} /></figure>)} = <b>APY</b>: 3%</p>                 
                                             </div>
                                     </>
                                 }
-                            <div className="col-12 col-md-5 setup-component-main-col align-items-end">
-                                <div className="row mt-4">
+                            <div className="SetupFarmingOthers">
+                            {
+                                    setup.free ? <>
+                                    </> : <>
+                                        {/* @todo - Insert  Reward for main token staked and Available to stake*/}
+                                        <p><b>Reward for Buidl Staked</b>: {dfoCore.toDecimals(setup.rewardPerBlock)} {setup.rewardToken}</p> 
+                                        <p><b>Available to Stake:</b> {dfoCore.toDecimals((parseInt(setup.rewardPerBlock) - parseInt(setup.currentRewardPerBlock)).toString())} {setup.rewardToken}</p>
+                                    </>
+                                }
+                            </div>
+                            <div className="SetupFarmingBotton">
                                     { getButton() }
-                                </div>
                             </div>
                         </div>
                         {
