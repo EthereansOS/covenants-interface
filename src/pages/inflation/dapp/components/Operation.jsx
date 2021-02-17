@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { addEntry } from '../../../../store/actions';
 import { Coin, Input, TokenInput } from '../../../../components/shared';
+import Loading from '../../../../components/shared/Loading';
 
 const Operation = (props) => {
     const { entry, onCancel, onFinish, operation } = props;
@@ -21,6 +22,11 @@ const Operation = (props) => {
     // general
     const [loading, setLoading] = useState(false);
 
+    const [enterInETH, setEnterInETH] = useState(false);
+    const [exitInETH, setExitInETH] = useState(false);
+    const [renderExitInETH, setRenderExitInETH] = useState(false);
+    const [amm, setAmm] = useState(false);
+
     // check if an entry has been passed in the props
     useEffect(() => {
         if (operation) {
@@ -32,16 +38,24 @@ const Operation = (props) => {
             setTransferType(operation.transferType);
             setReceivers(operation.receivers);
             setPathTokens(operation.pathTokens);
+            setEnterInETH(operation.enterInETH || false);
+            setExitInETH(operation.exitInETH || false);
+            setRenderExitInETH(operation.exitInETH || false);
+            setAmm(operation.amm);
         }
     }, []);
 
     // second step methods
     const onSelectInputToken = async (address) => {
-        if (!address) return;
+        setAmm(null);
+        setPathTokens([]);
+        setExitInETH(false);
+        setRenderExitInETH(false);
+        if (!address) return setInputToken(null);
         setLoading(true);
         const inputTokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), address);
-        const symbol = await inputTokenContract.methods.symbol().call();
-        const decimals = await inputTokenContract.methods.decimals().call();
+        const symbol = address === window.voidEthereumAddress ? "ETH" : await inputTokenContract.methods.symbol().call();
+        const decimals = address === window.voidEthereumAddress ? "18" : await inputTokenContract.methods.decimals().call();
         setInputToken({ symbol, address, decimals });
         setLoading(false);
     }
@@ -49,8 +63,8 @@ const Operation = (props) => {
     // third step methods
     const isValidPercentage = () => {
         var hasIncoherent = false;
-        for(var receiver of receivers) {
-            if(receiver.percentage <= 0 || receiver.percentage > 100) {
+        for (var receiver of receivers) {
+            if (receiver.percentage <= 0 || receiver.percentage > 100) {
                 hasIncoherent = true;
             }
         }
@@ -64,8 +78,8 @@ const Operation = (props) => {
             if (i === index) {
                 return { ...receiver, percentage };
             }
-            if(i === receivers.length - 1) {
-                return {...receiver, percentage: 100 - cumulate};
+            if (i === receivers.length - 1) {
+                return { ...receiver, percentage: 100 - cumulate };
             }
             cumulate += receiver.percentage;
             return receiver;
@@ -77,42 +91,47 @@ const Operation = (props) => {
         if (!address) return;
         setLoading(true);
         try {
-            console.log(pathTokens);
-            const lastOutputToken = pathTokens.length === 0 ? inputToken.address.toLowerCase() : pathTokens[pathTokens.length - 1].outputTokenAddress;
-            console.log(`lot: ${lastOutputToken}`);
             const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
             const info = await ammAggregator.methods.info(address).call();
             const ammContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("AMMABI"), info['amm']);
-            const lpInfo = await ammContract.methods.byLiquidityPool(address).call();
-            const lpTokensAddresses = lpInfo[2];
             const ammData = await ammContract.methods.data().call();
             const ethAddress = ammData[0];
+            var realInputToken = enterInETH ? ethAddress : inputToken.address;
+            if (amm && amm.ammContract.options.address !== ammContract.options.address) {
+                return;
+            }
+            if (pathTokens.filter(it => it.address === address).length > 0) {
+                return;
+            }
+            const lastOutputToken = pathTokens.length === 0 ? realInputToken : pathTokens[pathTokens.length - 1].outputTokenAddress;
+            const lpInfo = await ammContract.methods.byLiquidityPool(address).call();
+            const lpTokensAddresses = lpInfo[2];
             const symbols = [];
             let outputTokenAddress = null;
             let hasLastOutputToken = false;
             for (let i = 0; i < lpTokensAddresses.length; i++) {
                 const currentTokenAddress = lpTokensAddresses[i];
-                if (ethAddress.toLowerCase() === currentTokenAddress) {
-                    symbols.push('ETH');
-                } else {
-                    if (lpTokensAddresses.length === 2 && currentTokenAddress.toLowerCase() !== lastOutputToken) {
-                        outputTokenAddress = currentTokenAddress;
-                    }
+                outputTokenAddress = outputTokenAddress ? outputTokenAddress : currentTokenAddress !== lastOutputToken ? currentTokenAddress : null
+                if(currentTokenAddress !== window.voidEthereumAddress) {
                     const currentToken = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), currentTokenAddress);
                     const currentTokenSymbol = await currentToken.methods.symbol().call();
                     symbols.push(currentTokenSymbol);
                 }
-                if (lastOutputToken.toLowerCase() === currentTokenAddress.toLowerCase()) {
+                ethAddress === currentTokenAddress && (symbols[symbols.length - 1] = `ETH (${symbols[symbols.length - 1]})`);
+                if (lastOutputToken === currentTokenAddress) {
                     hasLastOutputToken = true;
                 }
             }
             if (!hasLastOutputToken) {
                 return;
             }
+            !amm && setAmm({ ammAggregator, info, ammContract, ammData, ethAddress });
             const pathTokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), address);
             const symbol = await pathTokenContract.methods.symbol().call();
             const decimals = await pathTokenContract.methods.decimals().call();
             setPathTokens(pathTokens.concat({ symbol, address, decimals, output: null, outputTokenAddress, lpTokensAddresses, symbols }));
+            setExitInETH(outputTokenAddress === ethAddress && ethAddress === window.voidEthereumAddress);
+            setRenderExitInETH(!enterInETH && outputTokenAddress === ethAddress && ethAddress !== window.voidEthereumAddress);
         } catch (error) {
             console.error(error);
         } finally {
@@ -130,8 +149,22 @@ const Operation = (props) => {
             transferType,
             receivers,
             pathTokens,
-            index: operation ? operation.index : -1
+            index: operation ? operation.index : -1,
+            enterInETH,
+            exitInETH,
+            amm
         }
+    }
+
+    function changeEnterInETH(e) {
+        setEnterInETH(e.currentTarget.value === 'true');
+        onSelectInputToken(e.currentTarget.value === 'true' ? window.voidEthereumAddress : null);
+        e.currentTarget.value === 'true' && setInputTokenMethod("reserve");
+        e.currentTarget.value === 'true' && onTransferChange({ target: { value: 'amount' } });
+    }
+
+    function changeExitInETH(e) {
+        setExitInETH(e.currentTarget.value === 'true');
     }
 
     // step retrieval methods
@@ -178,8 +211,20 @@ const Operation = (props) => {
     const getSecondStep = () => {
         return <div className="col-12 flex flex-column align-items-center">
             <div className="row">
-                <TokenInput tokenAddress={inputToken ? inputToken.address : ''} label={"Input token"} placeholder={"Input token address"} width={60} onClick={(address) => onSelectInputToken(address)} text={"Load"} />
+                <div className="col-12">
+                    <label>
+                        <input name="enterInETH" type="radio" value="true" onChange={changeEnterInETH} checked={enterInETH} />
+                        Ethereum
+                    </label>
+                    <label>
+                        <input name="enterInETH" type="radio" value="false" onChange={changeEnterInETH} checked={!enterInETH} />
+                        Token
+                    </label>
+                </div>
             </div>
+            {!enterInETH && <div className="row">
+                <TokenInput tokenAddress={inputToken ? inputToken.address : ''} label={"Input token"} placeholder={"Input token address"} width={60} onClick={(address) => onSelectInputToken(address)} text={"Load"} />
+            </div>}
             {
                 !inputToken &&
                 <div className="row mb-4">
@@ -201,7 +246,7 @@ const Operation = (props) => {
                         <div className="row w-50 mb-4">
                             <select value={inputTokenMethod} onChange={(e) => setInputTokenMethod(e.target.value)} className="custom-select wusd-pair-select">
                                 <option value="">Select method</option>
-                                <option value="mint">By mint</option>
+                                {!enterInETH && <option value="mint">By mint</option>}
                                 <option value="reserve">By reserve</option>
                             </select>
                         </div>
@@ -211,9 +256,7 @@ const Operation = (props) => {
                     </>
             }
             <div className="row justify-content-center">
-                <button onClick={() => {
-                    setStep(step - 1);
-                }} className="btn btn-light mr-4">Back</button>
+                <button onClick={() => setStep(step - 1)} className="btn btn-light mr-4">Back</button>
                 <button onClick={() => setStep(2)} disabled={!inputToken || !inputTokenMethod} className="btn btn-secondary">Next</button>
             </div>
         </div>
@@ -227,7 +270,7 @@ const Operation = (props) => {
             <div className="row w-50 mb-4">
                 <select value={transferType} onChange={(e) => setTransferType(e.target.value)} className="custom-select wusd-pair-select">
                     <option value="">Select type</option>
-                    <option value="percentage">Percentage</option>
+                    {!enterInETH && <option value="percentage">Percentage</option>}
                     <option value="amount">Amount</option>
                 </select>
             </div>
@@ -253,7 +296,7 @@ const Operation = (props) => {
                             <input type="text" value={currentReceiver} onChange={(e) => setCurrentReceiver(e.target.value)} className="form-control" placeholder="Address" aria-label="Receiver" aria-describedby="button-add" />
                             <button onClick={() => {
                                 if (!window.isEthereumAddress(currentReceiver)) return;
-                                const exists = receivers.filter((r) => r.address.toLowerCase() === currentReceiver.toLowerCase()).length > 0;
+                                const exists = receivers.filter((r) => r.address === currentReceiver).length > 0;
                                 if (exists) return;
                                 setReceivers(receivers.concat({ address: currentReceiver, percentage: receivers.length === 0 ? 100 : 0 }));
                                 setCurrentReceiver("");
@@ -291,7 +334,15 @@ const Operation = (props) => {
         setPercentage('');
         setAmount('');
         setTransferType(e.target.value);
-        console.log(e.target.value);
+    }
+
+    function removePathTokens(index) {
+        var removeAMM = pathTokens.length === 1;
+        var newPathTokens = pathTokens.filter((_, i) => i !== index);
+        setPathTokens(newPathTokens);
+        removeAMM && setAmm(null);
+        setExitInETH(false);
+        setRenderExitInETH(!enterInETH && newPathTokens.length > 0 && newPathTokens[newPathTokens.length - 1].outputTokenAddress === amm.ethAddress && amm.ethAddress !== window.voidEthereumAddress);
     }
 
     const getSwapThirdStep = () => {
@@ -302,7 +353,7 @@ const Operation = (props) => {
             <div className="row w-50 mb-4">
                 <select value={transferType} onChange={onTransferChange} className="custom-select wusd-pair-select">
                     <option value="">Select type</option>
-                    <option value="percentage">Percentage</option>
+                    {!enterInETH && <option value="percentage">Percentage</option>}
                     <option value="amount">Amount</option>
                 </select>
             </div>
@@ -321,46 +372,35 @@ const Operation = (props) => {
             <div className="row mb-4">
                 <TokenInput label={"Path"} placeholder={"LPT address"} width={60} onClick={(address) => onAddPathToken(address)} text={"Load"} />
             </div>
-            {
-                loading ? <div className="row justify-content-center">
-                    <div className="spinner-border text-secondary" role="status">
-                        <span className="visually-hidden"></span>
+            {loading && <Loading />}
+            {!loading && pathTokens.map((pathToken, index) => {
+                var realInputToken = enterInETH ? amm.ethAddress : inputToken.address;
+                var lastOutputToken = pathTokens.length === 1 ? realInputToken : pathTokens[pathTokens.length - 2].outputTokenAddress;
+                return <Fragment key={pathToken.address}>
+                    <div className="row mb-4">
+                        {pathToken && <div className="col-12">
+                            <b>{pathToken.symbol} {pathToken.symbols.map((symbol) => <span>{symbol} </span>)}</b> {index === pathTokens.length - 1 ? <button className="btn btn-sm btn-outline-danger ml-1" onClick={() => removePathTokens(index)}><b>Remove</b></button> : <div />}
+                        </div>}
                     </div>
-                </div> : <>
-                        {
-                            pathTokens.length > 0 && pathTokens.map((pathToken, index) => {
-                                return (
-                                    <>
-                                        <div className="row mb-4">
-                                            {pathToken && <div className="col-12">
-                                                <b>{pathToken.symbol} {pathToken.symbols.map((symbol) => <span>{symbol} </span>)}</b> {index === pathTokens.length - 1 ? <button className="btn btn-sm btn-outline-danger ml-1" onClick={() => setPathTokens(pathTokens.filter((_, i) => i !== index))}><b>Remove</b></button> : <div />}
-                                            </div>
-                                            }
-                                        </div>
-                                        <div className="row w-50 mb-4">
-                                            <select value={pathToken.output} disabled={index !== pathTokens.length - 1} onChange={(e) => setPathTokens(pathTokens.map((pt, i) => i === index ? { ...pt, outputTokenAddress: e.target.value } : pt))} className="custom-select wusd-pair-select">
-                                                {
-                                                    pathToken.lpTokensAddresses.map((lpTokenAddress, lpTokenIndex) => {
-                                                        const isFirst = index === 0;
-                                                        if (isFirst) {
-                                                            if (lpTokenAddress.toLowerCase() !== inputToken.address.toLowerCase()) {
-                                                                return <option value={lpTokenAddress}>{pathToken.symbols[lpTokenIndex]}</option>
-                                                            }
-                                                        } else {
-                                                            if (lpTokenAddress.toLowerCase() !== pathTokens[index - 1].outputTokenAddress.toLowerCase()) {
-                                                                return <option value={lpTokenAddress}>{pathToken.symbols[lpTokenIndex]}</option>
-                                                            }
-                                                        }
-                                                    })
-                                                }
-                                            </select>
-                                        </div>
-                                    </>
-                                )
-                            })
-                        }
-                    </>
-            }
+                    <div className="row w-50 mb-4">
+                        <select value={pathToken.outputTokenAddress} disabled={index !== pathTokens.length - 1} onChange={e => setPathTokens(pathTokens.map((pt, i) => i === index ? { ...pt, outputTokenAddress: e.target.value } : pt))} className="custom-select wusd-pair-select">
+                            {pathToken.lpTokensAddresses.filter(it => index !== pathTokens.length - 1 ? true : it !== lastOutputToken).map(lpTokenAddress => <option value={lpTokenAddress}>{pathToken.symbols[pathToken.lpTokensAddresses.indexOf(lpTokenAddress)]}</option>)}
+                        </select>
+                    </div>
+                </Fragment>
+            })}
+            {renderExitInETH && <div className="row">
+                <div className="col-12">
+                    <label>
+                        <input name="enterInETH" type="radio" value="true" onChange={changeExitInETH} checked={exitInETH} />
+                        Ethereum
+                    </label>
+                    <label>
+                        <input name="enterInETH" type="radio" value="false" onChange={changeExitInETH} checked={!exitInETH} />
+                        Token
+                    </label>
+                </div>
+            </div>}
             {
                 transferType ? <>
                     <div className="row">
@@ -370,7 +410,7 @@ const Operation = (props) => {
                         <div className="input-group mb-3">
                             <input type="text" value={currentReceiver} onChange={(e) => setCurrentReceiver(e.target.value)} className="form-control" placeholder="Address" aria-label="Receiver" aria-describedby="button-add" />
                             <button onClick={() => {
-                                const exists = receivers.filter((r) => r.address.toLowerCase() === currentReceiver.toLowerCase()).length > 0;
+                                const exists = receivers.filter((r) => r.address === currentReceiver).length > 0;
                                 if (exists) return;
                                 setReceivers(receivers.concat({ address: currentReceiver, percentage: receivers.length === 0 ? 100 : 0 }));
                                 setCurrentReceiver("");
@@ -413,7 +453,11 @@ const Operation = (props) => {
             {actionType === 'transfer' ? getTransferThirdStep() : getSwapThirdStep()}
             <div className="row justify-content-center">
                 <button onClick={() => setStep(step - 1)} className="btn btn-light mr-4">Back</button>
-                <button onClick={() => props.saveEditOperation(getEntry())} disabled={(!amount && !percentage) || !transferType || receivers.length === 0 || !isValidPercentage()} className="btn btn-secondary">Add</button>
+                <button
+                    onClick={() => props.saveEditOperation(getEntry())}
+                    disabled={(!amount && !percentage) || !transferType || receivers.length === 0 || !isValidPercentage() || (actionType === 'swap' && pathTokens.length === 0)}
+                    className="btn btn-secondary"
+                >Add</button>
             </div>
         </div>
     }
