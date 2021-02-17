@@ -62,36 +62,28 @@ const FarmingComponent = (props) => {
             freeSetups,
             lockedSetups,
             host: `${host.substring(0, 5)}...${host.substring(host.length - 3, host.length)}`,
+            fullhost: `${host}`,
         });
     }
 
     return (
         <div className={className}>
-            <div className={`card farming-card primary-farming-card ${!hasBorder ? "no-border" : ""}`}>
-                <div className="card-body">
-                    <div className="row px-2 farming-component-main-row">
                         {
                             metadata ? <>
-                            <div className="col-12 col-md-3 farming-component-main-col">
-                                <div className="row mb-2">
-                                    <Coin address={metadata.rewardTokenAddress} /> <h6><b>{metadata.name}</b></h6>
-                                </div>
-                                <div className="row">
-                                    <Link to={ goBack ? `/farm/dapp/` : `/farm/dapp/${metadata.contractAddress}`} className="btn btn-secondary btn-sm">{ goBack ? "Back" : "Enter" }</Link>
-                                </div>
+                            <div className="FarmTitle">
+                                <figure>
+                                    <Coin address={metadata.rewardTokenAddress} />
+                                </figure>
+                                <aside>
+                                    <h6><b>{metadata.name}</b></h6>
+                                    <Link to={ goBack ? `/farm/dapp/` : `/farm/dapp/${metadata.contractAddress}`} className={ goBack ? "backActionBTN" : "web2ActionBTN" }>{ goBack ? "Back" : "Enter" }</Link>
+                                </aside>
                             </div>
-                            <div className="col-12 col-md-5">
-                                <div className="row">
-                                    <p className="farming-component-paragraph"><b>Returns (APY)</b>: {metadata.apy}</p>
+                            <div className="FarmThings">
+                                    <p className="farming-component-paragraph"><b>APY</b>: {metadata.apy}</p>
                                     <p className="farming-component-paragraph"><b>Rewards/block</b>: {metadata.rewardPerBlock}</p>
-                                </div>
-                            </div>
-                            <div className="col-12 col-md-4">
-                                <div className="row">
-                                    <p className="farming-component-paragraph"><b>Rewards</b>: {metadata.byMint ? "By mint" : "By reserve"}</p>
-                                    <p className="farming-component-paragraph"><b>Setups (f/l)</b>: {metadata.freeSetups} | {metadata.lockedSetups}</p>
-                                    <p className="farming-component-paragraph"><b>Hosted</b>: {metadata.host}</p>
-                                </div>
+                                    <p className="farming-component-paragraph"><b>Setups</b>: {metadata.freeSetups} free | {metadata.lockedSetups} Locked</p>
+                                    <p className="farming-component-paragraph"><b>Host</b>: <a target="_blank" href={"https://etherscan.io/address/" + metadata.fullhost}>{metadata.host}</a></p>
                             </div>
                             </> : <div className="col-12 justify-content-center">
                                 <div className="spinner-border text-secondary" role="status">
@@ -99,10 +91,7 @@ const FarmingComponent = (props) => {
                                 </div>
                             </div>
                         }
-                    </div>
                 </div>
-            </div>
-        </div>
     )
 }
 

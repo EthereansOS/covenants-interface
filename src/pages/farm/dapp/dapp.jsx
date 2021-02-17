@@ -38,15 +38,19 @@ const Dapp = (props) => {
     }
 
     if (!props.dfoCore) {
-        return (
-            <div className="dapp-container">
-                <div className="row">
-                    <div className="col-12 dapp-col text-center justify-content-center">
-                        <button className="btn btn-primary mx-4" onClick={() => connectCore()}>Connect</button>
+            return (
+                <div className="dapp-container">
+                    <div className="row">
+                        <div className="col-12 dapp-col text-center justify-content-center">
+                            <p className="Web3">You need a <a target="_blank" href="https://etherscan.io/directory/Wallet">web3-enabler</a> to use this Dapp - If you have problems connecting, refresh the page.</p>
+                            <button className="ConnectBTN" onClick={() => connectCore()}>Connect</button>
+                        </div>
+                    </div>
+                    <div className="FooterP">
+                    <p>Covenants is an <a href="https://ethereansos.eth.link">EthOS</a> research and development project. <b>Use it at your own risk!</b> This protocol is ruled by the <a href="https://dapp.dfohub.com/?addr=0xeFAa6370A2ebdC47B12DBfB5a07F91A3182B5684">Covenants DFO</a>  a fully decentralized organization that operates 100% on-chain without the involvement of any legal entity. If you find a bug, please notify us on our <a href="https://github.com/b-u-i-d-l">Github</a></p>
                     </div>
                 </div>
-            </div>
-        )
+            )
     }
 
     return (
@@ -69,7 +73,7 @@ const Dapp = (props) => {
                 </div>
             </div>
             <div className="FooterP">
-                <p>Covenats is a protocol by <a href="https://ethereansos.eth.link">EthOS</a>. This is an R&D project <b>use it at your own risk!</b> This protocol is ruled by the <a href="https://dapp.dfohub.com/?addr=0xeFAa6370A2ebdC47B12DBfB5a07F91A3182B5684">Covenants DFO</a> A Fully On-Chain Organization, without any real world legal entity involved. If you find a bug, please help us to improve by our <a href="https://github.com/b-u-i-d-l">Github</a></p>
+            <p>Covenants is an <a href="https://ethereansos.eth.link">EthOS</a> research and development project. <b>Use it at your own risk!</b> This protocol is ruled by the <a href="https://dapp.dfohub.com/?addr=0xeFAa6370A2ebdC47B12DBfB5a07F91A3182B5684">Covenants DFO</a>  a fully decentralized organization that operates 100% on-chain without the involvement of any legal entity. If you find a bug, please notify us on our <a href="https://github.com/b-u-i-d-l">Github</a></p>
             </div>
         </div>
     )

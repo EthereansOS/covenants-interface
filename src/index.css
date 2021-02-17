@@ -97,6 +97,7 @@
 
 
 .SelectRegular {width: 100%; display: inline-block; font-size: 13px; font-weight: bold; padding: 7px 2%;border: 1px solid; border-radius: 8px; background-color: transparent;max-width: 370px;}
+.TextRegular {width: 100%; display: inline-block; font-size: 13px; font-weight: bold; padding: 7px 2%;border: 1px solid; border-radius: 8px; background-color: transparent;max-width: 370px;}
 .QuestionRegular {width: 100%; display: inline-block; font-size: 14px; margin: 15px auto 0px auto;}
 .QuestionRegular input {display: inline-block; vertical-align: middle;}
 .QuestionRegular label {display: inline-block; margin: 0 0 0 10px; vertical-align: middle;}
@@ -141,6 +142,27 @@
 .GrimoureContent figure img {display: inline-block; width: 100%; height: auto;}
 .GrimoureContent header h2 {font-size: 27px; font-weight: bold !important;}
 .GrimoureContent header p {font-size: 13px; font-weight: normal !important;}
+.ListOfThings {width: 100%; text-align: center; display: inline-block; margin: 20px auto;max-width: 600px;}
+.web2ActionBTN {display: inline-block; padding: 4px 13px; background-color: #7474f7; color: #ffffff; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer;}
+.web2ActionBTN:hover {color: #ffffff; text-decoration: none;}
+.web2ActionBTN:disabled {font-weight: normal !important;}
+.backActionBTN {width: 100%; text-align: center; display: inline-block; margin: 20px auto;max-width: 600px;}
+.backActionBTN:hover {color: #ffffff; text-decoration: none;}
+.backActionBTN:disabled {font-weight: normal !important;}
+
+
+.MainExploration {width: 95%; display: inline-block; margin: 10px auto;}
+.SortSection {width: 100%; text-align: center; display: inline-block; margin: 10px auto; min-width: 600px;} 
+.SortSection .SelectRegular {width: 45%; margin: 0 2.5%;}
+.SortSection .TextRegular {width: 45%; margin: 0 2.5%;}
+.ImgStand {width: 30px; height: 30px; display: inline-block;}
+.FarmContract {width: 100%; display: inline-block; margin: 10px auto; min-width: 600px; border: 1px solid; border-radius: 12px; padding: 3%; text-align: left;}
+.FarmTitle {width: 40%; display: inline-block; margin-right: 1%; text-align: left;height: 90px;}
+.FarmTitle figure {display: inline-block; width: 40%; text-align: center;margin-block-start: 0em;margin-block-end: 0em;margin-inline-start: 0px;margin-inline-end: 0px; margin-bottom: 5px; vertical-align: middle;}
+.FarmTitle figure img {display: inline-block; width: 45px; max-height: 90px; vertical-align: middle;}
+.FarmTitle figure h6 {font-size: 18px;}
+.FarmTitle aside {width: 60%;display: inline-block;text-align: center;margin-block-start: 0em;margin-block-end: 0em;margin-inline-start: 0px;margin-inline-end: 0px; margin-bottom: 5px; vertical-align: middle;}
+.FarmThings {width: 55%; margin-left: 2%; display: inline-block; vertical-align: middle;}
 
 .fantasy {background-color: #4d4c4a !important;}
 .fantasy .LogoM {background-position: 0 -50px;}
@@ -176,6 +198,7 @@
 .penguin .nav-item-selected {border-bottom: 8px solid #7474f7;}
 .penguin .health-bar {background-color: #1c1c27;}
 .penguin .SelectRegular {border-color: #9e6915; color: #9e6915;}
+.penguin .TextRegular {border-color: #9e6915; color: #9e6915;}
 .penguin .input-group-text {background-color: transparent;border-top: 1px solid #9e6915; border-right: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-left: 0px solid #9e6915; color: #ffffff;}
 .penguin .form-control, .penguin .form-control:focus {background-color: transparent;border-top: 1px solid #9e6915; border-left: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-right: 0px solid #9e6915; color: #ffffff;}
 
@@ -200,6 +223,7 @@
 .magic .nav-item-selected {border-bottom: 8px solid #7474f7;}
 .magic .health-bar {background-color: #ebebeb;}
 .magic .SelectRegular {border-color: #9e6915; color: #9e6915;}
+.magic .TextRegular {border-color: #9e6915; color: #9e6915;}
 .magic .input-group-text {background-color: transparent;border-top: 1px solid #9e6915; border-right: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-left: 0px solid #9e6915; color: #000000;}
 .magic .form-control, .magic .form-control:focus {background-color: transparent;border-top: 1px solid #9e6915; border-left: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-right: 0px solid #9e6915; color: #000000;}
 
