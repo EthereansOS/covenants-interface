@@ -638,8 +638,9 @@ const SetupComponent = (props) => {
                         <div className="FarmSetupMain">
                                 <h5><b>{setup.free ? "Free Farming" : "Locked Farming"} {(!setup.free && parseInt(setup.endBlock) <= blockNumber) && <span>(ended)</span>}</b> <a>{AMM.name}</a></h5>
                                 <aside>
-                                        <p><b>block end</b>: {setup.endBlock}</p>
                                         {/* @todo - Setup Reward Token Symbol don't work*/}
+                                        <p><b>block end</b>: {setup.endBlock}</p>
+                                        <p><b>Min to Stake</b>: 20 Buidl</p>
                                 </aside>
                                 {
                                     setup.free ? <>
@@ -660,6 +661,7 @@ const SetupComponent = (props) => {
                                         <p><b>Reward/Block</b>: {props.dfoCore.toDecimals(setup.rewardPerBlock)} {setup.rewardToken} <span>(Shared)</span></p>
                                     </> : <>
                                         {/* @todo - Insert  Reward for main token staked and Available to stake*/}
+                                        {/* @todo - Setup Reward Token Symbol don't work*/}
                                         <p><b>Max Stakable</b>: {dfoCore.toDecimals(setup.rewardPerBlock)} {setup.rewardToken}</p> 
                                         <p><b>Available</b>: {dfoCore.toDecimals((parseInt(setup.rewardPerBlock) - parseInt(setup.currentRewardPerBlock)).toString())} {setup.rewardToken}</p>
                                         <p><b>1 Buidl Staked</b> = 0.00005 UniFi/Block</p>
