@@ -322,23 +322,21 @@ const SetupComponent = (props) => {
     const getButton = () => {
         return <>
             {
-                (isHost && extensionContract && !edit) && <div className="col-md-6 col-12">
-                    <button className="btn btn-primary" onClick={() => { setOpen(false); setEdit(true) }}>Edit</button>
-                </div>
+                (isHost && extensionContract && !edit) && 
+                    <a className="web2ActionBTN" onClick={() => { setOpen(false); setEdit(true) }}>Edit</a>
             }
             {
-                (open || edit) && <div className="col-md-6 col-12">
-                    <button className="btn btn-secondary" onClick={() => { setOpen(false); setEdit(false) }}>Close</button>
-                </div>
+                (open || edit) && 
+                    <a className="backActionBTN" onClick={() => { setOpen(false); setEdit(false) }}>Close</a>
             }
             {
-                (parseInt(setup.startBlock) > 0 && blockNumber < parseInt(setup.startBlock)) ? <div className="col-md-6 col-12">
-                    <button className="btn btn-secondary" disabled={true}>{setup.startBlock}</button>
-                </div> :(manage && currentPosition && !open) ? <div className="col-md-6 col-12">
-                    <button className="btn btn-secondary" onClick={() => { setOpen(true); setEdit(false); setStatus('manage') }}>Manage</button>
-                </div> : (setup.rewardPerBlock > 0 && !open && (setup.free || parseInt(setup.startBlock) >= blockNumber)) ? <div className="col-md-6 col-12">
-                    <button className="btn btn-secondary" onClick={() => { setOpen(true); setEdit(false); setStatus('manage') }}>Farm</button>
-                </div> : <div/>
+                (parseInt(setup.startBlock) > 0 && blockNumber < parseInt(setup.startBlock)) ? 
+                    <a className="web2ActionBTN" disabled={true}>{setup.startBlock}</a>
+                    :(manage && currentPosition && !open) ? 
+                    <a className="web2ActionBTN" onClick={() => { setOpen(true); setEdit(false); setStatus('manage') }}>Manage</a>
+                    : (setup.rewardPerBlock > 0 && !open && (setup.free || parseInt(setup.startBlock) >= blockNumber)) ? 
+                    <a className="web2ActionBTN" onClick={() => { setOpen(true); setEdit(false); setStatus('manage') }}>Farm</a>
+                     : <div/>
         }
         </>
     }
@@ -642,7 +640,6 @@ const SetupComponent = (props) => {
                                 <aside>
                                         <p><b>block end</b>: {setup.endBlock}</p>
                                         {/* @todo - Setup Reward Token Symbol don't work*/}
-                                        <p><b>Reward/Block</b>: {props.dfoCore.toDecimals(setup.rewardPerBlock)} {setup.rewardToken} {setup.free ? "(Shared)" : "(Fixed)"}</p>
                                 </aside>
                                 {
                                     setup.free ? <>
@@ -660,10 +657,12 @@ const SetupComponent = (props) => {
                             <div className="SetupFarmingOthers">
                             {
                                     setup.free ? <>
+                                        <p><b>Reward/Block</b>: {props.dfoCore.toDecimals(setup.rewardPerBlock)} {setup.rewardToken} <span>(Shared)</span></p>
                                     </> : <>
                                         {/* @todo - Insert  Reward for main token staked and Available to stake*/}
-                                        <p><b>Reward for Buidl Staked</b>: {dfoCore.toDecimals(setup.rewardPerBlock)} {setup.rewardToken}</p> 
-                                        <p><b>Available to Stake:</b> {dfoCore.toDecimals((parseInt(setup.rewardPerBlock) - parseInt(setup.currentRewardPerBlock)).toString())} {setup.rewardToken}</p>
+                                        <p><b>Max Stakable</b>: {dfoCore.toDecimals(setup.rewardPerBlock)} {setup.rewardToken}</p> 
+                                        <p><b>Available</b>: {dfoCore.toDecimals((parseInt(setup.rewardPerBlock) - parseInt(setup.currentRewardPerBlock)).toString())} {setup.rewardToken}</p>
+                                        <p><b>1 Buidl Staked</b> = 0.00005 UniFi/Block</p>
                                     </>
                                 }
                             </div>

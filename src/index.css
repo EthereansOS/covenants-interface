@@ -177,8 +177,10 @@
 .SetupFarmingInstructions p span {font-size: 12px;}
 .SetupFarmingInstructions figure {display: inline-block; margin-right: 5px;}
 .SetupFarmingInstructions img {width: 40px; height: auto;}
-.SetupFarmingOthers {display: inline-block; width: 65%; margin: 5px 1%;}
+.SetupFarmingOthers {display: inline-block; width: 65%; margin: 0px 1%;vertical-align: middle;}
 .SetupFarmingOthers p {font-size: 13px; margin: 5px; display: inline-block;}
+.SetupFarmingOthers p span {font-size: 11px;}
+.SetupFarmingBotton {display: inline-block; width: 30%; vertical-align: middle; text-align: right;}
 
 .fantasy {background-color: #4d4c4a !important;}
 .fantasy .LogoM {background-position: 0 -50px;}
