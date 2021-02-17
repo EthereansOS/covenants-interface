@@ -76,7 +76,11 @@ const ExploreInflationContract = (props) => {
             var blockNumber = parseInt(await window.web3.eth.getBlockNumber());
             var nextBlock = parseInt(entry.lastBlock) + parseInt(entry.blockInterval);
             var extensionContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("FixedInflationExtensionABI"), await contract.methods.extension().call());
-            var active = await extensionContract.methods.active().call();
+            var active = true;
+            try {
+                active = await extensionContract.methods.active().call();
+            } catch(e) {
+            }
             setMetadata({
                 entry,
                 name: entry.name,

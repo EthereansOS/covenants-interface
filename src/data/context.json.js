@@ -165,7 +165,7 @@ export default {
     "x5USDNoteControllerAddress": "0x7fcb2c6bed43029e8a8a0d700539f47ecb6e0f4c",
     "ammAggregatorAddress": "0x81391d117a03A6368005e447197739D06550D4CD",
     "ammAggregatorAddressRopsten" : "0x69BfA39E408B91DC8cB85C94EB824b37038c0aAA",
-    "fixedInflationFactoryAddress": "0x81391d117a03A6368005e447197739D06550D4CD",
+    "fixedInflationFactoryAddress": "0x1f3486A16707B18ED85Fe4719f70c7a486D1a72d",
     "fixedInflationFactoryAddressRopsten" : "0x7b795cd9B591E2dBcE4E73302dBE0C97aaf7ad7d",
     "liquidityMiningFactoryAddress": "0x9df4e915D093f03169270857CF9a0A5d1ef26388",
     "WUSDExtensionControllerAddress": "0xc6749132243dA6B174BF502E7a85f5cEdD74A753",
