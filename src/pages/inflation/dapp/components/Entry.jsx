@@ -43,6 +43,20 @@ const Entry = (props) => {
         setOperations(operations.map(it => it));
     }
 
+    function onCallerPercentageChange(e) {
+        var value = 0;
+        try {
+            value = parseFloat(e.target.value.split('-').join('').trim());
+        } catch(e) {
+        }
+        setCallerRewardPercentage(value > 99 ? 99 : value);
+    }
+
+    function onSetHasCallerRewardPercentageChange(e) {
+        setHasCallerRewardPercentage(e.currentTarget.checked);
+        setCallerRewardPercentage(0);
+    }
+
     var steps = [
         [function () {
             return <>
@@ -69,14 +83,14 @@ const Entry = (props) => {
                 <p>
                     <label>
                         Execution reward
-                        <input type="checkbox" checked={hasCallerRewardPercentage} onChange={e => setHasCallerRewardPercentage(e.currentTarget.checked)} />
+                        <input type="checkbox" checked={hasCallerRewardPercentage} onChange={onSetHasCallerRewardPercentageChange} />
                     </label>
-                    <Input disabled={!hasCallerRewardPercentage} label="Caller reward %:" min="0" max="100" onChange={e => setCallerRewardPercentage(parseInt(e.target.value))} value={callerRewardPercentage} />
+                    <Input disabled={!hasCallerRewardPercentage} label="Caller reward %:" min="0" max="100" onChange={onCallerPercentageChange} value={callerRewardPercentage} />
                 </p>
             </>
         },
         function () {
-            return !(!hasCallerRewardPercentage || callerRewardPercentage > 0);
+            return !(!hasCallerRewardPercentage || (callerRewardPercentage > 0 && callerRewardPercentage < 100));
         }],
         [function () {
             return <>

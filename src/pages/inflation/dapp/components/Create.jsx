@@ -33,8 +33,11 @@ const Create = (props) => {
     var deployMethodologies = {
         async wallet() {
             setDeployMessage("1/3 - Deploying Extension...");
-
-            var transaction = await fixedInflationFactory.methods.cloneLiquidityMiningDefaultExtension().send({ from: props.dfoCore.address });
+            var sendingOptions = { from: props.dfoCore.address };
+            var method = fixedInflationFactory.methods.cloneFixedInflationDefaultExtension();
+            var gasLimit = await method.estimateGas(sendingOptions);
+            sendingOptions.gasLimit = gasLimit;
+            var transaction = await method.send(sendingOptions);
             var receipt = await window.web3.eth.getTransactionReceipt(transaction.transactionHash);
             var fixedInflationExtensionAddress = window.web3.eth.abi.decodeParameter("address", receipt.logs.filter(it => it.topics[0] === window.web3.utils.sha3('ExtensionCloned(address)'))[0].topics[1]);
 
@@ -77,13 +80,11 @@ const Create = (props) => {
                 }
             });
 
-            console.log(JSON.stringify(elaborateEntries));
-
             var data = window.newContract(props.dfoCore.getContextElement("FixedInflationABI")).methods.init(
                 preDeployedContract || extensionAddress,
                 builtPayload || payload,
-                elaborateEntries,
-                elaborateEntries.map(it => it.operations)
+                elaborateEntries[0],
+                elaborateEntries.map(it => it.operations)[0]
             ).encodeABI();
 
             var result = await fixedInflationFactory.methods.deploy(data).send({ from: props.dfoCore.address });

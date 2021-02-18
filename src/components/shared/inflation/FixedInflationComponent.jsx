@@ -75,7 +75,7 @@ const FixedInflationComponent = (props) => {
                         {metadata.executorReward !== 0 && <p>{window.formatMoney(metadata.executorReward)}% Reward to execute {metadata.operations.length} operations</p>}
                         {metadata.executorReward === 0 && <p>{metadata.operations.length} Operations</p>}
                     <div className="InflationContractButton">
-                        { !showButton ? <div/> : <Link to={`/inflation/dapp/${metadata.contractAddress}/${metadata.entry.id}`} className="web2ActionBTN">Open</Link>}
+                        { !showButton ? <div/> : <Link to={`/inflation/dapp/${metadata.contractAddress}`} className="web2ActionBTN">Open</Link>}
                         {false && showButton && metadata.executable && !executing && <a className="Web3ActionBTN" onClick={execute}>Execute</a>}
                         {false && executing && <Loading/>}
                     </div>

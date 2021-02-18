@@ -23,13 +23,8 @@ const Explore = (props) => {
             await Promise.all(
                 props.dfoCore.deployedFixedInflationContracts.map(async (contract) => { 
                     const fiContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('FixedInflationABI'), contract.address);
-                    const events = await fiContract.getPastEvents('Entry', { fromBlock: 0 });
-                    await Promise.all(events.map(async (event) => {
-                        const { id } = event.returnValues;
-                        const result = await fiContract.methods.entry(id).call();
-                        const {entriesArray, operations} = result;
-                        mappedEntries.push({ contract: fiContract, entry : entriesArray, operations });
-                    }))
+                    const result = await fiContract.methods.entry().call();
+                    mappedEntries.push({ contract: fiContract, entry : result[0], operations: result[1] });
                 })
             );
             setFixedInflationContracts(mappedEntries);

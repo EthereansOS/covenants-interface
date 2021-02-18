@@ -24,11 +24,10 @@ const ExploreInflationContract = (props) => {
 
     const getContractMetadata = async () => {
         try {
-            var contractAddress = paths[paths.length - 2];
-            var entryId = paths[paths.length - 1];
+            var contractAddress = paths[paths.length - 1];
             var contract = await props.dfoCore.getContract(props.dfoCore.getContextElement("FixedInflationABI"), contractAddress);
             setContract(contract);
-            var result = await contract.methods.entry(entryId).call();
+            var result = await contract.methods.entry().call();
             var entry = result[0];
             var operations = result[1].map(it => {
                 var copy = {};
@@ -47,9 +46,9 @@ const ExploreInflationContract = (props) => {
                 var inputTokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("ERC20ABI"), operation.inputTokenAddress);
                 operation.inputToken = {
                     contract: inputTokenContract,
-                    symbol: operation.amm && operation.enterInETH && operation.inputTokenAddress === operation.amm.data[0] ? "ETH" : await inputTokenContract.methods.symbol().call(),
-                    decimals: operation.amm && operation.enterInETH && operation.inputTokenAddress === operation.amm.data[0] ? "18" : await inputTokenContract.methods.decimals().call(),
-                    address: operation.amm && operation.enterInETH && operation.inputTokenAddress === operation.amm.data[0] ? window.voidEthereumAddress : operation.inputTokenAddress
+                    symbol: operation.inputTokenAddress === window.voidEthereumAddress || (operation.amm && operation.enterInETH && operation.inputTokenAddress === operation.amm.data[0]) ? "ETH" : await inputTokenContract.methods.symbol().call(),
+                    decimals: operation.inputTokenAddress === window.voidEthereumAddress || (operation.amm && operation.enterInETH && operation.inputTokenAddress === operation.amm.data[0]) ? "18" : await inputTokenContract.methods.decimals().call(),
+                    address: operation.inputTokenAddress === window.voidEthereumAddress || (operation.amm && operation.enterInETH && operation.inputTokenAddress === operation.amm.data[0]) ? window.voidEthereumAddress : operation.inputTokenAddress
                 }
                 for (var swapTokenIndex in operation.swapPath) {
                     var swapToken = operation.swapPath[swapTokenIndex = parseInt(swapTokenIndex)];
@@ -105,15 +104,19 @@ const ExploreInflationContract = (props) => {
         var error;
         try {
             var sendingOptions = { from: props.dfoCore.address };
-            var method = contract.methods.execute([metadata.entry.id], [earnByInput]);
+            var method = contract.methods.execute(earnByInput);
             var gasLimit = await method.estimateGas(sendingOptions);
             sendingOptions.gasLimit = gasLimit;
-            await method.send(sendingOptions);
+            var transactionResult = await method.send(sendingOptions);
+            transactionResult = await window.web3.eth.getTransactionReceipt(transactionResult.transactionHash);
+            var Executed = window.web3.eth.abi.decodeParameter("bool", transactionResult.logs.filter(it => it.topics[0] === window.web3.utils.sha3('Executed(bool)'))[0].data);
+            error = !Executed ? "Operation not executed, extension has been deactivated" : error;
         } catch (e) {
             error = e;
         }
         setExecuting(false);
-        error && alert(error.message);
+        getContractMetadata();
+        error && alert(error.message || error);
     }
 
     return !metadata ? <Loading /> : <div className="InflationContractAll">
@@ -142,12 +145,13 @@ const ExploreInflationContract = (props) => {
                             }
                             return <Fragment key={it}>
                                 <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${it}`}>
-                                    {window.formatMoney(parseFloat(window.fromDecimals(percentage, 18, true)) * 100)}% Receiver</a>
+                                    {window.formatMoney(parseFloat(window.fromDecimals(percentage, 18, true)) * 100)}% Receiver
+                                </a>
                             </Fragment>
                         })}
                         <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${metadata.extension}`}>Sender</a>
                     </div>
-                    <p><b>{operation.inputTokenAmountIsByMint ? "Mint " : "Transfer "}</b> {window.formatMoney(amount)} {operation.inputTokenAmountIsPercentage ? "% of " : " "} {operation.inputToken.symbol} <Coin address={operation.inputToken.address} /> {operation.inputTokenAmountIsPercentage ? " Supply " : ""}
+                    <p><b>{operation.inputTokenAmountIsByMint ? "Mint " : "Transfer "}</b> {window.formatMoney(amount) != '0' ? window.formatMoney(amount) : amount} {operation.inputTokenAmountIsPercentage ? "% of " : " "} {operation.inputToken.symbol} <Coin address={operation.inputToken.address} /> {operation.inputTokenAmountIsPercentage ? " Supply " : ""}
                         {operation.ammPlugin !== window.voidEthereumAddress && <>
                             and <b>swap</b><span> {" > "} </span>
                             {operation.swapTokens.map((swapToken, i) => <>
@@ -161,10 +165,10 @@ const ExploreInflationContract = (props) => {
         })}
         <div className="TokenOperationExecute">
             {metadata.executorReward !== 0 && <h5> {window.formatMoney(metadata.executorReward)}% reward by</h5>}
-            <select className="SelectRegular" value={earnByInput} onChange={e => setEarnByInput(e.currentTarget.value === 'true')}>
+            {metadata.executable && !executing && <select className="SelectRegular" value={earnByInput} onChange={e => setEarnByInput(e.currentTarget.value === 'true')}>
                 <option value="true">Input</option>
                 <option value="false">Output</option>
-            </select>
+            </select>}
         </div>
         {metadata.executable && !executing && <a className="Web3ActionBTN" onClick={execute}>Execute</a>}
         {executing && <Loading />}
