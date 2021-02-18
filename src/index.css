@@ -226,6 +226,10 @@ a:disabled {cursor:wait !important;}
 .CheckboxQuestions label {width: 100%; display: inline-block; margin: 10px auto; text-align: center;}
 .CheckboxQuestions label h5 {display: inline-block;font-size: 16px; margin: auto 10px; vertical-align: middle;}
 .CheckboxQuestions label input[type="checkbox"] {display: inline-block;vertical-align: middle;}
+.SpecialInputPerch {width: 100%; display: inline-block;max-width: 370px; position: relative;}
+.SpecialInputPerch aside {position: absolute; right: 0; width: 40px; font-size: 18px; color: #9e6915; border-left: 1px solid #9e6915; top: 4px;}
+
+
 
 .fantasy {background-color: #4d4c4a !important;}
 .fantasy .LogoM {background-position: 0 -50px;}

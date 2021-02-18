@@ -86,12 +86,17 @@ const Entry = (props) => {
                         <h5>Start Block</h5>
                         <input type="checkbox" checked={hasLastBlock} onChange={onHasLastBlockChange} />
                     </label>
-                    {hasLastBlock && <Input className="TextRegular" label="Start Block:" min="0" onChange={e => setLastBlock(parseInt(e.target.value))} value={lastBlock} />}
+                    {hasLastBlock && <input type="number" className="TextRegular" placeholder="Start Block" label="Start Block:" min="0" onChange={e => setLastBlock(parseInt(e.target.value))} value={lastBlock} />}
                     <label>
                         <h5>Executor Reward</h5>
                         <input type="checkbox" checked={hasCallerRewardPercentage} onChange={onHasCallerRewardPercentageChange} />
                     </label>
-                    {hasCallerRewardPercentage && <input className="TextRegular TextRegularS" label="Caller reward %:" min="0" max="100" onChange={onCallerPercentageChange} value={callerRewardPercentage}/> }<aside>%</aside>
+                    {hasCallerRewardPercentage && 
+                    <div className="SpecialInputPerch">
+                        <aside>%</aside>
+                        <input className="TextRegular" placeholder="Executor Reward Perchentage (%)" label="Caller reward %:" min="0" max="100" onChange={onCallerPercentageChange} value={callerRewardPercentage}/>
+                    </div>
+                    }
                     </div>
             </>
         },
