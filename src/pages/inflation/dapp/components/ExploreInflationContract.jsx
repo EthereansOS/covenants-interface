@@ -130,9 +130,8 @@ const ExploreInflationContract = (props) => {
                 <div className="TokenOperation">
                     <h6>Operation {(i + 1)}</h6>
                     <div className="TokenOperationLinks">
-                        {/* @todoM AMM Print a magical 1 */}
                         {operation.ammPlugin !== window.voidEthereumAddress &&
-                            <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${operation.ammPlugin}`}>{operation.amm.info[0]} {operation.amm.info[1]}</a>
+                            <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${operation.ammPlugin}`}>{operation.amm.info[0]}</a>
                         }
                         {operation.receivers.map((it, i) => {
                             var percentage = i === operation.receiversPercentages.length ? metadata.oneHundred : operation.receiversPercentages[i];
