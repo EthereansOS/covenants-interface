@@ -6,13 +6,13 @@ const menu = [
         name: 'Farm', path: '/farm', asset: require('../../../assets/images/farm.png').default, hasDapp: false,
     },
     {
-        name: 'Inflation', path: '/inflation', asset: require('../../../assets/images/cloud.png').default, hasDapp: false,
+        name: 'Inflation', path: '/inflation', asset: require('../../../assets/images/cloud.png').default, hasDapp: true,
     },
     {
         name: 'WUSD', path: '/wusd', asset: require('../../../assets/images/wusd.png').default, hasDapp: true,
     },
     {
-        name: 'Bazar', path: '/bazaar', asset: require('../../../assets/images/bread.png').default, hasDapp: false,
+        name: 'Bazar', path: '/bazaar', asset: require('../../../assets/images/bread.png').default, hasDapp: true,
     },
     {
         name: 'Craft', path: '/crafting', asset: require('../../../assets/images/bottle.png').default, hasDapp: false,

@@ -9,7 +9,7 @@ import { Arbitrage, Explore, Multiswap, ExploreIndexToken } from './components';
 
 const Dapp = (props) => {
     const history = useHistory();
-    const [currentTab, setCurrentTab] = useState('explore');
+    const [currentTab, setCurrentTab] = useState('indexes');
 
     const connectCore = async () => {
         const core = new DFOCore(context);

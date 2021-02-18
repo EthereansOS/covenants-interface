@@ -12,6 +12,7 @@ const Create = (props) => {
     const [step, setStep] = useState(0);
     const [tokens, setTokens] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [deployLoading, setDeployLoading] = useState(false);
 
     const captureFile = (event) => {
         event.preventDefault();
@@ -63,7 +64,10 @@ const Create = (props) => {
     }
 
     const deployIndexToken = async () => {
-        setLoading(true);
+        if (tokens.length === 0 || tokens.map((token) => parseFloat(token.amount) === 0).filter((v) => v).length > 0) {
+            return;
+        }
+        setDeployLoading(true);
         try {
             const indexContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("IndexABI"), props.dfoCore.getContextElement("indexAddress"));
             console.log(indexContract);
@@ -74,7 +78,7 @@ const Create = (props) => {
         } catch (error) {
             console.error(error);
         } finally {
-            setLoading(false);
+            setDeployLoading(false);
         }
     }
 
@@ -106,7 +110,7 @@ const Create = (props) => {
                 </div>
                 <div className="Web2ActionsBTNs">
                     <a onClick={() => onCancel()} className="backActionBTN">Cancel</a>
-                    <a onClick={() => setStep(1)} className="web2ActionBTN" disabled={!title || !description || !symbol || !icon}>Next</a>
+                    <a onClick={() => (!title || !description || !symbol || !icon) ? console.log('missing parameters') : setStep(1)} className="web2ActionBTN" disabled={!title || !description || !symbol || !icon}>Next</a>
                 </div>
             </div>
         )
@@ -124,7 +128,7 @@ const Create = (props) => {
                                 <div>
                                     <Input min={0} value={token.amount} onChange={(e) => setTokens(tokens.map((t, i) => i !== index ? t : { ...token, amount: e.target.value}))} showCoin={true} address={token.address} name={token.symbol} />
                                     <a className="backActionBTN" onClick={() => setTokens(tokens.filter((_, i) => i !== index))}>X</a>
-                                    <p>Insert the ammount of {token.symbol} needed to mint 1 { symbol }</p>
+                                    <p>Insert the amount of {token.symbol} needed to mint 1 { symbol }</p>
                                 </div>
                             </div>
                     )
@@ -132,7 +136,11 @@ const Create = (props) => {
             }
             <div className="Web2ActionsBTNs">
                 <a onClick={() => setStep(0)} className="backActionBTN">Cancel</a>
-                <a onClick={() => deployIndexToken()} disabled={tokens.length === 0 || tokens.map((token) => parseFloat(token.amount) === 0).filter((v) => v).length > 0 } className="Web3ActionBTN">Deploy</a>
+                {
+                    deployLoading ? <a className="Web3ActionBTN" disabled={deployLoading}>
+                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </a> : <a onClick={() => deployIndexToken()} disabled={tokens.length === 0 || tokens.map((token) => parseFloat(token.amount) === 0).filter((v) => v).length > 0 } className="Web3ActionBTN">Deploy</a>
+                }
             </div>
         </div>
     )
