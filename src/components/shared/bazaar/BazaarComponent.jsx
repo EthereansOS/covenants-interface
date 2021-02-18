@@ -1,6 +1,6 @@
 import { Coin } from '../';
 import { Link } from 'react-router-dom';
-import swordImage from '../../../assets/images/sword.png';
+import defaultLogoImage from '../../../assets/images/default-logo.png';
 
 const BazaarComponent = (props) => {
     const { hasBorder, className, indexToken } = props;
@@ -17,7 +17,7 @@ const BazaarComponent = (props) => {
                                 <h6><b>{indexToken.name}</b></h6>
                             </div>
                             <div className="row mb-2">
-                                <img src={swordImage} width={100} />
+                                <img src={indexToken.ipfsInfo.image || defaultLogoImage} width={100} />
                             </div>
                         </div>
                         <div className="col-12 col-md-5">
