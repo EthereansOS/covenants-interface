@@ -9,6 +9,7 @@ export default class DFOCore {
     deployedFixedInflationContracts = [];
     deployedLiquidityMiningContracts = [];
     indexTokens = [];
+    ipfsClient;
     eventEmitters = {};
     initialized = false;
     positions = [];
@@ -319,6 +320,12 @@ export default class DFOCore {
             ...this.eventEmitters[address],
             eventName: contract.events[eventName]({ filter: filter || {}, fromBlock: fromBlock || await this.getBlockNumber() }),
         };
+    }
+
+    uploadDataToIpfs = async (data) => {
+        this.ipfsClient = this.ipfsClient || new window.IpfsHttpClient(this.getContextElement('ipfsHost'));
+        const upload = await this.ipfsClient.add(data, { pin: true });
+        return upload;
     }
 
     fromDecimals = (amount, decimals = 18) => {

@@ -8,6 +8,8 @@ const Explore = (props) => {
     const [showCreate, setShowCreate] = useState(false);
     const [loading, setLoading] = useState(false);
     const [indexTokens, setIndexTokens] = useState([]);
+    const [showFinish, setShowFinish] = useState(false);
+    const [deployedAddress, setDeployedAddress] = useState(props.dfoCore.voidEthereumAddress);
 
     useEffect(() => {
         getIndexTokens();
@@ -36,6 +38,7 @@ const Explore = (props) => {
                         const amount = info._amounts[index];
                         percentages[token] = (parseInt(amount) / parseInt(total)) * 100;
                     })
+                    console.log(uri);
                     tokens.push({ contract, address: indexToken.address, objectId: indexToken.objectId, info, percentages, name, uri });
                 } catch (error) {
                     console.error(error);
@@ -51,7 +54,22 @@ const Explore = (props) => {
     }
 
     if (showCreate) {
-        return <Create onCancel={() => setShowCreate(false) } onFinish={() => { setShowCreate(false); getIndexTokens() }}  />
+        return <Create onCancel={() => setShowCreate(false) } onFinish={(address) => { setShowCreate(false); setDeployedAddress(address); setShowFinish(true) }}  />
+    }
+
+    if (showFinish) {
+        return <>
+            <div className="row">
+                <div className="col-12">
+                    <h6>Success!</h6>
+                </div>
+            </div>
+            <div className="row">
+                <div className="col-12">
+                    <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}/address/${deployedAddress}`}>{deployedAddress}</a>
+                </div>
+            </div>
+        </>
     }
 
     if (loading) {

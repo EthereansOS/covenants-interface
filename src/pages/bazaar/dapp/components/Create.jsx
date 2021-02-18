@@ -32,7 +32,7 @@ const Create = (props) => {
                     reader.readAsArrayBuffer(file);
                     reader.onloadend = () => {
                         console.log(reader);
-                        setIcon({ buffer: Buffer(reader.result) });
+                        setIcon({ buffer: Buffer.from(reader.result) });
                     }
                 }
             }
@@ -69,12 +69,25 @@ const Create = (props) => {
         }
         setDeployLoading(true);
         try {
+            const ipfsImage = await props.dfoCore.uploadDataToIpfs(icon.buffer);
+            const ipfsImageUrl = `${props.dfoCore.getContextElement('ipfsUrlBase')}/${ipfsImage.path}`;
+            const metadata = {
+                name: title,
+                description,
+                symbol,
+                image: ipfsImageUrl,
+                background_color: "#ffffff",
+            }
+            const metadataResult = await props.dfoCore.uploadDataToIpfs(JSON.stringify(metadata));
+            const metadataURI = `${props.dfoCore.getContextElement('ipfsUrlBase')}/${metadataResult.path}`;
             const indexContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("IndexABI"), props.dfoCore.getContextElement("indexAddress"));
             console.log(indexContract);
-            const gas = await indexContract.methods.mint(title, symbol, "google.com", tokens.map((token) => token.address), tokens.map((token) => props.dfoCore.toFixed(token.amount * 10**token.decimals).toString()), 0, props.dfoCore.voidEthereumAddress).estimateGas({ from: props.dfoCore.address });
-            const result = await indexContract.methods.mint(title, symbol, "google.com", tokens.map((token) => token.address), tokens.map((token) => props.dfoCore.toFixed(token.amount * 10**token.decimals).toString()), 0, props.dfoCore.voidEthereumAddress).send({ from: props.dfoCore.address, gas });
+            const gas = await indexContract.methods.mint(title, symbol, metadataURI, tokens.map((token) => token.address), tokens.map((token) => props.dfoCore.toFixed(token.amount * 10**token.decimals).toString()), 0, props.dfoCore.voidEthereumAddress).estimateGas({ from: props.dfoCore.address });
+            const result = await indexContract.methods.mint(title, symbol, metadataURI, tokens.map((token) => token.address), tokens.map((token) => props.dfoCore.toFixed(token.amount * 10**token.decimals).toString()), 0, props.dfoCore.voidEthereumAddress).send({ from: props.dfoCore.address, gas });
+            const receipt = await props.dfoCore.web3.eth.getTransactionReceipt(result.transactionHash);
+            const indexTokenAddress = props.dfoCore.web3.eth.abi.decodeParameter("address", receipt.logs.filter(it => it.topics[0] === props.dfoCore.web3.utils.sha3('NewIndex(uint256,address,address,uint256)'))[0].topics[1]);
             props.addTransaction(result);
-            onFinish();
+            onFinish(indexTokenAddress);
         } catch (error) {
             console.error(error);
         } finally {
@@ -135,7 +148,7 @@ const Create = (props) => {
                 })
             }
             <div className="Web2ActionsBTNs">
-                <a onClick={() => setStep(0)} className="backActionBTN">Cancel</a>
+                <a onClick={() => setStep(0)} disabled={deployLoading} className="backActionBTN">Cancel</a>
                 {
                     deployLoading ? <a className="Web3ActionBTN" disabled={deployLoading}>
                     <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>

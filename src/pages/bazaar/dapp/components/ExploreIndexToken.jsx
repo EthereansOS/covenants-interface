@@ -2,10 +2,11 @@ import { useEffect } from 'react';
 import { useState } from 'react';
 import { connect } from 'react-redux';
 import { useParams } from 'react-router';
-import swordImage from '../../../../assets/images/sword.png';
+import defaultLogoImage from '../../../../assets/images/default-logo.png';
 import { ApproveButton, Coin, Input, TokenInput } from '../../../../components/shared';
 import { addTransaction } from '../../../../store/actions';
 import { ethers } from 'ethers';
+import axios from 'axios';
 
 const abi = new ethers.utils.AbiCoder();
 
@@ -39,6 +40,12 @@ const ExploreIndexToken = (props) => {
             const balanceOf = await contract.methods.balanceOf(props.dfoCore.address, objectId).call();
             setBalance(props.dfoCore.toDecimals(balanceOf, indexDecimals));
             const uri = await contract.methods.uri(objectId).call();
+            let res = { data: { description: '', image: '' } };
+            try {
+                res = await axios.get(uri);
+            } catch (error) {
+                console.log('error while reading metadata from ipfs..')
+            }
             let total = 0;
             await Promise.all(info._amounts.map(async (amount) => total += parseInt(amount)));
             const percentages = {};
@@ -62,7 +69,7 @@ const ExploreIndexToken = (props) => {
                     console.error(error);
                 }
             }));
-            setMetadata({ name, symbol, symbols, uri, info, objectId, interoperableContract, indexDecimals, percentages, contract, indexContract, decimals, approvals, contracts });
+            setMetadata({ name, symbol, symbols, uri, ipfsInfo: res.data, info, objectId, interoperableContract, indexDecimals, percentages, contract, indexContract, decimals, approvals, contracts });
         } catch (error) {
             console.error(error);
         } finally {
@@ -166,14 +173,14 @@ const ExploreIndexToken = (props) => {
             <>
             <div className="row">
                 <div className="col-md-3 col-12">
-                    <img src={swordImage} width={100} />
+                    <img src={metadata.ipfsInfo.image || defaultLogoImage} width={100} />
                 </div>
                 <div className="col-md-9 col-12">
                     <div className="row">
                         <h3><b>{ metadata.name} ({metadata.symbol})</b></h3>
                     </div>
                     <div className="row text-left">
-                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Sequi accusantium sint et aut. Laudantium dolor ex nulla corrupti unde eligendi voluptatem doloribus nobis. Expedita totam voluptates ratione quas enim! Delectus?</p>  
+                        <p>{ metadata.ipfsInfo.description }</p>  
                     </div>
                 </div>
             </div>
