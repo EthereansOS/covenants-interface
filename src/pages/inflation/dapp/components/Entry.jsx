@@ -81,20 +81,18 @@ const Entry = (props) => {
         }],
         [function () {
             return <>
-                <p>
+                <div className="CheckboxQuestions">
                     <label>
-                        Starting Block
+                        <h5>Start Block</h5>
                         <input type="checkbox" checked={hasLastBlock} onChange={onHasLastBlockChange} />
                     </label>
-                    {hasLastBlock && <Input label="Start Block:" min="0" onChange={e => setLastBlock(parseInt(e.target.value))} value={lastBlock} />}
-                </p>
-                <p>
+                    {hasLastBlock && <Input className="TextRegular" label="Start Block:" min="0" onChange={e => setLastBlock(parseInt(e.target.value))} value={lastBlock} />}
                     <label>
-                        Execution reward
+                        <h5>Executor Reward</h5>
                         <input type="checkbox" checked={hasCallerRewardPercentage} onChange={onHasCallerRewardPercentageChange} />
                     </label>
-                    {hasCallerRewardPercentage && <Input label="Caller reward %:" min="0" max="100" onChange={onCallerPercentageChange} value={callerRewardPercentage} />}
-                </p>
+                    {hasCallerRewardPercentage && <input className="TextRegular TextRegularS" label="Caller reward %:" min="0" max="100" onChange={onCallerPercentageChange} value={callerRewardPercentage}/> }<aside>%</aside>
+                    </div>
             </>
         },
         function () {
@@ -137,7 +135,6 @@ const Entry = (props) => {
                 </div>
             <div className="Web2ActionsBTNs">
 
-                    {step === 0 && <a onClick={props.cancelEditEntry} className="backActionBTN">Cancel</a>}
                     {step !== 0 && <a onClick={() => setStep(step - 1)} className="backActionBTN">Back</a>}
                     {step !== steps.length - 1 && <a disabled={steps[step][1]()} onClick={() => setStep(step + 1)} className="web2ActionBTN">Next</a>}
                     {step === steps.length - 1 && <a disabled={steps[step][1]()} onClick={() => props.saveEntry(entryName, lastBlock, blockInterval, callerRewardPercentage, operations)} className="web2ActionBTN">Save</a>}

@@ -14,6 +14,8 @@
  }
 
 .body {position: relative;}
+a {cursor: pointer !important;}
+a:disabled {cursor:wait !important;}
 .MobileMenu {display: none;}
 .spinner-border, .spinner-border-sm, .text-secondary  {color: #7474f7 !important;}
 .fantasyMenu {font-size: 13px;z-index: 5; position: relative;}
@@ -166,6 +168,8 @@
 .TokenLoaded img {width: 23px; height: 23px; margin: auto 5px; display: inline-block;}
 .TokenLoaded p {font-size: 12px; display: block; margin: 5px auto; text-align: center; width: 300px;}
 .CreateList p {font-size: 12px; display: block; margin: 5px auto; text-align: center; width: 300px;}
+.TextRegularS {width: 90%; display: inline-block; font-size: 13px; font-weight: bold; padding: 7px 2%;border: 1px solid; border-radius: 8px; background-color: transparent;max-width: 330px;}
+.CheckboxQuestions aside {width: 10%; display: inline-block; margin-left: 3px; font-size: 18px; }
 
 
 .MainExploration {width: 95%; display: inline-block; margin: 10px auto; width: 600px;}
@@ -218,8 +222,10 @@
 .TokenOperationExecute .SelectRegular {width: 20%;margin: auto 5px; display: inline-block; vertical-align: middle;}
 .ExploreCreate {text-align: right;}
 .InputForm h5 {font-size: 16px; margin: 30px auto 5px auto;}
-
-
+.CheckboxQuestions {width: 100%; display: inline-block; margin: 10px auto;}
+.CheckboxQuestions label {width: 100%; display: inline-block; margin: 10px auto; text-align: center;}
+.CheckboxQuestions label h5 {display: inline-block;font-size: 16px; margin: auto 10px; vertical-align: middle;}
+.CheckboxQuestions label input[type="checkbox"] {display: inline-block;vertical-align: middle;}
 
 .fantasy {background-color: #4d4c4a !important;}
 .fantasy .LogoM {background-position: 0 -50px;}
@@ -237,7 +243,7 @@
 .fantasy .grimoireBox {background-color: #4d4c4a; border: 1px solid #9e6915;}
 .fantasy .GrimoureContent {color: #ffffff;}
 
-.penguin h1, .penguin input[type="file"], .penguin p, .penguin h2, .penguin h3, .penguin h4, .penguin h5, .penguin h6, .penguin label, .penguin span {color: #ffffff;}
+.penguin h1, .penguin .aside, .penguin input[type="file"], .penguin p, .penguin h2, .penguin h3, .penguin h4, .penguin h5, .penguin h6, .penguin label, .penguin span {color: #ffffff;}
 .penguin {background: rgb(58,60,106);background: linear-gradient(135deg, rgba(58,60,106,1) 0%, rgba(0,0,0,1) 41%);}
 .penguin .dapp-container {background-color: #2d2e40 !important;box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px, rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px;}
 .penguin .sidebar-menu-link, .penguin .nav-link, .penguin .fantasyMenu:hover, .penguin .fantasyMenu, .penguin .form-check-label, .penguin .infoList, .penguin .StatsBro, .penguin .StatsBroO, .penguin .IndexRegular, .penguin .Web3, .penguin .disclamer, .penguin .TitleCov, .penguin .xTitle, .penguin .StatsIndicator a, .penguin .QuestionRegular label,.penguin .DisclamerRegular p, .penguin .InputTokensRegular p, .penguin .Resultsregular p, .penguin .Resultsregular p, .penguin .Rebalance aside h6, .penguin .Rebalance aside p, .penguin .FarmThings p, .penguin .FarmTitle aside h6, .penguin .FarmSetupMain h5 {color: #ffffff;}
