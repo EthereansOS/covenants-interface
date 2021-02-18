@@ -8,6 +8,7 @@ export default class DFOCore {
     contracts = {};
     deployedFixedInflationContracts = [];
     deployedLiquidityMiningContracts = [];
+    indexTokens = [];
     eventEmitters = {};
     initialized = false;
     positions = [];
@@ -236,6 +237,27 @@ export default class DFOCore {
             this.deployedFixedInflationContracts = [];
         }
     };
+
+    loadIndexTokens = async (indexAddress) => {
+        try {
+            if (!indexAddress) indexAddress = this.getContextElement("indexAddress");
+            const indexContract = new this.web3.eth.Contract(this.getContextElement("IndexABI"), indexAddress);
+            const events = await indexContract.getPastEvents('NewIndex', { fromBlock: 0 });
+            this.indexTokens = [];
+            await Promise.all(events.map(async(event) => {
+                try {
+                    const exists = this.indexTokens.filter((indexToken) => indexToken.address.toLowerCase() === event.returnValues.interoperableInterfaceAddress.toLowerCase()).length > 0;
+                    if (!exists) {
+                        this.indexTokens.push({ address: event.returnValues.interoperableInterfaceAddress, objectId: event.returnValues.id});
+                    }
+                } catch (error) {
+                    console.error(error);
+                }
+            }));
+        } catch (error) {
+            this.indexTokens = [];
+        }
+    }
 
     getHostedLiquidityMiningContracts = () => {
         return this.deployedLiquidityMiningContracts.filter((item) => item.sender.toLowerCase() === this.address.toLowerCase());

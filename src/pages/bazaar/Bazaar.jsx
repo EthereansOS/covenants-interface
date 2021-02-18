@@ -8,15 +8,11 @@ const lorem = 'Take a walk through the Bazar, bustling with busy DeFi creatures.
 const Bazaar = () => {
     return (
         <Switch>
-            {
-                /*
-                    <Route path="/bazaar/dapp">
-                        <BazaarDapp />
-                    </Route>
-                */
-            }
+            <Route path="/bazaar/dapp">
+                <BazaarDapp />
+            </Route>
             <Route path="/bazaar/">
-                <PageContainer image={homeBazaarImage} imageHeight={300} text={lorem} launchDapp={false} title={"Bazar"} buttonText={"Coming soon"} />
+                <PageContainer image={homeBazaarImage} imageHeight={300} text={lorem} launchDapp={true} link={"/bazaar/dapp"} title={"Bazar"} buttonText={"Coming soon"} />
             </Route>
         </Switch>
     )
