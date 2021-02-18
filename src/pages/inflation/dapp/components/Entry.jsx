@@ -85,11 +85,13 @@ const Entry = (props) => {
                     <label>
                         <h5>Start Block</h5>
                         <input type="checkbox" checked={hasLastBlock} onChange={onHasLastBlockChange} />
+                        <p>The first execution of this Inflation Contract will be after this typed block. If Disabled the Contract will be available to execute by the deployment block</p>
                     </label>
                     {hasLastBlock && <input type="number" className="TextRegular" placeholder="Start Block" label="Start Block:" min="0" onChange={e => setLastBlock(parseInt(e.target.value))} value={lastBlock} />}
                     <label>
                         <h5>Executor Reward</h5>
                         <input type="checkbox" checked={hasCallerRewardPercentage} onChange={onHasCallerRewardPercentageChange} />
+                        <p>By activating the Executor Reward, you can set a % of reward by all of the operations for the executor of the inflation.</p>
                     </label>
                     {hasCallerRewardPercentage && 
                     <div className="SpecialInputPerch">
@@ -109,9 +111,7 @@ const Entry = (props) => {
                     <div className="col-5">
                         <h6 className="text-secondary"><b>Operations:</b></h6>
                     </div>
-                    <div className="col-3">
-                        <button onClick={editOrAddEntryOperation} className="btn btn-outline-secondary">Add</button>
-                    </div>
+
                 </div>
                 {operations.length === 0 && <span>No operations</span>}
                 {editingOperation === null && operations.map((entryOperation, entryOperationIndex) => <div key={entryOperationIndex} className="row align-items-center text-left mb-md-2 mb-4">
@@ -123,6 +123,9 @@ const Entry = (props) => {
                         <button className="btn btn-sm btn-outline-danger mr-1" onClick={() => removeEntryOperation(entryOperationIndex)}><b>X</b></button>
                     </div>
                 </div>)}
+                <div className="col-3">
+                        <button onClick={editOrAddEntryOperation} className="btn btn-outline-secondary">Add</button>
+                </div>
             </>
         },
         function () {

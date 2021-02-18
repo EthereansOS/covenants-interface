@@ -119,8 +119,6 @@ const Create = (props) => {
     return (
         <div className="CreateList">
                 <h6>{ symbol }</h6>
-                <TokenInput placeholder={"Token address"} width={60} onClick={(address) => onAddToken(address)} text={"Load"} />
-                <p>Load all of the tokens needed to mint 1 { symbol }</p>
             {
                 tokens.length > 0 && tokens.map((token, index) => {
                     return (
@@ -134,6 +132,8 @@ const Create = (props) => {
                     )
                 })
             }
+            <TokenInput placeholder={"Token address"} width={60} onClick={(address) => onAddToken(address)} text={"Load"} />
+                <p>Load all of the tokens needed to mint 1 { symbol }</p>
             <div className="Web2ActionsBTNs">
                 <a onClick={() => setStep(0)} className="backActionBTN">Cancel</a>
                 {
