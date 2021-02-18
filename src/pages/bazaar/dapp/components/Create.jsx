@@ -92,54 +92,47 @@ const Create = (props) => {
 
     if (step == 0) {
         return (
-            <div className="create-component">
-                <div className="row mb-4">
-                    <h6 className="text-secondary"><b>New Index Token</b></h6>
-                </div>
-                <div className="row mb-4">
-                    <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" />
-                </div>
-                <div className="row mb-4">
-                    <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description" />
-                </div>
-                <div className="row mb-4">
-                    <input type="text" value={symbol} onChange={(e) => setSymbol(e.target.value)}  placeholder="Symbol" />
-                </div>
-                <div className="row justify-content-center">
-                    <h6 className="text-secondary"><b>Icon</b></h6>
-                </div>
-                <div className="row mb-4">
+            <div className="CreateList">
+                    <h6><b>New Index</b></h6>
+                    <div className="InputForm">
+                        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="TextRegular" placeholder="Title" />
+                        <input type="text" value={symbol} onChange={(e) => setSymbol(e.target.value)} className="TextRegular"  placeholder="Symbol" />
+                        <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="TextAreaRegular" placeholder="Description" />
+                    </div>
+                <div className="InputForm">
+                    <h6><b>Cover</b></h6>
                     <input type="file" accept=".png,.gif" onChange={captureFile} />
+                    <p>The cover image must be .png or .gif, with a size limit of 5 MB and max. width of 350px, due to users experience in IPFS download speed limitations</p>
                 </div>
-                <div className="row">
-                    <a onClick={() => onCancel()} className="btn btn-light">Cancel</a>
-                    <button onClick={() => setStep(1)} className="btn btn-secondary" disabled={!title || !description || !symbol || !icon}>Next</button>
+                <div className="Web2ActionsBTNs">
+                    <a onClick={() => onCancel()} className="backActionBTN">Cancel</a>
+                    <a onClick={() => setStep(1)} className="web2ActionBTN" disabled={!title || !description || !symbol || !icon}>Next</a>
                 </div>
             </div>
         )
     }
 
     return (
-        <div className="create-component">
-            <div className="row">
-                1 { symbol }
-            </div>
-            <div className="row">
+        <div className="CreateList">
+                <h6>{ symbol }</h6>
                 <TokenInput placeholder={"Token address"} width={60} onClick={(address) => onAddToken(address)} text={"Load"} />
-            </div>
+                <p>Load all of the tokens needed to mint 1 { symbol }</p>
             {
                 tokens.length > 0 && tokens.map((token, index) => {
                     return (
-                            <div key={index} className="row mb-2">
-                                <Input min={0} value={token.amount} onChange={(e) => setTokens(tokens.map((t, i) => i !== index ? t : { ...token, amount: e.target.value}))} showCoin={true} address={token.address} name={token.symbol} />
-                                <button className="btn btn-sm btn-outline-danger ml-1" onClick={() => setTokens(tokens.filter((_, i) => i !== index))}>X</button>
+                            <div key={index} className="TokenLoaded">
+                                <div>
+                                    <Input min={0} value={token.amount} onChange={(e) => setTokens(tokens.map((t, i) => i !== index ? t : { ...token, amount: e.target.value}))} showCoin={true} address={token.address} name={token.symbol} />
+                                    <a className="backActionBTN" onClick={() => setTokens(tokens.filter((_, i) => i !== index))}>X</a>
+                                    <p>Insert the ammount of {token.symbol} needed to mint 1 { symbol }</p>
+                                </div>
                             </div>
                     )
                 })
             }
-            <div className="row">
-                <a onClick={() => setStep(0)} className="btn btn-light">Cancel</a>
-                <button onClick={() => deployIndexToken()} disabled={tokens.length === 0 || tokens.map((token) => parseFloat(token.amount) === 0).filter((v) => v).length > 0 } className="btn btn-secondary">Deploy</button>
+            <div className="Web2ActionsBTNs">
+                <a onClick={() => setStep(0)} className="backActionBTN">Cancel</a>
+                <a onClick={() => deployIndexToken()} disabled={tokens.length === 0 || tokens.map((token) => parseFloat(token.amount) === 0).filter((v) => v).length > 0 } className="Web3ActionBTN">Deploy</a>
             </div>
         </div>
     )

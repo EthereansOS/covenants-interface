@@ -98,6 +98,7 @@
 
 .SelectRegular {width: 100%; display: inline-block; font-size: 13px; font-weight: bold; padding: 7px 2%;border: 1px solid; border-radius: 8px; background-color: transparent;max-width: 370px;}
 .TextRegular {width: 100%; display: inline-block; font-size: 13px; font-weight: bold; padding: 7px 2%;border: 1px solid; border-radius: 8px; background-color: transparent;max-width: 370px;}
+.TextAreaRegular {width: 100%; display: inline-block; height: 100px; font-size: 13px; font-weight: bold; padding: 7px 2%;border: 1px solid; border-radius: 8px; background-color: transparent;max-width: 370px;}
 .QuestionRegular {width: 100%; display: inline-block; font-size: 14px; margin: 15px auto 0px auto;}
 .QuestionRegular input {display: inline-block; vertical-align: middle;}
 .QuestionRegular label {display: inline-block; margin: 0 0 0 10px; vertical-align: middle;}
@@ -150,8 +151,24 @@
 .backActionBTN {display: inline-block; padding: 4px 13px; border:1px solid #9e6915; color: #9e6915; border-radius: 20px; font-size: 14px; font-weight: normal; cursor: pointer;}
 .backActionBTN:hover {color: #9e6915; text-decoration: none;}
 .backActionBTN:disabled {font-weight: normal !important;}
+.InputForm {width: 100%; display: inline-block; margin: 10px auto; text-align: center;}
+.CreateList {width: 95%; width: 600px; display: inline-block; text-align: center; margin: 10px auto;}
+.CreateList h6 {font-size: 20px; display: inline-block; width: 100%; text-align: center; margin: 15px auto;}
+.InputForm input, .InputForm textarea {margin: 10px auto 0px auto;}
+.InputForm p {font-size: 12px; display: block; margin: 5px auto; text-align: left; width: 300px;}
+.InputForm input[type="file"] {width: auto; text-align: center; margin: 10px auto;}
+.Web2ActionsBTNs {width: 300px; text-align: center; display: inline-block; margin: 20px auto;}
+.Web2ActionsBTNs a {margin: auto 10px;}
+.LoadInput input {margin-right:5px;}
+.TokenLoaded {margin: 20px auto; display: inline-block; text-align: center; width: 100%;}
+.TokenLoaded > div {width: 300px; text-align: center; display: inline-block; position: relative;}
+.TokenLoaded > div .backActionBTN {display: inline-block; position: absolute; z-index: 10; top: 4px; left: -50px;}
+.TokenLoaded img {width: 23px; height: 23px; margin: auto 5px; display: inline-block;}
+.TokenLoaded p {font-size: 12px; display: block; margin: 5px auto; text-align: center; width: 300px;}
+.CreateList p {font-size: 12px; display: block; margin: 5px auto; text-align: center; width: 300px;}
 
-.MainExploration {width: 95%; display: inline-block; margin: 10px auto;}
+
+.MainExploration {width: 95%; display: inline-block; margin: 10px auto; width: 600px;}
 .SortSection {width: 100%; text-align: center; display: inline-block; margin: 10px auto; min-width: 600px;} 
 .SortSection .SelectRegular {width: 45%; margin: 0 2.5%;}
 .SortSection .TextRegular {width: 45%; margin: 0 2.5%;}
@@ -199,7 +216,7 @@
 .TokenOperationExecute {width: 100%; text-align: center; display: inline-block; margin: 30px auto;}
 .TokenOperationExecute h5 {font-size: 18px; font-weight: normal; vertical-align: middle; display: inline-block; margin: auto 5px;}
 .TokenOperationExecute .SelectRegular {width: 20%;margin: auto 5px; display: inline-block; vertical-align: middle;}
-
+.ExploreCreate {text-align: right;}
 
 .fantasy {background-color: #4d4c4a !important;}
 .fantasy .LogoM {background-position: 0 -50px;}
@@ -217,7 +234,7 @@
 .fantasy .grimoireBox {background-color: #4d4c4a; border: 1px solid #9e6915;}
 .fantasy .GrimoureContent {color: #ffffff;}
 
-
+.penguin h1, .penguin input[type="file"], .penguin p, .penguin h2, .penguin h3, .penguin h4, .penguin h5, .penguin h6, .penguin label, .penguin span {color: #ffffff;}
 .penguin {background: rgb(58,60,106);background: linear-gradient(135deg, rgba(58,60,106,1) 0%, rgba(0,0,0,1) 41%);}
 .penguin .dapp-container {background-color: #2d2e40 !important;box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px, rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px;}
 .penguin .sidebar-menu-link, .penguin .nav-link, .penguin .fantasyMenu:hover, .penguin .fantasyMenu, .penguin .form-check-label, .penguin .infoList, .penguin .StatsBro, .penguin .StatsBroO, .penguin .IndexRegular, .penguin .Web3, .penguin .disclamer, .penguin .TitleCov, .penguin .xTitle, .penguin .StatsIndicator a, .penguin .QuestionRegular label,.penguin .DisclamerRegular p, .penguin .InputTokensRegular p, .penguin .Resultsregular p, .penguin .Resultsregular p, .penguin .Rebalance aside h6, .penguin .Rebalance aside p, .penguin .FarmThings p, .penguin .FarmTitle aside h6, .penguin .FarmSetupMain h5 {color: #ffffff;}
@@ -235,7 +252,7 @@
 .penguin .nav-item-selected {border-bottom: 8px solid #7474f7;}
 .penguin .health-bar {background-color: #1c1c27;}
 .penguin .SelectRegular {border-color: #9e6915; color: #9e6915;}
-.penguin .TextRegular {border-color: #9e6915; color: #9e6915;}
+.penguin .TextRegular, .penguin .TextAreaRegular {border-color: #9e6915; color: #9e6915;}
 .penguin .input-group-text {background-color: transparent;border-top: 1px solid #9e6915; border-right: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-left: 0px solid #9e6915; color: #ffffff;}
 .penguin .form-control, .penguin .form-control:focus {background-color: transparent;border-top: 1px solid #9e6915; border-left: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-right: 0px solid #9e6915; color: #ffffff;}
 .penguin .FarmContract, .penguin .FarmContractOpen, .penguin .FarmSetup, .penguin .InflationContract, .penguin .TokenOperation {border-color: #4d4c4a;}
@@ -260,7 +277,7 @@
 .magic .nav-item-selected {border-bottom: 8px solid #7474f7;}
 .magic .health-bar {background-color: #ebebeb;}
 .magic .SelectRegular {border-color: #9e6915; color: #9e6915;}
-.magic .TextRegular {border-color: #9e6915; color: #9e6915;}
+.magic .TextRegular, .magic .TextAreaRegular {border-color: #9e6915; color: #9e6915;}
 .magic .input-group-text {background-color: transparent;border-top: 1px solid #9e6915; border-right: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-left: 0px solid #9e6915; color: #000000;}
 .magic .form-control, .magic .form-control:focus {background-color: transparent;border-top: 1px solid #9e6915; border-left: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-right: 0px solid #9e6915; color: #000000;}
 .magic .FarmContract, .magic .FarmContractOpen, .magic .FarmSetup, .magic .InflationContract, .magic .TokenOperation {border-color: #ebebeb;}

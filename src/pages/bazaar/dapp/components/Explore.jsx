@@ -67,15 +67,15 @@ const Explore = (props) => {
     }
 
     return (
-        <div className="explore-component">
-            <div className="row mt-4">
-                <a onClick={() => { setShowCreate(true); }} className="btn btn-secondary">Create</a>
+        <div className="MainExploration">
+            <div className="ExploreCreate">
+                <a onClick={() => { setShowCreate(true); }} className="web2ActionBTN">Create</a>
             </div>
-            <div className="row mt-4">
+            <div className="ListOfThings">
                 {
-                    indexTokens.length === 0 && <div className="col-12 text-left">
-                        <h6><b>No index token available!</b></h6>
-                    </div>
+                    indexTokens.length === 0 && 
+                        <h6><b>No Indexes available!</b></h6>
+
                 }
                 {
                     indexTokens.length > 0 && indexTokens.map((indexToken, index) => {
