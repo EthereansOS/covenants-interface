@@ -217,6 +217,9 @@
 .TokenOperationExecute h5 {font-size: 18px; font-weight: normal; vertical-align: middle; display: inline-block; margin: auto 5px;}
 .TokenOperationExecute .SelectRegular {width: 20%;margin: auto 5px; display: inline-block; vertical-align: middle;}
 .ExploreCreate {text-align: right;}
+.InputForm h5 {font-size: 16px; margin: 30px auto 5px auto;}
+
+
 
 .fantasy {background-color: #4d4c4a !important;}
 .fantasy .LogoM {background-position: 0 -50px;}

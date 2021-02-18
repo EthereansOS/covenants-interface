@@ -60,16 +60,15 @@ const Entry = (props) => {
     var steps = [
         [function () {
             return <>
-                <p>
-                    <label>Name:</label>
-                    <input onChange={e => setEntryName(e.currentTarget.value)} value={entryName} />
-                </p>
-                <p>
-                    <label>Block Interval:</label>
-                    <select className="custom-select wusd-pair-select" onChange={e => setBlockInterval(e.currentTarget.value)} value={blockInterval}>
+                <div className="InputForm">
+                    <input className="TextRegular" placeholder="Title" onChange={e => setEntryName(e.currentTarget.value)} value={entryName} />
+                
+                    <h5>Block Interval:</h5>
+                    <select className="SelectRegular" onChange={e => setBlockInterval(e.currentTarget.value)} value={blockInterval}>
                         {Object.entries(props.dfoCore.getContextElement("blockIntervals")).map(it => <option key={it[0]} value={it[1]}>{it[0]}</option>)}
                     </select>
-                </p>
+                    <p>The amount of time between every execution</p>
+                </div>
             </>
         },
         function () {
@@ -122,23 +121,17 @@ const Entry = (props) => {
     return editingOperation != null ?
         <Operation operation={operations[editingOperation]} cancelEditOperation={cancelEditOperation} saveEditOperation={saveEditOperation} />
         : <>
-            <div className="row">
-                <div className="col-12">
-                    <h6 className="text-secondary"><b>Entry {entryName}</b></h6>
-                </div>
-            </div>
-            <div className="row">
-                <div className="col-12">
+            <div className="CreateList">
+                    <h6><b>Create {entryName}</b></h6>
+            
                     {steps[step][0]()}
                 </div>
-            </div>
-            <div className="row">
-                <div className="col-12">
-                    {step === 0 && <button onClick={props.cancelEditEntry} className="btn btn-light">Cancel</button>}
-                    {step !== 0 && <button onClick={() => setStep(step - 1)} className="btn btn-light">Back</button>}
-                    {step !== steps.length - 1 && <button disabled={steps[step][1]()} onClick={() => setStep(step + 1)} className="btn btn-primary">Next</button>}
-                    {step === steps.length - 1 && <button disabled={steps[step][1]()} onClick={() => props.saveEntry(entryName, lastBlock, blockInterval, callerRewardPercentage, operations)} className="btn btn-primary">Save</button>}
-                </div>
+            <div className="Web2ActionsBTNs">
+
+                    {step === 0 && <a onClick={props.cancelEditEntry} className="backActionBTN">Cancel</a>}
+                    {step !== 0 && <a onClick={() => setStep(step - 1)} className="backActionBTN">Back</a>}
+                    {step !== steps.length - 1 && <a disabled={steps[step][1]()} onClick={() => setStep(step + 1)} className="web2ActionBTN">Next</a>}
+                    {step === steps.length - 1 && <a disabled={steps[step][1]()} onClick={() => props.saveEntry(entryName, lastBlock, blockInterval, callerRewardPercentage, operations)} className="web2ActionBTN">Save</a>}
             </div>
         </>
 }
