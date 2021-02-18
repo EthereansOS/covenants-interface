@@ -52,7 +52,7 @@ const Create = (props) => {
         },
         async deployedContract(preDeployedContract, builtPayload) {
             setDeployMessage(`${preDeployedContract ? "2/3" : "1/2"} - Deploying Liqudity Mining Contract...`);
-            var elaborateEntries = entries.map(entry => {
+            var elaboratedEntries = entries.map(entry => {
                 return {
                     id: window.web3.utils.sha3('0'),
                     name: entry.name,
@@ -80,21 +80,33 @@ const Create = (props) => {
                 }
             });
 
+            console.log(JSON.stringify(elaboratedEntries));
+
             var data = window.newContract(props.dfoCore.getContextElement("FixedInflationABI")).methods.init(
                 preDeployedContract || extensionAddress,
                 builtPayload || payload,
-                elaborateEntries[0],
-                elaborateEntries.map(it => it.operations)[0]
+                elaboratedEntries[0],
+                elaboratedEntries.map(it => it.operations)[0]
             ).encodeABI();
 
-            var result = await fixedInflationFactory.methods.deploy(data).send({ from: props.dfoCore.address });
-            result = await window.web3.eth.getTransactionReceipt(result.transactionHash);
-            var fixedInflationAddress = window.web3.eth.abi.decodeParameter("address", result.logs.filter(it => it.topics[0] === window.web3.utils.sha3('FixedInflationDeployed(address,address,bytes)'))[0].topics[1]);
+            var sendingOptions = { from: props.dfoCore.address };
+            var method = fixedInflationFactory.methods.deploy(data);
+            var gasLimit = await method.estimateGas(sendingOptions);
+            sendingOptions.gasLimit = gasLimit;
+            var transaction = await method.send(sendingOptions);
+            var receipt = await window.web3.eth.getTransactionReceipt(transaction.transactionHash);
+            var fixedInflationAddress = window.web3.eth.abi.decodeParameter("address", receipt.logs.filter(it => it.topics[0] === window.web3.utils.sha3('FixedInflationDeployed(address,address,bytes)'))[0].topics[1]);
 
             setDeployMessage(`${preDeployedContract ? "3/3" : "2/2"} - Enabling Extension...`);
 
             var extension = await props.dfoCore.getContract(props.dfoCore.getContextElement("FixedInflationExtensionABI"), preDeployedContract || extensionAddress);
-            await extension.methods.setActive(true).send({ from: props.dfoCore.address });
+
+            sendingOptions = { from: props.dfoCore.address };
+            method = extension.methods.setActive(true);
+            gasLimit = await method.estimateGas(sendingOptions);
+            sendingOptions.gasLimit = gasLimit;
+            transaction = await method.send(sendingOptions);
+
             setFixedInflationAddress(fixedInflationAddress);
         }
     }
