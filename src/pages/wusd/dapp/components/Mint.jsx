@@ -193,20 +193,24 @@ const Mint = (props) => {
     }
 
     const updateFirstAmount = async (amount) => {
-        if (!amount) {
-            clear();
-            return;
-        };
-        const chosenPair = pairs[pair];
-        const { ammContract, liquidityPool, token0, token0decimals, token1decimals, decimalsLp } = chosenPair;
-        const updatedFirstAmount = { value: props.dfoCore.toFixed(amount), full: props.dfoCore.toFixed(props.dfoCore.fromDecimals(parseFloat(amount).toString() || "0", token0decimals)).toString()};
-        setFirstAmount(updatedFirstAmount);
-
-        const res = await ammContract.methods.byTokenAmount(liquidityPool, token0, updatedFirstAmount.full.toString()).call();
-        const { tokensAmounts, liquidityPoolAmount } = res;
-
-        setSecondAmount({ value: props.dfoCore.toDecimals(tokensAmounts[1], token1decimals), full: tokensAmounts[1]});
-        setLpTokenAmount({ value: props.dfoCore.toDecimals(liquidityPoolAmount, decimalsLp), full: liquidityPoolAmount });
+        try {
+            if (!amount) {
+                clear();
+                return;
+            };
+            const chosenPair = pairs[pair];
+            const { ammContract, liquidityPool, token0, token0decimals, token1decimals, decimalsLp } = chosenPair;
+            const updatedFirstAmount = { value: amount, full: props.dfoCore.toFixed(props.dfoCore.fromDecimals(parseFloat(amount).toString() || "0", token0decimals)).toString()};
+            setFirstAmount(updatedFirstAmount);
+    
+            const res = await ammContract.methods.byTokenAmount(liquidityPool, token0, updatedFirstAmount.full.toString()).call();
+            const { tokensAmounts, liquidityPoolAmount } = res;
+    
+            setSecondAmount({ value: props.dfoCore.toDecimals(tokensAmounts[1], token1decimals), full: tokensAmounts[1]});
+            setLpTokenAmount({ value: props.dfoCore.toDecimals(liquidityPoolAmount, decimalsLp), full: liquidityPoolAmount });
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     const updateSecondAmount = async (amount) => {
@@ -217,10 +221,12 @@ const Mint = (props) => {
             };
             const chosenPair = pairs[pair];
             const { ammContract, liquidityPool, token1, token0decimals, token1decimals, decimalsLp } = chosenPair;
-            const updatedSecondAmount = { value: props.dfoCore.toFixed(amount), full: props.dfoCore.toFixed(props.dfoCore.fromDecimals(parseFloat(amount).toString() || "0", token1decimals)).toString()};
+            const updatedSecondAmount = { value: amount, full: props.dfoCore.toFixed(props.dfoCore.fromDecimals(parseFloat(amount).toString() || "0", token1decimals)).toString()};
+            
             setSecondAmount(updatedSecondAmount);
+            console.log(updatedSecondAmount);
     
-            const res = await ammContract.methods.byTokenAmount(liquidityPool, token1, updatedSecondAmount.full).call();
+            const res = await ammContract.methods.byTokenAmount(liquidityPool, token1, updatedSecondAmount.full.toString()).call();
             const { tokensAmounts, liquidityPoolAmount } = res;
     
             setFirstAmount({ value: props.dfoCore.toDecimals(tokensAmounts[0], token0decimals), full: tokensAmounts[0]});
@@ -231,20 +237,24 @@ const Mint = (props) => {
     }
 
     const updateLpAmount = async (amount) => {
-        if (!amount) {
-            clear();
-            return;
-        };
-        const chosenPair = pairs[pair];
-        const { ammContract, liquidityPool, token0decimals, token1decimals, decimalsLp } = chosenPair;
-        const updatedLpAmount = { value: props.dfoCore.toFixed(amount), full: props.dfoCore.toFixed(props.dfoCore.fromDecimals(parseFloat(amount).toString() || "0", decimalsLp).toString())};
-        setLpTokenAmount(updatedLpAmount);
-
-        const res = await ammContract.methods.byLiquidityPoolAmount(liquidityPool, updatedLpAmount.full).call();
-        const { tokensAmounts } = res;
-
-        setFirstAmount({ value: props.dfoCore.toDecimals(tokensAmounts[0], token0decimals), full: tokensAmounts[0]});
-        setSecondAmount({ value: props.dfoCore.toDecimals(tokensAmounts[1], token1decimals), full: tokensAmounts[1]});
+        try {
+            if (!amount) {
+                clear();
+                return;
+            };
+            const chosenPair = pairs[pair];
+            const { ammContract, liquidityPool, token0decimals, token1decimals, decimalsLp } = chosenPair;
+            const updatedLpAmount = { value: amount, full: props.dfoCore.toFixed(props.dfoCore.fromDecimals(parseFloat(amount).toString() || "0", decimalsLp).toString())};
+            setLpTokenAmount(updatedLpAmount);
+    
+            const res = await ammContract.methods.byLiquidityPoolAmount(liquidityPool, updatedLpAmount.full).call();
+            const { tokensAmounts } = res;
+    
+            setFirstAmount({ value: props.dfoCore.toDecimals(tokensAmounts[0], token0decimals), full: tokensAmounts[0]});
+            setSecondAmount({ value: props.dfoCore.toDecimals(tokensAmounts[1], token1decimals), full: tokensAmounts[1]});
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     const getEstimatedAmount = () => {

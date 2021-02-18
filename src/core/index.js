@@ -333,7 +333,11 @@ export default class DFOCore {
     }
 
     toFixed = (amount) => {
-        return toFixed(amount);
+        return toFixed(amount).toString().split('.')[0];
+    }
+
+    removeDecimals = (amount) => {
+        return amount.split('.')[0];
     }
 
     toDecimals = (amount, decimals = 18, precision) => {
