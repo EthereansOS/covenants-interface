@@ -99,7 +99,7 @@ export default {
     "decentralizedFlexibleOrganizationsURL": "https://raw.githubusercontent.com/b-u-i-d-l/bazar-tokens-list/master/dist/decentralizedFlexibleOrganizations.json",
     "decentralizedFlexibleOrganizationsURLRopsten": "https://raw.githubusercontent.com/b-u-i-d-l/bazar-tokens-list/master/dist/programmableEquities.json",
     "uniswapTokensURL": "https://raw.githubusercontent.com/b-u-i-d-l/bazar-tokens-list/master/dist/uniswapTokens.json",
-    "itemsListURL": "https://raw.githubusercontent.com/b-u-i-d-l/WIMD-uniswap/master/wimdlist.json",
+    "itemsListURL" : "https://raw.githubusercontent.com/b-u-i-d-l/ITEMswap/master/src/constants/ethItemLists/dist/tokensList.json",
     "blockIntervals" : {
       "6 Hours" : 1600,
       "12 Hours" : 3200,

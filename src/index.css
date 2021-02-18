@@ -97,6 +97,7 @@
 
 
 .SelectRegular {width: 100%; display: inline-block; font-size: 13px; font-weight: bold; padding: 7px 2%;border: 1px solid; border-radius: 8px; background-color: transparent;max-width: 370px;}
+.TextRegular {width: 100%; display: inline-block; font-size: 13px; font-weight: bold; padding: 7px 2%;border: 1px solid; border-radius: 8px; background-color: transparent;max-width: 370px;}
 .QuestionRegular {width: 100%; display: inline-block; font-size: 14px; margin: 15px auto 0px auto;}
 .QuestionRegular input {display: inline-block; vertical-align: middle;}
 .QuestionRegular label {display: inline-block; margin: 0 0 0 10px; vertical-align: middle;}
@@ -112,6 +113,7 @@
 .InputTokenRegular aside {width: 100%; display: inline-block; margin-top: 3px; text-align: left;}
 .InputTokenRegular aside a {display: inline-block; padding: 2px 4px; background-color: #9e6915; color: #ffffff !important; border-radius: 8px; font-size: 10px; font-weight: bold;vertical-align: middle;}
 .InputTokenRegular aside p {display: inline-block; font-size: 12px; margin-left: 10px; vertical-align: middle; color: #5f5b53;}
+.InputTokenRegular img {width: 22px;height: 22px;margin-right: 5px;}
 .ApproveBTN {display: inline-block; padding: 8px 17px; background-color: #9e6915; color: #ffffff; border-radius: 20px; font-size: 16px; font-weight: bold; cursor: pointer;}
 .ApproveBTN:hover {color: #ffffff; text-decoration: none;}
 .ApproveBTN:disabled {font-weight: normal;}
@@ -141,6 +143,44 @@
 .GrimoureContent figure img {display: inline-block; width: 100%; height: auto;}
 .GrimoureContent header h2 {font-size: 27px; font-weight: bold !important;}
 .GrimoureContent header p {font-size: 13px; font-weight: normal !important;}
+.ListOfThings {width: 100%; text-align: center; display: inline-block; margin: 20px auto;max-width: 600px;}
+.web2ActionBTN {display: inline-block; padding: 4px 13px; background-color: #9e6915; color: #ffffff; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer;}
+.web2ActionBTN:hover {color: #ffffff; text-decoration: none;}
+.web2ActionBTN:disabled {font-weight: normal !important;}
+.backActionBTN {display: inline-block; padding: 4px 13px; border:1px solid #9e6915; color: #9e6915; border-radius: 20px; font-size: 14px; font-weight: normal; cursor: pointer;}
+.backActionBTN:hover {color: #9e6915; text-decoration: none;}
+.backActionBTN:disabled {font-weight: normal !important;}
+
+
+.MainExploration {width: 95%; display: inline-block; margin: 10px auto;}
+.SortSection {width: 100%; text-align: center; display: inline-block; margin: 10px auto; min-width: 600px;} 
+.SortSection .SelectRegular {width: 45%; margin: 0 2.5%;}
+.SortSection .TextRegular {width: 45%; margin: 0 2.5%;}
+.ImgStand {width: 30px; height: 30px; display: inline-block;}
+.FarmContract, .FarmSetup {width: 100%; display: inline-block; margin: 10px auto; min-width: 600px; border: 1px solid; border-radius: 12px; padding: 3%; text-align: left;}
+.FarmContractOpen {width: 100%; display: inline-block; margin: 10px auto; min-width: 600px; border-bottom: 1px solid; border-radius: 0px; padding: 3%; text-align: left;}
+.FarmTitle {width: 40%; display: inline-block; margin-right: 1%; text-align: left;}
+.FarmTitle figure {display: inline-block; width: 40%; text-align: center;margin-block-start: 0em;margin-block-end: 0em;margin-inline-start: 0px;margin-inline-end: 0px; margin-bottom: 5px; vertical-align: middle;}
+.FarmTitle figure img {display: inline-block; width: 45px; max-height: 90px; vertical-align: middle;}
+.FarmTitle aside h6 {font-size: 16px; text-align: center; display: inline-block; width: 95%;}
+.FarmTitle aside {width: 60%;display: inline-block;text-align: center;margin-block-start: 0em;margin-block-end: 0em;margin-inline-start: 0px;margin-inline-end: 0px; margin-bottom: 5px; vertical-align: middle;}
+.FarmThings {width: 55%; margin-left: 4%; display: inline-block; vertical-align: middle;}
+.FarmThings p {display: inline-block; width: 95%; font-size: 14px; margin-bottom: 5px;}
+.FarmThings p a {text-decoration: underline !important;}
+.FarmSetupMain {width: 100%; display: inline-block;}
+.FarmSetupMain h5 {width: 40%; display: inline-block; font-size: 16px; vertical-align: top;}
+.FarmSetupMain h5 a {font-size: 11px; margin: 5px 5px; display: inline-block; padding: 2px 5px; border-radius: 5px; cursor: pointer;}
+.FarmSetupMain aside {width: 55%; display: inline-block;vertical-align: top; margin-left: 2%;}
+.FarmSetupMain aside p {font-size: 12px; width: 100%; text-align: right; margin-bottom: 5px;}
+.SetupFarmingInstructions {width: 100%; display: inline-block; margin-top: 10px; text-align: center;}
+.SetupFarmingInstructions p {display: inline-block; font-size: 16px; margin-bottom: 2px;}
+.SetupFarmingInstructions p span {font-size: 12px;}
+.SetupFarmingInstructions figure {display: inline-block; margin-right: 5px;}
+.SetupFarmingInstructions img {width: 40px; height: auto;}
+.SetupFarmingOthers {display: inline-block; width: 65%; margin: 0px 1%;vertical-align: middle;}
+.SetupFarmingOthers p {font-size: 13px; margin: 5px; display: inline-block;}
+.SetupFarmingOthers p span {font-size: 11px;}
+.SetupFarmingBotton {display: inline-block; width: 30%; vertical-align: middle; text-align: right;}
 
 .fantasy {background-color: #4d4c4a !important;}
 .fantasy .LogoM {background-position: 0 -50px;}
@@ -161,7 +201,7 @@
 
 .penguin {background: rgb(58,60,106);background: linear-gradient(135deg, rgba(58,60,106,1) 0%, rgba(0,0,0,1) 41%);}
 .penguin .dapp-container {background-color: #2d2e40 !important;box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px, rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px;}
-.penguin .sidebar-menu-link, .penguin .nav-link, .penguin .fantasyMenu:hover, .penguin .fantasyMenu, .penguin .form-check-label, .penguin .infoList, .penguin .StatsBro, .penguin .StatsBroO, .penguin .IndexRegular, .penguin .Web3, .penguin .disclamer, .penguin .TitleCov, .penguin .xTitle, .penguin .StatsIndicator a, .penguin .QuestionRegular label,.penguin .DisclamerRegular p, .penguin .InputTokensRegular p, .penguin .Resultsregular p, .penguin .Resultsregular p, .penguin .Rebalance aside h6, .penguin .Rebalance aside p {color: #ffffff;}
+.penguin .sidebar-menu-link, .penguin .nav-link, .penguin .fantasyMenu:hover, .penguin .fantasyMenu, .penguin .form-check-label, .penguin .infoList, .penguin .StatsBro, .penguin .StatsBroO, .penguin .IndexRegular, .penguin .Web3, .penguin .disclamer, .penguin .TitleCov, .penguin .xTitle, .penguin .StatsIndicator a, .penguin .QuestionRegular label,.penguin .DisclamerRegular p, .penguin .InputTokensRegular p, .penguin .Resultsregular p, .penguin .Resultsregular p, .penguin .Rebalance aside h6, .penguin .Rebalance aside p, .penguin .FarmThings p, .penguin .FarmTitle aside h6, .penguin .FarmSetupMain h5 {color: #ffffff;}
 .penguin .custom-control-label::before, .penguin .custom-file-label, .penguin .custom-select, .penguin .custom-select:focus {transition: none; background: url("./assets/images/arrowdown.png") right 0.75rem center/15px 10px no-repeat;border-color: #9e6915 !important; box-shadow: none;}
 .penguin .token-filter-input {border-color: #9e6915 !important;}
 .penguin .wusd-pair-select, .penguin .token-filter-input {background-color: #2d2e40 !important; color: #ffffff;}
@@ -169,16 +209,17 @@
 .penguin .BtnConnect {border: 1px solid #7474f7; color: #7474f7;}
 .penguin .BtnConnectAfter {border: 1px solid #9e6915; color: #9e6915;}
 .penguin .FooterP p {color: #adadad;}
-.penguin .FooterP p a, .penguin .disclamer a {font-weight: bold; color: #adadad !important;}
+.penguin .FooterP p a, .penguin .disclamer a, .penguin .FarmThings p a {font-weight: bold; color: #adadad !important;}
 .penguin .card {border: 1px solid #000000; color: #ffffff;}
-.penguin .StatsLink a {border: 1px solid #9e6915; color: #9e6915;text-decoration: none;}
-.penguin .StatsLink a:hover {color: #9e6915; text-decoration: none !important;}
+.penguin .StatsLink a, .penguin .FarmSetupMain h5 a {border: 1px solid #9e6915; color: #9e6915;text-decoration: none;}
+.penguin .StatsLink a:hover, .penguin .FarmSetupMain h5 a:hover {color: #9e6915; text-decoration: none !important;}
 .penguin .nav-item-selected {border-bottom: 8px solid #7474f7;}
 .penguin .health-bar {background-color: #1c1c27;}
 .penguin .SelectRegular {border-color: #9e6915; color: #9e6915;}
+.penguin .TextRegular {border-color: #9e6915; color: #9e6915;}
 .penguin .input-group-text {background-color: transparent;border-top: 1px solid #9e6915; border-right: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-left: 0px solid #9e6915; color: #ffffff;}
 .penguin .form-control, .penguin .form-control:focus {background-color: transparent;border-top: 1px solid #9e6915; border-left: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-right: 0px solid #9e6915; color: #ffffff;}
-
+.penguin .FarmContract, .penguin .FarmContractOpen, .penguin .FarmSetup {border-color: #4d4c4a;}
 
 
 .magic {background: rgb(210,208,247);background: linear-gradient(135deg, rgba(210,208,247,1) 0%, rgba(253,247,245,1) 41%);}
@@ -193,16 +234,17 @@
 .magic .form-check-label {color: #000000;}
 .magic .IndexRegular {color: #000000;}
 .magic .FooterP p {color: #636363;}
-.magic .FooterP p a, .magic .disclamer a {font-weight: bold; color: #636363 !important;}
+.magic .FooterP p a, .magic .disclamer a, .magic .FarmThings p a {font-weight: bold; color: #636363 !important;}
 .magic .card {border: 1px solid #aaaaaa; color: #000000;}
-.magic .StatsLink a {border: 1px solid #9e6915; color: #9e6915;}
-.magic .StatsLink a:hover {color: #9e6915;text-decoration: none !important;}
+.magic .StatsLink a, .magic .FarmSetupMain h5 a {border: 1px solid #9e6915; color: #9e6915;}
+.magic .StatsLink a:hover, .magic .FarmSetupMain h5 a:hover {color: #9e6915;text-decoration: none !important;}
 .magic .nav-item-selected {border-bottom: 8px solid #7474f7;}
 .magic .health-bar {background-color: #ebebeb;}
 .magic .SelectRegular {border-color: #9e6915; color: #9e6915;}
+.magic .TextRegular {border-color: #9e6915; color: #9e6915;}
 .magic .input-group-text {background-color: transparent;border-top: 1px solid #9e6915; border-right: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-left: 0px solid #9e6915; color: #000000;}
 .magic .form-control, .magic .form-control:focus {background-color: transparent;border-top: 1px solid #9e6915; border-left: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-right: 0px solid #9e6915; color: #000000;}
-
+.magic .FarmContract, .magic .FarmContractOpen, .magic .FarmSetup {border-color: #ebebeb;}
 
 
 @media only screen and (max-device-width: 750px) {

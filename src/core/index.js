@@ -15,6 +15,7 @@ export default class DFOCore {
     provider;
     voidEthereumAddress = '0x0000000000000000000000000000000000000000';
     web3;
+    itemsTokens;
 
     /**
      * constructs the DFOCore object by passing the context json object.
@@ -34,6 +35,7 @@ export default class DFOCore {
     init = async(web3, providerOptions = {}) => {
         // return if already initialized
         if (this.initialized) return;
+        this.itemsTokens = JSON.parse(await (await fetch(this.getContextElement("itemsListURL"))).text()).tokens;
         try {
             // retrieve the web3 passed in the function
             this.web3 = web3;
@@ -75,7 +77,6 @@ export default class DFOCore {
                 });
                 this.provider = provider;
             }
-            console.log(this.web3);
             // set the core as initialized
             this.initialized = true;
             window.web3 = this.web3;

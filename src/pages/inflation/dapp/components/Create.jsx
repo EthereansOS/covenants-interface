@@ -61,21 +61,23 @@ const Create = (props) => {
                         var receiversPercentages = operation.receivers.map(it => window.toDecimals(window.numberToString(it.percentage / 100), 18));
                         receiversPercentages.pop();
                         return {
-                            inputTokenAddress: operation.inputToken.address,
+                            inputTokenAddress: operation.enterInETH && operation.amm ? operation.amm.ethAddress : operation.inputToken.address,
                             inputTokenAmount: window.toDecimals(window.numberToString(operation.amount || parseFloat(operation.percentage) / 100), operation.transferType === 'percentage' ? "18" : operation.inputToken.decimals),
-                            inputTokenAmountIsPercentage: operation.amount !== '',
+                            inputTokenAmountIsPercentage: operation.percentage !== '',
                             inputTokenAmountIsByMint: operation.inputTokenMethod === 'mint',
-                            ammPlugin: operation.ammPlugin || window.voidEthereumAddress,
-                            liquidityPoolAddresses: operation.liquidityPoolAddresses || [],
-                            swapPath: operation.swapPath || [],
+                            ammPlugin: operation.amm ? operation.amm.ammContract.options.address : window.voidEthereumAddress,
+                            liquidityPoolAddresses: operation.pathTokens ? operation.pathTokens.map(it => it.address) : [],
+                            swapPath: operation.pathTokens ? operation.pathTokens.map(it => it.outputTokenAddress) : [],
                             receivers: receivers,
                             receiversPercentages: receiversPercentages,
-                            enterInETH: operation.enterInETH || false,
+                            enterInETH: (operation.enterInETH && operation.amm !== undefined && operation.amm !== null) || false,
                             exitInETH: operation.exitInETH || false
                         }
                     })
                 }
             });
+
+            console.log(JSON.stringify(elaborateEntries));
 
             var data = window.newContract(props.dfoCore.getContextElement("FixedInflationABI")).methods.init(
                 preDeployedContract || extensionAddress,
@@ -111,7 +113,7 @@ const Create = (props) => {
                             <select className="custom-select wusd-pair-select" value={extensionType} onChange={onExtensionType}>
                                 <option value="wallet">Wallet</option>
                                 <option value="deployedContract">Deployed Contract</option>
-                                <option value="fromSourceCode">From Source Code</option>
+                                {/*<option value="fromSourceCode">From Source Code</option>*/}
                             </select>
                         </div>
                         {(extensionType === 'wallet' || extensionType === 'deployedContract') && <div className="row">

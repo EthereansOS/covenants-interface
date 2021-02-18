@@ -13,8 +13,7 @@ const Transactions = (props) => {
                 }, 8000);
 
                 return <div key={transaction.transactionHash} className="success">
-                    <p>Lorem ipsum</p>
-                    <a href={`${etherscanURL}tx/${transaction.transactionHash}`} rel="noopener noreferrer" target="blank" className="link">View on Etherscan</a>
+                    <p>Transaction Done! | <a href={`${etherscanURL}tx/${transaction.transactionHash}`} rel="noopener noreferrer" target="blank" className="link">View on Etherscan</a></p>
                     <a onClick={() => props.removeTransaction(index)} className="close">X</a>
                 </div>
             })

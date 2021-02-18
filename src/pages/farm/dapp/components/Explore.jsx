@@ -65,21 +65,17 @@ const Explore = (props) => {
     }
 
     return (
-        <div className="explore-component">
-            <div className="row mb-4">
-                <div className="col-12 col-md-6 mb-4 mb-md-0">
-                    <select className="custom-select wusd-pair-select">
+        <div className="MainExploration">
+            {/*<div className="SortSection">
+                    <select className="SelectRegular">
                         <option value="">Sort by..</option>
                         <option value="1">One</option>
                         <option value="2">Two</option>
                         <option value="3">Three</option>
                     </select>
-                </div>
-                <div className="col-12 col-md-6 mb-4 mb-md-0">
-                    <input type="text" className="form-control token-filter-input" placeholder="Reward token address.." value={tokenFilter} onChange={(e) => onChangeTokenFilter(e.target.value)} />
-                </div>
-            </div>
-            <div className="row">
+                    <input type="text" className="TextRegular" placeholder="Token Address.." value={tokenFilter} onChange={(e) => onChangeTokenFilter(e.target.value)} />
+            </div> */}
+            <div className="ListOfThings">
                 {
                     farmingContracts.length === 0 && <div className="col-12 text-left">
                         <h6><b>No farming contract available!</b></h6>
@@ -88,7 +84,7 @@ const Explore = (props) => {
                 {
                     farmingContracts.length > 0 && farmingContracts.map((farmingContract) => {
                         return (
-                            <FarmingComponent className="col-12 mb-4" dfoCore={props.dfoCore} contract={farmingContract} hasBorder />
+                            <FarmingComponent className="FarmContract" dfoCore={props.dfoCore} contract={farmingContract} hasBorder />
                         )
                     })
                 }

@@ -8,7 +8,6 @@ const PageContainer = (props) => {
                     <div className="IndexRegularText">
                         { props.title ? <h3><b>{props.title}</b></h3> : '' }
                         { props.text ? <p>{props.text}</p> : props.children } 
-                        <iframe src="https://www.youtube.com/embed/TN7I4f5za8g?controls=0" allow="autoplay; encrypted-media"></iframe>
                     </div>
                     { props.image ? 
                         <div className="IndexRegularImg">

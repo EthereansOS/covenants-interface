@@ -322,23 +322,21 @@ const SetupComponent = (props) => {
     const getButton = () => {
         return <>
             {
-                (isHost && extensionContract && !edit) && <div className="col-md-6 col-12">
-                    <button className="btn btn-primary" onClick={() => { setOpen(false); setEdit(true) }}>Edit</button>
-                </div>
+                (isHost && extensionContract && !edit) && 
+                    <a className="web2ActionBTN" onClick={() => { setOpen(false); setEdit(true) }}>Edit</a>
             }
             {
-                (open || edit) && <div className="col-md-6 col-12">
-                    <button className="btn btn-secondary" onClick={() => { setOpen(false); setEdit(false) }}>Close</button>
-                </div>
+                (open || edit) && 
+                    <a className="backActionBTN" onClick={() => { setOpen(false); setEdit(false) }}>Close</a>
             }
             {
-                (parseInt(setup.startBlock) > 0 && blockNumber < parseInt(setup.startBlock)) ? <div className="col-md-6 col-12">
-                    <button className="btn btn-secondary" disabled={true}>{setup.startBlock}</button>
-                </div> :(manage && currentPosition && !open) ? <div className="col-md-6 col-12">
-                    <button className="btn btn-secondary" onClick={() => { setOpen(true); setEdit(false); setStatus('manage') }}>Manage</button>
-                </div> : (setup.rewardPerBlock > 0 && !open && (setup.free || parseInt(setup.startBlock) >= blockNumber)) ? <div className="col-md-6 col-12">
-                    <button className="btn btn-secondary" onClick={() => { setOpen(true); setEdit(false); setStatus('manage') }}>Farm</button>
-                </div> : <div/>
+                (parseInt(setup.startBlock) > 0 && blockNumber < parseInt(setup.startBlock)) ? 
+                    <a className="web2ActionBTN" disabled={true}>{setup.startBlock}</a>
+                    :(manage && currentPosition && !open) ? 
+                    <a className="web2ActionBTN" onClick={() => { setOpen(true); setEdit(false); setStatus('manage') }}>Manage</a>
+                    : (setup.rewardPerBlock > 0 && !open && (setup.free || parseInt(setup.startBlock) >= blockNumber)) ? 
+                    <a className="web2ActionBTN" onClick={() => { setOpen(true); setEdit(false); setStatus('manage') }}>Farm</a>
+                     : <div/>
         }
         </>
     }
@@ -629,8 +627,6 @@ const SetupComponent = (props) => {
 
     return (
         <div className={className}>
-            <div className={`card farming-card`}>
-                <div className="card-body">
                     {
                         loading ? <div className="row px-2 farming-component-main-row">
                             <div className="col-12 justify-content-center">
@@ -639,44 +635,41 @@ const SetupComponent = (props) => {
                                 </div>
                             </div>
                         </div> : <>
-                        <div className="row px-2 farming-component-main-row">
-                            <div className="col-12 col-md-7 setup-component-main-col">
-                                <div className="row mb-4">
-                                    <h5><b>{setup.free ? "Free farming" : "Locked farming"} {(!setup.free && parseInt(setup.endBlock) <= blockNumber) && <span className="text-danger">(ended)</span>}</b></h5>
-                                </div>
+                        <div className="FarmSetupMain">
+                                <h5><b>{setup.free ? "Free Farming" : "Locked Farming"} {(!setup.free && parseInt(setup.endBlock) <= blockNumber) && <span>(ended)</span>}</b> <a>{AMM.name}</a></h5>
+                                <aside>
+                                        {/* @todo - Setup Reward Token Symbol don't work*/}
+                                        <p><b>block end</b>: {setup.endBlock}</p>
+                                        <p><b>Min to Stake</b>: 20 Buidl</p>
+                                </aside>
                                 {
                                     setup.free ? <>
-                                        <div className="row mb-4">
-                                            {setupTokens.map((token, i) => <span key={token.address}>{i !== 0 ? '+ ' : ''}<Coin address={token.address} className="mr-2 mb-1" /> </span>)} = {dfoCore.toDecimals(setup.rewardPerBlock).substring(0, 6)} <Coin address={rewardTokenInfo?.address} className="mx-2" />/block
+                                        <div className="SetupFarmingInstructions">
+                                            {/* @todo - Insert  APY Calc*/}
+                                            <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}<Coin address={token.address} /> </figure>)} = <b>APY</b>: 3% <span>(Unstable)</span></p>
                                         </div>
-                                        <div className="row">
-                                            <p className="mb-0 setup-component-small-p"><b>Shared reward</b>: {AMM.name}</p>
-                                        </div> 
                                     </> : <>
-                                        <div className="row mb-4">
-                                            {props.dfoCore.toDecimals(setup.rewardPerBlock)} <Coin address={setup.rewardTokenAddress} className="ml-2" />/block = {setupTokens.map((token, i) => <span key={token.address}>{i !== 0 ? '+' : ''}<Coin address={token.address} className="mx-2 mb-1" /></span>)}
-                                        </div>
-                                        <div className="row">
-                                            <p className="mb-0 setup-component-small-p text-left"><b>Fixed reward</b>: {AMM.name} - <span className="text-underline">block end: {setup.endBlock}</span></p>
-                                        </div> 
+                                        <div className="SetupFarmingInstructions">
+                                            {/* @todo - Insert  APY Calc*/}
+                                            <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+' : ''}<Coin address={token.address} /></figure>)} = <b>APY</b>: 3%</p>                 
+                                            </div>
+                                    </>
+                                }
+                            <div className="SetupFarmingOthers">
+                            {
+                                    setup.free ? <>
+                                        <p><b>Reward/Block</b>: {props.dfoCore.toDecimals(setup.rewardPerBlock)} {setup.rewardToken} <span>(Shared)</span></p>
+                                    </> : <>
+                                        {/* @todo - Insert  Reward for main token staked and Available to stake*/}
+                                        {/* @todo - Setup Reward Token Symbol don't work*/}
+                                        <p><b>Max Stakable</b>: {dfoCore.toDecimals(setup.rewardPerBlock)} {setup.rewardToken}</p> 
+                                        <p><b>Available</b>: {dfoCore.toDecimals((parseInt(setup.rewardPerBlock) - parseInt(setup.currentRewardPerBlock)).toString())} {setup.rewardToken}</p>
+                                        <p><b>1 Buidl Staked</b> = 0.00005 UniFi/Block</p>
                                     </>
                                 }
                             </div>
-                            <div className="col-12 col-md-5 setup-component-main-col align-items-end">
-                                <div className="row mb-4">
-                                    <div className="col-12">
-                                        <p className="mb-0 setup-component-small-p"><b>liquidity</b>: {setupTokens.map((token, i) => <span>{dfoCore.toDecimals(dfoCore.toFixed(dfoCore.normalizeValue(token.liquidity, token.decimals)).toString())} <Coin address={token.address} height={18} />{i !== setupTokens.length - 1 ? '+ ' : ''}</span> ) }</p>
-                                    </div>
-                                    {
-                                        !setup.free && 
-                                        <div className="col-12 mt-2">
-                                            <p className="mb-0 setup-component-small-p"><b>reward/block</b>: {dfoCore.toDecimals(setup.rewardPerBlock)} <Coin address={setup.rewardTokenAddress} height={18} /> - <span className="text-secondary"><b>available:</b> {dfoCore.toDecimals((parseInt(setup.rewardPerBlock) - parseInt(setup.currentRewardPerBlock)).toString())} <Coin address={setup.rewardTokenAddress} height={18} /></span></p>
-                                        </div>
-                                    }
-                                </div>
-                                <div className="row mt-4">
+                            <div className="SetupFarmingBotton">
                                     { getButton() }
-                                </div>
                             </div>
                         </div>
                         {
@@ -688,8 +681,6 @@ const SetupComponent = (props) => {
                         </>
                     }
                     
-                </div>
-            </div>
         </div>
     )
 }

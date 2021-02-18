@@ -35,28 +35,39 @@ const ExploreInflationContract = (props) => {
                 return copy;
             });
             for (var operation of operations) {
-                var tokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("ERC20ABI"), operation.inputTokenAddress);
-                operation.inputToken = {
-                    contract: tokenContract,
-                    symbol: await tokenContract.methods.symbol().call(),
-                    decimals: await tokenContract.methods.decimals().call(),
-                    address: operation.inputTokenAddress
-                }
-                for (var swapToken of operation.swapPath) {
-                    var tokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("ERC20ABI"), swapToken);
-                    (operation.swapTokens = operation.swapTokens || []).push({
-                        contract: tokenContract,
-                        symbol: await tokenContract.methods.symbol().call(),
-                        decimals: await tokenContract.methods.decimals().call(),
-                        address: operation.inputTokenAddress
-                    });
-                }
                 if (operation.ammPlugin !== window.voidEthereumAddress) {
                     var ammContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("AMMABI"), operation.ammPlugin);
                     operation.amm = {
                         contract: ammContract,
-                        info: await ammContract.methods.info().call()
+                        info: await ammContract.methods.info().call(),
+                        data : await ammContract.methods.data().call()
                     }
+                }
+                var inputTokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("ERC20ABI"), operation.inputTokenAddress);
+                operation.inputToken = {
+                    contract: inputTokenContract,
+                    symbol: operation.amm && operation.enterInETH && operation.inputTokenAddress === operation.amm.data[0] ? "ETH" : await inputTokenContract.methods.symbol().call(),
+                    decimals: operation.amm && operation.enterInETH && operation.inputTokenAddress === operation.amm.data[0] ? "18" : await inputTokenContract.methods.decimals().call(),
+                    address: operation.amm && operation.enterInETH && operation.inputTokenAddress === operation.amm.data[0] ? window.voidEthereumAddress : operation.inputTokenAddress
+                }
+                for (var swapTokenIndex in operation.swapPath) {
+                    var swapToken = operation.swapPath[swapTokenIndex = parseInt(swapTokenIndex)];
+                    var tokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("ERC20ABI"), swapToken);
+                    var data = {
+                        contract: tokenContract,
+                        symbol: await tokenContract.methods.symbol().call(),
+                        decimals: await tokenContract.methods.decimals().call(),
+                        address: swapToken
+                    };
+                    if(operation.amm && operation.exitInETH && swapTokenIndex === operation.swapPath.length - 1) {
+                        data = {
+                            contract: tokenContract,
+                            symbol: swapToken === operation.amm.data[0] ? "ETH" : await tokenContract.methods.symbol().call(),
+                            decimals: swapToken === operation.amm.data[0] ? "18" : await tokenContract.methods.decimals().call(),
+                            address: swapToken === operation.amm.data[0] ? window.voidEthereumAddress : swapToken
+                        }
+                    }
+                    (operation.swapTokens = operation.swapTokens || []).push(data);
                 }
             }
             const period = Object.entries(dfoCore.getContextElement("blockIntervals")).filter(([key, value]) => value === entry.blockInterval);
