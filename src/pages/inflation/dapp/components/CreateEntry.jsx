@@ -152,14 +152,14 @@ const CreateEntry = (props) => {
                 <button onClick={() => setActionType(actionType !== 'swap' ? 'swap' : "")} className={`btn ${actionType === 'swap' ? "btn-secondary" : "btn-outline-secondary"}`}>Swap</button>
             </div>
             <div className="row mb-4">
-                <p style={{fontSize: 14}}>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quaerat animi ipsam nemo at nobis odit temporibus autem possimus quae vel, ratione numquam modi rem accusamus, veniam neque voluptates necessitatibus enim!</p>
+                <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quaerat animi ipsam nemo at nobis odit temporibus autem possimus quae vel, ratione numquam modi rem accusamus, veniam neque voluptates necessitatibus enim!</p>
             </div>
-            <div className="row justify-content-center">
-                <button onClick={() => {
+            <div className="Web2ActionsBTNs">
+                <a onClick={() => {
                     setActionType("");
                     onCancel();
-                }} className="btn btn-light mr-4">Cancel</button>
-                <button onClick={() => setStep(1)} disabled={!actionType} className="btn btn-primary">Next</button>
+                }} className="backActionBTN">Cancel</a>
+                <a onClick={() => setStep(1)} disabled={!actionType} className="web2ActionBTN">Next</a>
             </div>
         </div>
     }

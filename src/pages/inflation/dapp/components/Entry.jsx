@@ -107,24 +107,21 @@ const Entry = (props) => {
         }],
         [function () {
             return <>
-                <div className="row">
-                    <div className="col-5">
-                        <h6 className="text-secondary"><b>Operations:</b></h6>
-                    </div>
-
+                <div className="CreateList">
+                    <h6 className="text-secondary"><b>Operations:</b></h6>
                 </div>
-                {operations.length === 0 && <span>No operations</span>}
-                {editingOperation === null && operations.map((entryOperation, entryOperationIndex) => <div key={entryOperationIndex} className="row align-items-center text-left mb-md-2 mb-4">
+                {operations.length === 0 && <div className="CreateList"><p>No operations</p></div>}
+                {editingOperation === null && operations.map((entryOperation, entryOperationIndex) => <div key={entryOperationIndex} className="CreateList">
                     <div className="col-md-9 col-12">
-                        <b style={{ fontSize: 14 }}>{entryOperation.actionType} {entryOperation.amount !== 0 ? entryOperation.amount : `${entryOperation.percentage}%`} {entryOperation.inputToken.symbol} to {entryOperation.receivers.length} wallet(s)</b>
+                        <b>{entryOperation.actionType} {entryOperation.amount !== 0 ? entryOperation.amount : `${entryOperation.percentage}%`} {entryOperation.inputToken.symbol} to {entryOperation.receivers.length} wallet(s)</b>
                     </div>
                     <div className="col-md-3 col-12 flex">
                         <button className="btn btn-sm btn-danger ml-1" onClick={() => editOrAddEntryOperation(entryOperationIndex)}><b>EDIT</b></button>
                         <button className="btn btn-sm btn-outline-danger mr-1" onClick={() => removeEntryOperation(entryOperationIndex)}><b>X</b></button>
                     </div>
                 </div>)}
-                <div className="col-3">
-                        <button onClick={editOrAddEntryOperation} className="btn btn-outline-secondary">Add</button>
+                <div className="Web2ActionsBTNs">
+                        <a onClick={editOrAddEntryOperation} className="web2ActionBTN">+</a>
                 </div>
             </>
         },

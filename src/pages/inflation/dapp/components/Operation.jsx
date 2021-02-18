@@ -184,53 +184,36 @@ const Operation = (props) => {
     }
 
     const getFirstStep = () => {
-        return <div className="col-12">
-            <div className="row flex-column align-items-start mb-4">
-                <h6 className="text-secondary"><b>Inflation Entry Operation</b></h6>
-            </div>
-            <div className="row justify-content-center mb-4">
-                <h6><b>Select action type</b></h6>
-            </div>
-            <div className="row justify-content-center mb-4">
-                <button onClick={() => setActionType(actionType !== 'transfer' ? 'transfer' : "")} className={`btn ${actionType === 'transfer' ? "btn-secondary" : "btn-outline-secondary"} mr-4`}>Transfer</button>
-                <button onClick={() => setActionType(actionType !== 'swap' ? 'swap' : "")} className={`btn ${actionType === 'swap' ? "btn-secondary" : "btn-outline-secondary"}`}>Swap</button>
-            </div>
+        return <div className="InputForm">
+                <h6><b>Add new Operation by:</b></h6>
+            <select className="SelectRegular">
+                <option onChange={() => setActionType(actionType !== 'transfer' ? 'transfer' : "")}>Transfer</option>
+                <option onChange={() => setActionType(actionType !== 'swap' ? 'swap' : "")}>Swap</option>
+            </select>
             <div className="row mb-4">
-                <p style={{ fontSize: 14 }}>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quaerat animi ipsam nemo at nobis odit temporibus autem possimus quae vel, ratione numquam modi rem accusamus, veniam neque voluptates necessitatibus enim!</p>
+                <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quaerat animi ipsam nemo at nobis odit temporibus autem possimus quae vel, ratione numquam modi rem accusamus, veniam neque voluptates necessitatibus enim!</p>
             </div>
-            <div className="row justify-content-center">
-                <button onClick={() => {
+            <div className="Web2ActionsBTNs">
+                <a onClick={() => {
                     setActionType("");
                     props.cancelEditOperation();
-                }} className="btn btn-light mr-4">Cancel</button>
-                <button onClick={() => setStep(1)} disabled={!actionType} className="btn btn-primary">Next</button>
+                }} className="backActionBTN">Cancel</a>
+                <a onClick={() => setStep(1)} disabled={!actionType} className="web2ActionBTN">Next</a>
             </div>
         </div>
     }
 
     const getSecondStep = () => {
-        return <div className="col-12 flex flex-column align-items-center">
-            <div className="row">
-                <div className="col-12">
-                    <label>
-                        <input name="enterInETH" type="radio" value="true" onChange={changeEnterInETH} checked={enterInETH} />
-                        Ethereum
-                    </label>
-                    <label>
-                        <input name="enterInETH" type="radio" value="false" onChange={changeEnterInETH} checked={!enterInETH} />
-                        Token
-                    </label>
-                </div>
-            </div>
-            {!enterInETH && <div className="row">
-                <TokenInput tokenAddress={inputToken ? inputToken.address : ''} label={"Input token"} placeholder={"Input token address"} width={60} onClick={(address) => onSelectInputToken(address)} text={"Load"} />
-            </div>}
-            {
-                !inputToken &&
-                <div className="row mb-4">
-                    <p style={{ fontSize: 12 }}>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quaerat animi ipsam nemo at nobis odit temporibus autem possimus quae vel, ratione numquam modi rem accusamus, veniam neque voluptates necessitatibus enim!</p>
-                </div>
-            }
+        return <div className="InputForm">
+                    <select className="SelectRegular">
+                        <option value="false" onChange={changeEnterInETH}>Token or Item</option>
+                        <option value="true" onChange={changeEnterInETH}>Ethereum</option>
+                    </select>
+                            
+                    {!enterInETH && <div className="CreateList">
+                        <TokenInput placeholder={"Token address"} tokenAddress={inputToken ? inputToken.address : ''} label={"Input token"} placeholder={"Input token address"} width={60} onClick={(address) => onSelectInputToken(address)} text={"Load"} />
+                    </div>}
+           
             {
                 loading ? <div className="row justify-content-center">
                     <div className="spinner-border text-secondary" role="status">
@@ -243,21 +226,17 @@ const Operation = (props) => {
                             </div>
                             }
                         </div>
-                        <div className="row w-50 mb-4">
-                            <select value={inputTokenMethod} onChange={(e) => setInputTokenMethod(e.target.value)} className="custom-select wusd-pair-select">
+                            <select value={inputTokenMethod} onChange={(e) => setInputTokenMethod(e.target.value)} className="SelectRegular">
                                 <option value="">Select method</option>
                                 {!enterInETH && <option value="mint">By mint</option>}
                                 <option value="reserve">By reserve</option>
                             </select>
-                        </div>
-                        <div className="row mb-4">
-                            <p style={{ fontSize: 12 }}>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quaerat animi ipsam nemo at nobis odit temporibus autem possimus quae vel, ratione numquam modi rem accusamus, veniam neque voluptates necessitatibus enim!</p>
-                        </div>
+                            <p>Selecting "by reserve", the input token of this operation will be received via tranfer, instead by selecting "by Mint" the input token will be minted. The logic of this action MUST be carefully coded into the Extension! more info: <a>Documentation</a></p>
                     </>
             }
-            <div className="row justify-content-center">
-                <button onClick={() => setStep(step - 1)} className="btn btn-light mr-4">Back</button>
-                <button onClick={() => setStep(2)} disabled={!inputToken || !inputTokenMethod} className="btn btn-secondary">Next</button>
+            <div className="Web2ActionsBTNs">
+                <a onClick={() => setStep(step - 1)} className="backActionBTN">Back</a>
+                <a onClick={() => setStep(2)} disabled={!inputToken || !inputTokenMethod} className="web2ActionBTN">Next</a>
             </div>
         </div>
     }
