@@ -43,26 +43,23 @@ const Explore = (props) => {
     }
 
     return loading ? <Loading/> : (
-        <div className="explore-component">
-            <div className="row mb-4 align-items-center">
-                <div className="col-12 col-md-6 mb-4 mb-md-0">
-                    <select className="custom-select wusd-pair-select">
+        
+        <div className="MainExploration">
+            {/*<div className="SortSection">
+                    <select className="SelectRegular">
                         <option value="">Sort by..</option>
                         <option value="1">One</option>
                         <option value="2">Two</option>
                         <option value="3">Three</option>
                     </select>
-                </div>
-                <div className="col-12 col-md-6 mb-4 mb-md-0">
                     <div className="form-check my-4">
                         <input className="form-check-input" type="checkbox" value={executable} onChange={(e) => setExecutable(e.target.checked)} id="setExecutable" />
                         <label className="form-check-label" htmlFor="setExecutable">
                             Executable
                         </label>
                     </div>
-                </div>
-            </div>
-            <div className="row">
+            </div> */}
+            <div className="ListOfThings">
                 {
                     fixedInflationContracts.length === 0 && <div className="col-12 text-left">
                         <h6><b>No fixed inflation contracts!</b></h6>
@@ -71,7 +68,7 @@ const Explore = (props) => {
                 {
                     fixedInflationContracts.map(({ contract, entry, operations }, i) => {
                         return (
-                            <FixedInflationComponent key={entry.name + "_" + i} className={"col-12 mb-4"} contract={contract} entry={entry} operations={operations} showButton={true} hasBorder={true} />
+                            <FixedInflationComponent key={entry.name + "_" + i} className={"InflationContract"} contract={contract} entry={entry} operations={operations} showButton={true} hasBorder={true} />
                         )
                     })
                 }

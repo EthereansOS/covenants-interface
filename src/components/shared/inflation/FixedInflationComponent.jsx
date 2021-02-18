@@ -65,38 +65,27 @@ const FixedInflationComponent = (props) => {
 
     return (
         <div className={className}>
-            <div className={`card farming-card ${!hasBorder ? "no-border" : ""}`}>
-                <div className="card-body">
-                    <div className="row px-2 fixed-inflation-main-row">
-                        {
-                            metadata ? <>
-                            <div className="col-12 col-md-6 flex flex-column justify-content-center">
-                                <div className="row mb-2">
-                                    <h4 className="mr-4"><b>{metadata.name}</b></h4>
-                                </div>
-                                <div className="row">
-                                    {metadata.executorReward !== 0 && <><b style={{fontSize: 14}} className="text-secondary mr-1">Executor reward: {window.formatMoney(metadata.executorReward)}% </b> <b style={{fontSize: 14, marginBottom: 4}}>for {metadata.operations.length} operations</b></>}
-                                    {metadata.executorReward === 0 && <b style={{fontSize: 14, marginBottom: 4}}>{metadata.operations.length} operations</b>}
-                                </div>
-                            </div>
-                            <div className="col-12 col-md-6">
-                                <div className="row flex-column align-items-end">
-                                    <p className="fixed-inflation-paragraph"><b>Extension</b>: <a href={`${props.dfoCore.getContextElement('etherscanURL')}address/${metadata.extension}`} target="_blank">{window.shortenWord(metadata.extension, 16)}</a></p>
-                                    <p className="fixed-inflation-paragraph"><b>Contract</b>: <a href={`${props.dfoCore.getContextElement('etherscanURL')}address/${metadata.contract}`} target="_blank">{window.shortenWord(metadata.contractAddress, 16)}</a></p>
-                                    { !showButton ? <div/> : <Link to={`/inflation/dapp/${metadata.contractAddress}/${metadata.entry.id}`} className="btn btn-secondary btn-sm">Open</Link>}
-                                    {false && showButton && metadata.executable && !executing && <button className="btn btn-secondary btn-sm" onClick={execute}>Execute</button>}
-                                    {false && executing && <Loading/>}
-                                </div>
-                            </div>
-                            </> : <div className="col-12 justify-content-center">
-                                <div className="spinner-border text-secondary" role="status">
-                                    <span className="visually-hidden"></span>
-                                </div>
-                            </div>
-                        }
+            {
+                metadata ? <>
+                    <h4>{metadata.name}</h4>
+                    {/* @todoM Etherscan Links don't work */}
+                    <div className="InflationContractLinks">
+                        <a href={`${props.dfoCore.getContextElement('etherscanURL')}address/${metadata.extension}`} target="_blank">Host</a>
+                        <a href={`${props.dfoCore.getContextElement('etherscanURL')}address/${metadata.contract}`} target="_blank">Contract</a>
+                    </div>
+                        {metadata.executorReward !== 0 && <p>{window.formatMoney(metadata.executorReward)}% Reward to execute {metadata.operations.length} operations</p>}
+                        {metadata.executorReward === 0 && <p>{metadata.operations.length} Operations</p>}
+                    <div className="InflationContractButton">
+                        { !showButton ? <div/> : <Link to={`/inflation/dapp/${metadata.contractAddress}/${metadata.entry.id}`} className="web2ActionBTN">Open</Link>}
+                        {false && showButton && metadata.executable && !executing && <a className="Web3ActionBTN" onClick={execute}>Execute</a>}
+                        {false && executing && <Loading/>}
+                    </div>
+                </> : <div className="col-12 justify-content-center">
+                    <div className="spinner-border text-secondary" role="status">
+                        <span className="visually-hidden"></span>
                     </div>
                 </div>
-            </div>
+            }
         </div>
     )
 }

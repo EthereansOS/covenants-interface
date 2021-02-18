@@ -115,87 +115,67 @@ const ExploreInflationContract = (props) => {
         error && alert(error.message);
     }
 
-    return !metadata ? <Loading /> : <div className="explore-inflation-component">
-        <div className="row mb-4 align-items-center">
-            <div className="col-12">
-                <h6>{metadata.entry.name}</h6>
-            </div>
-        </div>
-        {metadata.executorReward !== "0%" && <div className="row">
-            <div className="col-12">
-                <b style={{ fontSize: 14 }} className="text-secondary mr-1">Executor reward: {window.formatMoney(metadata.executorReward)}% </b>
-            </div>
-        </div>}
-        <div className="row mb-4 align-items-center">
-            <div className="col-12">
-                <h6>{metadata.operations.length} operations:</h6>
-            </div>
+    return !metadata ? <Loading /> : <div className="InflationContractAll">
+        <div className="InflationContractOpen">
+                <h3>{metadata.entry.name}</h3>
+                <div className="InflationContractOpenBack">
+                    <a className="backActionBTN">Back</a>
+                </div>
         </div>
         {metadata.operations.map((operation, i) => {
             var amount = window.fromDecimals(operation.inputTokenAmount, operation.inputTokenAmountIsPercentage ? "18" : operation.inputToken.decimals, true);
             amount = !operation.inputTokenAmountIsPercentage ? amount : (parseFloat(amount) * 100);
             return <Fragment key={i}>
-                <div className="row mb-4">
-                    <div className="col-12">
-                        {(i + 1)})
-                        {"\u00a0"}
-                        {operation.inputTokenAmountIsByMint ? "Mint" : "Transfer"}
-                        {"\u00a0"}
-                        {window.formatMoney(amount)}
-                        {operation.inputTokenAmountIsPercentage ? "\u00a0% of " : ""}
-                        {"\u00a0"}
-                        {operation.inputToken.symbol}
-                        <Coin address={operation.inputToken.address} className="ml-2" />
-                        {operation.inputTokenAmountIsPercentage ? "\u00a0Supply" : ""}
+                    <div className="TokenOperation">
+                        <h6>Operation {(i + 1)}</h6>
+                        <div className="TokenOperationLinks">
+                        {/* @todoM AMM Print a magical 1 */}
+                        {operation.ammPlugin !== window.voidEthereumAddress && 
+                        <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${operation.ammPlugin}`}>{operation.amm.info[0]} {operation.amm.info[1]}</a>
+                        }
+                        {operation.receivers.map((it, i) => {
+                            var percentage = i === operation.receiversPercentages.length ? metadata.oneHundred : operation.receiversPercentages[i];
+                            if (i === operation.receiversPercentages.length) {
+                                for (var perc of operation.receiversPercentages) {
+                                    percentage = window.web3.utils.toBN(percentage).sub(window.web3.utils.toBN(perc)).toString();
+                                }
+                            }
+                            return <Fragment key={it}>
+                                <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${it}`}>
+                                {window.formatMoney(parseFloat(window.fromDecimals(percentage, 18, true)) * 100)}% Receiver</a>
+                            </Fragment>
+                        })}
+                        <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${metadata.extension}`}>Sender</a>
+                        </div>
+                        <p><b>{operation.inputTokenAmountIsByMint ? "Mint " : "Transfer "}</b> {window.formatMoney(amount)} {operation.inputTokenAmountIsPercentage ? "% of " : " "} {operation.inputToken.symbol} <Coin address={operation.inputToken.address}/> {operation.inputTokenAmountIsPercentage ? " Supply " : ""}
                         {operation.ammPlugin !== window.voidEthereumAddress && <>
-                            {"\u00a0"}
-                            and swap for
+                            and <b>swap</b><span> > </span>
                             {operation.swapTokens.map((swapToken, i) => <>
                                 {swapToken.symbol}
-                                <Coin address={swapToken.address} className="ml-2" />
-                                {i !== operation.swapTokens.length - 1 && "\u00a0>\u00a0"}
+                                <Coin address={swapToken.address}/>
+                                {i !== operation.swapTokens.length - 1 && " > "}
                             </>)}
-                        </>}
+                        </>}</p>
                     </div>
-                </div>
-                <div className="row mb-4">
-                    <div className="col-4">
-                        Sender: <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${metadata.extension}`}>{window.shortenWord(metadata.extension, 8)}</a>
-                    </div>
-                    <div className="col-4">
-                        Receiver:
-                        {operation.receivers.map((it, i) => {
-                        var percentage = i === operation.receiversPercentages.length ? metadata.oneHundred : operation.receiversPercentages[i];
-                        if (i === operation.receiversPercentages.length) {
-                            for (var perc of operation.receiversPercentages) {
-                                percentage = window.web3.utils.toBN(percentage).sub(window.web3.utils.toBN(perc)).toString();
-                            }
-                        }
-                        return <Fragment key={it}>
-                            {"\u00a0"}
-                            <span>{window.formatMoney(parseFloat(window.fromDecimals(percentage, 18, true)) * 100)}%</span>
-                            {"\u00a0"}
-                            <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${it}`}>{window.shortenWord(it, 8)}</a>
-                        </Fragment>
-                    })}
-                    </div>
-                    {operation.ammPlugin !== window.voidEthereumAddress && <div className="col-2">
-                        AMM: <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${operation.ammPlugin}`}>{operation.amm.info[0]} {operation.amm.info[1]}</a>
-                    </div>}
-                </div>
-            </Fragment>
+                    {/* @todoM Weird parentesi error */}
+                    </Fragment>
         })}
-        <div className="row mb-4 align-items-center">
-            <div className="col-12">
-                {metadata.executable && <label>
+        <div className="TokenOperationExecute">
+            {metadata.executorReward !== "0%" && 
+            <h5> {window.formatMoney(metadata.executorReward)}% reward by</h5>}
+            <select className="SelectRegular">
+                <option>Input</option>
+                <option>Output</option>
+            </select>
+            {/* @todoM Selector not input (users don't uderstand anything) */}
+               {/* {metadata.executable && <label>
                     Earn by input
                     <input type="checkbox" onChange={e => setEarnByInput(e.currentTarget.checked)} />
-                </label>}
-                {metadata.executable && !executing && <button className="btn btn-secondary btn-sm" onClick={execute}>Execute</button>}
-                {executing && <Loading />}
+                </label>}*/}
             </div>
-        </div>
-    </div>;
+            {metadata.executable && !executing && <a className="Web3ActionBTN" onClick={execute}>Execute</a>}
+            {executing && <Loading />}
+        </div>;
 }
 
 const mapStateToProps = (state) => {

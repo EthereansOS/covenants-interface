@@ -58,7 +58,6 @@ const Dapp = (props) => {
             <div className="row" style={{flexDirection: 'column'}}>
                 <div className="col-12 dapp-col text-center">
                     <DappMenu className="wusd-dapp-menu" onClick={(name) => setTab(name)} currentTab={currentTab} options={['Explore', 'Positions', 'Hosted', 'Create']} />
-                        <div className="p-2">
                             <Switch>
                                 <Route path="/farm/dapp/:address">
                                     <ExploreFarmingContract />
@@ -67,7 +66,6 @@ const Dapp = (props) => {
                                     { getContent() }
                                 </Route>
                             </Switch>
-                        </div>
                     </div>
             </div>
             <div className="FooterP">
