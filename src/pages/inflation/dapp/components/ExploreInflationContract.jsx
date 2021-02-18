@@ -4,6 +4,7 @@ import { FixedInflationComponent } from '../../../../components';
 import { useLocation } from "react-router-dom";
 import Loading from '../../../../components/shared/Loading';
 import { Coin } from '../../../../components/shared';
+import { Link } from 'react-router-dom';
 
 const ExploreInflationContract = (props) => {
 
@@ -119,7 +120,7 @@ const ExploreInflationContract = (props) => {
         <div className="InflationContractOpen">
             <h3>{metadata.entry.name}</h3>
             <div className="InflationContractOpenBack">
-                <a className="backActionBTN">Back</a>
+                <Link to={`/inflation/dapp`} className="backActionBTN">Back</Link>
             </div>
         </div>
         {metadata.operations.map((operation, i) => {
