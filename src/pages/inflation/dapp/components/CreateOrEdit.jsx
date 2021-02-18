@@ -76,15 +76,11 @@ const CreateOrEdit = (props) => {
         return (
             editingEntry !== null ? <Entry entry={copy(entries[editingEntry])} cancelEditEntry={cancelEditEntry} saveEntry={saveEntry} />
                 : <>
-                    <div className="row">
-                        <div className="col-5">
-                            <h6 className="text-secondary"><b>Entries:</b></h6>
+                    {entries.length === 0 && <div className="row">
+                        <div className="col-12">
+                            <button onClick={editOrAddEntry} className="btn btn-outline-secondary">Create Entry</button>
                         </div>
-                        <div className="col-3">
-                            <button onClick={editOrAddEntry} className="btn btn-outline-secondary">Add</button>
-                        </div>
-                    </div>
-                    {entries.length === 0 && <span>No entries</span>}
+                    </div>}
                     {entries.map((entry, entryIndex) => <div key={entry.name} className="row">
                         <div className="col-8">
                             <p><b>{entry.name}</b> ({entry.operations.length} operations)</p>

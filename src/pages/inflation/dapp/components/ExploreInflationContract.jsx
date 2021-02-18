@@ -40,7 +40,7 @@ const ExploreInflationContract = (props) => {
                     operation.amm = {
                         contract: ammContract,
                         info: await ammContract.methods.info().call(),
-                        data : await ammContract.methods.data().call()
+                        data: await ammContract.methods.data().call()
                     }
                 }
                 var inputTokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("ERC20ABI"), operation.inputTokenAddress);
@@ -59,7 +59,7 @@ const ExploreInflationContract = (props) => {
                         decimals: await tokenContract.methods.decimals().call(),
                         address: swapToken
                     };
-                    if(operation.amm && operation.exitInETH && swapTokenIndex === operation.swapPath.length - 1) {
+                    if (operation.amm && operation.exitInETH && swapTokenIndex === operation.swapPath.length - 1) {
                         data = {
                             contract: tokenContract,
                             symbol: swapToken === operation.amm.data[0] ? "ETH" : await tokenContract.methods.symbol().call(),
@@ -79,7 +79,7 @@ const ExploreInflationContract = (props) => {
             var active = true;
             try {
                 active = await extensionContract.methods.active().call();
-            } catch(e) {
+            } catch (e) {
             }
             setMetadata({
                 entry,
@@ -117,21 +117,21 @@ const ExploreInflationContract = (props) => {
 
     return !metadata ? <Loading /> : <div className="InflationContractAll">
         <div className="InflationContractOpen">
-                <h3>{metadata.entry.name}</h3>
-                <div className="InflationContractOpenBack">
-                    <a className="backActionBTN">Back</a>
-                </div>
+            <h3>{metadata.entry.name}</h3>
+            <div className="InflationContractOpenBack">
+                <a className="backActionBTN">Back</a>
+            </div>
         </div>
         {metadata.operations.map((operation, i) => {
             var amount = window.fromDecimals(operation.inputTokenAmount, operation.inputTokenAmountIsPercentage ? "18" : operation.inputToken.decimals, true);
             amount = !operation.inputTokenAmountIsPercentage ? amount : (parseFloat(amount) * 100);
             return <Fragment key={i}>
-                    <div className="TokenOperation">
-                        <h6>Operation {(i + 1)}</h6>
-                        <div className="TokenOperationLinks">
+                <div className="TokenOperation">
+                    <h6>Operation {(i + 1)}</h6>
+                    <div className="TokenOperationLinks">
                         {/* @todoM AMM Print a magical 1 */}
-                        {operation.ammPlugin !== window.voidEthereumAddress && 
-                        <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${operation.ammPlugin}`}>{operation.amm.info[0]} {operation.amm.info[1]}</a>
+                        {operation.ammPlugin !== window.voidEthereumAddress &&
+                            <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${operation.ammPlugin}`}>{operation.amm.info[0]} {operation.amm.info[1]}</a>
                         }
                         {operation.receivers.map((it, i) => {
                             var percentage = i === operation.receiversPercentages.length ? metadata.oneHundred : operation.receiversPercentages[i];
@@ -142,40 +142,33 @@ const ExploreInflationContract = (props) => {
                             }
                             return <Fragment key={it}>
                                 <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${it}`}>
-                                {window.formatMoney(parseFloat(window.fromDecimals(percentage, 18, true)) * 100)}% Receiver</a>
+                                    {window.formatMoney(parseFloat(window.fromDecimals(percentage, 18, true)) * 100)}% Receiver</a>
                             </Fragment>
                         })}
                         <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${metadata.extension}`}>Sender</a>
-                        </div>
-                        <p><b>{operation.inputTokenAmountIsByMint ? "Mint " : "Transfer "}</b> {window.formatMoney(amount)} {operation.inputTokenAmountIsPercentage ? "% of " : " "} {operation.inputToken.symbol} <Coin address={operation.inputToken.address}/> {operation.inputTokenAmountIsPercentage ? " Supply " : ""}
+                    </div>
+                    <p><b>{operation.inputTokenAmountIsByMint ? "Mint " : "Transfer "}</b> {window.formatMoney(amount)} {operation.inputTokenAmountIsPercentage ? "% of " : " "} {operation.inputToken.symbol} <Coin address={operation.inputToken.address} /> {operation.inputTokenAmountIsPercentage ? " Supply " : ""}
                         {operation.ammPlugin !== window.voidEthereumAddress && <>
-                            and <b>swap</b><span> > </span>
+                            and <b>swap</b><span> {" > "} </span>
                             {operation.swapTokens.map((swapToken, i) => <>
                                 {swapToken.symbol}
-                                <Coin address={swapToken.address}/>
+                                <Coin address={swapToken.address} />
                                 {i !== operation.swapTokens.length - 1 && " > "}
                             </>)}
                         </>}</p>
-                    </div>
-                    {/* @todoM Weird parentesi error */}
-                    </Fragment>
+                </div>
+            </Fragment>
         })}
         <div className="TokenOperationExecute">
-            {metadata.executorReward !== "0%" && 
-            <h5> {window.formatMoney(metadata.executorReward)}% reward by</h5>}
-            <select className="SelectRegular">
-                <option>Input</option>
-                <option>Output</option>
+            {metadata.executorReward !== 0 && <h5> {window.formatMoney(metadata.executorReward)}% reward by</h5>}
+            <select className="SelectRegular" value={earnByInput} onChange={e => setEarnByInput(e.currentTarget.value === 'true')}>
+                <option value="true">Input</option>
+                <option value="false">Output</option>
             </select>
-            {/* @todoM Selector not input (users don't uderstand anything) */}
-               {/* {metadata.executable && <label>
-                    Earn by input
-                    <input type="checkbox" onChange={e => setEarnByInput(e.currentTarget.checked)} />
-                </label>}*/}
-            </div>
-            {metadata.executable && !executing && <a className="Web3ActionBTN" onClick={execute}>Execute</a>}
-            {executing && <Loading />}
-        </div>;
+        </div>
+        {metadata.executable && !executing && <a className="Web3ActionBTN" onClick={execute}>Execute</a>}
+        {executing && <Loading />}
+    </div>;
 }
 
 const mapStateToProps = (state) => {

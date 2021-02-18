@@ -68,10 +68,9 @@ const FixedInflationComponent = (props) => {
             {
                 metadata ? <>
                     <h4>{metadata.name}</h4>
-                    {/* @todoM Etherscan Links don't work */}
                     <div className="InflationContractLinks">
                         <a href={`${props.dfoCore.getContextElement('etherscanURL')}address/${metadata.extension}`} target="_blank">Host</a>
-                        <a href={`${props.dfoCore.getContextElement('etherscanURL')}address/${metadata.contract}`} target="_blank">Contract</a>
+                        <a href={`${props.dfoCore.getContextElement('etherscanURL')}address/${metadata.contractAddress}`} target="_blank">Contract</a>
                     </div>
                         {metadata.executorReward !== 0 && <p>{window.formatMoney(metadata.executorReward)}% Reward to execute {metadata.operations.length} operations</p>}
                         {metadata.executorReward === 0 && <p>{metadata.operations.length} Operations</p>}
