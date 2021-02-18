@@ -50,6 +50,8 @@ const Burn = (props) => {
             clearTokens();
             const contract = await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDExtensionControllerABI"), props.dfoCore.getContextElement("WUSDExtensionControllerAddress"));
             setWusdExtensionController(contract);
+            const extensionAddress = await contract.methods.extension().call();
+            const ammAggregatorContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
             const allowedAMMS = await contract.methods.allowedAMMs().call();
             let allowedPairs = [];
             await Promise.all(allowedAMMS.map(async (allowedAMM, ammIndex) => {
@@ -60,6 +62,8 @@ const Burn = (props) => {
                     const poolInfo = await ammContract.methods.byLiquidityPool(liquidityPool).call();
                     const ammInfo = await ammContract.methods.info().call();
                     const ammName = ammInfo[0];
+                    const balanceOf = await ammAggregatorContract.methods.balanceOf(liquidityPool, extensionAddress).call();
+                    const isValid = parseInt(balanceOf['0']) > 0;
                     const totalAmount = poolInfo['0'];
                     const [token0Amount, token1Amount] = poolInfo['1'];
                     const [token0, token1] = poolInfo['2'];
@@ -73,7 +77,7 @@ const Burn = (props) => {
                     const lpSymbol = await lpContract.methods.symbol().call();
                     const decimalsLp = await lpContract.methods.decimals().call();
                     const approval = await lpContract.methods.allowance(props.dfoCore.address, props.dfoCore.getContextElement("WUSDExtensionControllerAddress")).call();
-                    pools.push({ ammName, ammContract, ammIndex, lpContract, lpIndex, lpSymbol, totalAmount, token0Amount, token1Amount, liquidityPool, token0, token1, symbol0, symbol1, token0decimals, token1decimals, decimalsLp, token0Contract, token1Contract, lpTokenApproved: parseInt(approval) !== 0 });
+                    pools.push({ ammName, ammContract, ammIndex, balanceOf, isValid, lpContract, lpIndex, lpSymbol, totalAmount, token0Amount, token1Amount, liquidityPool, token0, token1, symbol0, symbol1, token0decimals, token1decimals, decimalsLp, token0Contract, token1Contract, lpTokenApproved: parseInt(approval) !== 0 });
                 }));
                 allowedPairs = [...allowedPairs, ...pools ];
             }))
@@ -100,6 +104,9 @@ const Burn = (props) => {
             if (pairIndex) {
                 const chosenPair = pairs[pairIndex];
 
+                setFirstTokenBalance(await chosenPair.token0Contract.methods.balanceOf(props.dfoCore.address).call());
+                setSecondTokenBalance(await chosenPair.token1Contract.methods.balanceOf(props.dfoCore.address).call());
+                setLpTokenBalance(await chosenPair.lpContract.methods.balanceOf(props.dfoCore.address).call());
                 const res = await chosenPair.ammContract.methods.byLiquidityPool(chosenPair.liquidityPool).call();
 
                 const tokensAmounts = res[1];
@@ -210,41 +217,36 @@ const Burn = (props) => {
         }
         
         if (getLpToken) {
-            return (
+            return (<>
+                <div className="Resultsregular">
+                        <p><b>{ pairs[pair].lpSymbol } balance</b>: { window.formatMoney(props.dfoCore.toDecimals(pairs[pair].balanceOf['0'], pairs[pair].decimalsLp), 2) }</p>
+                </div>
                 <div className="Resultsregular">
                         <p>For <b> { estimatedLpToken.value } { pairs[pair].lpSymbol } </b></p>
                 </div>
+                </>
             )
         }
-        return (
-            <div className="Resultsregular">
-                    <p>For <b> { estimatedToken0.value } { pairs[pair].symbol0 } / { estimatedToken1.value } { pairs[pair].symbol1 }</b></p>
-            </div>
+        return (<>
+                <div className="Resultsregular">
+                        <p><b>{ pairs[pair].symbol0 } balance</b>: { window.formatMoney(props.dfoCore.toDecimals(pairs[pair].balanceOf['1'][0], pairs[pair].token0decimals), 2) }</p>
+                        <p><b>{ pairs[pair].symbol1 } balance</b>: {  window.formatMoney(props.dfoCore.toDecimals(pairs[pair].balanceOf['1'][1], pairs[pair].token1decimals), 2) }</p>
+                </div>
+                <div className="Resultsregular">
+                        <p>For <b> { estimatedToken0.value } { pairs[pair].symbol0 } / { estimatedToken1.value } { pairs[pair].symbol1 }</b></p>
+                </div>
+            </>
         )
     }
 
     const getButtons = () => {
         return (
             <div className="Web3BTNs">
-                    {
-                        /*
-                        !wusdApproved ? <div className="col-12 col-md-6">
-                            <ApproveButton contract={wusdContract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.log(error)} onApproval={() => onTokenApproval('wusd')} text={`Approve WUSD`} />
-                        </div> : <div/>
-                        */
-                    }
-                    {
-                        /*
-                        !pairs[pair].lpTokenApproved ? <div className="col-12 col-md-6">
-                            <ApproveButton contract={pairs[pair].lpContract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.log(error)} onApproval={() => onTokenApproval(pair)} text={`Approve ${pairs[pair].lpSymbol}`} />
-                        </div> : <div/>
-                        */
-                    }
-                            {
-                                burnLoading ? <a className="Web3ActionBTN" disabled={burnLoading}>
-                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                </a> : <a onClick={() => burnWUSD()} disabled={!amount.full || !amount.value || amount.value === 0 || amount.full === 0} className="Web3ActionBTN">Burn</a>
-                            }
+                {
+                    burnLoading ? <a className="Web3ActionBTN" disabled={burnLoading}>
+                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    </a> : <a onClick={() => burnWUSD()} disabled={!amount.full || !amount.value || amount.value === 0 || amount.full === 0} className="Web3ActionBTN">Burn</a>
+                }
             </div>
         )
     }
@@ -270,13 +272,13 @@ const Burn = (props) => {
                         <option value="">Select a pair..</option>
                         {
                             pairs.map((pair, index) => {
-                                return <option key={pair.ammName + pair.symbol0 + pair.symbol1} value={index}>{pair.ammName} - {pair.symbol0}/{pair.symbol1}</option>
+                                return <option disabled={!pair.isValid} key={pair.ammName + pair.symbol0 + pair.symbol1} value={index}>{pair.ammName} - {pair.symbol0}/{pair.symbol1}</option>
                             })
                         }
                     </select>
                     {
                         isHealthyPair && <div className="QuestionRegular">
-                            <input type="checkbox" value={getLpToken} onChange={(e) => setGetLpToken(e.target.checked)} id="getLpToken" disabled={!pair} />
+                            <input type="checkbox" checked={getLpToken} defaultChecked={getLpToken} onChange={(e) => setGetLpToken(e.target.checked)} id="getLpToken" disabled={!pair} />
                             <label htmlFor="getLpToken">Get liquidity pool token</label>
                         </div>
                     }
