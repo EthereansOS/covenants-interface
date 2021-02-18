@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { useState } from 'react';
 import defaultLogoImage from '../../../assets/images/default-logo.png';
-import ethereumLogoImage from '../../../assets/images/ethereum.png';
+import ethereumLogoImage from '../../../assets/images/eth.png';
 import { connect } from 'react-redux';
 
 const Coin = (props) => {
