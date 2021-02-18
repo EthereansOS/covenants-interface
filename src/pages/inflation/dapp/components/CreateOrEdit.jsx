@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Entry from './Entry';
 import Loading from '../../../../components/shared/Loading';
 
@@ -7,6 +7,24 @@ const CreateOrEdit = (props) => {
     const [loading, setLoading] = useState(true);
     const [entries, setEntries] = useState(props.fixedInflationContractAddress ? [] : props.entries || []);
     const [editingEntry, setEditingEntry] = useState(null);
+
+    useEffect(() => {
+        editOrAddEntry(props.fixedInflationContractAddress ? 0 : undefined);
+    }, []);
+
+    function editOrAddEntry(entryIndex) {
+        if (isNaN(entryIndex)) {
+            entries.push({
+                name: '',
+                operations: [],
+                add: true,
+                create: true
+            });
+            entryIndex = entries.length - 1;
+            setEntries(entries.map(it => it));
+        }
+        setEditingEntry(entryIndex);
+    }
 
     async function loadContract() {
         if (!props.fixedInflationContractAddress) {
@@ -31,20 +49,6 @@ const CreateOrEdit = (props) => {
             copy.operations.push(operationCopy);
         }
         return copy;
-    }
-
-    function editOrAddEntry(entryIndex) {
-        if (isNaN(entryIndex)) {
-            entries.push({
-                name: '',
-                operations: [],
-                add: true,
-                create: true
-            });
-            entryIndex = entries.length - 1;
-            setEntries(entries.map(it => it));
-        }
-        setEditingEntry(entryIndex);
     }
 
     function saveEntry(entryName, lastBlock, blockInterval, callerRewardPercentage, operations) {
@@ -87,7 +91,7 @@ const CreateOrEdit = (props) => {
                         </div>
                         <div className="col-4 flex">
                             <button className="btn btn-sm btn-danger ml-1" onClick={() => editOrAddEntry(entryIndex)}><b>EDIT</b></button>
-                            <button className="btn btn-sm btn-outline-danger mr-1" onClick={() => removeEntry(entryIndex)}><b>X</b></button>
+                            {/*<button className="btn btn-sm btn-outline-danger mr-1" onClick={() => removeEntry(entryIndex)}><b>X</b></button>*/}
                         </div>
                     </div>)}
                     <div className="row">

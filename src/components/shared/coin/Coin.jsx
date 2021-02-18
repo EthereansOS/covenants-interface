@@ -16,6 +16,8 @@ const Coin = (props) => {
         imageLink = token.logoURI;
     }
 
+    console.log(imageLink);
+
     const onImageError = () => {
         if (icons[props.address.toLowerCase()]) {
             setImage(icons[props.address.toLowerCase()]);
