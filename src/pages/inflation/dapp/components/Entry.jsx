@@ -12,6 +12,7 @@ const Entry = (props) => {
     const [blockInterval, setBlockInterval] = useState(props.entry.blockInterval || Object.values(props.dfoCore.getContextElement("blockIntervals"))[0]);
     const [callerRewardPercentage, setCallerRewardPercentage] = useState(props.entry.callerRewardPercentage || 0);
     const [hasCallerRewardPercentage, setHasCallerRewardPercentage] = useState((props.entry.callerRewardPercentage || 0) > 0);
+    const [hasLastBlock, setHasLastBlock] = useState((props.entry.lastBlock || 0) > 0);
     const [editingOperation, setEditingOperation] = useState(null);
 
     function editOrAddEntryOperation(entryOperationIndex) {
@@ -52,9 +53,14 @@ const Entry = (props) => {
         setCallerRewardPercentage(value > 99 ? 99 : value);
     }
 
-    function onSetHasCallerRewardPercentageChange(e) {
+    function onHasCallerRewardPercentageChange(e) {
         setHasCallerRewardPercentage(e.currentTarget.checked);
         setCallerRewardPercentage(0);
+    }
+
+    function onHasLastBlockChange(e) {
+        setHasLastBlock(e.currentTarget.checked);
+        setLastBlock(0);
     }
 
     var steps = [
@@ -62,7 +68,6 @@ const Entry = (props) => {
             return <>
                 <div className="InputForm">
                     <input className="TextRegular" placeholder="Title" onChange={e => setEntryName(e.currentTarget.value)} value={entryName} />
-                
                     <h5>Block Interval:</h5>
                     <select className="SelectRegular" onChange={e => setBlockInterval(e.currentTarget.value)} value={blockInterval}>
                         {Object.entries(props.dfoCore.getContextElement("blockIntervals")).map(it => <option key={it[0]} value={it[1]}>{it[0]}</option>)}
@@ -77,19 +82,23 @@ const Entry = (props) => {
         [function () {
             return <>
                 <p>
-                    <Input label="Start Block:" min="0" onChange={e => setLastBlock(parseInt(e.target.value))} value={lastBlock} />
+                    <label>
+                        Starting Block
+                        <input type="checkbox" checked={hasLastBlock} onChange={onHasLastBlockChange} />
+                    </label>
+                    {hasLastBlock && <Input label="Start Block:" min="0" onChange={e => setLastBlock(parseInt(e.target.value))} value={lastBlock} />}
                 </p>
                 <p>
                     <label>
                         Execution reward
-                        <input type="checkbox" checked={hasCallerRewardPercentage} onChange={onSetHasCallerRewardPercentageChange} />
+                        <input type="checkbox" checked={hasCallerRewardPercentage} onChange={onHasCallerRewardPercentageChange} />
                     </label>
-                    <Input disabled={!hasCallerRewardPercentage} label="Caller reward %:" min="0" max="100" onChange={onCallerPercentageChange} value={callerRewardPercentage} />
+                    {hasCallerRewardPercentage && <Input label="Caller reward %:" min="0" max="100" onChange={onCallerPercentageChange} value={callerRewardPercentage} />}
                 </p>
             </>
         },
         function () {
-            return !(!hasCallerRewardPercentage || (callerRewardPercentage > 0 && callerRewardPercentage < 100));
+            return !(lastBlock >= 0 && (!hasCallerRewardPercentage || (callerRewardPercentage > 0 && callerRewardPercentage < 100)));
         }],
         [function () {
             return <>
