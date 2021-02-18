@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { BazaarComponent } from '../../../../components';
 import Create from './Create';
+import axios from 'axios';
 
 const Explore = (props) => {
     const [showCreate, setShowCreate] = useState(false);
@@ -24,13 +25,17 @@ const Explore = (props) => {
             await Promise.all(props.dfoCore.indexTokens.map(async (indexToken) => {
                 try {
                     const interoperableContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('IEthItemInteroperableInterfaceABI'), indexToken.address);
-                    console.log(interoperableContract);
                     const mainInterface = await interoperableContract.methods.mainInterface().call();
                     const contract = await props.dfoCore.getContract(props.dfoCore.getContextElement('IEthItemABI'), mainInterface);
                     const info = await indexContract.methods.info(indexToken.objectId, 0).call();
-                    console.log(indexToken);
                     const name = await contract.methods.name(indexToken.objectId).call();
                     const uri = await contract.methods.uri(indexToken.objectId).call();
+                    let res = { data: { description: '', image: '' } };
+                    try {
+                        res = await axios.get(uri);
+                    } catch (error) {
+                        console.log('error while reading metadata from ipfs..')
+                    }
                     let total = 0;
                     await info._amounts.map(async (amount) => total += parseInt(amount));
                     const percentages = {};
@@ -38,8 +43,7 @@ const Explore = (props) => {
                         const amount = info._amounts[index];
                         percentages[token] = (parseInt(amount) / parseInt(total)) * 100;
                     })
-                    console.log(uri);
-                    tokens.push({ contract, address: indexToken.address, objectId: indexToken.objectId, info, percentages, name, uri });
+                    tokens.push({ contract, ipfsInfo: res.data, address: indexToken.address, objectId: indexToken.objectId, info, percentages, name, uri });
                 } catch (error) {
                     console.error(error);
                 }

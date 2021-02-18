@@ -38,7 +38,7 @@ const ExploreIndexToken = (props) => {
             const symbol = await contract.methods.symbol(objectId).call();
             const indexDecimals = await contract.methods.decimals(objectId).call();
             const balanceOf = await contract.methods.balanceOf(props.dfoCore.address, objectId).call();
-            setBalance(props.dfoCore.toDecimals(balanceOf, indexDecimals));
+            setBalance(window.formatMoney(props.dfoCore.toDecimals(balanceOf, indexDecimals), 4));
             const uri = await contract.methods.uri(objectId).call();
             let res = { data: { description: '', image: '' } };
             try {
@@ -53,23 +53,27 @@ const ExploreIndexToken = (props) => {
             const decimals = {};
             const approvals = {};
             const contracts = {};
+            const balances = {};
             await Promise.all(info._tokens.map(async (token, index) => {
                 try {
                     const amount = info._amounts[index];
                     const tokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), token);
-                    percentages[token] = (parseInt(amount) / parseInt(total)) * 100;
                     const symbol = await tokenContract.methods.symbol().call();
                     const decimal = await tokenContract.methods.decimals().call();
                     const approval = await tokenContract.methods.allowance(props.dfoCore.address, indexContract.options.address).call();
+                    const balance = await tokenContract.methods.balanceOf(props.dfoCore.address).call();
+                    percentages[token] = (parseInt(amount) / parseInt(total)) * 100;
+                    console.log(percentages[token], token)
                     symbols[token] = symbol;
                     decimals[token] = decimal;
                     approvals[token] = parseInt(approval) > 0;
                     contracts[token] = tokenContract;
+                    balances[token] = balance;
                 } catch (error) {
                     console.error(error);
                 }
             }));
-            setMetadata({ name, symbol, symbols, uri, ipfsInfo: res.data, info, objectId, interoperableContract, indexDecimals, percentages, contract, indexContract, decimals, approvals, contracts });
+            setMetadata({ name, symbol, symbols, uri, balances, ipfsInfo: res.data, info, objectId, interoperableContract, indexDecimals, percentages, contract, indexContract, decimals, approvals, contracts });
         } catch (error) {
             console.error(error);
         } finally {
@@ -106,8 +110,15 @@ const ExploreIndexToken = (props) => {
         const unapproved = tkns.filter((tkn) => !tkn.approval);
         return <div className="col-md-9 col-12">
             <div className="row">
-                <Input step={0.0001} address={address} min={0} value={mintValue} onChange={(e) => onMintUpdate(e.target.value)} showCoin={true} name={metadata.symbol} />
+                <Input step={0.0001} showBalance={true} balance={balance} address={address} min={0} value={mintValue} onChange={(e) => onMintUpdate(e.target.value)} showCoin={true} name={metadata.symbol} />
             </div>
+            {
+                metadata.info._tokens.map((token, index) => {
+                    return (
+                        <p><b>{metadata.symbols[token]} balance: </b> {window.formatMoney(metadata.balances[token], 2)}</p>
+                    )
+                })
+            }
             <div className="row">
                 {
                     mintValue > 0 && <p>by {mintResult._tokens.map((token, index) => `${window.formatMoney(props.dfoCore.toDecimals(mintResult._amounts[index], metadata.decimals[token], 2))} ${metadata.symbols[token]} `)}</p>
@@ -151,7 +162,7 @@ const ExploreIndexToken = (props) => {
     const getBurn = () => {
         return <div className="col-md-9 col-12">
             <div className="row">
-                <Input address={address} step={0.0001} showBalance={true} min={0} showMax={true} value={burnValue} onChange={(e) => onBurnUpdate(e.target.value)} showCoin={true} name={metadata.symbol} />
+                <Input address={address} step={0.0001} showBalance={true} balance={balance} min={0} showMax={true} value={burnValue} onChange={(e) => onBurnUpdate(e.target.value)} showCoin={true} name={metadata.symbol} />
 
             </div>
             <div className="row">
