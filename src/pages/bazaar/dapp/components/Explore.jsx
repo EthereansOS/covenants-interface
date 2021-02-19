@@ -19,8 +19,8 @@ const Explore = (props) => {
     const getIndexTokens = async () => {
         setLoading(true);
         try {
-            await props.dfoCore.loadIndexTokens(props.dfoCore.getContextElement('indexAddressRopsten'));
-            const indexContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('IndexABI'), props.dfoCore.getContextElement('indexAddressRopsten'));
+            await props.dfoCore.loadIndexTokens();
+            const indexContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('IndexABI'), props.dfoCore.getContextElement('indexAddress'));
             const tokens = [];
             await Promise.all(props.dfoCore.indexTokens.map(async (indexToken) => {
                 try {

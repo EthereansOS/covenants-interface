@@ -21,6 +21,8 @@ const ExploreIndexToken = (props) => {
     const [burnResult, setBurnResult] = useState(null);
     const [balance, setBalance] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [mintLoading, setMintLoading] = useState(false);
+    const [burnLoading, setBurnLoading] = useState(false);
 
     useEffect(() => {
         getContractMetadata()
@@ -49,18 +51,20 @@ const ExploreIndexToken = (props) => {
                 console.log('error while reading metadata from ipfs..')
             }
             let total = 0;
-            const valueLocked = 0;
+            let valueLocked = 0;
             await Promise.all(info._amounts.map(async (amount, index) => {
                 try {
                     const token = info._tokens[index];
                     const tokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), token);
                     const decimal = await tokenContract.methods.decimals().call();
                     const res = await axios.get(props.dfoCore.getContextElement('coingeckoCoinPriceURL') + token);
-                    const data = res.data();
-                    const tokenPrice = data[token].usd;
+                    console.log(res);
+                    const { data } = res;
+                    const tokenPrice = data[token.toLowerCase()].usd;
                     const value = parseFloat(props.dfoCore.toDecimals(amount, decimal)) * tokenPrice;
                     total += value;
                     valueLocked += value * parseFloat(props.dfoCore.toDecimals(totalSupply, indexDecimals));
+                    console.log(value, valueLocked)
                 } catch (error) {
                     console.error(error);
                 }
@@ -82,8 +86,8 @@ const ExploreIndexToken = (props) => {
                     const amountDecimals = props.dfoCore.toDecimals(amount.toString(), decimal);
                     try {
                         const res = await axios.get(props.dfoCore.getContextElement('coingeckoCoinPriceURL') + token);
-                        const data = res.data();
-                        const tokenPrice = data[token].usd;
+                        const { data } = res;
+                        const tokenPrice = data[token.toLowerCase()].usd;
                         percentages[token] = ((parseFloat(amountDecimals) * tokenPrice) / parseInt(total)) * 100;
                     } catch (error) {
                         console.error(error);
@@ -106,6 +110,16 @@ const ExploreIndexToken = (props) => {
         }
     }
 
+    const onTokenApproval = (token) => {
+        setMetadata({
+            ...metadata,
+            approvals: {
+                ...metadata.approvals,
+                token: true,
+            }
+        })
+    }
+
     const onMintUpdate = async (value) => {
         if (!value || parseFloat(value) === 0) {
             setMintValue(0);
@@ -120,8 +134,9 @@ const ExploreIndexToken = (props) => {
         const tkns = metadata.info._tokens.map((token, index) => { return { approval: metadata.approvals[token], index, token } });
         const unapproved = tkns.filter((tkn) => !tkn.approval);
         if (mintValue === 0 || unapproved.length > 0 || !mintValue) return;
-        setLoading(true);
+        setMintLoading(true);
         try {
+            console.log(`minting ${props.dfoCore.toFixed(parseFloat(mintValue) * 10**metadata.indexDecimals).toString()}`)
             const gas = await metadata.indexContract.methods.mint(metadata.objectId, props.dfoCore.toFixed(parseFloat(mintValue) * 10**metadata.indexDecimals).toString(), props.dfoCore.address).estimateGas({ from: props.dfoCore.address });
             const result = await metadata.indexContract.methods.mint(metadata.objectId, props.dfoCore.toFixed(parseFloat(mintValue) * 10**metadata.indexDecimals).toString(), props.dfoCore.address).send({ from: props.dfoCore.address, gas })
             props.addTransaction(result);
@@ -129,7 +144,7 @@ const ExploreIndexToken = (props) => {
             console.error(error)
         } finally {
             await getContractMetadata();
-            setLoading(false);
+            setMintLoading(false);
         }
     }
 
@@ -138,7 +153,7 @@ const ExploreIndexToken = (props) => {
         const unapproved = tkns.filter((tkn) => !tkn.approval);
         return <div className="InputTokensRegular">
                 <div className="InputTokenRegular">
-                <Input step={0.0001} showBalance={false} balance={balance} address={address} min={0} value={mintValue} onChange={(e) => onMintUpdate(e.target.value)} showCoin={true} name={metadata.symbol} />
+                <Input step={0.0001} showBalance={false} tokenImage={metadata.ipfsInfo.image} address={address} min={0} value={mintValue} onChange={(e) => onMintUpdate(e.target.value)} showCoin={true} name={metadata.symbol} />
             </div>
                 {
                     mintValue > 0 && <div className="ShowCollateralNeededBal"><h6>Needed:</h6> {mintResult._tokens.map((token, index) => <p>{window.formatMoney(props.dfoCore.toDecimals(mintResult._amounts[index], metadata.decimals[token], 2))} {metadata.symbols[token]}</p>)}</div>
@@ -148,32 +163,37 @@ const ExploreIndexToken = (props) => {
             {
                 metadata.info._tokens.map((token, index) => {
                     return (
-                            <p>{window.formatMoney(metadata.balances[token], 4)} {metadata.symbols[token]}</p>
+                            <p>{window.formatMoney(props.dfoCore.toDecimals(metadata.balances[token], metadata.decimals[token]), 4)} {metadata.symbols[token]}</p>
                     )
                 })
             }
             </div>
             <div className="Web3BTNs">
                 {
-                    unapproved.length > 0 && <ApproveButton contract={metadata.contracts[unapproved[0].token]} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("indexAddress")} onError={(error) => console.error(error)} onApproval={(res) => getContractMetadata()} text={`Approve ${metadata.symbols[unapproved[0].token]}`}  /> 
+                    unapproved.length > 0 && <ApproveButton contract={metadata.contracts[unapproved[0].token]} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("indexAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval(unapproved[0].token)} text={`Approve ${metadata.symbols[unapproved[0].token]}`}  /> 
                 }
-                    <a className="Web3ActionBTN" disabled={mintValue === 0 || unapproved.length > 0} onClick={() => mint()}>Mint</a> 
+                {
+                    mintLoading ? <a className="Web3ActionBTN" disabled={mintLoading}>
+                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    </a> : <a className="Web3ActionBTN" disabled={mintValue === 0 || unapproved.length > 0} onClick={() => mint()}>Mint</a> 
+                }
             </div>
         </div>
     }
 
     const burn = async () => {
         if (burnValue === 0 || !burnValue) return;
-        setLoading(true);
+        setBurnLoading(true);
         try {
-            const gas = await metadata.contract.methods.safeBatchTransferFrom(props.dfoCore.address, metadata.indexContract.options.address, [metadata.objectId], [props.dfoCore.toFixed(parseFloat(burnValue) * 10**metadata.indexDecimals).toString()], abi.encode(["address[]"], [[props.dfoCore.address]])).estimateGas({ from: props.dfoCore.address });
-            const result = await metadata.contract.methods.safeBatchTransferFrom(props.dfoCore.address, metadata.indexContract.options.address, [metadata.objectId], [props.dfoCore.toFixed(parseFloat(burnValue) * 10**metadata.indexDecimals).toString()], abi.encode(["address[]"], [[props.dfoCore.address]])).send({ from: props.dfoCore.address, gas })
+            console.log(props.dfoCore.toFixed(parseFloat(burnValue) * 10**metadata.indexDecimals).toString());
+            const gas = await metadata.contract.methods.safeBatchTransferFrom(props.dfoCore.address, props.dfoCore.getContextElement('indexAddress'), [metadata.objectId], [props.dfoCore.toFixed(parseFloat(burnValue) * 10**metadata.indexDecimals).toString()], abi.encode(["address[]"], [[props.dfoCore.address]])).estimateGas({ from: props.dfoCore.address });
+            const result = await metadata.contract.methods.safeBatchTransferFrom(props.dfoCore.address, props.dfoCore.getContextElement('indexAddress'), [metadata.objectId], [props.dfoCore.toFixed(parseFloat(burnValue) * 10**metadata.indexDecimals).toString()], abi.encode(["address[]"], [[props.dfoCore.address]])).send({ from: props.dfoCore.address, gas })
             props.addTransaction(result);
         } catch (error) {
             console.error(error)
         } finally {
             await getContractMetadata();
-            setLoading(false);
+            setBurnLoading(false);
         }
     }
 
@@ -190,15 +210,18 @@ const ExploreIndexToken = (props) => {
     const getBurn = () => {
         return <div className="InputTokensRegular">
         <div className="InputTokenRegular">
-                <Input address={address} step={0.0001} showBalance={true} balance={balance} min={0} showMax={true} value={burnValue} onChange={(e) => onBurnUpdate(e.target.value)} showCoin={true} name={metadata.symbol} />
+                <Input address={address} tokenImage={metadata.ipfsInfo.image} step={0.0001} showBalance={true} balance={balance} min={0} showMax={true} value={burnValue} onChange={(e) => onBurnUpdate(e.target.value)} showCoin={true} name={metadata.symbol} />
 
             </div>
                 {
                     burnValue > 0 && <div className="ShowCollateralNeededBal"><h6>for</h6> {burnResult._tokens.map((token, index) => <p>{window.formatMoney(props.dfoCore.toDecimals(burnResult._amounts[index], metadata.decimals[token], 2))} {metadata.symbols[token]}</p>)}</div>
                 }
             <div className="Web3BTNs">
-
-                    <a className="Web3ActionBTN" disabled={parseFloat(burnValue) === 0} onClick={() => burn()}>Burn</a> 
+                {
+                    burnLoading ? <a className="Web3ActionBTN" disabled={burnLoading}>
+                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    </a> : <a className="Web3ActionBTN" disabled={parseFloat(burnValue) === 0} onClick={() => burn()}>Burn</a> 
+                }  
             </div>
         </div>
     }

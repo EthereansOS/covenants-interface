@@ -5,6 +5,7 @@ import ethereumLogoImage from '../../../assets/images/eth.png';
 import { connect } from 'react-redux';
 
 const Coin = (props) => {
+    const { forcedImage } = props;
     const [image, setImage] = useState(`https://assets.trustwalletapp.com/blockchains/ethereum/assets/${props.address}/logo.png`)
     const { icons } = require('../../../data/context.json').default;
 
@@ -24,7 +25,7 @@ const Coin = (props) => {
         }
     }
 
-    return <img className={props.className} src={imageLink} onError={(e) => onImageError()} />
+    return <img className={props.className} src={forcedImage || imageLink} onError={(e) => onImageError()} />
 }
 
 Coin.propTypes = {

@@ -242,9 +242,9 @@ export default class DFOCore {
 
     loadIndexTokens = async (indexAddress) => {
         try {
-            if (!indexAddress) indexAddress = this.getContextElement("indexAddressRopsten");
+            if (!indexAddress) indexAddress = this.getContextElement("indexAddress");
             const indexContract = new this.web3.eth.Contract(this.getContextElement("IndexABI"), indexAddress);
-            const events = await indexContract.getPastEvents('NewIndex', { fromBlock: 9689385 });
+            const events = await indexContract.getPastEvents('NewIndex', { fromBlock: 11806961 });
             this.indexTokens = [];
             await Promise.all(events.map(async(event) => {
                 try {
