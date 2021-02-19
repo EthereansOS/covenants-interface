@@ -191,8 +191,8 @@ const ExploreIndexToken = (props) => {
         try {
             const indexCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), props.dfoCore.getContextElement('indexCollectionAddress'));
             console.log([props.dfoCore.toFixed(props.dfoCore.fromDecimals(burnValue, metadata.indexDecimals)).toString()]);
-            const gas = await indexCollection.safeBatchTransferFrom(props.dfoCore.address, props.dfoCore.getContextElement('indexAddress'), [metadata.objectId], [props.dfoCore.toFixed(props.dfoCore.fromDecimals(burnValue, metadata.indexDecimals)).toString()], abi.encode(["address[]"], [[props.dfoCore.address]])).estimateGas({ from: props.dfoCore.address });
-            const result = await indexCollection.safeBatchTransferFrom(props.dfoCore.address, props.dfoCore.getContextElement('indexAddress'), [metadata.objectId], [props.dfoCore.toFixed(props.dfoCore.fromDecimals(burnValue, metadata.indexDecimals)).toString()], abi.encode(["address[]"], [[props.dfoCore.address]])).send({ from: props.dfoCore.address, gas })
+            const gas = await indexCollection.methods.safeBatchTransferFrom(props.dfoCore.address, props.dfoCore.getContextElement('indexAddress'), [metadata.objectId], [props.dfoCore.toFixed(props.dfoCore.fromDecimals(burnValue, metadata.indexDecimals)).toString()], abi.encode(["address[]"], [[props.dfoCore.address]])).estimateGas({ from: props.dfoCore.address });
+            const result = await indexCollection.methods.safeBatchTransferFrom(props.dfoCore.address, props.dfoCore.getContextElement('indexAddress'), [metadata.objectId], [props.dfoCore.toFixed(props.dfoCore.fromDecimals(burnValue, metadata.indexDecimals)).toString()], abi.encode(["address[]"], [[props.dfoCore.address]])).send({ from: props.dfoCore.address, gas })
             props.addTransaction(result);
         } catch (error) {
             console.error(error)
