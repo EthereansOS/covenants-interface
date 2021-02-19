@@ -37,18 +37,21 @@ const Explore = (props) => {
                         console.log('error while reading metadata from ipfs..')
                     }
                     let total = 0;
-                    await info._amounts.map(async (amount) => total += parseInt(amount));
+                    await Promise.all(info._amounts.map(async (amount) => total += parseInt(amount)));
                     const percentages = {};
-                    await info._tokens.map(async (token, index) => {
+                    const amounts = {};
+                    await Promise.all(info._tokens.map(async (token, index) => {
                         const amount = info._amounts[index];
+                        const tokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), token);
+                        const decimals = await tokenContract.methods.decimals().call();
+                        amounts[token] = props.dfoCore.toDecimals(amount, decimals);
                         percentages[token] = (parseInt(amount) / parseInt(total)) * 100;
-                    })
-                    tokens.push({ contract, ipfsInfo: res.data, address: indexToken.address, objectId: indexToken.objectId, info, percentages, name, uri });
+                    }));
+                    tokens.push({ contract, amounts, ipfsInfo: res.data, address: indexToken.address, objectId: indexToken.objectId, info, percentages, name, uri });
                 } catch (error) {
                     console.error(error);
                 }
             }));
-            console.log(tokens);
             setIndexTokens(tokens);
         } catch (error) {
             console.error(error);
