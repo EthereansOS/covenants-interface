@@ -188,14 +188,22 @@ const ExploreIndexToken = (props) => {
     const burn = async () => {
         if (burnValue === 0 || !burnValue) return;
         setBurnLoading(true);
+        var value = window.toDecimals(burnValue, metadata.indexDecimals);
+        console.log(burnValue, value, metadata.decimals);
+        var payload = "0x";
+        payload = window.web3.eth.abi.encodeParameter("address", props.dfoCore.address);
+        payload = abi.encode(["bytes[]"], [[payload]]);
         try {
             const indexCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), props.dfoCore.getContextElement('indexCollectionAddress'));
-            console.log([props.dfoCore.toFixed(props.dfoCore.fromDecimals(burnValue, metadata.indexDecimals)).toString()]);
-            const gas = await indexCollection.methods.safeBatchTransferFrom(props.dfoCore.address, props.dfoCore.getContextElement('indexAddress'), [metadata.objectId], [props.dfoCore.toFixed(props.dfoCore.fromDecimals(burnValue, metadata.indexDecimals)).toString()], abi.encode(["address[]"], [[props.dfoCore.address]])).estimateGas({ from: props.dfoCore.address });
-            const result = await indexCollection.methods.safeBatchTransferFrom(props.dfoCore.address, props.dfoCore.getContextElement('indexAddress'), [metadata.objectId], [props.dfoCore.toFixed(props.dfoCore.fromDecimals(burnValue, metadata.indexDecimals)).toString()], abi.encode(["address[]"], [[props.dfoCore.address]])).send({ from: props.dfoCore.address, gas })
+            var indexAddress = props.dfoCore.getContextElement("indexAddress");
+            var sendingOptions = {from : props.dfoCore.address};
+            var method = indexCollection.methods.safeBatchTransferFrom(props.dfoCore.address, indexAddress, [metadata.objectId], [value], payload);
+            sendingOptions.gasLimit = await method.estimateGas({ from: props.dfoCore.address });
+            const result = await method.send(sendingOptions);
             props.addTransaction(result);
         } catch (error) {
             console.error(error)
+            alert(error.message || error);
         } finally {
             await getContractMetadata();
             setBurnLoading(false);
