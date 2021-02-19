@@ -266,10 +266,10 @@ a:disabled {cursor:wait !important;}
 .IndexContractOpenStatistic {width: 95%; display: inline-block; margin: 30px auto; border: 1px solid; border-radius: 12px;}
 .IndexContractOpenStatistic p {font-size: 14px; display: inline-block; margin: 10px 10px; vertical-align: middle;}
 .IndexManageMB .Web3BTNs {width: 100%;}
-.success {position: absolute; top: 0; left: 0; z-index: 99999999999; background-color: #7474f7; padding: 40px 0; text-align: center; border-radius: 12px; width: 100%;}
-.success p {font-size: 20px; display: inline-block; color: #ffffff; font-weight: normal;}
-.success p a {font-size: 20px; display: inline-block; color: #ffffff; font-weight: bold; text-decoration: underline !important;}
-.success > a {font-size: 14px; position: absolute; bottom: 5px; left: 5px;z-index: 999999999999;}
+.success {position: absolute; top: 0; left: 0; z-index: 99999999999; background-color: #7474f7; padding: 25px 0; text-align: center; border-radius: 12px; width: 100%;}
+.success p {font-size: 18px; display: inline-block; color: #ffffff; font-weight: normal;}
+.success p a {font-size: 18px; display: inline-block; color: #ffffff; font-weight: bold; text-decoration: underline !important;}
+.success > a {font-size: 14px; position: absolute; bottom: 5px; left: 5px;z-index: 999999999999; color: #ffffff;}
 
 
 .fantasy {background-color: #4d4c4a !important;}
@@ -343,7 +343,6 @@ a:disabled {cursor:wait !important;}
    .TitleCov {display: none;}
    .CovTITLE figure {width: 90%;}
    .DescCov p {font-size: 12px;}
-   .IndexRegular .IndexRegularText p {display: none;}
    .page-container .FooterP {display: none;}
    .IndexRegular .IndexRegularImg {width: 90%;}
    .dapp-container, .page-container {padding: 2px !important;}
@@ -375,6 +374,12 @@ a:disabled {cursor:wait !important;}
    .GrimoureContent header {width: 100%; display: inline-block; margin: 10px auto;}
    .GrimoureContent span {width: 100%; display: inline-block; margin: 10px auto;vertical-align: top; text-align: center;}
    .GrimoureContent span img {text-align: center;}
+   .IndexRegular {position: relative;}
+   .IndexRegular .IndexRegularText {width: 80%; margin-top: 20px;}
+   .IndexRegular .IndexRegularText h3 {width: 95%;font-size: 18px; margin-top: 20px; display: inline-block;}
+   .IndexRegularImg {position: absolute; bottom: 5px;right: 5%; width: 90% !important;}
+   .IndexRegular .IndexRegularText p {font-size: 10px;font-weight: bold;}
+   .IndexRegular {display: inline-block !important; min-height: 300px !important; padding: 20px 20px 300px 20px !important;}
 }
 
 @media only screen and (min-device-width: 751px) and (max-device-width: 1024px) {

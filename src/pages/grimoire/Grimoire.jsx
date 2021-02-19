@@ -1,5 +1,5 @@
 import { PageContainer } from "../../components";
-import homeInflationImage from '../../assets/images/1.png';
+import homeInflationImage from '../../assets/images/6.png';
 import { Route, Switch } from "react-router-dom";
 import chap1 from '../../assets/images/sword.png';
 import chap2 from '../../assets/images/wusd.png';
