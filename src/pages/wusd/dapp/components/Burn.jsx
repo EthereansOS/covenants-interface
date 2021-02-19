@@ -229,10 +229,6 @@ const Burn = (props) => {
         }
         return (<>
                 <div className="Resultsregular">
-                        <p><b>{ pairs[pair].symbol0 } balance</b>: { window.formatMoney(props.dfoCore.toDecimals(pairs[pair].balanceOf['1'][0], pairs[pair].token0decimals), 2) }</p>
-                        <p><b>{ pairs[pair].symbol1 } balance</b>: {  window.formatMoney(props.dfoCore.toDecimals(pairs[pair].balanceOf['1'][1], pairs[pair].token1decimals), 2) }</p>
-                </div>
-                <div className="Resultsregular">
                         <p>For <b> { estimatedToken0.value } { pairs[pair].symbol0 } / { estimatedToken1.value } { pairs[pair].symbol1 }</b></p>
                 </div>
             </>
@@ -247,6 +243,9 @@ const Burn = (props) => {
                         <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                     </a> : <a onClick={() => burnWUSD()} disabled={!amount.full || !amount.value || amount.value === 0 || amount.full === 0} className="Web3ActionBTN">Burn</a>
                 }
+                <div className="Resultsregular ResultsregularS">
+                        <p><b>System Balance:</b> { window.formatMoney(props.dfoCore.toDecimals(pairs[pair].balanceOf['1'][0], pairs[pair].token0decimals), 2) } { pairs[pair].symbol0 } / {  window.formatMoney(props.dfoCore.toDecimals(pairs[pair].balanceOf['1'][1], pairs[pair].token1decimals), 2) } { pairs[pair].symbol1 }</p>
+                </div>
             </div>
         )
     }

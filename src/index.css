@@ -270,7 +270,7 @@ a:disabled {cursor:wait !important;}
 .success p {font-size: 18px; display: inline-block; color: #ffffff; font-weight: normal;}
 .success p a {font-size: 18px; display: inline-block; color: #ffffff; font-weight: bold; text-decoration: underline !important;}
 .success > a {font-size: 14px; position: absolute; bottom: 5px; left: 5px;z-index: 999999999999; color: #ffffff;}
-
+.ResultsregularS {font-size: 12px;}
 
 .fantasy {background-color: #4d4c4a !important;}
 .fantasy .LogoM {background-position: 0 -50px;}
