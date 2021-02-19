@@ -7,6 +7,7 @@ import { ApproveButton, Coin, Input, TokenInput } from '../../../../components/s
 import { addTransaction } from '../../../../store/actions';
 import { ethers } from 'ethers';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const abi = new ethers.utils.AbiCoder();
 
@@ -38,6 +39,7 @@ const ExploreIndexToken = (props) => {
             const symbol = await contract.methods.symbol(objectId).call();
             const indexDecimals = await contract.methods.decimals(objectId).call();
             const balanceOf = await contract.methods.balanceOf(props.dfoCore.address, objectId).call();
+            const totalSupply = await contract.methods.totalSupply(objectId).call();
             setBalance(window.formatMoney(props.dfoCore.toDecimals(balanceOf, indexDecimals), 4));
             const uri = await contract.methods.uri(objectId).call();
             let res = { data: { description: '', image: '' } };
@@ -47,7 +49,22 @@ const ExploreIndexToken = (props) => {
                 console.log('error while reading metadata from ipfs..')
             }
             let total = 0;
-            await Promise.all(info._amounts.map(async (amount) => total += parseInt(amount)));
+            const valueLocked = 0;
+            await Promise.all(info._amounts.map(async (amount, index) => {
+                try {
+                    const token = info._tokens[index];
+                    const tokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), token);
+                    const decimal = await tokenContract.methods.decimals().call();
+                    const res = await axios.get(props.dfoCore.getContextElement('coingeckoCoinPriceURL') + token);
+                    const data = res.data();
+                    const tokenPrice = data[token].usd;
+                    const value = parseFloat(props.dfoCore.toDecimals(amount, decimal)) * tokenPrice;
+                    total += value;
+                    valueLocked += value * parseFloat(props.dfoCore.toDecimals(totalSupply, indexDecimals));
+                } catch (error) {
+                    console.error(error);
+                }
+            }))
             const percentages = {};
             const symbols = {};
             const decimals = {};
@@ -62,8 +79,16 @@ const ExploreIndexToken = (props) => {
                     const decimal = await tokenContract.methods.decimals().call();
                     const approval = await tokenContract.methods.allowance(props.dfoCore.address, indexContract.options.address).call();
                     const balance = await tokenContract.methods.balanceOf(props.dfoCore.address).call();
-                    percentages[token] = (parseInt(amount) / parseInt(total)) * 100;
-                    console.log(percentages[token], token)
+                    const amountDecimals = props.dfoCore.toDecimals(amount.toString(), decimal);
+                    try {
+                        const res = await axios.get(props.dfoCore.getContextElement('coingeckoCoinPriceURL') + token);
+                        const data = res.data();
+                        const tokenPrice = data[token].usd;
+                        percentages[token] = ((parseFloat(amountDecimals) * tokenPrice) / parseInt(total)) * 100;
+                    } catch (error) {
+                        console.error(error);
+                        percentages[token] = 0;
+                    }
                     symbols[token] = symbol;
                     decimals[token] = decimal;
                     approvals[token] = parseInt(approval) > 0;
@@ -73,7 +98,7 @@ const ExploreIndexToken = (props) => {
                     console.error(error);
                 }
             }));
-            setMetadata({ name, symbol, symbols, uri, balances, ipfsInfo: res.data, info, objectId, interoperableContract, indexDecimals, percentages, contract, indexContract, decimals, approvals, contracts });
+            setMetadata({ name, symbol, symbols, mainInterface, uri, valueLocked, totalSupply, balances, ipfsInfo: res.data, info, objectId, interoperableContract, indexDecimals, percentages, contract, indexContract, decimals, approvals, contracts });
         } catch (error) {
             console.error(error);
         } finally {
@@ -92,6 +117,9 @@ const ExploreIndexToken = (props) => {
     }
 
     const mint = async () => {
+        const tkns = metadata.info._tokens.map((token, index) => { return { approval: metadata.approvals[token], index, token } });
+        const unapproved = tkns.filter((tkn) => !tkn.approval);
+        if (mintValue === 0 || unapproved.length > 0 || !mintValue) return;
         setLoading(true);
         try {
             const gas = await metadata.indexContract.methods.mint(metadata.objectId, props.dfoCore.toFixed(parseFloat(mintValue) * 10**metadata.indexDecimals).toString(), props.dfoCore.address).estimateGas({ from: props.dfoCore.address });
@@ -135,6 +163,7 @@ const ExploreIndexToken = (props) => {
     }
 
     const burn = async () => {
+        if (burnValue === 0 || !burnValue) return;
         setLoading(true);
         try {
             const gas = await metadata.contract.methods.safeBatchTransferFrom(props.dfoCore.address, metadata.indexContract.options.address, [metadata.objectId], [props.dfoCore.toFixed(parseFloat(burnValue) * 10**metadata.indexDecimals).toString()], abi.encode(["address[]"], [[props.dfoCore.address]])).estimateGas({ from: props.dfoCore.address });
@@ -179,28 +208,25 @@ const ExploreIndexToken = (props) => {
         return (
             <>
             <div className="IndexContractOpenInfo">
-                {/*@todoB - Close Button Logic*/}
-                <a className="web2ActionBTN">Close</a>
+                <Link to={"/bazaar/dapp"} className="web2ActionBTN">Close</Link>
                 <figure className="IndexLogoL">
                     <img src={metadata.ipfsInfo.image || defaultLogoImage}/>
                 </figure>
                 <div className="IndexThings">
                         <h3><b>{ metadata.name} ({metadata.symbol})</b></h3>
                         <p>{ metadata.ipfsInfo.description }</p> 
-                        {/*@todoB - Take the ITEM Contract and the ERC20 Version contract*/}
                         <div className="StatsLink">
-                            <a target="_blank" href="https://info.uniswap.orgtoken/0xA4d9C768E1c6cabB127a6326c0668b49235639e8">Etherscan</a>
-                            <a target="_blank" href="https://ethitem.com/?interoperable=0xA4d9C768E1c6cabB127a6326c0668b49235639e8">ITEM</a>
-                            <a target="_blank" href="https://info.uniswap.org/token/0xA4d9C768E1c6cabB127a6326c0668b49235639e8">Uniswap</a>
-                            <a target="_blank" href="https://mooniswap.info/token/0xA4d9C768E1c6cabB127a6326c0668b49235639e8">Mooniswap</a>
-                            <a target="_blank" href="https://sushiswap.fi/token/0xA4d9C768E1c6cabB127a6326c0668b49235639e8">Sushiswap</a>
+                            <a target="_blank" href={`https://etherscan.io/token/${metadata.mainInterface}`}>Etherscan</a>
+                            <a target="_blank" href={`https://ethitem.com/?interoperable=${address}`}>ITEM</a>
+                            <a target="_blank" href={`https://info.uniswap.org/token/${address}`}>Uniswap</a>
+                            <a target="_blank" href={`https://mooniswap.info/token/${address}`}>Mooniswap</a>
+                            <a target="_blank" href={`https://sushiswap.fi/token/${address}`}>Sushiswap</a>
                         </div> 
                 </div>
             </div>
             <div className="IndexContractOpenStatistic">
-                {/*@todoB - Supply + Calculation (Coingecko prices x units x supply) */}
-                <p><b>Supply:</b> 130,000 { metadata.symbol }</p>
-                <p><b>Total Value Locked:</b> $130,000</p>
+                <p><b>Supply:</b> {window.formatMoney(props.dfoCore.toDecimals(metadata.totalSupply, metadata.indexDecimals), 2)} { metadata.symbol }</p>
+                <p><b>Total Value Locked:</b> ${window.formatMoney(metadata.valueLocked, 2)}</p>
             </div>
             <div className="IndexContractOpenCollateral">
                 <h6>1 { metadata.symbol } is mintable by:</h6>
@@ -220,7 +246,7 @@ const ExploreIndexToken = (props) => {
                                             </div>
                                         </div>
                                         <div className="StatsLink">
-                                            <a target="_blank" href={"https://info.uniswap.org/token/" + [token]}>Etherscan</a>
+                                            <a target="_blank" href={"https://etherscan.io/token/" + [token]}>Etherscan</a>
                                             <a target="_blank" href={"https://info.uniswap.org/token/" + [token]}>Uniswap</a>
                                         </div>
                                     </div>
