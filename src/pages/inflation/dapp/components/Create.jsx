@@ -122,7 +122,7 @@ const Create = (props) => {
                     <div className="row">
                         <div className="col-12">
                             <h6>Host</h6>
-                            <p>Quando mio figlio era criaturo ié 'ò purtàv a vré e scigne e iss mi ricév papà? Ma com'è possibile? Degli animali accussì scemi vogliono fare quello che fanno i cristiani?</p>
+                            <p></p>
                             <select className="custom-select wusd-pair-select" value={extensionType} onChange={onExtensionType}>
                                 <option value="wallet">Wallet</option>
                                 <option value="deployedContract">Deployed Contract</option>
@@ -164,7 +164,7 @@ const Create = (props) => {
     }
 
     function render() {
-        return <>
+        return <> 
             <div className="row">
                 <div className="col-12">
                     <h6>Deploy</h6>

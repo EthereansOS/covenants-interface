@@ -102,7 +102,7 @@ const Explore = (props) => {
                 {
                     indexTokens.length > 0 && indexTokens.map((indexToken, index) => {
                         return (
-                            <BazaarComponent key={index} className="col-12 mb-4" dfoCore={props.dfoCore} indexToken={indexToken} hasBorder />
+                            <BazaarComponent key={index} className="IndexContract" dfoCore={props.dfoCore} indexToken={indexToken} hasBorder />
                         )
                     })
                 }

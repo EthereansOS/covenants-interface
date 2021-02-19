@@ -133,8 +133,12 @@ const Entry = (props) => {
     return editingOperation != null ?
         <Operation operation={operations[editingOperation]} cancelEditOperation={cancelEditOperation} saveEditOperation={saveEditOperation} />
         : <>
-            <div className="CreateList">
-                    <h6><b>Create {entryName}</b></h6>
+        <h6 className="COMINGSOONCOSIGIUDILI">Coming Soon</h6>
+        </>
+}
+
+    /* <div className="CreateList">
+                    <h6><b> {entryName}</b></h6>
             
                     {steps[step][0]()}
                 </div>
@@ -143,9 +147,8 @@ const Entry = (props) => {
                     {step !== 0 && <a onClick={() => setStep(step - 1)} className="backActionBTN">Back</a>}
                     {step !== steps.length - 1 && <a disabled={steps[step][1]()} onClick={() => setStep(step + 1)} className="web2ActionBTN">Next</a>}
                     {step === steps.length - 1 && <a disabled={steps[step][1]()} onClick={() => props.saveEntry(entryName, lastBlock, blockInterval, callerRewardPercentage, operations)} className="web2ActionBTN">Save</a>}
-            </div>
-        </>
-}
+            </div> */
+
 
 const mapStateToProps = (state) => {
     const { core, session } = state;

@@ -108,29 +108,28 @@ const ExploreIndexToken = (props) => {
     const getMint = () => {
         const tkns = metadata.info._tokens.map((token, index) => { return { approval: metadata.approvals[token], index, token } });
         const unapproved = tkns.filter((tkn) => !tkn.approval);
-        return <div className="col-md-9 col-12">
-            <div className="row">
-                <Input step={0.0001} showBalance={true} balance={balance} address={address} min={0} value={mintValue} onChange={(e) => onMintUpdate(e.target.value)} showCoin={true} name={metadata.symbol} />
+        return <div className="InputTokensRegular">
+                <div className="InputTokenRegular">
+                <Input step={0.0001} showBalance={false} balance={balance} address={address} min={0} value={mintValue} onChange={(e) => onMintUpdate(e.target.value)} showCoin={true} name={metadata.symbol} />
             </div>
+                {
+                    mintValue > 0 && <div className="ShowCollateralNeededBal"><h6>Needed:</h6> {mintResult._tokens.map((token, index) => <p>{window.formatMoney(props.dfoCore.toDecimals(mintResult._amounts[index], metadata.decimals[token], 2))} {metadata.symbols[token]}</p>)}</div>
+                }
+            <div className="ShowCollateralNeededBal">
+            <h6>Balances:</h6>
             {
                 metadata.info._tokens.map((token, index) => {
                     return (
-                        <p><b>{metadata.symbols[token]} balance: </b> {window.formatMoney(metadata.balances[token], 2)}</p>
+                            <p>{window.formatMoney(metadata.balances[token], 4)} {metadata.symbols[token]}</p>
                     )
                 })
             }
-            <div className="row">
-                {
-                    mintValue > 0 && <p>by {mintResult._tokens.map((token, index) => `${window.formatMoney(props.dfoCore.toDecimals(mintResult._amounts[index], metadata.decimals[token], 2))} ${metadata.symbols[token]} `)}</p>
-                }
             </div>
-            <div className="row">
+            <div className="Web3BTNs">
                 {
                     unapproved.length > 0 && <ApproveButton contract={metadata.contracts[unapproved[0].token]} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("indexAddress")} onError={(error) => console.error(error)} onApproval={(res) => getContractMetadata()} text={`Approve ${metadata.symbols[unapproved[0].token]}`}  /> 
                 }
-                <div className="col">
-                    <button className="btn btn-secondary" disabled={mintValue === 0 || unapproved.length > 0} onClick={() => mint()}>Mint</button> 
-                </div>
+                    <a className="Web3ActionBTN" disabled={mintValue === 0 || unapproved.length > 0} onClick={() => mint()}>Mint</a> 
             </div>
         </div>
     }
@@ -160,20 +159,17 @@ const ExploreIndexToken = (props) => {
     }
 
     const getBurn = () => {
-        return <div className="col-md-9 col-12">
-            <div className="row">
+        return <div className="InputTokensRegular">
+        <div className="InputTokenRegular">
                 <Input address={address} step={0.0001} showBalance={true} balance={balance} min={0} showMax={true} value={burnValue} onChange={(e) => onBurnUpdate(e.target.value)} showCoin={true} name={metadata.symbol} />
 
             </div>
-            <div className="row">
                 {
-                    burnValue > 0 && <p>for {burnResult._tokens.map((token, index) => `${window.formatMoney(props.dfoCore.toDecimals(burnResult._amounts[index], metadata.decimals[token], 2))} ${metadata.symbols[token]} `)}</p>
+                    burnValue > 0 && <div className="ShowCollateralNeededBal"><h6>for</h6> {burnResult._tokens.map((token, index) => <p>{window.formatMoney(props.dfoCore.toDecimals(burnResult._amounts[index], metadata.decimals[token], 2))} {metadata.symbols[token]}</p>)}</div>
                 }
-            </div>
-            <div className="row">
-                <div className="col">
-                    <button className="btn btn-secondary" disabled={parseFloat(burnValue) === 0} onClick={() => burn()}>Burn</button> 
-                </div>
+            <div className="Web3BTNs">
+
+                    <a className="Web3ActionBTN" disabled={parseFloat(burnValue) === 0} onClick={() => burn()}>Burn</a> 
             </div>
         </div>
     }
@@ -182,42 +178,62 @@ const ExploreIndexToken = (props) => {
         
         return (
             <>
-            <div className="row">
-                <div className="col-md-3 col-12">
-                    <img src={metadata.ipfsInfo.image || defaultLogoImage} width={100} />
-                </div>
-                <div className="col-md-9 col-12">
-                    <div className="row">
+            <div className="IndexContractOpenInfo">
+                {/*@todoB - Close Button Logic*/}
+                <a className="web2ActionBTN">Close</a>
+                <figure className="IndexLogoL">
+                    <img src={metadata.ipfsInfo.image || defaultLogoImage}/>
+                </figure>
+                <div className="IndexThings">
                         <h3><b>{ metadata.name} ({metadata.symbol})</b></h3>
-                    </div>
-                    <div className="row text-left">
-                        <p>{ metadata.ipfsInfo.description }</p>  
-                    </div>
+                        <p>{ metadata.ipfsInfo.description }</p> 
+                        {/*@todoB - Take the ITEM Contract and the ERC20 Version contract*/}
+                        <div className="StatsLink">
+                            <a target="_blank" href="https://info.uniswap.orgtoken/0xA4d9C768E1c6cabB127a6326c0668b49235639e8">Etherscan</a>
+                            <a target="_blank" href="https://ethitem.com/?interoperable=0xA4d9C768E1c6cabB127a6326c0668b49235639e8">ITEM</a>
+                            <a target="_blank" href="https://info.uniswap.org/token/0xA4d9C768E1c6cabB127a6326c0668b49235639e8">Uniswap</a>
+                            <a target="_blank" href="https://mooniswap.info/token/0xA4d9C768E1c6cabB127a6326c0668b49235639e8">Mooniswap</a>
+                            <a target="_blank" href="https://sushiswap.fi/token/0xA4d9C768E1c6cabB127a6326c0668b49235639e8">Sushiswap</a>
+                        </div> 
                 </div>
             </div>
-            <div className="row text-left">
-               <div className="col-12">
-                1 { metadata.symbol }:
-               </div>
+            <div className="IndexContractOpenStatistic">
+                {/*@todoB - Supply + Calculation (Coingecko prices x units x supply) */}
+                <p><b>Supply:</b> 130,000 { metadata.symbol }</p>
+                <p><b>Total Value Locked:</b> $130,000</p>
             </div>
-            <div className="row">
-                <div className="col">
-                    {
-                        metadata.info._tokens.map((token, index) => {
-                            return (
-                                <><b>{window.formatMoney(props.dfoCore.toDecimals(metadata.info._amounts[index], metadata.decimals[token]), 2)} {metadata.symbols[token]} </b><Coin address={token} />({window.formatMoney(metadata.percentages[token], 2)}%) </>
-                            )
-                        })
-                    }
+            <div className="IndexContractOpenCollateral">
+                <h6>1 { metadata.symbol } is mintable by:</h6>
+                <div className="IndexContractOpenCollateralALL">
+                    {/*@todoB - Allocation % logic based on coingecko prices */}
+                        {
+                            metadata.info._tokens.map((token, index) => {
+                                return (
+                                    <div className="IndexContractOpenCollateralSingle">
+                                        <div className="IndexContractOpenCollateralSingleTITLE">
+                                            <p>{window.formatMoney(props.dfoCore.toDecimals(metadata.info._amounts[index], metadata.decimals[token]), 2)} {metadata.symbols[token]} </p>
+                                            <Coin address={token} />
+                                            <div className="IndexSinglePerchBar">
+                                                <aside style={{width: metadata.percentages[token] + "%"}} >
+                                                    <span>{window.formatMoney(metadata.percentages[token], 0)}%</span>
+                                                </aside>
+                                            </div>
+                                        </div>
+                                        <div className="StatsLink">
+                                            <a target="_blank" href={"https://info.uniswap.org/token/" + [token]}>Etherscan</a>
+                                            <a target="_blank" href={"https://info.uniswap.org/token/" + [token]}>Uniswap</a>
+                                        </div>
+                                    </div>
+                                )
+                            })
+                        }
                 </div>
             </div>
-            <div className="row mt-4">
-                <div className="col-md-3 col-12">
-                    <select className="custom-select wusd-pair-select" onChange={(e) => setAction(e.target.value)}>
+            <div className="IndexManageMB">
+                    <select className="SelectRegular" onChange={(e) => setAction(e.target.value)}>
                         <option value="mint">Mint</option>
                         <option value="burn">Burn</option>
                     </select>
-                </div>
                 {
                     action === "mint" && getMint()
                 }

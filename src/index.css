@@ -177,7 +177,7 @@ a:disabled {cursor:wait !important;}
 .SortSection .SelectRegular {width: 45%; margin: 0 2.5%;}
 .SortSection .TextRegular {width: 45%; margin: 0 2.5%;}
 .ImgStand {width: 30px; height: 30px; display: inline-block;}
-.FarmContract, .FarmSetup {width: 100%; display: inline-block; margin: 10px auto; min-width: 600px; border: 1px solid; border-radius: 12px; padding: 3%; text-align: left;}
+.FarmContract, .FarmSetup, .IndexContract {width: 100%; display: inline-block; margin: 10px auto; min-width: 600px; border: 1px solid; border-radius: 12px; padding: 3%; text-align: left;}
 .InflationContract {width: 100%; display: inline-block; margin: 10px auto; min-width: 600px; border: 1px solid; border-radius: 12px; padding: 3%; text-align: left;}
 .FarmContractOpen {width: 100%; display: inline-block; margin: 10px auto; min-width: 600px; border-bottom: 1px solid; border-radius: 0px; padding: 3%; text-align: left;}
 .InflationContractOpen {width: 100%; display: inline-block; margin: 10px auto; min-width: 600px; border-radius: 0px; padding: 3%; text-align: left;}
@@ -231,6 +231,41 @@ a:disabled {cursor:wait !important;}
 .TokenInflLoaded {width: 100%; display: inline-block; text-align: center; margin: 20px auto;}
 .TokenInflLoaded h5 {font-size: 18px; display: inline-block; margin: auto 10px auto auto; vertical-align: middle; font-weight: bold;}
 .TokenInflLoaded img {width: 40px; display: inline-block; height: auto; vertical-align: middle;}
+.IndexLogo {width: 100px; height: 100px; display: inline-block; vertical-align: middle;}
+.IndexLogo img {width: 100px; height: 100px;}
+.IndexLogoL {width: 150px; height: 150px; display: inline-block; vertical-align: middle;}
+.IndexLogoL img {width: 150px; height: 150px;}
+.IndexInfo {width: 400px; display: inline-block; margin-left: 50px; vertical-align: middle;}
+.IndexInfo h6 {font-size: 18px; width: 100%; display: inline-block;}
+.IndexTokens {display: inline-block; width: 100%; margin-top: 10px;}
+.IndexTokens p {display: inline-block; margin: 5px; font-size: 12px;}
+.IndexTokens img {width: 23px;}
+.IndexContractBTN {width: 100%; display: inline-block; text-align: right;}
+.IndexContractOpenInfo {width: 95%; display: inline-block; margin: 10px auto 0 auto; padding-bottom: 10px; position: relative;}
+.IndexContractOpenInfo .web2ActionBTN {position: absolute; top: -10px; right: 0;}
+.IndexThings {width: 450px; display: inline-block; margin-left: 40px; vertical-align: middle; text-align: left;}
+.IndexThings p {font-size: 12px; display: inline-block; width: 100%;}
+.IndexThings h3 {font-size: 20px;display: inline-block; width: 100%;}
+.IndexThings .StatsLink {width: 100%; margin: 5px 0; text-align: left;}
+.IndexContractOpenCollateral {width: 95%; display: inline-block; margin: 15px auto;}
+.IndexContractOpenCollateral h6 {width: 100%; display: inline-block; text-align: left;}
+.IndexContractOpenCollateralALL {width: 100%;display: inline-block; text-align: left;margin: 10px auto;}
+.IndexContractOpenCollateralSingle {width: 30%; display: inline-block; vertical-align: middle; margin: 10px; border: 1px solid;border-radius: 12px;}
+.IndexContractOpenCollateralSingleTITLE {width: 100%; display: inline-block; margin: 20px 0 5px 0; text-align: center;}
+.IndexContractOpenCollateralSingleTITLE img {display: inline-block; margin: auto 5px; vertical-align: middle; width: 30px;}
+.IndexContractOpenCollateralSingleTITLE p {display: inline-block;vertical-align: middle; font-size: 16px; margin-block-start: 0em;margin-block-end: 0em;margin-inline-start: 0px;margin-inline-end: 0px;}
+.IndexSinglePerchBar {display: inline-block; width: 80%; border: 1px solid #7474f7; height: 33px; margin-top: 17px; border-radius: 12px; text-align: left;}
+.IndexSinglePerchBar span {font-size: 11px; font-weight: bold; margin-left: 5px; display: inline-block; vertical-align: middle;}
+.IndexSinglePerchBar aside {display: inline-block; height: 28px; vertical-align: middle; margin: 1px 1px; background-color: #7474f7; border-radius: 12px;}
+.IndexContractOpenCollateralSingle .StatsLink {width: 100%; text-align: center;}
+.IndexManageMB {width: 600px; margin: 20px auto; display: inline-block; text-align: center;}
+.ShowCollateralNeededBal {width: 100%; display: inline-block; margin: 10px auto; border: 1px solid; border-radius: 12px; padding: 5px;}
+.ShowCollateralNeededBal p {display: inline-block; width: auto; font-size: 13px;margin-block-start: 0em;margin-block-end: 0em;margin-inline-start: 0px;margin-inline-end: 0px; margin: 2px 5px;}
+.ShowCollateralNeededBal h6 {display: inline-block; margin-top: 5px; width: 100%; font-size: 13px;}
+.COMINGSOONCOSIGIUDILI {width: 100%; display: inline-block; margin: 30px auto; text-align: center; font-size: 20px;}
+.IndexContractOpenStatistic {width: 95%; display: inline-block; margin: 30px auto; border: 1px solid; border-radius: 12px;}
+.IndexContractOpenStatistic p {font-size: 14px; display: inline-block; margin: 10px 10px; vertical-align: middle;}
+.IndexManageMB .Web3BTNs {width: 100%;}
 
 
 .fantasy {background-color: #4d4c4a !important;}
@@ -270,7 +305,7 @@ a:disabled {cursor:wait !important;}
 .penguin .TextRegular, .penguin .TextAreaRegular {border-color: #9e6915; color: #9e6915;}
 .penguin .input-group-text {background-color: transparent;border-top: 1px solid #9e6915; border-right: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-left: 0px solid #9e6915; color: #ffffff;}
 .penguin .form-control, .penguin .form-control:focus {background-color: transparent;border-top: 1px solid #9e6915; border-left: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-right: 0px solid #9e6915; color: #ffffff;}
-.penguin .FarmContract, .penguin .FarmContractOpen, .penguin .FarmSetup, .penguin .InflationContract, .penguin .TokenOperation {border-color: #4d4c4a;}
+.penguin .FarmContract,.penguin .IndexContract, .penguin .FarmContractOpen, .penguin .FarmSetup, .penguin .InflationContract, .penguin .TokenOperation, .penguin .IndexContractOpenInfo, .penguin .IndexContractOpenCollateralSingle, .penguin .IndexContractOpenStatistic, .penguin .ShowCollateralNeededBal {border-color: #4d4c4a;}
 
 
 .magic {background: rgb(210,208,247);background: linear-gradient(135deg, rgba(210,208,247,1) 0%, rgba(253,247,245,1) 41%);}
@@ -295,8 +330,8 @@ a:disabled {cursor:wait !important;}
 .magic .TextRegular, .magic .TextAreaRegular {border-color: #9e6915; color: #9e6915;}
 .magic .input-group-text {background-color: transparent;border-top: 1px solid #9e6915; border-right: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-left: 0px solid #9e6915; color: #000000;}
 .magic .form-control, .magic .form-control:focus {background-color: transparent;border-top: 1px solid #9e6915; border-left: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-right: 0px solid #9e6915; color: #000000;}
-.magic .FarmContract, .magic .FarmContractOpen, .magic .FarmSetup, .magic .InflationContract, .magic .TokenOperation {border-color: #ebebeb;}
-
+.magic .FarmContract,.magic .IndexContract, .magic .FarmContractOpen, .magic .FarmSetup, .magic .InflationContract, .magic .TokenOperation, .magic .IndexContractOpenInfo, .magic .IndexContractOpenCollateralSingle, .magic .IndexContractOpenStatistic, .magic .ShowCollateralNeededBal {border-color: #ebebeb;}
+.magic .IndexSinglePerchBar span {color: #ffffff;}
 
 @media only screen and (max-device-width: 750px) {
    .IndexRegularText iframe {display: none;}
