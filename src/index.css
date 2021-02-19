@@ -344,10 +344,12 @@ a:disabled {cursor:wait !important;}
    .CovTITLE figure {width: 90%;}
    .DescCov p {font-size: 12px;}
    .page-container .FooterP {display: none;}
+   .TextRegular {width: 100%;}
    .IndexRegular .IndexRegularImg {width: 90%;}
    .dapp-container, .page-container {padding: 2px !important;}
    .StatsBro {display: none;}
    .StatsSis {width: 100%;}
+   .TextAreaRegular {max-width: 100%;}
    .nav-link {font-size: 10px;}
    .HealthContainer {width: 100%;display: inline-block;margin: 10px auto 40px auto;}
    .StatsIndicator {width: 100%;}
@@ -380,6 +382,30 @@ a:disabled {cursor:wait !important;}
    .IndexRegularImg {position: absolute; bottom: 5px;right: 5%; width: 90% !important;}
    .IndexRegular .IndexRegularText p {font-size: 10px;font-weight: bold;}
    .IndexRegular {display: inline-block !important; min-height: 300px !important; padding: 20px 20px 300px 20px !important;}
+   .IndexThings, .IndexManageMB, .IndexContractOpenCollateralSingle {width: 90%;}
+   .IndexThings {margin-left: auto; margin: 10px auto;}
+   .ListOfThings, .IndexContract, .InflationContract, .InflationContractOpen {max-width: 95%;min-width: 95%;}
+   .IndexInfo, .MainExploration {width: 90%;}
+   .IndexLogo {margin: 10px auto; display: block;}
+   .IndexInfo {width: 95%; display: block; margin: 5px auto;}
+   .IndexInfo h6 {font-size: 12px;}
+   .IndexContractBTN {text-align: center;}
+   .InflationContract h4 {width: 100%; font-size: 15px; margin-bottom: 8px;}
+   .InflationContractLinks {width: 100%; text-align: center;}
+   .InflationContract p {display: none;}
+   .InflationContract .InflationContractButton {width: 100%; text-align: center; margin-left: auto; margin: 10px auto;}
+   .InflationContractOpen h3 {font-size: 15px;}
+   .dapp-container {min-height: 300px;}
+   .TokenOperation h6 {width: 100%; font-size: 15px; text-align: center; margin: 8px auto; margin-bottom: 8px;}
+   .TokenOperationLinks, .CreateList {width: 100%;}
+   .TokenOperation p {font-size: 13px;}
+   .TokenOperation p img {width: 20px;}
+   .CreateList p {width: 100%;}
+   .InputForm input[type="file"] {width: 90%;}
+   .Web2ActionsBTNs {width: 100%;}
+   .TokenLoaded > div {width: 100%;}
+   .CreateList .TokenLoaded > div .backActionBTN {left: -35px;}
+   .CreateList .TokenLoaded {width: 90%;margin-left: 25px;}
 }
 
 @media only screen and (min-device-width: 751px) and (max-device-width: 1024px) {
