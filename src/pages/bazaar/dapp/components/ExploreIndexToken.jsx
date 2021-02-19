@@ -57,14 +57,18 @@ const ExploreIndexToken = (props) => {
                     const token = info._tokens[index];
                     const tokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), token);
                     const decimal = await tokenContract.methods.decimals().call();
-                    const res = await axios.get(props.dfoCore.getContextElement('coingeckoCoinPriceURL') + token);
-                    console.log(res);
-                    const { data } = res;
-                    const tokenPrice = data[token.toLowerCase()].usd;
-                    const value = parseFloat(props.dfoCore.toDecimals(amount, decimal)) * tokenPrice;
-                    total += value;
-                    valueLocked += value * parseFloat(props.dfoCore.toDecimals(totalSupply, indexDecimals));
-                    console.log(value, valueLocked)
+                    try {
+                        const res = await axios.get(props.dfoCore.getContextElement('coingeckoCoinPriceURL') + token);
+                        const { data } = res;
+                        const tokenPrice = data[token.toLowerCase()].usd;
+                        let value = parseFloat(props.dfoCore.toDecimals(amount, decimal)) * tokenPrice;
+                        total += value;
+                        valueLocked += value * parseFloat(props.dfoCore.toDecimals(totalSupply, indexDecimals));
+                    } catch (err) {
+                        let val = parseFloat(props.dfoCore.toDecimals(amount, decimal));
+                        total += val;
+                        valueLocked += val * parseFloat(props.dfoCore.toDecimals(totalSupply, indexDecimals));
+                    }
                 } catch (error) {
                     console.error(error);
                 }
@@ -90,7 +94,7 @@ const ExploreIndexToken = (props) => {
                         const tokenPrice = data[token.toLowerCase()].usd;
                         percentages[token] = ((parseFloat(amountDecimals) * tokenPrice) / parseInt(total)) * 100;
                     } catch (error) {
-                        console.error(error);
+                        // percentages[token] = ((parseFloat(amountDecimals)) / parseInt(total)) * 100;
                         percentages[token] = 0;
                     }
                     symbols[token] = symbol;
@@ -185,9 +189,10 @@ const ExploreIndexToken = (props) => {
         if (burnValue === 0 || !burnValue) return;
         setBurnLoading(true);
         try {
-            console.log(props.dfoCore.toFixed(parseFloat(burnValue) * 10**metadata.indexDecimals).toString());
-            const gas = await metadata.contract.methods.safeBatchTransferFrom(props.dfoCore.address, props.dfoCore.getContextElement('indexAddress'), [metadata.objectId], [props.dfoCore.toFixed(parseFloat(burnValue) * 10**metadata.indexDecimals).toString()], abi.encode(["address[]"], [[props.dfoCore.address]])).estimateGas({ from: props.dfoCore.address });
-            const result = await metadata.contract.methods.safeBatchTransferFrom(props.dfoCore.address, props.dfoCore.getContextElement('indexAddress'), [metadata.objectId], [props.dfoCore.toFixed(parseFloat(burnValue) * 10**metadata.indexDecimals).toString()], abi.encode(["address[]"], [[props.dfoCore.address]])).send({ from: props.dfoCore.address, gas })
+            const indexCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), props.dfoCore.getContextElement('indexCollectionAddress'));
+            console.log([props.dfoCore.toFixed(props.dfoCore.fromDecimals(burnValue, metadata.indexDecimals)).toString()]);
+            const gas = await indexCollection.methods.safeBatchTransferFrom(props.dfoCore.address, props.dfoCore.getContextElement('indexAddress'), [metadata.objectId], [props.dfoCore.toFixed(props.dfoCore.fromDecimals(burnValue, metadata.indexDecimals)).toString()], abi.encode(["address[]"], [[props.dfoCore.address]])).estimateGas({ from: props.dfoCore.address });
+            const result = await indexCollection.methods.safeBatchTransferFrom(props.dfoCore.address, props.dfoCore.getContextElement('indexAddress'), [metadata.objectId], [props.dfoCore.toFixed(props.dfoCore.fromDecimals(burnValue, metadata.indexDecimals)).toString()], abi.encode(["address[]"], [[props.dfoCore.address]])).send({ from: props.dfoCore.address, gas })
             props.addTransaction(result);
         } catch (error) {
             console.error(error)
