@@ -92,7 +92,8 @@ const ExploreInflationContract = (props) => {
                 executable: active && blockNumber >= nextBlock,
                 active,
                 contract,
-                oneHundred
+                oneHundred,
+                nextBlock
             });
         } catch (error) {
             console.error(error);
@@ -170,6 +171,7 @@ const ExploreInflationContract = (props) => {
                 <option value="false">Output</option>
             </select>}
         </div>
+        <h5>Next Execution Block: <a href={`${props.dfoCore.getContextElement("etherscanURL")}block/${metadata.nextBlock}`} target="_blank"><b>#{metadata.nextBlock}</b></a></h5>
         {metadata.executable && !executing && <a className="Web3ActionBTN" onClick={execute}>Execute</a>}
         {executing && <Loading />}
     </div>;
