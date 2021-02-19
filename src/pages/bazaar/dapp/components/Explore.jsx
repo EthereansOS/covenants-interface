@@ -51,7 +51,7 @@ const Explore = (props) => {
             console.log(tokens);
             setIndexTokens(tokens);
         } catch (error) {
-
+            console.error(error);
         } finally {
             setLoading(false);
         }

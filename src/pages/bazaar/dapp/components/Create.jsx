@@ -81,7 +81,7 @@ const Create = (props) => {
             const metadataResult = await props.dfoCore.uploadDataToIpfs(JSON.stringify(metadata));
             const metadataURI = `${props.dfoCore.getContextElement('ipfsUrlBase')}/${metadataResult.path}`;
             const indexContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("IndexABI"), props.dfoCore.getContextElement("indexAddress"));
-            console.log(indexContract);
+
             const gas = await indexContract.methods.mint(title, symbol, metadataURI, tokens.map((token) => token.address), tokens.map((token) => props.dfoCore.toFixed(token.amount * 10**token.decimals).toString()), 0, props.dfoCore.voidEthereumAddress).estimateGas({ from: props.dfoCore.address });
             const result = await indexContract.methods.mint(title, symbol, metadataURI, tokens.map((token) => token.address), tokens.map((token) => props.dfoCore.toFixed(token.amount * 10**token.decimals).toString()), 0, props.dfoCore.voidEthereumAddress).send({ from: props.dfoCore.address, gas });
             const receipt = await props.dfoCore.web3.eth.getTransactionReceipt(result.transactionHash);
