@@ -210,7 +210,7 @@ const Operation = (props) => {
                         <option value="true" onChange={changeEnterInETH}>Ethereum</option>
                     </select>
                             
-                    {!enterInETH && <div className="CreateList">
+                    {!enterInETH && <div className="CreateList CreateListS">
                         <TokenInput placeholder={"Token address"} tokenAddress={inputToken ? inputToken.address : ''} label={"Input token"} placeholder={"Input token address"} width={60} onClick={(address) => onSelectInputToken(address)} text={"Load"} />
                     </div>}
            
@@ -220,12 +220,10 @@ const Operation = (props) => {
                         <span className="visually-hidden"></span>
                     </div>
                 </div> : <>
-                        <div className="row mb-4">
-                            {inputToken && <div className="col-12">
-                                <b>{inputToken.symbol}</b> <Coin address={inputToken.address} className="ml-2" />
+                            {inputToken && <div className="TokenInflLoaded">
+                                <h5>{inputToken.symbol}</h5> <Coin address={inputToken.address} className="TokenInflLoaded" />
                             </div>
                             }
-                        </div>
                             <select value={inputTokenMethod} onChange={(e) => setInputTokenMethod(e.target.value)} className="SelectRegular">
                                 <option value="">Select method</option>
                                 {!enterInETH && <option value="mint">By mint</option>}
@@ -326,16 +324,13 @@ const Operation = (props) => {
 
     const getSwapThirdStep = () => {
         return <>
-            <div className="row mb-4">
-                <h6 className="text-secondary"><b>Swap</b></h6>
-            </div>
-            <div className="row w-50 mb-4">
-                <select value={transferType} onChange={onTransferChange} className="custom-select wusd-pair-select">
+            <div className="InputForm">
+                <h6><b>Swap Operation</b></h6>
+                <select value={transferType} onChange={onTransferChange} className="SelectRegular">
                     <option value="">Select type</option>
                     {!enterInETH && <option value="percentage">Percentage</option>}
                     <option value="amount">Amount</option>
                 </select>
-            </div>
             {
                 transferType ?
                     transferType == 'percentage' ?
@@ -424,6 +419,7 @@ const Operation = (props) => {
                     </div>
                 </> : <div />
             }
+            </div>
         </>
     }
 

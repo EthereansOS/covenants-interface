@@ -170,7 +170,7 @@ a:disabled {cursor:wait !important;}
 .CreateList p {font-size: 12px; display: block; margin: 5px auto; text-align: center; width: 300px;}
 .TextRegularS {width: 90%; display: inline-block; font-size: 13px; font-weight: bold; padding: 7px 2%;border: 1px solid; border-radius: 8px; background-color: transparent;max-width: 330px;}
 .CheckboxQuestions aside {width: 10%; display: inline-block; margin-left: 3px; font-size: 18px; }
-
+.CreateListS .TextRegular {width: 300px;}
 
 .MainExploration {width: 95%; display: inline-block; margin: 10px auto; width: 600px;}
 .SortSection {width: 100%; text-align: center; display: inline-block; margin: 10px auto; min-width: 600px;} 
@@ -228,7 +228,9 @@ a:disabled {cursor:wait !important;}
 .CheckboxQuestions label input[type="checkbox"] {display: inline-block;vertical-align: middle;}
 .SpecialInputPerch {width: 100%; display: inline-block;max-width: 370px; position: relative;}
 .SpecialInputPerch aside {position: absolute; right: 0; width: 40px; font-size: 18px; color: #9e6915; border-left: 1px solid #9e6915; top: 4px;}
-
+.TokenInflLoaded {width: 100%; display: inline-block; text-align: center; margin: 20px auto;}
+.TokenInflLoaded h5 {font-size: 18px; display: inline-block; margin: auto 10px auto auto; vertical-align: middle; font-weight: bold;}
+.TokenInflLoaded img {width: 40px; display: inline-block; height: auto; vertical-align: middle;}
 
 
 .fantasy {background-color: #4d4c4a !important;}
