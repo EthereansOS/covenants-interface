@@ -119,7 +119,7 @@ const Create = (props) => {
                 <div className="InputForm">
                     <h6><b>Cover</b></h6>
                     <input type="file" accept=".png,.gif" onChange={captureFile} />
-                    <p>The cover image must be .png or .gif, with a size limit of 5 MB and max. width of 350px, due to users experience in IPFS download speed limitations</p>
+                    <p>Keeping in mind IPFS download speed limitations, the cover image must be .png or .gif, with a size limit of 5MB and a max width of 350px</p>
                 </div>
                 <div className="Web2ActionsBTNs">
                     <a onClick={() => onCancel()} className="backActionBTN">Cancel</a>
@@ -139,7 +139,7 @@ const Create = (props) => {
                                 <div>
                                     <Input min={0} value={token.amount} onChange={(e) => setTokens(tokens.map((t, i) => i !== index ? t : { ...token, amount: e.target.value}))} showCoin={true} address={token.address} name={token.symbol} />
                                     <a className="backActionBTN" onClick={() => setTokens(tokens.filter((_, i) => i !== index))}>X</a>
-                                    <p>Insert the amount of {token.symbol} needed to mint 1 { symbol }</p>
+                                    <p>Insert the amount of {token.symbol} tokens needed to mint 1 { symbol }</p>
                                 </div>
                             </div>
                     )
