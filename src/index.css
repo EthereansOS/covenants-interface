@@ -256,7 +256,7 @@ a:disabled {cursor:wait !important;}
 .IndexContractOpenCollateralSingleTITLE p {display: inline-block;vertical-align: middle; font-size: 16px; margin-block-start: 0em;margin-block-end: 0em;margin-inline-start: 0px;margin-inline-end: 0px;}
 .IndexSinglePerchBar {display: inline-block; width: 80%; border: 1px solid #7474f7; height: 33px; margin-top: 17px; border-radius: 12px; text-align: left;}
 .IndexSinglePerchBar span {font-size: 11px; font-weight: bold; margin-left: 5px; display: inline-block; vertical-align: middle;}
-.IndexSinglePerchBar aside {display: inline-block; height: 28px; vertical-align: middle; margin: 1px 1px; background-color: #7474f7; border-radius: 12px; min-width: 15%; max-width: 99%;}
+.IndexSinglePerchBar aside {display: inline-block; height: 28px; vertical-align: middle; margin: 1px 1px; background-color: #7474f7; border-radius: 12px; min-width: 17%; max-width: 99%;}
 .IndexContractOpenCollateralSingle .StatsLink {width: 100%; text-align: center;}
 .IndexManageMB {width: 600px; margin: 20px auto; display: inline-block; text-align: center;}
 .ShowCollateralNeededBal {width: 100%; display: inline-block; margin: 10px auto; border: 1px solid; border-radius: 12px; padding: 5px;}
