@@ -30,6 +30,7 @@ const Explore = (props) => {
                     const info = await indexContract.methods.info(indexToken.objectId, 0).call();
                     const name = await contract.methods.name(indexToken.objectId).call();
                     const uri = await contract.methods.uri(indexToken.objectId).call();
+                    const totalSupply = await interoperableContract.methods.totalSupply().call();
                     let res = { data: { description: '', image: '' } };
                     try {
                         res = await axios.get(uri);
@@ -47,12 +48,12 @@ const Explore = (props) => {
                         amounts[token] = props.dfoCore.toDecimals(amount, decimals);
                         percentages[token] = (parseInt(amount) / parseInt(total)) * 100;
                     }));
-                    tokens.push({ contract, amounts, ipfsInfo: res.data, address: indexToken.address, objectId: indexToken.objectId, info, percentages, name, uri });
+                    tokens.push({ totalSupply, contract, amounts, ipfsInfo: res.data, address: indexToken.address, objectId: indexToken.objectId, info, percentages, name, uri });
                 } catch (error) {
                     console.error(error);
                 }
             }));
-            setIndexTokens(tokens);
+            setIndexTokens(tokens.sort(function(a, b){return parseInt(b.totalSupply) - parseInt(a.totalSupply)}));
         } catch (error) {
             console.error(error);
         } finally {
