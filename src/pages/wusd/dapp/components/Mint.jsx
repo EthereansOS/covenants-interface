@@ -172,8 +172,8 @@ const Mint = (props) => {
                 const chosenPair = pairs[pair];
                 const { ammIndex, lpIndex, token0Contract, token1Contract, token0decimals, token1decimals } = chosenPair;
                 
-                const gasLimit = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), false).estimateGas({ from: props.dfoCore.address });
-                const result = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), false).send({ from: props.dfoCore.address, gasLimit });
+                const gasLimit = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), useLpToken).estimateGas({ from: props.dfoCore.address });
+                const result = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), useLpToken).send({ from: props.dfoCore.address, gasLimit });
                 props.addTransaction(result);
                 const balance0 = await token0Contract.methods.balanceOf(props.dfoCore.address).call();
                 const balance1 = await token1Contract.methods.balanceOf(props.dfoCore.address).call();
