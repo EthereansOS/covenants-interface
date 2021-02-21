@@ -48,7 +48,7 @@ const Mint = (props) => {
                         })
                     chosenPair.lpContract.methods.balanceOf(props.dfoCore.address).call()
                         .then((result) => {
-                            setLpTokenBalance(props.dfoCore.toDecimals(result, parseInt(chosenPair.lpDecimals)));
+                            setLpTokenBalance(props.dfoCore.toDecimals(result, parseInt(chosenPair.decimalsLp)));
                         })
                 }
             }, 2000);
