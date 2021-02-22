@@ -15,16 +15,39 @@ const Explore = (props) => {
         }
     }, []);
 
+    function manipulateResult(res, address) {
+        console.log(res);
+        var result = {
+            0 : {},
+            1 : {}
+        };
+
+        Object.entries(res[0]).forEach(it => result[0][it[0]] = it[1]);
+        Object.entries(res[1]).forEach(it => result[1][it[0]] = it[1]);
+
+        if(props.dfoCore.web3.utils.toChecksumAddress(address) === '0x1CB9F190247C8745DFFc751b1604BC3b3Bcd2175') {
+            result[0].name = "EthOS - WIMD Weekly Fixed Inflation";
+        }
+
+        return result;
+    }
+
     const getEntries = async () => {
         setLoading(true);
         try {
             await props.dfoCore.loadDeployedFixedInflationContracts();
             const mappedEntries = [];
             await Promise.all(
-                props.dfoCore.deployedFixedInflationContracts.map(async (contract) => { 
+                props.dfoCore.deployedFixedInflationContracts.map(async (contract) => {
                     const fiContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('FixedInflationABI'), contract.address);
-                    const result = await fiContract.methods.entry().call();
-                    mappedEntries.push({ contract: fiContract, entry : result[0], operations: result[1] });
+                    const result = manipulateResult(await fiContract.methods.entry().call(), contract.address);
+                    var extensionContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("FixedInflationExtensionABI"), await fiContract.methods.extension().call());
+                    var active = true;
+                    try {
+                        active = await extensionContract.methods.active().call();
+                    } catch (e) {
+                    }
+                    active && mappedEntries.push({ contract: fiContract, entry: result[0], operations: result[1] });
                 })
             );
             setFixedInflationContracts(mappedEntries);
@@ -37,8 +60,8 @@ const Explore = (props) => {
         }
     }
 
-    return loading ? <Loading/> : (
-        
+    return loading ? <Loading /> : (
+
         <div className="MainExploration">
             {/*<div className="SortSection">
                     <select className="SelectRegular">
@@ -61,7 +84,11 @@ const Explore = (props) => {
                     </div>
                 }
                 {
-                    fixedInflationContracts.map(({ contract, entry, operations }, i) => {
+                    fixedInflationContracts.sort((a, b) => {
+                        if(a.entry.name < b.entry.name) { return -1; }
+                        if(a.entry.name > b.entry.name) { return 1; }
+                        return 0;
+                       }).map(({ contract, entry, operations }, i) => {
                         return (
                             <FixedInflationComponent key={entry.name + "_" + i} className={"InflationContract"} contract={contract} entry={entry} operations={operations} showButton={true} hasBorder={true} />
                         )
