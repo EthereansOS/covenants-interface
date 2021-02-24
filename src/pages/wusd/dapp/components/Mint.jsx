@@ -1,27 +1,31 @@
 import { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { ApproveButton, Input } from '../../../../components';
+import { ApproveButton, Input, Coin } from '../../../../components';
 import { addTransaction } from '../../../../store/actions';
 import WUSDLogo from '../../../../assets/images/x1WUSD.png';
 
 const Mint = (props) => {
     const [pair, setPair] = useState("");
     const [pairs, setPairs] = useState([]);
-    const [useLpToken, setUseLpToken] = useState(false);
+    const [inputType, setInputType] = useState("pair");
     const [lpTokenAmount, setLpTokenAmount] = useState(0);
     const [firstAmount, setFirstAmount] = useState(0);
     const [secondAmount, setSecondAmount] = useState(0);
     const [firstTokenApproved, setFirstTokenApproved] = useState(false);
     const [secondTokenApproved, setSecondTokenApproved] = useState(false);
-    const [firstTokenBalance, setFirstTokenBalance] = useState(0);
-    const [secondTokenBalance, setSecondTokenBalance] = useState(0);
-    const [lpTokenBalance, setLpTokenBalance] = useState(0);
+    const [firstTokenBalance, setFirstTokenBalance] = useState(0);
+    const [secondTokenBalance, setSecondTokenBalance] = useState(0);
+    const [lpTokenBalance, setLpTokenBalance] = useState(0);
     const [lpTokenApproved, setLpTokenApproved] = useState(false);
     const [wusdExtensionController, setWusdExtensionController] = useState(null);
     const [loading, setLoading] = useState(false);
     const [mintLoading, setMintLoading] = useState(false);
     const [isHealthyPair, setIsHealthyPair] = useState(true);
     const [intervalId, setIntervalId] = useState(null);
+    const [ethBalance, setEthBalance] = useState("0");
+    const [ethValue, setEthValue] = useState("0");
+    const [ethValue0, setEthValue0] = useState("0");
+    const [ethValue1, setEthValue1] = useState("0");
 
     useEffect(() => {
         getController();
@@ -35,7 +39,7 @@ const Mint = (props) => {
     useEffect(() => {
         if (intervalId) clearInterval(intervalId);
         if (pair) {
-            const interval = setInterval(() => {
+            const interval = setInterval(async () => {
                 if (pair && pairs[pair]) {
                     const chosenPair = pairs[pair];
                     chosenPair.token0Contract.methods.balanceOf(props.dfoCore.address).call()
@@ -50,6 +54,7 @@ const Mint = (props) => {
                         .then((result) => {
                             setLpTokenBalance(props.dfoCore.toDecimals(result, parseInt(chosenPair.decimalsLp)));
                         })
+                    setEthBalance(props.dfoCore.toDecimals(await props.dfoCore.web3.eth.getBalance(props.dfoCore.address), 18));
                 }
             }, 2000);
             setIntervalId(interval);
@@ -95,7 +100,7 @@ const Mint = (props) => {
                             console.error(error);
                         }
                     }));
-                    allowedPairs = [...allowedPairs, ...pools ];
+                    allowedPairs = [...allowedPairs, ...pools];
                 } catch (error) {
                     console.error(error);
                 }
@@ -110,9 +115,9 @@ const Mint = (props) => {
     }
 
     const clear = () => {
-        setFirstAmount({ value: 0, full: 0});
-        setSecondAmount({ value: 0, full: 0});
-        setLpTokenAmount({ value: 0, full: 0});
+        setFirstAmount({ value: 0, full: 0 });
+        setSecondAmount({ value: 0, full: 0 });
+        setLpTokenAmount({ value: 0, full: 0 });
     }
 
     const onTokenApproval = (type, res) => {
@@ -145,12 +150,12 @@ const Mint = (props) => {
                 const tokensAmounts = res[1];
                 const updatedFirstTokenAmount = props.dfoCore.formatNumber(props.dfoCore.normalizeValue(tokensAmounts[0], chosenPair.token0decimals));
                 const updatedSecondTokenAmount = props.dfoCore.formatNumber(props.dfoCore.normalizeValue(tokensAmounts[1], chosenPair.token1decimals));
-        
+
                 const ratio = updatedFirstTokenAmount > updatedSecondTokenAmount ? updatedFirstTokenAmount / updatedSecondTokenAmount : updatedSecondTokenAmount / updatedFirstTokenAmount;
                 const maximumPairRatioForMint = await wusdExtensionController.methods.maximumPairRatioForMint().call();
                 const oneHundred = await wusdExtensionController.methods.ONE_HUNDRED().call()
-                
-                
+
+
                 if (parseFloat(ratio) > (parseInt(maximumPairRatioForMint) / parseInt(oneHundred))) {
                     setIsHealthyPair(false);
                 } else {
@@ -171,9 +176,18 @@ const Mint = (props) => {
             if ((firstAmount.value > 0 && secondAmount.value > 0) || lpTokenAmount.value > 0) {
                 const chosenPair = pairs[pair];
                 const { ammIndex, lpIndex, token0Contract, token1Contract, token0decimals, token1decimals } = chosenPair;
-                
-                const gasLimit = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), useLpToken).estimateGas({ from: props.dfoCore.address });
-                const result = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), useLpToken).send({ from: props.dfoCore.address, gasLimit });
+
+                var result;
+                if (inputType !== 'eth') {
+                    const gasLimit = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), inputType === 'lp').estimateGas({ from: props.dfoCore.address });
+                    result = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), inputType === 'lp').send({ from: props.dfoCore.address, gasLimit });
+                } else {
+                    var sendingOptions = { from: props.dfoCore.address };
+                    var method;//TODO prepare input and call method
+                    sendingOptions.gasLimit = method.estimateGas(sendingOptions);
+                    method.send({ ...sendingOptions, gasLimit: await method.estimateGas(sendingOptions) });
+                }
+
                 props.addTransaction(result);
                 const balance0 = await token0Contract.methods.balanceOf(props.dfoCore.address).call();
                 const balance1 = await token1Contract.methods.balanceOf(props.dfoCore.address).call();
@@ -182,9 +196,9 @@ const Mint = (props) => {
             } else {
                 return;
             }
-            setFirstAmount({ value: 0, full: 0});
-            setSecondAmount({ value: 0, full: 0});
-            setLpTokenAmount({ value: 0, full: 0});
+            setFirstAmount({ value: 0, full: 0 });
+            setSecondAmount({ value: 0, full: 0 });
+            setLpTokenAmount({ value: 0, full: 0 });
         } catch (error) {
             console.error(error);
         } finally {
@@ -200,13 +214,13 @@ const Mint = (props) => {
             };
             const chosenPair = pairs[pair];
             const { ammContract, liquidityPool, token0, token0decimals, token1decimals, decimalsLp } = chosenPair;
-            const updatedFirstAmount = { value: amount, full: props.dfoCore.toFixed(props.dfoCore.fromDecimals(parseFloat(amount).toString() || "0", token0decimals)).toString()};
+            const updatedFirstAmount = { value: amount, full: props.dfoCore.toFixed(props.dfoCore.fromDecimals(parseFloat(amount).toString() || "0", token0decimals)).toString() };
             setFirstAmount(updatedFirstAmount);
-    
+
             const res = await ammContract.methods.byTokenAmount(liquidityPool, token0, updatedFirstAmount.full.toString()).call();
             const { tokensAmounts, liquidityPoolAmount } = res;
-    
-            setSecondAmount({ value: props.dfoCore.toDecimals(tokensAmounts[1], token1decimals), full: tokensAmounts[1]});
+
+            setSecondAmount({ value: props.dfoCore.toDecimals(tokensAmounts[1], token1decimals), full: tokensAmounts[1] });
             setLpTokenAmount({ value: props.dfoCore.toDecimals(liquidityPoolAmount, decimalsLp), full: liquidityPoolAmount });
         } catch (error) {
             console.error(error);
@@ -221,15 +235,15 @@ const Mint = (props) => {
             };
             const chosenPair = pairs[pair];
             const { ammContract, liquidityPool, token1, token0decimals, token1decimals, decimalsLp } = chosenPair;
-            const updatedSecondAmount = { value: amount, full: props.dfoCore.toFixed(props.dfoCore.fromDecimals(parseFloat(amount).toString() || "0", token1decimals)).toString()};
-            
+            const updatedSecondAmount = { value: amount, full: props.dfoCore.toFixed(props.dfoCore.fromDecimals(parseFloat(amount).toString() || "0", token1decimals)).toString() };
+
             setSecondAmount(updatedSecondAmount);
             console.log(updatedSecondAmount);
-    
+
             const res = await ammContract.methods.byTokenAmount(liquidityPool, token1, updatedSecondAmount.full.toString()).call();
             const { tokensAmounts, liquidityPoolAmount } = res;
-    
-            setFirstAmount({ value: props.dfoCore.toDecimals(tokensAmounts[0], token0decimals), full: tokensAmounts[0]});
+
+            setFirstAmount({ value: props.dfoCore.toDecimals(tokensAmounts[0], token0decimals), full: tokensAmounts[0] });
             setLpTokenAmount({ value: props.dfoCore.toDecimals(liquidityPoolAmount, decimalsLp), full: liquidityPoolAmount });
         } catch (error) {
             console.error(error);
@@ -244,14 +258,75 @@ const Mint = (props) => {
             };
             const chosenPair = pairs[pair];
             const { ammContract, liquidityPool, token0decimals, token1decimals, decimalsLp } = chosenPair;
-            const updatedLpAmount = { value: amount, full: props.dfoCore.toFixed(props.dfoCore.fromDecimals(parseFloat(amount).toString() || "0", decimalsLp).toString())};
+            const updatedLpAmount = { value: amount, full: props.dfoCore.toFixed(props.dfoCore.fromDecimals(parseFloat(amount).toString() || "0", decimalsLp).toString()) };
             setLpTokenAmount(updatedLpAmount);
-    
+
             const res = await ammContract.methods.byLiquidityPoolAmount(liquidityPool, updatedLpAmount.full).call();
             const { tokensAmounts } = res;
-    
-            setFirstAmount({ value: props.dfoCore.toDecimals(tokensAmounts[0], token0decimals), full: tokensAmounts[0]});
-            setSecondAmount({ value: props.dfoCore.toDecimals(tokensAmounts[1], token1decimals), full: tokensAmounts[1]});
+
+            setFirstAmount({ value: props.dfoCore.toDecimals(tokensAmounts[0], token0decimals), full: tokensAmounts[0] });
+            setSecondAmount({ value: props.dfoCore.toDecimals(tokensAmounts[1], token1decimals), full: tokensAmounts[1] });
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    const updateEthAmount = async (amount) => {
+        try {
+            if (!amount) {
+                clear();
+                return;
+            };
+            setEthValue(amount);
+            const chosenPair = pairs[pair];
+            const { ammContract, liquidityPool, token0decimals, token1decimals, decimalsLp } = chosenPair;
+
+            var value = props.dfoCore.fromDecimals(window.numberToString(amount), 18);
+            var halfValue = props.dfoCore.web3.utils.toBN(value).div(props.dfoCore.web3.utils.toBN(2)).toString();
+            var ethereumAddress = (await ammContract.methods.data().call())[0];
+
+            async function calculateBestLP(firstToken, secondToken, firstDecimals, secondDecimals) {
+
+                var liquidityPoolAddress = (await ammContract.methods.byTokens([ethereumAddress, firstToken]).call())[2];
+
+                var token0Value = (await ammContract.methods.getSwapOutput(ethereumAddress, halfValue, [liquidityPoolAddress], [firstToken]).call())[1];
+
+                var token1Value = (await ammContract.methods.byTokenAmount(liquidityPool, firstToken, token0Value).call());
+                var lpAmount = token1Value[0];
+                token1Value = token1Value[1][token1Value[2].indexOf(secondToken)];
+
+                const updatedFirstTokenAmount = props.dfoCore.formatNumber(props.dfoCore.normalizeValue(token0Value, firstDecimals));
+                const updatedSecondTokenAmount = props.dfoCore.formatNumber(props.dfoCore.normalizeValue(token1Value, secondDecimals));
+
+                liquidityPoolAddress = (await ammContract.methods.byTokens([ethereumAddress, secondToken]).call())[2];
+                var token1ValueETH = (await ammContract.methods.getSwapOutput(secondToken, token1Value, [liquidityPoolAddress], [ethereumAddress]).call())[1];
+
+                return { lpAmount, updatedFirstTokenAmount, updatedSecondTokenAmount, token0Value, token1Value, token1ValueETH };
+            }
+
+            var bestLP = await calculateBestLP(chosenPair.token0Contract.options.address, chosenPair.token1Contract.options.address, token0decimals, token1decimals);
+
+            var lpAmount = bestLP.lpAmount;
+            var firstTokenAmount = bestLP.token0Value;
+            var secondTokenAmount = bestLP.token1Value;
+            var firstTokenETH = halfValue;
+            var secondTokenETH = bestLP.token1ValueETH;
+
+            if (bestLP.updatedSecondTokenAmount > bestLP.updatedFirstTokenAmount) {
+                bestLP = await calculateBestLP(chosenPair.token1Contract.options.address, chosenPair.token0Contract.options.address, token1decimals, token0decimals);
+
+                lpAmount = bestLP.lpAmount;
+                firstTokenAmount = bestLP.token1Value;
+                secondTokenAmount = bestLP.token0Value;
+                firstTokenETH = bestLP.token1ValueETH;
+                secondTokenETH = halfValue;
+            }
+
+            setEthValue0(firstTokenETH);
+            setEthValue1(secondTokenETH);
+            setLpTokenAmount({ value: props.dfoCore.toDecimals(lpAmount, decimalsLp), full: lpAmount });
+            setFirstAmount({ value: props.dfoCore.toDecimals(firstTokenAmount, token0decimals), full: firstTokenAmount });
+            setSecondAmount({ value: props.dfoCore.toDecimals(secondTokenAmount, token1decimals), full: secondTokenAmount });
         } catch (error) {
             console.error(error);
         }
@@ -262,6 +337,30 @@ const Mint = (props) => {
             return parseFloat(firstAmount.value) + parseFloat(secondAmount.value);
         }
         return 0;
+    }
+
+    function renderByETH() {
+        return <>
+            <div className="InputTokensRegular">
+                <div className="InputTokenRegular">
+                    <Input showMax={true} step={0.0001} address={window.voidEthereumAddress} value={ethValue} balance={ethBalance} min={0} onChange={(e) => updateEthAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name="ETH" />
+                </div>
+                <div className="InputTokensRegular">
+                    <p>Swapping</p>
+                    <div className="InputTokenRegular">
+                        <span>{window.fromDecimals(ethValue0, 18)} ETH <Coin address={window.voidEthereumAddress} /></span>
+                        for
+                        <span>{window.formatMoney(firstAmount.value, 2)} {pairs[pair].symbol0} <Coin address={pairs[pair].token0} /></span>
+                    </div>
+                    <p>And</p>
+                    <div className="InputTokenRegular">
+                        <span>{window.fromDecimals(ethValue1, 18)} ETH <Coin address={window.voidEthereumAddress} /></span>
+                        for
+                        <span>{window.formatMoney(secondAmount.value, 2)} {pairs[pair].symbol1} <Coin address={pairs[pair].token1} /></span>
+                    </div>
+                </div>
+            </div>
+        </>
     }
 
     const getLpToken = () => {
@@ -277,16 +376,16 @@ const Mint = (props) => {
     }
 
     const getMultipleTokens = () => {
-        
+
         return (
             <div className="InputTokensRegular">
                 <p>Wrap</p>
                 <div className="InputTokenRegular">
-                    <Input showMax={true} step={0.0001}  value={firstAmount.value} address={pairs[pair].token0} balance={firstTokenBalance} min={0} onChange={(e) => updateFirstAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol0} />
+                    <Input showMax={true} step={0.0001} value={firstAmount.value} address={pairs[pair].token0} balance={firstTokenBalance} min={0} onChange={(e) => updateFirstAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol0} />
                 </div>
                 <p>And</p>
                 <div className="InputTokenRegular">
-                    <Input showMax={true} step={0.0001}  value={secondAmount.value} address={pairs[pair].token1} balance={secondTokenBalance} min={0} onChange={(e) => updateSecondAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol1} />
+                    <Input showMax={true} step={0.0001} value={secondAmount.value} address={pairs[pair].token1} balance={secondTokenBalance} min={0} onChange={(e) => updateSecondAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol1} />
                 </div>
             </div>
         )
@@ -295,26 +394,26 @@ const Mint = (props) => {
     const getButtons = () => {
         return (
             <div className="Web3BTNs">
-                        {
-                            useLpToken ? <div/>
-                            :
-                            !firstTokenApproved ? <ApproveButton contract={pairs[pair].token0Contract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('first', res)} text={`Approve ${pairs[pair].symbol0}`} />
+                {
+                    inputType === 'lp' ? <div />
+                        :
+                        !firstTokenApproved ? <ApproveButton contract={pairs[pair].token0Contract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('first', res)} text={`Approve ${pairs[pair].symbol0}`} />
                             :
                             !secondTokenApproved ? <ApproveButton contract={pairs[pair].token1Contract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('second', res)} text={`Approve ${pairs[pair].symbol1}`} />
-                            : <div/>
-                        }
-                        
-                        {
-                            (useLpToken && !lpTokenApproved) && 
-                                <ApproveButton contract={pairs[pair].lpContract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('lp', res)} text={`Approve ${pairs[pair].symbolLp}`} />
-                        }
-                        {
-                            mintLoading ? <a className="Web3ActionBTN" disabled={mintLoading}>
-                                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            </a>
-                            : 
-                            <a className="Web3ActionBTN" onClick={() => mintWUSD()} disabled={((!firstAmount.value || !secondAmount.value) && !lpTokenAmount.value) || !firstTokenApproved || !secondTokenApproved}>Mint</a>
-                        }
+                                : <div />
+                }
+
+                {
+                    (inputType === 'lp' && !lpTokenApproved) &&
+                    <ApproveButton contract={pairs[pair].lpContract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('lp', res)} text={`Approve ${pairs[pair].symbolLp}`} />
+                }
+                {
+                    mintLoading ? <a className="Web3ActionBTN" disabled={mintLoading}>
+                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    </a>
+                        :
+                        <a className="Web3ActionBTN" onClick={() => mintWUSD()} disabled={((!firstAmount.value || !secondAmount.value) && !lpTokenAmount.value) || !firstTokenApproved || !secondTokenApproved}>Mint</a>
+                }
             </div>
         )
     }
@@ -322,49 +421,59 @@ const Mint = (props) => {
     if (loading) {
         return (
             <div className="mint-component">
-                    <div className="col-12 justify-content-center">
-                        <div className="spinner-border text-secondary" role="status">
-                            <span className="visually-hidden"></span>
-                        </div>
+                <div className="col-12 justify-content-center">
+                    <div className="spinner-border text-secondary" role="status">
+                        <span className="visually-hidden"></span>
                     </div>
+                </div>
             </div>
         )
     }
 
     return (
         <div className="MintBurn">
-                <div className="PairSelector">
-                    <select className="SelectRegular" value={pair} onChange={(e) => { clear(); setChosenPair(e.target.value); }}>
-                        <option value="">Select a pair..</option>
-                        {
-                            pairs.map((pair, index) => {
-                                return <option key={pair.ammName + pair.symbol0 + pair.symbol1} value={index}>{pair.ammName} - {pair.symbol0}/{pair.symbol1}</option>
-                            })
-                        }
-                    </select>
+            <div className="PairSelector">
+                <select className="SelectRegular" value={pair} onChange={(e) => { clear(); setChosenPair(e.target.value); }}>
+                    <option value="">Select a pair..</option>
                     {
-                        isHealthyPair && <div className="QuestionRegular">
-                            <input type="checkbox" value={useLpToken} onChange={(e) => setUseLpToken(e.target.checked)} id="useLpToken" disabled={!pair} />
-                            <label htmlFor="useLpToken">Use liquidity pool token</label>
-                        </div>
+                        pairs.map((pair, index) => {
+                            return <option key={pair.ammName + pair.symbol0 + pair.symbol1} value={index}>{pair.ammName} - {pair.symbol0}/{pair.symbol1}</option>
+                        })
                     }
-                </div>
+                </select>
                 {
-                    !isHealthyPair && <div className="DisclamerRegular">
-                        <p><b>This pair is not healthy at the moment!</b> <br></br> Select a different pair or try again at another time.</p>
+                    isHealthyPair && <div className="QuestionRegular">
+                        <label>
+                            By ETH
+                                <input name="inputType" type="radio" value="eth" checked={inputType === "eth"} onChange={e => setInputType(e.target.value)} disabled={!pair} />
+                        </label>
+                        <label>
+                            By LP Token
+                                <input name="inputType" type="radio" value="lp" checked={inputType === "lp"} onChange={e => setInputType(e.target.value)} disabled={!pair} />
+                        </label>
+                        <label>
+                            By pair
+                                <input name="inputType" type="radio" value="pair" checked={inputType === "pair"} onChange={e => setInputType(e.target.value)} disabled={!pair} />
+                        </label>
                     </div>
                 }
-                {
-                    (pair && isHealthyPair) ? useLpToken ? getLpToken() : getMultipleTokens() : <div/>
-                }
-                {
-                    (pair && isHealthyPair) ? <div className="Resultsregular">
-                            <p>For <b>{ window.formatMoney(getEstimatedAmount(), 2) } <img src={WUSDLogo}></img>WUSD</b></p>
-                    </div> : <div/>
-                }
-                {
-                    (pair && isHealthyPair) ? getButtons() : <div/>
-                }
+            </div>
+            {
+                !isHealthyPair && <div className="DisclamerRegular">
+                    <p><b>This pair is not healthy at the moment!</b> <br></br> Select a different pair or try again at another time.</p>
+                </div>
+            }
+            {
+                (pair && isHealthyPair) ? inputType === 'lp' ? getLpToken() : inputType === 'pair' ? getMultipleTokens() : renderByETH() : <div />
+            }
+            {
+                (pair && isHealthyPair) ? <div className="Resultsregular">
+                    <p>For <b>{window.formatMoney(getEstimatedAmount(), 2)} <img src={WUSDLogo}></img>WUSD</b></p>
+                </div> : <div />
+            }
+            {
+                (pair && isHealthyPair) ? getButtons() : <div />
+            }
         </div>
     )
 }
