@@ -26,6 +26,8 @@ const Mint = (props) => {
     const [ethValue, setEthValue] = useState("0");
     const [ethValue0, setEthValue0] = useState("0");
     const [ethValue1, setEthValue1] = useState("0");
+    const [onlyByToken0, setOnlyByToken0] = useState(false);
+    const [onlyByToken1, setOnlyByToken1] = useState(false);
 
     useEffect(() => {
         getController();
@@ -339,25 +341,34 @@ const Mint = (props) => {
         return 0;
     }
 
+    function onSingleTokenChange(e, token) {
+        if (token === "token0") {
+            setOnlyByToken0(e.target.checked);
+        }
+        if (token === "token1") {
+            setOnlyByToken1(e.target.checked);
+        }
+    }
+
     function renderByETH() {
         return <>
             <div className="InputTokensRegular">
                 <div className="InputTokenRegular">
                     <Input showMax={true} step={0.0001} address={window.voidEthereumAddress} value={ethValue} balance={ethBalance} min={0} onChange={(e) => updateEthAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name="ETH" />
                 </div>
-                <div className="InputTokensRegular">
-                    <p>Swapping</p>
-                    <div className="InputTokenRegular">
-                        <span>{window.fromDecimals(ethValue0, 18)} ETH <Coin address={window.voidEthereumAddress} /></span>
+            </div>
+            <div className="InputTokensRegular">
+                <p>Swapping</p>
+                <div className="InputTokenRegular">
+                    <span>{window.fromDecimals(ethValue0, 18)} ETH <Coin address={window.voidEthereumAddress} /></span>
                         for
                         <span>{window.formatMoney(firstAmount.value, 2)} {pairs[pair].symbol0} <Coin address={pairs[pair].token0} /></span>
-                    </div>
-                    <p>And</p>
-                    <div className="InputTokenRegular">
-                        <span>{window.fromDecimals(ethValue1, 18)} ETH <Coin address={window.voidEthereumAddress} /></span>
+                </div>
+                <p>And</p>
+                <div className="InputTokenRegular">
+                    <span>{window.fromDecimals(ethValue1, 18)} ETH <Coin address={window.voidEthereumAddress} /></span>
                         for
                         <span>{window.formatMoney(secondAmount.value, 2)} {pairs[pair].symbol1} <Coin address={pairs[pair].token1} /></span>
-                    </div>
                 </div>
             </div>
         </>
@@ -377,18 +388,49 @@ const Mint = (props) => {
 
     const getMultipleTokens = () => {
 
-        return (
+        return <>
             <div className="InputTokensRegular">
                 <p>Wrap</p>
                 <div className="InputTokenRegular">
-                    <Input showMax={true} step={0.0001} value={firstAmount.value} address={pairs[pair].token0} balance={firstTokenBalance} min={0} onChange={(e) => updateFirstAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol0} />
+                    {onlyByToken0 && <Input showMax={true} step={0.0001} value={firstAmount.value} address={pairs[pair].token0} balance={firstTokenBalance} min={0} onChange={(e) => updateFirstAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol0} />}
+                    {!onlyByToken0 && !onlyByToken1 && <Input showMax={true} step={0.0001} value={firstAmount.value} address={pairs[pair].token0} balance={firstTokenBalance} min={0} onChange={(e) => updateFirstAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol0} />}
+                    {!onlyByToken1 && <label>
+                        Only by this token
+                        <input type="checkbox" onChange={e => onSingleTokenChange(e, "token0")} checked={onlyByToken0} />
+                    </label>}
                 </div>
-                <p>And</p>
+                {!onlyByToken0 && <p>And</p>}
                 <div className="InputTokenRegular">
-                    <Input showMax={true} step={0.0001} value={secondAmount.value} address={pairs[pair].token1} balance={secondTokenBalance} min={0} onChange={(e) => updateSecondAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol1} />
+                    {onlyByToken1 && <Input showMax={true} step={0.0001} value={secondAmount.value} address={pairs[pair].token1} balance={secondTokenBalance} min={0} onChange={(e) => updateSecondAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol1} />}
+                    {!onlyByToken0 && !onlyByToken1 && <Input showMax={true} step={0.0001} value={secondAmount.value} address={pairs[pair].token1} balance={secondTokenBalance} min={0} onChange={(e) => updateSecondAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol1} />}
+                    {!onlyByToken0 && <label>
+                        Only by this token
+                        <input type="checkbox" onChange={e => onSingleTokenChange(e, "token1")} checked={onlyByToken1} />
+                    </label>}
                 </div>
             </div>
-        )
+            {(onlyByToken0 || onlyByToken1) && <div className="InputTokensRegular">
+                <div className="InputTokenRegular">
+                    {onlyByToken1 && <>
+                        Swapping
+                        <span>{window.formatMoney(secondAmount.value, 2)} {pairs[pair].symbol1} <Coin address={pairs[pair].token1} /></span>
+                        for
+                    </>}
+                    {onlyByToken0 && <span>Transfering</span>}
+                    <span>{window.formatMoney(firstAmount.value, 2)} {pairs[pair].symbol0} <Coin address={pairs[pair].token0} /></span>
+                </div>
+                <p>and</p>
+                <div className="InputTokenRegular">
+                    {onlyByToken0 && <>
+                        Swapping
+                        <span>{window.formatMoney(firstAmount.value, 2)} {pairs[pair].symbol0} <Coin address={pairs[pair].token0} /></span>
+                        for
+                    </>}
+                    {onlyByToken1 && <span>Transfering</span>}
+                    <span>{window.formatMoney(secondAmount.value, 2)} {pairs[pair].symbol1} <Coin address={pairs[pair].token1} /></span>
+                </div>
+            </div>}
+        </>
     }
 
     const getButtons = () => {
