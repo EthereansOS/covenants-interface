@@ -390,7 +390,8 @@ const Mint = (props) => {
 
         return <>
             <div className="InputTokensRegular">
-                <p>Wrap</p>
+                {!onlyByToken0 && !onlyByToken1 && <p>Wrap</p>}
+                {(onlyByToken0 || onlyByToken1) && <p>Use</p>}
                 <div className="InputTokenRegular">
                     {onlyByToken0 && <Input showMax={true} step={0.0001} value={firstAmount.value} address={pairs[pair].token0} balance={firstTokenBalance} min={0} onChange={(e) => updateFirstAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol0} />}
                     {!onlyByToken0 && !onlyByToken1 && <Input showMax={true} step={0.0001} value={firstAmount.value} address={pairs[pair].token0} balance={firstTokenBalance} min={0} onChange={(e) => updateFirstAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol0} />}
@@ -399,7 +400,7 @@ const Mint = (props) => {
                         <input type="checkbox" onChange={e => onSingleTokenChange(e, "token0")} checked={onlyByToken0} />
                     </label>}
                 </div>
-                {!onlyByToken0 && <p>And</p>}
+                {!onlyByToken0 && !onlyByToken1 && <p>And</p>}
                 <div className="InputTokenRegular">
                     {onlyByToken1 && <Input showMax={true} step={0.0001} value={secondAmount.value} address={pairs[pair].token1} balance={secondTokenBalance} min={0} onChange={(e) => updateSecondAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol1} />}
                     {!onlyByToken0 && !onlyByToken1 && <Input showMax={true} step={0.0001} value={secondAmount.value} address={pairs[pair].token1} balance={secondTokenBalance} min={0} onChange={(e) => updateSecondAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol1} />}
