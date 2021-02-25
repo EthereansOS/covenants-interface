@@ -16,7 +16,6 @@ const Explore = (props) => {
     }, []);
 
     function manipulateResult(res, address) {
-        console.log(res);
         var result = {
             0 : {},
             1 : {}

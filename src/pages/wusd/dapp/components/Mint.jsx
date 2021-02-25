@@ -485,7 +485,7 @@ const Mint = (props) => {
                     }
                 </select>
                 {
-                    isHealthyPair && <div className="QuestionRegular">
+                    pair && isHealthyPair && <div className="QuestionRegular">
                         <label>
                             By ETH
                                 <input name="inputType" type="radio" value="eth" checked={inputType === "eth"} onChange={e => setInputType(e.target.value)} disabled={!pair} />

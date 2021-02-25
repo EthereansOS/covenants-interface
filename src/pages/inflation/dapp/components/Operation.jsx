@@ -184,11 +184,13 @@ const Operation = (props) => {
     }
 
     const getFirstStep = () => {
+        var disabled = !actionType;
         return <div className="InputForm">
                 <h6><b>Add new Operation by:</b></h6>
-            <select className="SelectRegular">
-                <option onChange={() => setActionType(actionType !== 'transfer' ? 'transfer' : "")}>Transfer</option>
-                <option onChange={() => setActionType(actionType !== 'swap' ? 'swap' : "")}>Swap</option>
+            <select className="SelectRegular" value={actionType} onChange={e => setActionType(e.target.value)}>
+                <option value="">Operation type</option>
+                <option value="transfer">Transfer</option>
+                <option value="swap">Swap</option>
             </select>
             <div className="row mb-4">
                 <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quaerat animi ipsam nemo at nobis odit temporibus autem possimus quae vel, ratione numquam modi rem accusamus, veniam neque voluptates necessitatibus enim!</p>
@@ -198,12 +200,13 @@ const Operation = (props) => {
                     setActionType("");
                     props.cancelEditOperation();
                 }} className="backActionBTN">Cancel</a>
-                <a onClick={() => setStep(1)} disabled={!actionType} className="web2ActionBTN">Next</a>
+                <a onClick={() => !disabled && setStep(1)} disabled={disabled} className={"web2ActionBTN" + (disabled ? " disabled" : "")}>Next</a>
             </div>
         </div>
     }
 
     const getSecondStep = () => {
+        var disabled = !inputToken || !inputTokenMethod;
         return <div className="InputForm">
                     <select className="SelectRegular">
                         <option value="false" onChange={changeEnterInETH}>Token or Item</option>
@@ -234,7 +237,7 @@ const Operation = (props) => {
             }
             <div className="Web2ActionsBTNs">
                 <a onClick={() => setStep(step - 1)} className="backActionBTN">Back</a>
-                <a onClick={() => setStep(2)} disabled={!inputToken || !inputTokenMethod} className="web2ActionBTN">Next</a>
+                <a onClick={() => !disabled && setStep(2)} disabled={disabled} className={"web2ActionBTN" + (disabled ? " disabled" : "")}>Next</a>
             </div>
         </div>
     }
@@ -424,14 +427,15 @@ const Operation = (props) => {
     }
 
     const getThirdStep = () => {
+        var disabled = (!amount && !percentage) || !transferType || receivers.length === 0 || !isValidPercentage() || (actionType === 'swap' && pathTokens.length === 0);
         return <div className="col-12 flex flex-column align-items-center">
             {actionType === 'transfer' ? getTransferThirdStep() : getSwapThirdStep()}
             <div className="row justify-content-center">
                 <button onClick={() => setStep(step - 1)} className="btn btn-light mr-4">Back</button>
                 <button
-                    onClick={() => props.saveEditOperation(getEntry())}
-                    disabled={(!amount && !percentage) || !transferType || receivers.length === 0 || !isValidPercentage() || (actionType === 'swap' && pathTokens.length === 0)}
-                    className="btn btn-secondary"
+                    onClick={() => !disabled && props.saveEditOperation(getEntry())}
+                    disabled={disabled}
+                    className={"btn btn-secondary" + (disabled ? " disabled" : "")}
                 >Add</button>
             </div>
         </div>

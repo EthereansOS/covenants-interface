@@ -48,7 +48,7 @@ const Entry = (props) => {
         var value = 0;
         try {
             value = parseFloat(e.target.value.split('-').join('').trim());
-        } catch(e) {
+        } catch (e) {
         }
         setCallerRewardPercentage(value > 99 ? 99 : value);
     }
@@ -93,13 +93,13 @@ const Entry = (props) => {
                         <input type="checkbox" checked={hasCallerRewardPercentage} onChange={onHasCallerRewardPercentageChange} />
                         <p>By activating the Executor Reward, you can set a % of reward by all of the operations for the executor of the inflation.</p>
                     </label>
-                    {hasCallerRewardPercentage && 
-                    <div className="SpecialInputPerch">
-                        <aside>%</aside>
-                        <input className="TextRegular" placeholder="Executor Reward Perchentage (%)" label="Caller reward %:" min="0" max="100" onChange={onCallerPercentageChange} value={callerRewardPercentage}/>
-                    </div>
+                    {hasCallerRewardPercentage &&
+                        <div className="SpecialInputPerch">
+                            <aside>%</aside>
+                            <input className="TextRegular" placeholder="Executor Reward Perchentage (%)" label="Caller reward %:" min="0" max="100" onChange={onCallerPercentageChange} value={callerRewardPercentage} />
+                        </div>
                     }
-                    </div>
+                </div>
             </>
         },
         function () {
@@ -121,7 +121,7 @@ const Entry = (props) => {
                     </div>
                 </div>)}
                 <div className="Web2ActionsBTNs">
-                        <a onClick={editOrAddEntryOperation} className="web2ActionBTN">+</a>
+                    <a onClick={editOrAddEntryOperation} className="web2ActionBTN">+</a>
                 </div>
             </>
         },
@@ -133,22 +133,17 @@ const Entry = (props) => {
     return editingOperation != null ?
         <Operation operation={operations[editingOperation]} cancelEditOperation={cancelEditOperation} saveEditOperation={saveEditOperation} />
         : <>
-        <div className="CreateList">
-                    <h6><b> {entryName}</b></h6>
-            
-                    {steps[step][0]()}
-                </div>
+            <div className="CreateList">
+                <h6><b> {entryName}</b></h6>
+                {steps[step][0]()}
+            </div>
             <div className="Web2ActionsBTNs">
-
-                    {step !== 0 && <a onClick={() => setStep(step - 1)} className="backActionBTN">Back</a>}
-                    {step !== steps.length - 1 && <a disabled={steps[step][1]()} onClick={() => setStep(step + 1)} className="web2ActionBTN">Next</a>}
-                    {step === steps.length - 1 && <a disabled={steps[step][1]()} onClick={() => props.saveEntry(entryName, lastBlock, blockInterval, callerRewardPercentage, operations)} className="web2ActionBTN">Save</a>}
+                {step !== 0 && <a onClick={() => setStep(step - 1)} className="backActionBTN">Back</a>}
+                {step !== steps.length - 1 && <a disabled={steps[step][1]()} onClick={() => !steps[step][1]() && setStep(step + 1)} className={"web2ActionBTN" + (steps[step][1]() ? " disabled" : "")}>Next</a>}
+                {step === steps.length - 1 && <a disabled={steps[step][1]()} onClick={() => !steps[step][1]() && props.saveEntry(entryName, lastBlock, blockInterval, callerRewardPercentage, operations)} className={"web2ActionBTN" + (steps[step][1]() ? " disabled" : "")}>Save</a>}
             </div>
         </>
 }
-
-    
-
 
 const mapStateToProps = (state) => {
     const { core, session } = state;
