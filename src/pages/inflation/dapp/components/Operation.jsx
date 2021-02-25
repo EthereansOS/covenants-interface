@@ -112,7 +112,7 @@ const Operation = (props) => {
             for (let i = 0; i < lpTokensAddresses.length; i++) {
                 const currentTokenAddress = lpTokensAddresses[i];
                 outputTokenAddress = outputTokenAddress ? outputTokenAddress : currentTokenAddress !== lastOutputToken ? currentTokenAddress : null
-                if(currentTokenAddress !== window.voidEthereumAddress) {
+                if (currentTokenAddress !== window.voidEthereumAddress) {
                     const currentToken = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), currentTokenAddress);
                     const currentTokenSymbol = await currentToken.methods.symbol().call();
                     symbols.push(currentTokenSymbol);
@@ -130,7 +130,7 @@ const Operation = (props) => {
             const symbol = await pathTokenContract.methods.symbol().call();
             const decimals = await pathTokenContract.methods.decimals().call();
             setPathTokens(pathTokens.concat({ symbol, address, decimals, output: null, outputTokenAddress, lpTokensAddresses, symbols }));
-            setExitInETH(outputTokenAddress === ethAddress && ethAddress === window.voidEthereumAddress);
+            setExitInETH(outputTokenAddress === ethAddress);
             setRenderExitInETH(!enterInETH && outputTokenAddress === ethAddress && ethAddress !== window.voidEthereumAddress);
         } catch (error) {
             console.error(error);
@@ -186,7 +186,7 @@ const Operation = (props) => {
     const getFirstStep = () => {
         var disabled = !actionType;
         return <div className="InputForm">
-                <h6><b>Add new Operation by:</b></h6>
+            <h6><b>Add new Operation by:</b></h6>
             <select className="SelectRegular" value={actionType} onChange={e => setActionType(e.target.value)}>
                 <option value="">Operation type</option>
                 <option value="transfer">Transfer</option>
@@ -208,31 +208,29 @@ const Operation = (props) => {
     const getSecondStep = () => {
         var disabled = !inputToken || !inputTokenMethod;
         return <div className="InputForm">
-                    <select className="SelectRegular">
-                        <option value="false" onChange={changeEnterInETH}>Token or Item</option>
-                        <option value="true" onChange={changeEnterInETH}>Ethereum</option>
-                    </select>
-                            
-                    {!enterInETH && <div className="CreateList CreateListS">
-                        <TokenInput placeholder={"Token address"} tokenAddress={inputToken ? inputToken.address : ''} label={"Input token"} placeholder={"Input token address"} width={60} onClick={(address) => onSelectInputToken(address)} text={"Load"} />
-                    </div>}
-           
+            <select className="SelectRegular" value={(enterInETH && enterInETH.toString()) || "false"} onChange={changeEnterInETH}>
+                <option value="false" >Token or Item</option>
+                <option value="true">Ethereum</option>
+            </select>
+            {!enterInETH && <div className="CreateList CreateListS">
+                <TokenInput placeholder={"Token address"} tokenAddress={inputToken ? inputToken.address : ''} label={"Input token"} placeholder={"Input token address"} width={60} onClick={(address) => onSelectInputToken(address)} text={"Load"} />
+            </div>}
             {
                 loading ? <div className="row justify-content-center">
                     <div className="spinner-border text-secondary" role="status">
                         <span className="visually-hidden"></span>
                     </div>
                 </div> : <>
-                            {inputToken && <div className="TokenInflLoaded">
-                                <h5>{inputToken.symbol}</h5> <Coin address={inputToken.address} className="TokenInflLoaded" />
-                            </div>
-                            }
-                            <select value={inputTokenMethod} onChange={(e) => setInputTokenMethod(e.target.value)} className="SelectRegular">
-                                <option value="">Select method</option>
-                                {!enterInETH && <option value="mint">By mint</option>}
-                                <option value="reserve">By reserve</option>
-                            </select>
-                            <p>Selecting "by reserve", the input token of this operation will be received via tranfer, instead by selecting "by Mint" the input token will be minted. The logic of this action MUST be carefully coded into the Extension! more info: <a>Documentation</a></p>
+                        {inputToken && <div className="TokenInflLoaded">
+                            <h5>{inputToken.symbol}</h5> <Coin address={inputToken.address} className="TokenInflLoaded" />
+                        </div>
+                        }
+                        <select value={inputTokenMethod} onChange={(e) => setInputTokenMethod(e.target.value)} className="SelectRegular">
+                            <option value="">Select method</option>
+                            {!enterInETH && <option value="mint">By mint</option>}
+                            <option value="reserve">By reserve</option>
+                        </select>
+                        <p>Selecting "by reserve", the input token of this operation will be received via tranfer, instead by selecting "by Mint" the input token will be minted. The logic of this action MUST be carefully coded into the Extension! more info: <a>Documentation</a></p>
                     </>
             }
             <div className="Web2ActionsBTNs">
@@ -334,94 +332,94 @@ const Operation = (props) => {
                     {!enterInETH && <option value="percentage">Percentage</option>}
                     <option value="amount">Amount</option>
                 </select>
-            {
-                transferType ?
-                    transferType == 'percentage' ?
-                        <div className="row mb-4 justify-content-center align-items-center">
-                            <input type="number" min={0} max={100} value={percentage} onChange={(e) => setPercentage(e.target.value)} className="form-control mr-2" style={{ width: '33%' }} />% of {inputToken.symbol} <Coin address={inputToken.address} className="ml-2" />
+                {
+                    transferType ?
+                        transferType == 'percentage' ?
+                            <div className="row mb-4 justify-content-center align-items-center">
+                                <input type="number" min={0} max={100} value={percentage} onChange={(e) => setPercentage(e.target.value)} className="form-control mr-2" style={{ width: '33%' }} />% of {inputToken.symbol} <Coin address={inputToken.address} className="ml-2" />
+                            </div>
+                            :
+                            <div className="row mb-4 justify-content-center align-items-center">
+                                <Input showCoin={true} address={inputToken.address} name={inputToken.symbol} value={amount} onChange={(e) => setAmount(e.target.value)} />
+                            </div>
+                        : <div />
+                }
+                <div className="row mb-4">
+                    <TokenInput label={"Path"} placeholder={"LPT address"} width={60} onClick={(address) => onAddPathToken(address)} text={"Load"} />
+                </div>
+                {loading && <Loading />}
+                {!loading && pathTokens.map((pathToken, index) => {
+                    var realInputToken = enterInETH ? amm.ethAddress : inputToken.address;
+                    var lastOutputToken = pathTokens.length === 1 ? realInputToken : pathTokens[pathTokens.length - 2].outputTokenAddress;
+                    return <Fragment key={pathToken.address}>
+                        <div className="row mb-4">
+                            {pathToken && <div className="col-12">
+                                <b>{pathToken.symbol} {pathToken.symbols.map((symbol) => <span>{symbol} </span>)}</b> {index === pathTokens.length - 1 ? <button className="btn btn-sm btn-outline-danger ml-1" onClick={() => removePathTokens(index)}><b>Remove</b></button> : <div />}
+                            </div>}
                         </div>
-                        :
-                        <div className="row mb-4 justify-content-center align-items-center">
-                            <Input showCoin={true} address={inputToken.address} name={inputToken.symbol} value={amount} onChange={(e) => setAmount(e.target.value)} />
+                        <div className="row w-50 mb-4">
+                            <select value={pathToken.outputTokenAddress} disabled={index !== pathTokens.length - 1} onChange={e => setPathTokens(pathTokens.map((pt, i) => i === index ? { ...pt, outputTokenAddress: e.target.value } : pt))} className="custom-select wusd-pair-select">
+                                {pathToken.lpTokensAddresses.filter(it => index !== pathTokens.length - 1 ? true : it !== lastOutputToken).map(lpTokenAddress => <option value={lpTokenAddress}>{pathToken.symbols[pathToken.lpTokensAddresses.indexOf(lpTokenAddress)]}</option>)}
+                            </select>
                         </div>
-                    : <div />
-            }
-            <div className="row mb-4">
-                <TokenInput label={"Path"} placeholder={"LPT address"} width={60} onClick={(address) => onAddPathToken(address)} text={"Load"} />
-            </div>
-            {loading && <Loading />}
-            {!loading && pathTokens.map((pathToken, index) => {
-                var realInputToken = enterInETH ? amm.ethAddress : inputToken.address;
-                var lastOutputToken = pathTokens.length === 1 ? realInputToken : pathTokens[pathTokens.length - 2].outputTokenAddress;
-                return <Fragment key={pathToken.address}>
-                    <div className="row mb-4">
-                        {pathToken && <div className="col-12">
-                            <b>{pathToken.symbol} {pathToken.symbols.map((symbol) => <span>{symbol} </span>)}</b> {index === pathTokens.length - 1 ? <button className="btn btn-sm btn-outline-danger ml-1" onClick={() => removePathTokens(index)}><b>Remove</b></button> : <div />}
-                        </div>}
-                    </div>
-                    <div className="row w-50 mb-4">
-                        <select value={pathToken.outputTokenAddress} disabled={index !== pathTokens.length - 1} onChange={e => setPathTokens(pathTokens.map((pt, i) => i === index ? { ...pt, outputTokenAddress: e.target.value } : pt))} className="custom-select wusd-pair-select">
-                            {pathToken.lpTokensAddresses.filter(it => index !== pathTokens.length - 1 ? true : it !== lastOutputToken).map(lpTokenAddress => <option value={lpTokenAddress}>{pathToken.symbols[pathToken.lpTokensAddresses.indexOf(lpTokenAddress)]}</option>)}
-                        </select>
-                    </div>
-                </Fragment>
-            })}
-            {renderExitInETH && <div className="row">
-                <div className="col-12">
-                    <label>
-                        <input name="enterInETH" type="radio" value="true" onChange={changeExitInETH} checked={exitInETH} />
+                    </Fragment>
+                })}
+                {renderExitInETH && <div className="row">
+                    <div className="col-12">
+                        <label>
+                            <input name="enterInETH" type="radio" value="true" onChange={changeExitInETH} checked={exitInETH} />
                         Ethereum
                     </label>
-                    <label>
-                        <input name="enterInETH" type="radio" value="false" onChange={changeExitInETH} checked={!exitInETH} />
+                        <label>
+                            <input name="enterInETH" type="radio" value="false" onChange={changeExitInETH} checked={!exitInETH} />
                         Token
                     </label>
-                </div>
-            </div>}
-            {
-                transferType ? <>
-                    <div className="row">
-                        <h6><b>Receiver</b></h6>
                     </div>
-                    <div className="row">
-                        <div className="input-group mb-3">
-                            <input type="text" value={currentReceiver} onChange={(e) => setCurrentReceiver(e.target.value)} className="form-control" placeholder="Address" aria-label="Receiver" aria-describedby="button-add" />
-                            <button onClick={() => {
-                                const exists = receivers.filter((r) => r.address === currentReceiver).length > 0;
-                                if (exists) return;
-                                setReceivers(receivers.concat({ address: currentReceiver, percentage: receivers.length === 0 ? 100 : 0 }));
-                                setCurrentReceiver("");
-                            }} className="btn btn-outline-secondary ml-2" type="button" id="button-add">Add</button>
+                </div>}
+                {
+                    transferType ? <>
+                        <div className="row">
+                            <h6><b>Receiver</b></h6>
                         </div>
-                    </div>
-                    <div className="row mb-4">
-                        {
-                            receivers.map((receiver, index) => {
-                                return (
-                                    <div className="col-12 mb-2">
-                                        {
-                                            receivers.length === 1 ? <div className="row align-items-center">
-                                                <b>{receiver.address}</b>
-                                                <button onClick={() => setReceivers(receivers.filter((_, i) => i !== index))} className="btn btn-danger btn-sm ml-2">X</button>
-                                            </div> : <div className="row align-items-center">
-                                                    <div className="col-md-8 col-12">
-                                                        <b>{receiver.address}</b>
+                        <div className="row">
+                            <div className="input-group mb-3">
+                                <input type="text" value={currentReceiver} onChange={(e) => setCurrentReceiver(e.target.value)} className="form-control" placeholder="Address" aria-label="Receiver" aria-describedby="button-add" />
+                                <button onClick={() => {
+                                    const exists = receivers.filter((r) => r.address === currentReceiver).length > 0;
+                                    if (exists) return;
+                                    setReceivers(receivers.concat({ address: currentReceiver, percentage: receivers.length === 0 ? 100 : 0 }));
+                                    setCurrentReceiver("");
+                                }} className="btn btn-outline-secondary ml-2" type="button" id="button-add">Add</button>
+                            </div>
+                        </div>
+                        <div className="row mb-4">
+                            {
+                                receivers.map((receiver, index) => {
+                                    return (
+                                        <div className="col-12 mb-2">
+                                            {
+                                                receivers.length === 1 ? <div className="row align-items-center">
+                                                    <b>{receiver.address}</b>
+                                                    <button onClick={() => setReceivers(receivers.filter((_, i) => i !== index))} className="btn btn-danger btn-sm ml-2">X</button>
+                                                </div> : <div className="row align-items-center">
+                                                        <div className="col-md-8 col-12">
+                                                            <b>{receiver.address}</b>
+                                                        </div>
+                                                        <div className="col-md-2 col-12">
+                                                            <input type="number" min={0} max={100} onChange={(e) => onPercentageChange(index, e.target.value)} className="form-control mr-1" value={receiver.percentage} />
+                                                        </div>
+                                                        <div className="col-md-2 col-12">
+                                                            <button onClick={() => setReceivers(receivers.filter((_, i) => i !== index))} className="btn btn-danger btn-sm">X</button>
+                                                        </div>
                                                     </div>
-                                                    <div className="col-md-2 col-12">
-                                                        <input type="number" min={0} max={100} onChange={(e) => onPercentageChange(index, e.target.value)} className="form-control mr-1" value={receiver.percentage} />
-                                                    </div>
-                                                    <div className="col-md-2 col-12">
-                                                        <button onClick={() => setReceivers(receivers.filter((_, i) => i !== index))} className="btn btn-danger btn-sm">X</button>
-                                                    </div>
-                                                </div>
-                                        }
-                                    </div>
-                                )
-                            })
-                        }
-                    </div>
-                </> : <div />
-            }
+                                            }
+                                        </div>
+                                    )
+                                })
+                            }
+                        </div>
+                    </> : <div />
+                }
             </div>
         </>
     }
