@@ -28,6 +28,7 @@ const Mint = (props) => {
     const [ethValue1, setEthValue1] = useState("0");
     const [onlyByToken0, setOnlyByToken0] = useState(false);
     const [onlyByToken1, setOnlyByToken1] = useState(false);
+    const [singleTokenAmount, setSingleTokenAmount] = useState("");
 
     useEffect(() => {
         getController();
@@ -120,6 +121,12 @@ const Mint = (props) => {
         setFirstAmount({ value: 0, full: 0 });
         setSecondAmount({ value: 0, full: 0 });
         setLpTokenAmount({ value: 0, full: 0 });
+        setOnlyByToken0(false);
+        setOnlyByToken1(false);
+        setSingleTokenAmount("0");
+        setEthValue("0");
+        setEthValue0("0");
+        setEthValue1("0");
     }
 
     const onTokenApproval = (type, res) => {
@@ -180,12 +187,18 @@ const Mint = (props) => {
                 const { ammIndex, lpIndex, token0Contract, token1Contract, token0decimals, token1decimals } = chosenPair;
 
                 var result;
-                if (inputType !== 'eth') {
+                if (inputType !== 'eth' && !onlyByToken0 && !onlyByToken1) {
                     const gasLimit = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), inputType === 'lp').estimateGas({ from: props.dfoCore.address });
                     result = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), inputType === 'lp').send({ from: props.dfoCore.address, gasLimit });
                 } else {
                     var sendingOptions = { from: props.dfoCore.address };
-                    var method;//TODO prepare input and call method
+                    var method;
+                    //TODO prepare input and call method
+                    if(inputType === 'eth') {
+
+                    } else {
+
+                    }
                     sendingOptions.gasLimit = method.estimateGas(sendingOptions);
                     method.send({ ...sendingOptions, gasLimit: await method.estimateGas(sendingOptions) });
                 }
@@ -334,6 +347,50 @@ const Mint = (props) => {
         }
     }
 
+    async function onSingleTokenAmount(e) {
+        setSingleTokenAmount(e.target.value);
+        var value = parseFloat(e.target.value);
+
+        const { ammContract, liquidityPool, token0decimals, token1decimals, decimalsLp } = pairs[pair];
+
+        var tokenDecimals = onlyByToken0 ? token0decimals : token1decimals;
+        value = window.toDecimals(value, tokenDecimals);
+        var halfValue = props.dfoCore.web3.utils.toBN(value).div(props.dfoCore.web3.utils.toBN(2)).toString();
+
+        async function calculateBestLP(firstToken, secondToken) {
+
+            var token1Value = (await ammContract.methods.getSwapOutput(firstToken, halfValue, [liquidityPool], [secondToken]).call())[1];
+
+            var token0Value = (await ammContract.methods.byTokenAmount(liquidityPool, secondToken, token1Value).call());
+            var lpAmount = token0Value[0];
+            token0Value = token0Value[1][token0Value[2].indexOf(firstToken)];
+
+            return { lpAmount, token0Value, token1Value };
+        }
+
+        var lpAmount = "0";
+        var token0Value = "0";
+        var token1Value = "0";
+
+        try {
+            var bestLP = await calculateBestLP(
+                onlyByToken0 ? pairs[pair].token0Contract.options.address : pairs[pair].token1Contract.options.address,
+                onlyByToken0 ? pairs[pair].token1Contract.options.address : pairs[pair].token0Contract.options.address
+            );
+            lpAmount = bestLP.lpAmount;
+            token0Value = bestLP.token0Value;
+            token1Value = bestLP.token1Value;
+        } catch(e) {
+        }
+
+        var firstTokenAmount = onlyByToken0 ? token0Value : token1Value;
+        var secondTokenAmount = onlyByToken0 ? token1Value : token0Value;
+
+        setLpTokenAmount({ value: props.dfoCore.toDecimals(lpAmount, decimalsLp), full: lpAmount });
+        setFirstAmount({ value: props.dfoCore.toDecimals(firstTokenAmount, token0decimals), full: firstTokenAmount });
+        setSecondAmount({ value: props.dfoCore.toDecimals(secondTokenAmount, token1decimals), full: secondTokenAmount });
+    }
+
     const getEstimatedAmount = () => {
         if (firstAmount.value != 0 && secondAmount.value != 0) {
             return parseFloat(firstAmount.value) + parseFloat(secondAmount.value);
@@ -348,6 +405,16 @@ const Mint = (props) => {
         if (token === "token1") {
             setOnlyByToken1(e.target.checked);
         }
+        e.target.checked && onSingleTokenAmount({
+            target : {
+                value : singleTokenAmount || "0"
+            }
+        })
+    }
+
+    function onInputTypeChange(e) {
+        setInputType(e.target.value);
+        clear();
     }
 
     function renderByETH() {
@@ -393,7 +460,7 @@ const Mint = (props) => {
                 {!onlyByToken0 && !onlyByToken1 && <p>Wrap</p>}
                 {(onlyByToken0 || onlyByToken1) && <p>Use</p>}
                 <div className="InputTokenRegular">
-                    {onlyByToken0 && <Input showMax={true} step={0.0001} value={firstAmount.value} address={pairs[pair].token0} balance={firstTokenBalance} min={0} onChange={(e) => updateFirstAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol0} />}
+                    {onlyByToken0 && <Input showMax={true} step={0.0001} value={singleTokenAmount} address={pairs[pair].token0} balance={firstTokenBalance} min={0} onChange={onSingleTokenAmount} showCoin={true} showBalance={true} name={pairs[pair].symbol0} />}
                     {!onlyByToken0 && !onlyByToken1 && <Input showMax={true} step={0.0001} value={firstAmount.value} address={pairs[pair].token0} balance={firstTokenBalance} min={0} onChange={(e) => updateFirstAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol0} />}
                     {!onlyByToken1 && <label>
                         Only by this token
@@ -402,7 +469,7 @@ const Mint = (props) => {
                 </div>
                 {!onlyByToken0 && !onlyByToken1 && <p>And</p>}
                 <div className="InputTokenRegular">
-                    {onlyByToken1 && <Input showMax={true} step={0.0001} value={secondAmount.value} address={pairs[pair].token1} balance={secondTokenBalance} min={0} onChange={(e) => updateSecondAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol1} />}
+                    {onlyByToken1 && <Input showMax={true} step={0.0001} value={singleTokenAmount} address={pairs[pair].token1} balance={secondTokenBalance} min={0} onChange={onSingleTokenAmount} showCoin={true} showBalance={true} name={pairs[pair].symbol1} />}
                     {!onlyByToken0 && !onlyByToken1 && <Input showMax={true} step={0.0001} value={secondAmount.value} address={pairs[pair].token1} balance={secondTokenBalance} min={0} onChange={(e) => updateSecondAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol1} />}
                     {!onlyByToken0 && <label>
                         Only by this token
@@ -488,15 +555,15 @@ const Mint = (props) => {
                     pair && isHealthyPair && <div className="QuestionRegular">
                         <label>
                             By ETH
-                                <input name="inputType" type="radio" value="eth" checked={inputType === "eth"} onChange={e => setInputType(e.target.value)} disabled={!pair} />
+                                <input name="inputType" type="radio" value="eth" checked={inputType === "eth"} onChange={onInputTypeChange} disabled={!pair} />
                         </label>
                         <label>
                             By LP Token
-                                <input name="inputType" type="radio" value="lp" checked={inputType === "lp"} onChange={e => setInputType(e.target.value)} disabled={!pair} />
+                                <input name="inputType" type="radio" value="lp" checked={inputType === "lp"} onChange={onInputTypeChange} disabled={!pair} />
                         </label>
                         <label>
                             By pair
-                                <input name="inputType" type="radio" value="pair" checked={inputType === "pair"} onChange={e => setInputType(e.target.value)} disabled={!pair} />
+                                <input name="inputType" type="radio" value="pair" checked={inputType === "pair"} onChange={onInputTypeChange} disabled={!pair} />
                         </label>
                     </div>
                 }
