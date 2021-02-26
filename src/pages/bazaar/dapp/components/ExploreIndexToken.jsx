@@ -152,8 +152,8 @@ const ExploreIndexToken = (props) => {
             return;
         }
         const info = await metadata.indexContract.methods.info(metadata.objectId, props.dfoCore.toFixed(parseFloat(value) * 10 ** metadata.indexDecimals).toString()).call();
-        var infoData = {...info, symbols : []};
-        for(var tokenAddress of info[0]) {
+        var infoData = { ...info, symbols: [] };
+        for (var tokenAddress of info[0]) {
             var contract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), tokenAddress);
             infoData.symbols.push(await contract.methods.symbol().call());
         }
@@ -251,17 +251,17 @@ const ExploreIndexToken = (props) => {
                     {amms.map((it, i) => <option key={it.address} value={i}>{it.info[0]}</option>)}
                 </select>}
             </div>}
-            {mintByEth && mintByEthLoading && <Loading/>}
+            {mintByEth && mintByEthLoading && <Loading />}
             {mintByEth && <div className="InputTokenRegular">
                 {swapForEthValues.map((it, i) => <div key={it}>
                     Swapping
                     {window.fromDecimals(it, 18)}
                     ETH
-                    <Coin address={window.voidEthereumAddress}/>
+                    <Coin address={window.voidEthereumAddress} />
                     for
                     {window.fromDecimals(mintResult[1][i], 18)}
                     {mintResult.symbols[i]}
-                    <Coin address={mintResult[0][i]}/>
+                    <Coin address={mintResult[0][i]} />
                 </div>)}
                 {mintByEthError && <h6>Error while calculating swap prices, maybe low liquidity?</h6>}
             </div>}
@@ -400,12 +400,8 @@ const ExploreIndexToken = (props) => {
                         <option value="mint">Mint</option>
                         <option value="burn">Burn</option>
                     </select>
-                    {
-                        action === "mint" && getMint()
-                    }
-                    {
-                        action === "burn" && getBurn()
-                    }
+                    {action === "mint" && getMint()}
+                    {action === "burn" && getBurn()}
                 </div>
             </>
         );
@@ -425,16 +421,14 @@ const ExploreIndexToken = (props) => {
 
     return (
         <div className="explore-index-token-component">
-            {
-                metadata ? getContent() :
-                    <div className="row">
-                        <div className="col-12 justify-content-center">
-                            <div className="spinner-border text-secondary" role="status">
-                                <span className="visually-hidden"></span>
-                            </div>
+            {metadata ? getContent() :
+                <div className="row">
+                    <div className="col-12 justify-content-center">
+                        <div className="spinner-border text-secondary" role="status">
+                            <span className="visually-hidden"></span>
                         </div>
                     </div>
-            }
+                </div>}
         </div>
     )
 }
