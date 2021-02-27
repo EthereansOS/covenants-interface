@@ -24,6 +24,7 @@ const FixedInflationComponent = (props) => {
             var blockNumber = parseInt(await window.web3.eth.getBlockNumber());
             var nextBlock = parseInt(entry.lastBlock) + parseInt(entry.blockInterval);
             var extensionContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("FixedInflationExtensionABI"), await contract.methods.extension().call());
+            var extensionContractData = await extensionContract.methods.data().call();
             var active = true;
             try {
                 active = await extensionContract.methods.active().call();
@@ -38,7 +39,8 @@ const FixedInflationComponent = (props) => {
                 extension: await contract.methods.extension().call(),
                 contractAddress: contract.options.address,
                 executable : active && blockNumber >= nextBlock,
-                active
+                active,
+                extensionContractData
             });
         } catch (error) {
             console.error(error);
@@ -75,6 +77,7 @@ const FixedInflationComponent = (props) => {
                         {metadata.executorReward !== 0 && <p>{window.formatMoney(metadata.executorReward)}% Reward to execute {metadata.operations.length} operations</p>}
                         {metadata.executorReward === 0 && <p>{metadata.operations.length} Operations</p>}
                     <div className="InflationContractButton">
+                        { !showButton || metadata.extensionContractData[1] !== props.dfoCore.address ? <div/> : <Link to={`/inflation/dapp/create/${metadata.contractAddress}`} className="web2ActionBTN">Edit</Link>}
                         { !showButton ? <div/> : <Link to={`/inflation/dapp/${metadata.contractAddress}`} className="web2ActionBTN">Open</Link>}
                         {false && showButton && metadata.executable && !executing && <a className="Web3ActionBTN" onClick={execute}>Execute</a>}
                         {false && executing && <Loading/>}

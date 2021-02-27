@@ -222,7 +222,7 @@ export default class DFOCore {
         try {
             if (!factoryAddress) factoryAddress = this.getContextElement("fixedInflationFactoryAddress");
             const factoryContract = new this.web3.eth.Contract(this.getContextElement("FixedInflationFactoryABI"), factoryAddress);
-            const events = await factoryContract.getPastEvents('FixedInflationDeployed', { fromBlock: 11806961 });
+            const events = await factoryContract.getPastEvents('FixedInflationDeployed', { fromBlock: this.getContextElement('deploySearchStart') });
             this.deployedFixedInflationContracts = [];
             await Promise.all(events.map(async(event) => {
                 try {

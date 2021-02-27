@@ -4,7 +4,7 @@ import { setDFOCore, removeDFOCore } from '../../../store/actions';
 import { default as context } from '../../../data/context.json';
 import { useState } from 'react';
 import { DappMenu } from '../../../components';
-import { Create, Explore, ExploreInflationContract } from './components';
+import { CreateOrEditFixedInflation, Explore, ExploreInflationContract } from './components';
 import { Switch, Route, useHistory } from 'react-router-dom';
 
 const Dapp = (props) => {
@@ -27,7 +27,7 @@ const Dapp = (props) => {
             case 'explore':
                 return <Explore />;
             case 'create':
-                return <Create />;
+                return <CreateOrEditFixedInflation />;
             default:
                 return <div/>;
         }
@@ -51,6 +51,9 @@ const Dapp = (props) => {
         <div className="DappBox">
                     <DappMenu className="DappMenu" onClick={(name) => setTab(name)} currentTab={currentTab} options={['Explore', 'Create']} />
                             <Switch>
+                                <Route path="/inflation/dapp/create/:address">
+                                    <CreateOrEditFixedInflation />
+                                </Route>
                                 <Route path="/inflation/dapp/:address">
                                     <ExploreInflationContract />
                                 </Route>

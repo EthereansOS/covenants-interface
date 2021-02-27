@@ -1,9 +1,8 @@
 import { connect } from 'react-redux';
-import { useState } from 'react';
-import { Input } from '../../../../components';
-import Operation from './Operation';
+import { useEffect, useState } from 'react';
+import CreateOrEditFixedInflationEntryOperation from './CreateOrEditFixedInflationEntryOperation';
 
-const Entry = (props) => {
+const CreateOrEditFixedInflationEntry = (props) => {
 
     const [step, setStep] = useState(0);
     const [operations, setOperations] = useState(props.entry.operations || []);
@@ -14,6 +13,10 @@ const Entry = (props) => {
     const [hasCallerRewardPercentage, setHasCallerRewardPercentage] = useState((props.entry.callerRewardPercentage || 0) > 0);
     const [hasLastBlock, setHasLastBlock] = useState((props.entry.lastBlock || 0) > 0);
     const [editingOperation, setEditingOperation] = useState(null);
+
+    useEffect(() => {
+        props.notFirstTime && setStep(steps.length - 1);
+    }, []);
 
     function editOrAddEntryOperation(entryOperationIndex) {
         if (isNaN(entryOperationIndex)) {
@@ -127,7 +130,7 @@ const Entry = (props) => {
     ];
 
     return editingOperation != null ?
-        <Operation operation={operations[editingOperation]} cancelEditOperation={cancelEditOperation} saveEditOperation={saveEditOperation} />
+        <CreateOrEditFixedInflationEntryOperation operation={operations[editingOperation]} cancelEditOperation={cancelEditOperation} saveEditOperation={saveEditOperation} />
         : <>
             <div className="CreateList">
                 <h6><b> {entryName}</b></h6>
@@ -148,4 +151,4 @@ const mapStateToProps = (state) => {
     return { dfoCore, inflationSetups };
 }
 
-export default connect(mapStateToProps)(Entry);
+export default connect(mapStateToProps)(CreateOrEditFixedInflationEntry);

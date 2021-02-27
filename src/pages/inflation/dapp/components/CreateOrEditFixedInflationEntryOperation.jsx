@@ -4,7 +4,7 @@ import { addEntry } from '../../../../store/actions';
 import { Coin, Input, TokenInput } from '../../../../components/shared';
 import Loading from '../../../../components/shared/Loading';
 
-const Operation = (props) => {
+const CreateOrEditFixedInflationEntryOperation = (props) => {
     const { entry, onCancel, onFinish, operation } = props;
     const [step, setStep] = useState(0);
     // first step
@@ -30,15 +30,16 @@ const Operation = (props) => {
     // check if an entry has been passed in the props
     useEffect(() => {
         if (operation) {
+            var inputTokenAddress = operation.inputToken ? operation.inputToken.address ? operation.inputToken.address : operation.inputToken : null
             setActionType(operation.actionType);
-            onSelectInputToken(operation.inputToken ? operation.inputToken.address ? operation.inputToken.address : operation.inputToken : null);
+            onSelectInputToken(inputTokenAddress);
             setInputTokenMethod(operation.inputTokenMethod)
             setAmount(operation.amount);
             setPercentage(operation.percentage);
             setTransferType(operation.transferType);
             setReceivers(operation.receivers);
             setPathTokens(operation.pathTokens);
-            setEnterInETH(operation.enterInETH || false);
+            setEnterInETH(operation.enterInETH || inputTokenAddress === window.voidEthereumAddress);
             setExitInETH(operation.exitInETH || false);
             setRenderExitInETH(operation.exitInETH || false);
             setAmm(operation.amm);
@@ -449,4 +450,4 @@ const mapDispatchToProps = (dispatch) => {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Operation);
+export default connect(mapStateToProps, mapDispatchToProps)(CreateOrEditFixedInflationEntryOperation);

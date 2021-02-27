@@ -1,5 +1,5 @@
-import Create from './Create';
+import CreateOrEditFixedInflation from './CreateOrEditFixedInflation';
 import Explore from './Explore';
 import ExploreInflationContract from './ExploreInflationContract';
 
-export { Create, Explore, ExploreInflationContract };
+export { CreateOrEditFixedInflation, Explore, ExploreInflationContract };
