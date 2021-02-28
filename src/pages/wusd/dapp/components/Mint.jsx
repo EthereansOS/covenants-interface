@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { ApproveButton, Input, Coin } from '../../../../components';
 import { addTransaction } from '../../../../store/actions';
 import WUSDLogo from '../../../../assets/images/x1WUSD.png';
+import Loading from '../../../../components/shared/Loading';
 
 const Mint = (props) => {
     const [pair, setPair] = useState("");
@@ -29,10 +30,27 @@ const Mint = (props) => {
     const [onlyByToken0, setOnlyByToken0] = useState(false);
     const [onlyByToken1, setOnlyByToken1] = useState(false);
     const [singleTokenAmount, setSingleTokenAmount] = useState("");
+    const [amms, setAmms] = useState([]);
+    const [selectedAmmIndex, setSelectedAmmIndex] = useState(null);
+    const [mintByEthLoading, setMintByEthLoading] = useState(false);
 
-    useEffect(() => {
+    useEffect(async () => {
         getController();
-
+        var amms = [];
+        const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
+        var ammAddresses = await ammAggregator.methods.amms().call();
+        for (var address of ammAddresses) {
+            var contract = await props.dfoCore.getContract(props.dfoCore.getContextElement("AMMABI"), address);
+            var amm = {
+                address,
+                contract,
+                info: await contract.methods.info().call(),
+                data: await contract.methods.data().call()
+            }
+            amm.data[2] && amms.push(amm);
+        }
+        setSelectedAmmIndex(0);
+        setAmms(amms);
         return () => {
             console.log('clearing interval.');
             if (intervalId) clearInterval(intervalId);
@@ -127,6 +145,7 @@ const Mint = (props) => {
         setEthValue("0");
         setEthValue0("0");
         setEthValue1("0");
+        setMintByEthLoading(false);
     }
 
     const onTokenApproval = (type, res) => {
@@ -164,7 +183,6 @@ const Mint = (props) => {
                 const maximumPairRatioForMint = await wusdExtensionController.methods.maximumPairRatioForMint().call();
                 const oneHundred = await wusdExtensionController.methods.ONE_HUNDRED().call()
 
-
                 if (parseFloat(ratio) > (parseInt(maximumPairRatioForMint) / parseInt(oneHundred))) {
                     setIsHealthyPair(false);
                 } else {
@@ -194,7 +212,7 @@ const Mint = (props) => {
                     var sendingOptions = { from: props.dfoCore.address };
                     var method;
                     //TODO prepare input and call method
-                    if(inputType === 'eth') {
+                    if (inputType === 'eth') {
 
                     } else {
 
@@ -286,25 +304,28 @@ const Mint = (props) => {
         }
     }
 
-    const updateEthAmount = async (amount) => {
+    const updateEthAmount = async (amount, ammIndex) => {
         try {
             if (!amount) {
                 clear();
                 return;
             };
             setEthValue(amount);
+            setMintByEthLoading(true);
             const chosenPair = pairs[pair];
             const { ammContract, liquidityPool, token0decimals, token1decimals, decimalsLp } = chosenPair;
 
+            var amm = amms[!isNaN(ammIndex) ? ammIndex : selectedAmmIndex].contract;
+
             var value = props.dfoCore.fromDecimals(window.numberToString(amount), 18);
             var halfValue = props.dfoCore.web3.utils.toBN(value).div(props.dfoCore.web3.utils.toBN(2)).toString();
-            var ethereumAddress = (await ammContract.methods.data().call())[0];
+            var ethereumAddress = (await amm.methods.data().call())[0];
 
             async function calculateBestLP(firstToken, secondToken, firstDecimals, secondDecimals) {
 
-                var liquidityPoolAddress = (await ammContract.methods.byTokens([ethereumAddress, firstToken]).call())[2];
+                var liquidityPoolAddress = (await amm.methods.byTokens([ethereumAddress, firstToken]).call())[2];
 
-                var token0Value = (await ammContract.methods.getSwapOutput(ethereumAddress, halfValue, [liquidityPoolAddress], [firstToken]).call())[1];
+                var token0Value = (await amm.methods.getSwapOutput(ethereumAddress, halfValue, [liquidityPoolAddress], [firstToken]).call())[1];
 
                 var token1Value = (await ammContract.methods.byTokenAmount(liquidityPool, firstToken, token0Value).call());
                 var lpAmount = token1Value[0];
@@ -313,8 +334,8 @@ const Mint = (props) => {
                 const updatedFirstTokenAmount = props.dfoCore.formatNumber(props.dfoCore.normalizeValue(token0Value, firstDecimals));
                 const updatedSecondTokenAmount = props.dfoCore.formatNumber(props.dfoCore.normalizeValue(token1Value, secondDecimals));
 
-                liquidityPoolAddress = (await ammContract.methods.byTokens([ethereumAddress, secondToken]).call())[2];
-                var token1ValueETH = (await ammContract.methods.getSwapOutput(secondToken, token1Value, [liquidityPoolAddress], [ethereumAddress]).call())[1];
+                liquidityPoolAddress = (await amm.methods.byTokens([ethereumAddress, secondToken]).call())[2];
+                var token1ValueETH = (await amm.methods.getSwapOutput(secondToken, token1Value, [liquidityPoolAddress], [ethereumAddress]).call())[1];
 
                 return { lpAmount, updatedFirstTokenAmount, updatedSecondTokenAmount, token0Value, token1Value, token1ValueETH };
             }
@@ -345,6 +366,7 @@ const Mint = (props) => {
         } catch (error) {
             console.error(error);
         }
+        setMintByEthLoading(false);
     }
 
     async function onSingleTokenAmount(e) {
@@ -380,7 +402,7 @@ const Mint = (props) => {
             lpAmount = bestLP.lpAmount;
             token0Value = bestLP.token0Value;
             token1Value = bestLP.token1Value;
-        } catch(e) {
+        } catch (e) {
         }
 
         var firstTokenAmount = onlyByToken0 ? token0Value : token1Value;
@@ -406,8 +428,8 @@ const Mint = (props) => {
             setOnlyByToken1(e.target.checked);
         }
         e.target.checked && onSingleTokenAmount({
-            target : {
-                value : singleTokenAmount || "0"
+            target: {
+                value: singleTokenAmount || "0"
             }
         })
     }
@@ -417,16 +439,27 @@ const Mint = (props) => {
         clear();
     }
 
+    function onAmmChange(e) {
+        setSelectedAmmIndex(parseInt(e.target.value));
+        updateEthAmount(ethValue, parseInt(e.target.value));
+    }
+
     function renderByETH() {
         return <>
             <div className="InputTokensRegular">
                 <div className="InputTokenRegular">
                     <Input showMax={true} step={0.0001} address={window.voidEthereumAddress} value={ethValue} balance={ethBalance} min={0} onChange={(e) => updateEthAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name="ETH" />
                 </div>
+                {!mintByEthLoading && <div className="InputTokenRegular">
+                    {amms.length > 0 && <select value={selectedAmmIndex.toString()} onChange={onAmmChange}>
+                        {amms.map((it, i) => <option key={it.address} value={i}>{it.info[0]}</option>)}
+                    </select>}
+                </div>}
             </div>
-                <div className="FromETHPrestoDesc">
-                    <p>Swapping for {window.formatMoney(firstAmount.value, 2)} {pairs[pair].symbol0} <Coin address={pairs[pair].token0} /> And {window.formatMoney(secondAmount.value, 2)} {pairs[pair].symbol1} <Coin address={pairs[pair].token1} /></p>
-                </div>
+            {mintByEthLoading && <Loading/>}
+            {!mintByEthLoading && <div className="FromETHPrestoDesc">
+                <p>Swapping for {window.formatMoney(firstAmount.value, 2)} {pairs[pair].symbol0} <Coin address={pairs[pair].token0} /> And {window.formatMoney(secondAmount.value, 2)} {pairs[pair].symbol1} <Coin address={pairs[pair].token1} /></p>
+            </div>}
         </>
     }
 
@@ -449,7 +482,7 @@ const Mint = (props) => {
                 {!onlyByToken0 && !onlyByToken1 && <p>Wrap</p>}
                 {(onlyByToken0 || onlyByToken1) && <p>Use</p>}
                 <div className="InputTokenRegular InputTokenRegularS">
-                {!onlyByToken1 && <label className="PrestoSelector">
+                    {!onlyByToken1 && <label className="PrestoSelector">
                         <span>Only</span>
                         <input type="checkbox" onChange={e => onSingleTokenChange(e, "token0")} checked={onlyByToken0} />
                     </label>}
@@ -458,7 +491,7 @@ const Mint = (props) => {
                 </div>
                 {!onlyByToken0 && !onlyByToken1 && <p>And</p>}
                 <div className="InputTokenRegular InputTokenRegularS">
-                {!onlyByToken0 && <label className="PrestoSelector">
+                    {!onlyByToken0 && <label className="PrestoSelector">
                         <span>Only</span>
                         <input type="checkbox" onChange={e => onSingleTokenChange(e, "token1")} checked={onlyByToken1} />
                     </label>}
@@ -466,13 +499,13 @@ const Mint = (props) => {
                     {!onlyByToken0 && !onlyByToken1 && <Input showMax={true} step={0.0001} value={secondAmount.value} address={pairs[pair].token1} balance={secondTokenBalance} min={0} onChange={(e) => updateSecondAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol1} />}
                 </div>
             </div>
-            {(onlyByToken0 || onlyByToken1) &&  <div className="FromETHPrestoDesc">
-                    {onlyByToken1 && <>
+            {(onlyByToken0 || onlyByToken1) && <div className="FromETHPrestoDesc">
+                {onlyByToken1 && <>
                     <p>Swapping {window.formatMoney(secondAmount.value, 2)} {pairs[pair].symbol1} <Coin address={pairs[pair].token1} /> for {window.formatMoney(firstAmount.value, 2)} {pairs[pair].symbol0} <Coin address={pairs[pair].token0} /></p>
-                    </>}
-                    {onlyByToken0 && <>
-                        <p>Swapping {window.formatMoney(firstAmount.value, 2)} {pairs[pair].symbol0} <Coin address={pairs[pair].token0} /> for {window.formatMoney(secondAmount.value, 2)} {pairs[pair].symbol1} <Coin address={pairs[pair].token1} /></p>
-                    </>}
+                </>}
+                {onlyByToken0 && <>
+                    <p>Swapping {window.formatMoney(firstAmount.value, 2)} {pairs[pair].symbol0} <Coin address={pairs[pair].token0} /> for {window.formatMoney(secondAmount.value, 2)} {pairs[pair].symbol1} <Coin address={pairs[pair].token1} /></p>
+                </>}
             </div>}
         </>
     }
@@ -553,7 +586,7 @@ const Mint = (props) => {
                 (pair && isHealthyPair) ? inputType === 'lp' ? getLpToken() : inputType === 'pair' ? getMultipleTokens() : renderByETH() : <div />
             }
             {
-                (pair && isHealthyPair) ? <div className="Resultsregular">
+                (pair && isHealthyPair && !mintByEthLoading) ? <div className="Resultsregular">
                     <p>To mint <b>{window.formatMoney(getEstimatedAmount(), 2)} <img src={WUSDLogo}></img>WUSD</b></p>
                 </div> : <div />
             }
