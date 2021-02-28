@@ -4,19 +4,17 @@ const DappMenu = (props) => {
     const { className, currentTab, onClick, options } = props;
 
     return (
-        <div className={className}>
-            <ul className="nav justify-content-center">
+        <ul className={className}>
                 {
                     options.map((option, i) => {
                         return (
-                            <li key={option} className={`nav-item ${currentTab === option.toLowerCase() ? 'nav-item-selected' : ''}`} onClick={() => onClick(option.toLowerCase())}>
-                                <span className="nav-link">{option}</span>
+                            <li key={option} className={`${currentTab === option.toLowerCase() ? 'nav-selected' : ''}`} onClick={() => onClick(option.toLowerCase())}>
+                                <span>{option}</span>
                             </li>
                         )
                     })
                 }
-            </ul>
-        </div>
+        </ul>
     )
 }
 
