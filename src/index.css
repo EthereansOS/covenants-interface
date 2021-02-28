@@ -353,6 +353,13 @@ a:disabled {cursor:wait !important;}
 .magic .form-control, .magic .form-control:focus {background-color: transparent;border-top: 1px solid #9e6915; border-left: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-right: 0px solid #9e6915; color: #000000;}
 .magic .FarmContract,.magic .IndexContract, .magic .FarmContractOpen, .magic .FarmSetup, .magic .InflationContract, .magic .TokenOperation, .magic .IndexContractOpenInfo, .magic .IndexContractOpenCollateralSingle, .magic .IndexContractOpenStatistic, .magic .ShowCollateralNeededBal {border-color: #ebebeb;}
 .magic .IndexSinglePerchBar span {color: #ffffff;}
+.PrestoSelector {padding: 5px; margin: 2px 3px; border-radius: 8px; border: 1px solid #9e6915;}
+.PrestoSelector span {font-size: 14px; margin: auto 5px auto auto; display: inline-block; vertical-align: middle;}
+.FromETHPrestoDesc {width: 100%;}
+.FromETHPrestoDesc p {width: 100%;font-size: 12px;}
+.FromETHPrestoDesc img {width: 15px; height: 15px;}
+.InputTokenRegularS {position: relative;}
+.InputTokenRegularS .PrestoSelector {padding: 2px 5px; position: absolute; left: -80px; top: 2px;}
 
 @media only screen and (max-device-width: 750px) {
    .IndexRegularText iframe {display: none;}

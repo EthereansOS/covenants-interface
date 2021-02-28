@@ -424,20 +424,9 @@ const Mint = (props) => {
                     <Input showMax={true} step={0.0001} address={window.voidEthereumAddress} value={ethValue} balance={ethBalance} min={0} onChange={(e) => updateEthAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name="ETH" />
                 </div>
             </div>
-            <div className="InputTokensRegular">
-                <p>Swapping</p>
-                <div className="InputTokenRegular">
-                    <span>{window.fromDecimals(ethValue0, 18)} ETH <Coin address={window.voidEthereumAddress} /></span>
-                        for
-                        <span>{window.formatMoney(firstAmount.value, 2)} {pairs[pair].symbol0} <Coin address={pairs[pair].token0} /></span>
+                <div className="FromETHPrestoDesc">
+                    <p>Swapping for {window.formatMoney(firstAmount.value, 2)} {pairs[pair].symbol0} <Coin address={pairs[pair].token0} /> And {window.formatMoney(secondAmount.value, 2)} {pairs[pair].symbol1} <Coin address={pairs[pair].token1} /></p>
                 </div>
-                <p>And</p>
-                <div className="InputTokenRegular">
-                    <span>{window.fromDecimals(ethValue1, 18)} ETH <Coin address={window.voidEthereumAddress} /></span>
-                        for
-                        <span>{window.formatMoney(secondAmount.value, 2)} {pairs[pair].symbol1} <Coin address={pairs[pair].token1} /></span>
-                </div>
-            </div>
         </>
     }
 
@@ -459,44 +448,31 @@ const Mint = (props) => {
             <div className="InputTokensRegular">
                 {!onlyByToken0 && !onlyByToken1 && <p>Wrap</p>}
                 {(onlyByToken0 || onlyByToken1) && <p>Use</p>}
-                <div className="InputTokenRegular">
-                    {onlyByToken0 && <Input showMax={true} step={0.0001} value={singleTokenAmount} address={pairs[pair].token0} balance={firstTokenBalance} min={0} onChange={onSingleTokenAmount} showCoin={true} showBalance={true} name={pairs[pair].symbol0} />}
-                    {!onlyByToken0 && !onlyByToken1 && <Input showMax={true} step={0.0001} value={firstAmount.value} address={pairs[pair].token0} balance={firstTokenBalance} min={0} onChange={(e) => updateFirstAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol0} />}
-                    {!onlyByToken1 && <label>
-                        Only by this token
+                <div className="InputTokenRegular InputTokenRegularS">
+                {!onlyByToken1 && <label className="PrestoSelector">
+                        <span>Only</span>
                         <input type="checkbox" onChange={e => onSingleTokenChange(e, "token0")} checked={onlyByToken0} />
                     </label>}
+                    {onlyByToken0 && <Input showMax={true} step={0.0001} value={singleTokenAmount} address={pairs[pair].token0} balance={firstTokenBalance} min={0} onChange={onSingleTokenAmount} showCoin={true} showBalance={true} name={pairs[pair].symbol0} />}
+                    {!onlyByToken0 && !onlyByToken1 && <Input showMax={true} step={0.0001} value={firstAmount.value} address={pairs[pair].token0} balance={firstTokenBalance} min={0} onChange={(e) => updateFirstAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol0} />}
                 </div>
                 {!onlyByToken0 && !onlyByToken1 && <p>And</p>}
-                <div className="InputTokenRegular">
-                    {onlyByToken1 && <Input showMax={true} step={0.0001} value={singleTokenAmount} address={pairs[pair].token1} balance={secondTokenBalance} min={0} onChange={onSingleTokenAmount} showCoin={true} showBalance={true} name={pairs[pair].symbol1} />}
-                    {!onlyByToken0 && !onlyByToken1 && <Input showMax={true} step={0.0001} value={secondAmount.value} address={pairs[pair].token1} balance={secondTokenBalance} min={0} onChange={(e) => updateSecondAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol1} />}
-                    {!onlyByToken0 && <label>
-                        Only by this token
+                <div className="InputTokenRegular InputTokenRegularS">
+                {!onlyByToken0 && <label className="PrestoSelector">
+                        <span>Only</span>
                         <input type="checkbox" onChange={e => onSingleTokenChange(e, "token1")} checked={onlyByToken1} />
                     </label>}
+                    {onlyByToken1 && <Input showMax={true} step={0.0001} value={singleTokenAmount} address={pairs[pair].token1} balance={secondTokenBalance} min={0} onChange={onSingleTokenAmount} showCoin={true} showBalance={true} name={pairs[pair].symbol1} />}
+                    {!onlyByToken0 && !onlyByToken1 && <Input showMax={true} step={0.0001} value={secondAmount.value} address={pairs[pair].token1} balance={secondTokenBalance} min={0} onChange={(e) => updateSecondAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol1} />}
                 </div>
             </div>
-            {(onlyByToken0 || onlyByToken1) && <div className="InputTokensRegular">
-                <div className="InputTokenRegular">
+            {(onlyByToken0 || onlyByToken1) &&  <div className="FromETHPrestoDesc">
                     {onlyByToken1 && <>
-                        Swapping
-                        <span>{window.formatMoney(secondAmount.value, 2)} {pairs[pair].symbol1} <Coin address={pairs[pair].token1} /></span>
-                        for
+                    <p>Swapping {window.formatMoney(secondAmount.value, 2)} {pairs[pair].symbol1} <Coin address={pairs[pair].token1} /> for {window.formatMoney(firstAmount.value, 2)} {pairs[pair].symbol0} <Coin address={pairs[pair].token0} /></p>
                     </>}
-                    {onlyByToken0 && <span>Transfering</span>}
-                    <span>{window.formatMoney(firstAmount.value, 2)} {pairs[pair].symbol0} <Coin address={pairs[pair].token0} /></span>
-                </div>
-                <p>and</p>
-                <div className="InputTokenRegular">
                     {onlyByToken0 && <>
-                        Swapping
-                        <span>{window.formatMoney(firstAmount.value, 2)} {pairs[pair].symbol0} <Coin address={pairs[pair].token0} /></span>
-                        for
+                        <p>Swapping {window.formatMoney(firstAmount.value, 2)} {pairs[pair].symbol0} <Coin address={pairs[pair].token0} /> for {window.formatMoney(secondAmount.value, 2)} {pairs[pair].symbol1} <Coin address={pairs[pair].token1} /></p>
                     </>}
-                    {onlyByToken1 && <span>Transfering</span>}
-                    <span>{window.formatMoney(secondAmount.value, 2)} {pairs[pair].symbol1} <Coin address={pairs[pair].token1} /></span>
-                </div>
             </div>}
         </>
     }
@@ -553,17 +529,17 @@ const Mint = (props) => {
                 </select>
                 {
                     pair && isHealthyPair && <div className="QuestionRegular">
-                        <label>
-                            By ETH
-                                <input name="inputType" type="radio" value="eth" checked={inputType === "eth"} onChange={onInputTypeChange} disabled={!pair} />
+                        <label className="PrestoSelector">
+                            <span>From Pair</span>
+                            <input name="inputType" type="radio" value="pair" checked={inputType === "pair"} onChange={onInputTypeChange} disabled={!pair} />
                         </label>
-                        <label>
-                            By LP Token
-                                <input name="inputType" type="radio" value="lp" checked={inputType === "lp"} onChange={onInputTypeChange} disabled={!pair} />
+                        <label className="PrestoSelector">
+                            <span>From ETH</span>
+                            <input name="inputType" type="radio" value="eth" checked={inputType === "eth"} onChange={onInputTypeChange} disabled={!pair} />
                         </label>
-                        <label>
-                            By pair
-                                <input name="inputType" type="radio" value="pair" checked={inputType === "pair"} onChange={onInputTypeChange} disabled={!pair} />
+                        <label className="PrestoSelector">
+                            <span>From LP Token</span>
+                            <input name="inputType" type="radio" value="lp" checked={inputType === "lp"} onChange={onInputTypeChange} disabled={!pair} />
                         </label>
                     </div>
                 }
@@ -578,7 +554,7 @@ const Mint = (props) => {
             }
             {
                 (pair && isHealthyPair) ? <div className="Resultsregular">
-                    <p>For <b>{window.formatMoney(getEstimatedAmount(), 2)} <img src={WUSDLogo}></img>WUSD</b></p>
+                    <p>To mint <b>{window.formatMoney(getEstimatedAmount(), 2)} <img src={WUSDLogo}></img>WUSD</b></p>
                 </div> : <div />
             }
             {
