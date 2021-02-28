@@ -49,7 +49,7 @@ const Dapp = (props) => {
 
     return (
         <div className="DappBox">
-                    <DappMenu className="wusd-dapp-menu" onClick={(name) => setTab(name)} currentTab={currentTab} options={['Explore', 'Create']} />
+                    <DappMenu className="DappMenu" onClick={(name) => setTab(name)} currentTab={currentTab} options={['Explore', 'Create']} />
                             <Switch>
                                 <Route path="/inflation/dapp/:address">
                                     <ExploreInflationContract />
