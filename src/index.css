@@ -455,9 +455,9 @@ a:disabled {cursor:wait !important;}
    .fantasy .fantasyMenu {color: #ffffff;}
    .grimoireBox {max-width: 650px;width: 650px;}
    .ApplicationBox {width: 99%;margin-left: 0; margin: 0 auto; display: block;}
-   .ApplicationAll {width: 100%;margin: 0px auto 20px auto;}
-   .dapp-container {width: 100% !important;}
-   .app-container {width: 100% !important;}
-   .page-container-wrapper, .page-container {width: 100% !important;}
+   .ApplicationAll {width: 100%;margin: 40px auto 20px auto;}
+   .dapp-container {width: 100% !important; display: inline-block !important;;}
+   .app-container {width: 100% !important; display: inline-block !important;;}
+   .page-container-wrapper, .page-container {width: 100% !important;display: inline-block !important;}
    .ApplicationMenu {position: absolute;}
 }
