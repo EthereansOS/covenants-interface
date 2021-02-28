@@ -473,17 +473,13 @@ const Stats = (props) => {
 
     return (
         <div className="stats-container">
-            <div className="row">
                 { getZeroCol() }
                 { getFirstCol() }
                 { getSecondCol() }
-            </div>
             {
                 (showCredit || showDebt) && <>
                     <hr />
-                    <div className="row">
                         { getAdvancedCol() }
-                    </div>
                 </>
             }
         </div>

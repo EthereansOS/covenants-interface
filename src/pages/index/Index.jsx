@@ -5,10 +5,8 @@ const lorem2 = 'Here you will find Covenants. Empowered by the Aggregator, these
 
 const Index = () => {
     return (
-        <div className="page-container-wrapper">
-            <div className="page-container">
-                <div className="page-container-row index-container-row">
-                    <div className="page-container-col index-container-col CovTITLE">
+        <div className="DappBox">
+                    <div className="CovTITLE">
                         <figure>
                             <img src={dragonImage} className="index-image" />
                         </figure>
@@ -19,8 +17,6 @@ const Index = () => {
                         <p className="index-paragraph">{lorem2}</p>
                     </div>
                 </div>
-            </div>
-        </div>
     )
 }
 

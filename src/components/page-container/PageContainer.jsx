@@ -3,18 +3,16 @@ import PropTypes from 'prop-types';
 
 const PageContainer = (props) => {
     return (
-            <div className="page-container IndexRegular">
-                <div className="IndexRegularContents">
-                    <div className="IndexRegularText">
-                        { props.title ? <h3><b>{props.title}</b></h3> : '' }
-                        { props.text ? <p>{props.text}</p> : props.children } 
-                    </div>
-                    { props.image ? 
+        <div className="DappBox IndexRegular">
+                { props.image ? 
                         <div className="IndexRegularImg">
                             <img src={props.image} height={props.imageHeight || 350} />
                         </div> : '' 
                     }
-                </div>
+                    <div className="IndexRegularText">
+                        { props.title ? <h3><b>{props.title}</b></h3> : '' }
+                        { props.text ? <p>{props.text}</p> : props.children } 
+                    </div>
                 {
                     props.launchDapp ? 
                     <div className="IndexRegularBTN">
