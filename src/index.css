@@ -14,6 +14,9 @@
  }
 
 .body {position: relative;}
+.ApplicationAll {width: 990px; display: block; text-align: center; margin: 80px auto 80px auto;}
+.ApplicationBox {width: 750px; display: inline-block; margin-left: 20px; vertical-align: top;}
+.ApplicationMenu {width: 150px; display: inline-block;}
 a {cursor: pointer !important;}
 a:disabled {cursor:wait !important;}
 .MobileMenu {display: none;}
@@ -171,6 +174,8 @@ a:disabled {cursor:wait !important;}
 .TextRegularS {width: 90%; display: inline-block; font-size: 13px; font-weight: bold; padding: 7px 2%;border: 1px solid; border-radius: 8px; background-color: transparent;max-width: 330px;}
 .CheckboxQuestions aside {width: 10%; display: inline-block; margin-left: 3px; font-size: 18px; }
 .CreateListS .TextRegular {width: 300px;}
+.InputForm .SpecialInputPerch input {margin: 0;}
+.InputForm .SpecialInputPerch {margin-top: 10px;}
 
 .MainExploration {width: 95%; display: inline-block; margin: 10px auto; width: 600px;}
 .SortSection {width: 100%; text-align: center; display: inline-block; margin: 10px auto; min-width: 600px;} 
@@ -271,6 +276,18 @@ a:disabled {cursor:wait !important;}
 .success p a {font-size: 18px; display: inline-block; color: #ffffff; font-weight: bold; text-decoration: underline !important;}
 .success > a {font-size: 14px; position: absolute; bottom: 5px; left: 5px;z-index: 999999999999; color: #ffffff;}
 .ResultsregularS {font-size: 12px;}
+.InputForm .InputTokenRegular .input-group-append {margin-top: 10px;}
+.InputForm .InputTokensRegular {width: 100%;}
+.ReceiversList {width: 370px; display: inline-block; margin: 10px auto;}
+.ReceiverSingle {width: 100%; display: inline-block; margin: 5px auto;}
+.ReceiverSingle p {width: 80%; display: inline-block;}
+.ReceiverSingle .DeleteAddress {width: 15%; margin-left: 4%; display: inline-block; text-align: center;}
+.ReceiverSingle .TextRegular {width: 100%; display: inline-block;}
+.InputForm .Web2ActionsBTNs {width: 100%;}
+.CreateListOp {width: 100%; padding: 10px 10px; border: 1px solid #9e6915; border-radius: 12px;}
+.CreateListOp p {font-size: 15px;}
+
+
 
 .fantasy {background-color: #4d4c4a !important;}
 .fantasy .LogoM {background-position: 0 -50px;}
@@ -339,7 +356,7 @@ a:disabled {cursor:wait !important;}
 
 @media only screen and (max-device-width: 750px) {
    .IndexRegularText iframe {display: none;}
-   .page-container, .dapp-container {width: 270px !important; display: inline-block; margin: 20px auto;}
+   .page-container, .dapp-container {width: 270px !important; display: inline-block; margin: 0px auto;}
    .TitleCov {display: none;}
    .CovTITLE figure {width: 90%;}
    .DescCov p {font-size: 12px;}
@@ -364,10 +381,15 @@ a:disabled {cursor:wait !important;}
    .Ditone {display: none !important;}
    .sidebar-menu-link-selected .Ditone {display: none !important;}
    .Menuone {display: none;}
-   .sidemenu-active {display: inline-block; position: fixed; z-index: 30; right: 10px; top: 10px; background-color: #2d2e40; border-radius: 8px;top: 55px;}
+   .sidemenu-active {display: inline-block; position: fixed; z-index: 30; right: 10px; top: 10px; background-color: #2d2e40; border-radius: 8px;top: 55px; border: 1px solid #9e6915;}
+   .penguin .sidemenu-active {background-color: #2d2e40;}
+   .magic .sidemenu-active {background-color: #ffffff; color: #000000;}
+   .magic .sidebar-menu-link {color: #000000 !important;}
    .MobileMenu {display: inline-block; font-size: 13px; background-color: #7474f7; padding: 3px 5px; border-radius: 5px; color: #ffffff;text-decoration: none;}
    .MobileMenu:hover, .MobileMenu:after {color: #ffffff; text-decoration: none;}
-   .ChangeMod {position: fixed;bottom: 5px;right: 5px;z-index: 50; background-color: #7474f7; padding: 3px 6px; border-radius: 50%;}
+   .ChangeMod {position: fixed;top: 5px;left: 5px;z-index: 99999999999999999999999119;background-color: #7474f7;padding: 4px 4px;font-size: 10px;border-radius: 50%;}
+   .penguin .ChangeMod {background-color: #2d2e40}
+   .magic .ChangeMod {background-color: #ffffff;}
    .app-container {z-index: 0;}
    .app-container .row {z-index: 0;}
    .BtnConnect, .BtnConnectAfter {font-size: 10px;}
@@ -406,6 +428,15 @@ a:disabled {cursor:wait !important;}
    .TokenLoaded > div {width: 100%;}
    .CreateList .TokenLoaded > div .backActionBTN {left: -35px;}
    .CreateList .TokenLoaded {width: 90%;margin-left: 25px;}
+   .ApplicationBox {width: 100%;margin-left: 0; margin: 0 auto; display: block;border-radius: 0 !important;}
+   .ApplicationAll {width: 100%;margin: 0px auto 0px auto;border-radius: 0 !important;}
+   .dapp-container {width: 100% !important;border-radius: 0 !important;}
+   .app-container {width: 100% !important;border-radius: 0 !important;}
+   .page-container-wrapper, .page-container {width: 100% !important;border-radius: 0 !important;}
+   .Footer {display: none;}
+   #root {padding-bottom: 0 !important;}
+   .ApplicationMenu {position: absolute;}
+   .fantasy .navbar {background-color: #2d2e40 !important;}
 }
 
 @media only screen and (min-device-width: 751px) and (max-device-width: 1024px) {
@@ -417,7 +448,16 @@ a:disabled {cursor:wait !important;}
    .MobileMenu {display: inline-block;}
    .MobileMenu {display: inline-block; font-size: 15px; background-color: #7474f7; padding: 3px 5px; border-radius: 5px; color: #ffffff;text-decoration: none;}
    .MobileMenu:hover, .MobileMenu:after {color: #ffffff; text-decoration: none;}
-   .sidemenu-active {display: inline-block; position: fixed; z-index: 30; right: 10px; top: 10px; background-color: #2d2e40; border-radius: 8px;top: 55px;}
-   .magic .fantasyMenu, .fantasy .fantasyMenu {color: #ffffff;}
+   .sidemenu-active {display: inline-block; position: fixed; z-index: 30; right: 10px; top: 10px; background-color: #2d2e40; border-radius: 8px;top: 55px; border: 1px solid #9e6915;}
+   .penguin .sidemenu-active {background-color: #2d2e40;}
+   .magic .sidemenu-active {background-color: #ffffff; color: #000000;}
+   .magic .sidebar-menu-link {color: #000000 !important;}
+   .fantasy .fantasyMenu {color: #ffffff;}
    .grimoireBox {max-width: 650px;width: 650px;}
+   .ApplicationBox {width: 99%;margin-left: 0; margin: 0 auto; display: block;}
+   .ApplicationAll {width: 100%;margin: 0px auto 20px auto;}
+   .dapp-container {width: 100% !important;}
+   .app-container {width: 100% !important;}
+   .page-container-wrapper, .page-container {width: 100% !important;}
+   .ApplicationMenu {position: absolute;}
 }

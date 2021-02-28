@@ -41,12 +41,11 @@ const App = (props) => {
     <div className={`app`}>
       <Transactions />
       <Header />
-      <div className="container app-container">
-        <div className="row app-row w-100 align-items-start">
-          <div className="col-md-2 col-12 flex align-items-center justify-content-center">
+      <div className="ApplicationAll">
+          <div className="ApplicationMenu">
             <Sidemenu />
           </div>
-          <div className="col-md-10 col-12">
+          <div className="ApplicationBox">
             <Switch>
             <Route path="/arbitrage">
               <ArbitragePage />
@@ -83,7 +82,6 @@ const App = (props) => {
             </Route>
           </Switch>
           </div>
-        </div>
         
       </div>
       <Footer />
