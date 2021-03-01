@@ -315,6 +315,10 @@ window.getAddress = async function getAddress() {
     return (window.walletAddress = (await window.web3.eth.getAccounts())[0]);
 };
 
+window.formatNumber = function formatNumber(value) {
+    return parseFloat(window.numberToString(value).split(',').join(''));
+}
+
 window.getSendingOptions = function getSendingOptions(transaction, value) {
     return new Promise(async function(ok, ko) {
         if (transaction) {

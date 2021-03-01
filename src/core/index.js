@@ -436,6 +436,10 @@ export default class DFOCore {
         return this.web3.utils.toBN(amount).mul(this.web3.utils.toBN(10 ** (18 - decimals))).toString();
     }
 
+    denormalizeValue = (amount, decimals) => {
+        return this.web3.utils.toBN(amount).div(this.web3.utils.toBN(10 ** (18 - decimals))).toString();
+    }
+
     normalizeFixed = (amount, decimals) => {
         return this.toFixed(this.normalizeValue(amount, decimals));
     }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { Input } from '../../../../components';
+import { Input, Coin } from '../../../../components';
 import { ethers } from 'ethers';
 import { addTransaction } from '../../../../store/actions';
 
@@ -9,11 +9,11 @@ const abi = new ethers.utils.AbiCoder();
 const Burn = (props) => {
     const [pair, setPair] = useState("");
     const [pairs, setPairs] = useState([]);
-    const [getLpToken, setGetLpToken] = useState(false);
+    const [outputType, setOutputType] = useState("pair");
     const [amount, setAmount] = useState(0);
-    const [firstTokenBalance, setFirstTokenBalance] = useState(0);
-    const [secondTokenBalance, setSecondTokenBalance] = useState(0);
-    const [lpTokenBalance, setLpTokenBalance] = useState(0);
+    const [firstTokenBalance, setFirstTokenBalance] = useState(0);
+    const [secondTokenBalance, setSecondTokenBalance] = useState(0);
+    const [lpTokenBalance, setLpTokenBalance] = useState(0);
     const [wusdAmount, setWusdAmount] = useState(0);
     const [wusdContract, setWusdContract] = useState(null);
     const [wusdBalance, setWusdBalance] = useState(0);
@@ -26,14 +26,34 @@ const Burn = (props) => {
     const [loading, setLoading] = useState(false);
     const [isHealthyPair, setIsHealthyPair] = useState(true);
     const [burnLoading, setBurnLoading] = useState(false);
+    const [wusdPresto, setWusdPresto] = useState(null);
+    const [amms, setAmms] = useState([]);
+    const [selectedAmmIndex, setSelectedAmmIndex] = useState(null);
+    const [ethBalance, setEthBalance] = useState("0");
+    const [ethAmount, setEthAmount] = useState({});
 
-    useEffect(() => {
+    useEffect(async () => {
         getController();
-
+        setWusdPresto(await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDPrestoABI"), props.dfoCore.getContextElement("WUSDPrestoAddress")));
+        var amms = [];
+        const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
+        var ammAddresses = await ammAggregator.methods.amms().call();
+        for (var address of ammAddresses) {
+            var contract = await props.dfoCore.getContract(props.dfoCore.getContextElement("AMMABI"), address);
+            var amm = {
+                address,
+                contract,
+                info: await contract.methods.info().call(),
+                data: await contract.methods.data().call()
+            }
+            amm.data[2] && amms.push(amm);
+        }
+        setSelectedAmmIndex(0);
+        setAmms(amms);
         const interval = setInterval(() => {
             if (wusdContract) {
                 wusdContract.methods.balanceOf(props.dfoCore.address).call()
-                    .then((result) => {            
+                    .then((result) => {
                         setWusdBalance(props.dfoCore.toDecimals(result, wusdDecimals));
                     })
             }
@@ -42,7 +62,11 @@ const Burn = (props) => {
         return () => {
             clearInterval(interval);
         }
-    }, [])
+    }, []);
+
+    useEffect(() => {
+        updateETHAmount(selectedAmmIndex)
+    });
 
     const getController = async () => {
         setLoading(true);
@@ -79,7 +103,7 @@ const Burn = (props) => {
                     const approval = await lpContract.methods.allowance(props.dfoCore.address, props.dfoCore.getContextElement("WUSDExtensionControllerAddress")).call();
                     pools.push({ ammName, ammContract, ammIndex, balanceOf, isValid, lpContract, lpIndex, lpSymbol, totalAmount, token0Amount, token1Amount, liquidityPool, token0, token1, symbol0, symbol1, token0decimals, token1decimals, decimalsLp, token0Contract, token1Contract, lpTokenApproved: parseInt(approval) !== 0 });
                 }));
-                allowedPairs = [...allowedPairs, ...pools ];
+                allowedPairs = [...allowedPairs, ...pools];
             }))
             allowedPairs = allowedPairs.sort((a, b) => (a.ammName + a.symbol0 + a.symbol1).localeCompare(b.ammName + b.symbol0 + b.symbol1));
             const wusdContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("ERC20ABI"), props.dfoCore.getContextElement("WUSDAddress"));
@@ -116,7 +140,7 @@ const Burn = (props) => {
                 const ratio = parseInt(updatedFirstTokenAmount) > parseInt(updatedSecondTokenAmount) ? parseInt(updatedFirstTokenAmount) / parseInt(updatedSecondTokenAmount) : parseInt(updatedSecondTokenAmount) / parseInt(updatedFirstTokenAmount);
                 const maximumPairRatioPerBurn = await wusdExtensionController.methods.maximumPairRatioForBurn().call();
                 const oneHundred = await wusdExtensionController.methods.ONE_HUNDRED().call()
-        
+
                 if (parseFloat(ratio) > (parseInt(maximumPairRatioPerBurn) / parseInt(oneHundred))) {
                     setIsHealthyPair(false);
                 } else {
@@ -134,11 +158,11 @@ const Burn = (props) => {
     const clearTokens = () => {
         setEstimatedToken0({ value: 0, full: 0 });
         setEstimatedToken1({ value: 0, full: 0 });
-        setEstimatedLpToken({ value: 0, full: 0});
+        setEstimatedLpToken({ value: 0, full: 0 });
     }
 
     const onWUSDAmountChange = async (amount) => {
-        setAmount({ value: amount, full: props.dfoCore.fromDecimals(amount.toString(), 18)});
+        setAmount({ value: amount, full: props.dfoCore.fromDecimals(amount.toString(), 18) });
         if (!amount || parseFloat(amount) <= 0) {
             clearTokens();
             return;
@@ -174,9 +198,11 @@ const Burn = (props) => {
         var token1Amount = window.web3.utils.toBN(byTokenAmountValue[1][1]).div(window.web3.utils.toBN(2)).toString();
         var lpTokenAmount = window.web3.utils.toBN(byTokenAmountValue[0]).div(window.web3.utils.toBN(2)).toString();
 
-        setEstimatedToken0({ full: props.dfoCore.normalizeValue(token0Amount, token0decimals), value: window.formatMoney(props.dfoCore.toDecimals(token0Amount , token0decimals), 2)});
-        setEstimatedToken1({ full: props.dfoCore.normalizeValue(token1Amount, token1decimals), value: window.formatMoney(props.dfoCore.toDecimals(token1Amount, token1decimals), 2)});
-        setEstimatedLpToken({ full: lpTokenAmount, value: props.dfoCore.toDecimals(lpTokenAmount, decimalsLp)});
+        console.log(token0Amount, token1Amount);
+
+        setEstimatedToken0({ full: token0Amount, value: window.formatMoney(props.dfoCore.toDecimals(token0Amount, token0decimals), 2) });
+        setEstimatedToken1({ full: token1Amount, value: window.formatMoney(props.dfoCore.toDecimals(token1Amount, token1decimals), 2) });
+        setEstimatedLpToken({ full: lpTokenAmount, value: props.dfoCore.toDecimals(lpTokenAmount, decimalsLp) });
     }
 
     const burnWUSD = async () => {
@@ -187,11 +213,46 @@ const Burn = (props) => {
             const wusdObjectId = info['1'];
 
             const wusdCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), collectionAddress);
-            const burnData = abi.encode(["uint256","uint256","uint256","bool"], [pairs[pair].ammIndex, pairs[pair].lpIndex, estimatedLpToken.full, getLpToken])
+            const burnData = abi.encode(["uint256", "uint256", "uint256", "bool"], [pairs[pair].ammIndex, pairs[pair].lpIndex, estimatedLpToken.full, outputType === 'lp'])
             const data = abi.encode(["uint256", "bytes"], [0, burnData]);
+            var collectionData = abi.encode(["bytes[]"], [[data]]);
 
-            const gasLimit = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusdAmount], abi.encode(["bytes[]"], [[data]])).estimateGas({ from: props.dfoCore.address});
-            const res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusdAmount], abi.encode(["bytes[]"], [[data]])).send({ from: props.dfoCore.address, gasLimit });
+            const chosenPair = pairs[pair];
+            const { ammContract, liquidityPool, token0decimals, token1decimals, decimalsLp, token0Contract, token1Contract } = chosenPair;
+
+            var res;
+            if(outputType !== 'eth') {
+                const gasLimit = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusdAmount], collectionData).estimateGas({ from: props.dfoCore.address });
+                res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusdAmount], collectionData).send({ from: props.dfoCore.address, gasLimit });
+            } else {
+                var operations = [{
+                    inputTokenAddress : token0Contract.options.address,
+                    inputTokenAmount : estimatedToken0.full,
+                    ammContract : amms[selectedAmmIndex].contract.option.address,
+                    liquidityPoolAddresses : [ethAmount.token0ETHLiquidityPool],
+                    swapPath : [ethAmount.ethereumAddress],
+                    enterInETH : false,
+                    exitInETH : true,
+                    receivers : [props.dfoCore.address],
+                    receiversPercentages : []
+                }, {
+                    inputTokenAddress : token1Contract.options.address,
+                    inputTokenAmount : estimatedToken1.full,
+                    ammContract : amms[selectedAmmIndex].contract.option.address,
+                    liquidityPoolAddresses : [ethAmount.token1ETHLiquidityPool],
+                    swapPath : [ethAmount.ethereumAddress],
+                    enterInETH : false,
+                    exitInETH : true,
+                    receivers : [props.dfoCore.address],
+                    receiversPercentages : []
+                }];
+                var payload = abi.encode(["bytes", "address", "tuple(address,uint256,address,address[],address[],bool,bool,address[],uint256[])[]"],[collectionData, props.dfoCore.getContextElement("prestoAddress"), operations.map(it => Object.values(it))]);
+                var sendingOptions = {from : props.dfoCore.address};
+                var method = wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdPresto.options.address, [wusdObjectId], [wusdAmount], payload);
+                sendingOptions.gasLimit = await method.estimateGas(sendingOptions);
+                res = await method.send(sendingOptions);
+            }
+
             props.addTransaction(res);
             await getController();
         } catch (error) {
@@ -199,6 +260,43 @@ const Burn = (props) => {
         } finally {
             setBurnLoading(false);
         }
+    }
+
+    async function onOutputTypeChange(e) {
+        setOutputType(e.target.value);
+        if (e.target.value === 'eth') {
+            setEthBalance(await props.dfoCore.web3.eth.getBalance(props.dfoCore.address));
+        }
+    }
+
+    function onAmmChange(e) {
+        setSelectedAmmIndex(parseInt(e.target.value));
+        updateETHAmount(parseInt(e.target.value));
+    }
+
+    async function updateETHAmount(ammIndex) {
+        if(!amms || amms.length === 0 || pair === '' || isNaN(pair)) {
+            return;
+        }
+        var amm = amms[ammIndex];
+        var ethereumAddress = amm.data[0];
+        amm = amm.contract;
+        var chosenPair = pairs[pair];
+        var {token0Contract, token1Contract} = chosenPair;
+
+        var token0ETHLiquidityPool = (await amm.methods.byTokens([ethereumAddress, token0Contract.options.address]).call())[2];
+        var token0ETHValue = (await amm.methods.getSwapOutput(token0Contract.options.address, estimatedToken0.full, [token0ETHLiquidityPool], [ethereumAddress]).call());
+        token0ETHValue = token0ETHValue[1];
+
+        var token1ETHLiquidityPool = (await amm.methods.byTokens([ethereumAddress, token1Contract.options.address]).call())[2];
+        var token1ETHValue = (await amm.methods.getSwapOutput(token1Contract.options.address, estimatedToken1.full, [token1ETHLiquidityPool], [ethereumAddress]).call());
+        token1ETHValue = token1ETHValue[1];
+
+        var estimatedOutputETHValue = props.dfoCore.web3.utils.toBN(token0ETHValue).add(props.dfoCore.web3.utils.toBN(token1ETHValue)).toString();
+        if(ethAmount && ethAmount.estimatedOutputETHValue === estimatedOutputETHValue) {
+            return;
+        }
+        setEthAmount({estimatedOutputETHValue, token0ETHLiquidityPool, token0ETHValue, token1ETHLiquidityPool, token1ETHValue});
     }
 
     const getWUSDToken = () => {
@@ -213,25 +311,42 @@ const Burn = (props) => {
 
     const getBurnAmount = () => {
         if (!pair) {
-            return (<div/>);
+            return (<div />);
         }
-        
-        if (getLpToken) {
+
+        if (outputType === 'lp') {
             return (<>
                 <div className="Resultsregular">
-                        <p><b>{ pairs[pair].lpSymbol } balance</b>: { window.formatMoney(props.dfoCore.toDecimals(pairs[pair].balanceOf['0'], pairs[pair].decimalsLp), 2) }</p>
+                    <p><b>{pairs[pair].lpSymbol} balance</b>: {window.formatMoney(props.dfoCore.toDecimals(pairs[pair].balanceOf['0'], pairs[pair].decimalsLp), 2)}</p>
                 </div>
                 <div className="Resultsregular">
-                        <p>For <b> { estimatedLpToken.value } { pairs[pair].lpSymbol } </b></p>
+                    <p>For <b> {estimatedLpToken.value} {pairs[pair].lpSymbol} </b></p>
                 </div>
-                </>
+            </>
+            )
+        }
+        if (outputType === 'eth') {
+            return (<>
+                <div className="Resultsregular">
+                    <p><b>ETH balance</b>: {window.fromDecimals(ethBalance, 18)}</p>
+                </div>
+                <div className="FromETHPrestoDesc">
+                    <p>Swapping {window.formatMoney(estimatedToken0.value, 2)} {pairs[pair].symbol0} <Coin address={pairs[pair].token0} /> And {window.formatMoney(estimatedToken0.value, 2)} {pairs[pair].symbol1} <Coin address={pairs[pair].token1} /> on </p>
+                    {amms.length > 0 && <select className="SelectRegular" value={selectedAmmIndex.toString()} onChange={onAmmChange}>
+                        {amms.map((it, i) => <option key={it.address} value={i}>{it.info[0]}</option>)}
+                    </select>}
+                </div>
+                <div className="Resultsregular">
+                    <p>For <b> {window.fromDecimals(ethAmount.estimatedOutputETHValue || '0', 18)} ETH </b></p>
+                </div>
+            </>
             )
         }
         return (<>
-                <div className="Resultsregular">
-                        <p>For <b> { estimatedToken0.value } { pairs[pair].symbol0 } / { estimatedToken1.value } { pairs[pair].symbol1 }</b></p>
-                </div>
-            </>
+            <div className="Resultsregular">
+                <p>For <b> {estimatedToken0.value} {pairs[pair].symbol0} / {estimatedToken1.value} {pairs[pair].symbol1}</b></p>
+            </div>
+        </>
         )
     }
 
@@ -244,12 +359,12 @@ const Burn = (props) => {
                     </a> : <a onClick={() => burnWUSD()} disabled={!amount.full || !amount.value || amount.value === 0 || amount.full === 0} className="Web3ActionBTN">Burn</a>
                 }
                 <div className="Resultsregular ResultsregularS">
-                        <p><b>System Balance:</b> { window.formatMoney(props.dfoCore.toDecimals(pairs[pair].balanceOf['1'][0], pairs[pair].token0decimals), 2) } { pairs[pair].symbol0 } / {  window.formatMoney(props.dfoCore.toDecimals(pairs[pair].balanceOf['1'][1], pairs[pair].token1decimals), 2) } { pairs[pair].symbol1 }</p>
+                    <p><b>System Balance:</b> {window.formatMoney(props.dfoCore.toDecimals(pairs[pair].balanceOf['1'][0], pairs[pair].token0decimals), 2)} {pairs[pair].symbol0} / {window.formatMoney(props.dfoCore.toDecimals(pairs[pair].balanceOf['1'][1], pairs[pair].token1decimals), 2)} {pairs[pair].symbol1}</p>
                 </div>
             </div>
         )
     }
-    
+
     if (loading) {
         return (
             <div className="explore-component">
@@ -266,34 +381,44 @@ const Burn = (props) => {
 
     return (
         <div className="MintBurn">
-                <div className="PairSelector">
-                    <select className="SelectRegular" value={pair} onChange={(e) => setChosenPair(e.target.value)}>
-                        <option value="">Select a pair..</option>
-                        {
-                            pairs.map((pair, index) => {
-                                return <option disabled={!pair.isValid} key={pair.ammName + pair.symbol0 + pair.symbol1} value={index}>{pair.ammName} - {pair.symbol0}/{pair.symbol1}</option>
-                            })
-                        }
-                    </select>
+            <div className="PairSelector">
+                <select className="SelectRegular" value={pair} onChange={(e) => setChosenPair(e.target.value)}>
+                    <option value="">Select a pair..</option>
                     {
-                        isHealthyPair && <div className="QuestionRegular">
-                            <input type="checkbox" checked={getLpToken} defaultChecked={getLpToken} onChange={(e) => setGetLpToken(e.target.checked)} id="getLpToken" disabled={!pair} />
-                            <label htmlFor="getLpToken">Get liquidity pool token</label>
-                        </div>
+                        pairs.map((pair, index) => {
+                            return <option disabled={!pair.isValid} key={pair.ammName + pair.symbol0 + pair.symbol1} value={index}>{pair.ammName} - {pair.symbol0}/{pair.symbol1}</option>
+                        })
                     }
-                </div>
+                </select>
                 {
-                    !isHealthyPair && <div className="DisclamerRegular">
-                        <p><b>This pair is not healthy at the moment!</b> <br></br> Select a different pair or try again at another time.</p>
+                    pair !== '' && !isNaN(pair) && isHealthyPair && <div className="QuestionRegular">
+                        <label className="PrestoSelector">
+                            <span>Get Pair</span>
+                            <input name="outputType" type="radio" value="pair" checked={outputType === "pair"} onChange={onOutputTypeChange} disabled={isNaN(pair)} />
+                        </label>
+                        <label className="PrestoSelector">
+                            <span>Get ETH</span>
+                            <input name="outputType" type="radio" value="eth" checked={outputType === "eth"} onChange={onOutputTypeChange} disabled={isNaN(pair)} />
+                        </label>
+                        <label className="PrestoSelector">
+                            <span>Get LP Token</span>
+                            <input name="outputType" type="radio" value="lp" checked={outputType === "lp"} onChange={onOutputTypeChange} disabled={isNaN(pair)} />
+                        </label>
                     </div>
                 }
-                {
-                    (pair && isHealthyPair) ? getWUSDToken() : <div/>
-                }
-                { isHealthyPair && getBurnAmount() }
-                {
-                    (isHealthyPair && pair) ? getButtons() : <div/>
-                }
+            </div>
+            {
+                !isHealthyPair && <div className="DisclamerRegular">
+                    <p><b>This pair is not healthy at the moment!</b> <br></br> Select a different pair or try again at another time.</p>
+                </div>
+            }
+            {
+                (pair && isHealthyPair) ? getWUSDToken() : <div />
+            }
+            { isHealthyPair && getBurnAmount()}
+            {
+                (isHealthyPair && pair) ? getButtons() : <div />
+            }
         </div>
     )
 }

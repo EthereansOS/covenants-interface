@@ -30,9 +30,11 @@ const ExploreIndexToken = (props) => {
     const [selectedAmmIndex, setSelectedAmmIndex] = useState(null);
     const [mintByEthLoading, setMintByEthLoading] = useState(false);
     const [mintByEthError, setMintByEthError] = useState(false);
+    const [indexPresto, setIndexPresto] = useState(null);
 
     useEffect(async () => {
         getContractMetadata();
+        setIndexPresto(await props.dfoCore.getContract(props.dfoCore.getContextElement("IndexPrestoABI"), props.dfoCore.getContextElement("IndexPrestoAddress")));
         var amms = [];
         const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
         var ammAddresses = await ammAggregator.methods.amms().call();
@@ -168,10 +170,44 @@ const ExploreIndexToken = (props) => {
         if (mintValue === 0 || unapproved.length > 0 || !mintValue) return;
         setMintLoading(true);
         try {
-            console.log(`minting ${props.dfoCore.toFixed(parseFloat(mintValue) * 10 ** metadata.indexDecimals).toString()}`)
-            const gas = await metadata.indexContract.methods.mint(metadata.objectId, props.dfoCore.toFixed(parseFloat(mintValue) * 10 ** metadata.indexDecimals).toString(), props.dfoCore.address).estimateGas({ from: props.dfoCore.address });
-            const result = await metadata.indexContract.methods.mint(metadata.objectId, props.dfoCore.toFixed(parseFloat(mintValue) * 10 ** metadata.indexDecimals).toString(), props.dfoCore.address).send({ from: props.dfoCore.address, gas })
-            props.addTransaction(result);
+            if(!mintByEth) {
+                console.log(`minting ${props.dfoCore.toFixed(parseFloat(mintValue) * 10 ** metadata.indexDecimals).toString()}`)
+                const gas = await metadata.indexContract.methods.mint(metadata.objectId, props.dfoCore.toFixed(parseFloat(mintValue) * 10 ** metadata.indexDecimals).toString(), props.dfoCore.address).estimateGas({ from: props.dfoCore.address });
+                const result = await metadata.indexContract.methods.mint(metadata.objectId, props.dfoCore.toFixed(parseFloat(mintValue) * 10 ** metadata.indexDecimals).toString(), props.dfoCore.address).send({ from: props.dfoCore.address, gas })
+                props.addTransaction(result);
+            } else {
+                var ethValue = "0";
+                var operations = [];
+                var amm = amms[selectedAmmIndex];
+                var ethereumAddress = amm.data[0];
+                for(var i in swapForEthValues) {
+                    var data = swapForEthValues[i];
+                    operations.push({
+                        inputTokenAddress : ethereumAddress,
+                        inputTokenAmount : data.ethereumValue,
+                        ammPlugin : amm.contract.options.address,
+                        liquidityPoolAddresses : [data.liquidityPoolAddress],
+                        swapPath : [data.tokenAddress],
+                        enterInETH : true,
+                        exitInETH : false,
+                        receivers : [indexPresto.options.address],
+                        receiversPercentages : []
+                    });
+                    ethValue = props.dfoCore.web3.utils.toBN(ethValue).add(props.dfoCore.web3.utils.toBN(data.ethereumValue)).toString();
+                }
+                var sendingOptions = {from : props.dfoCore.address, value : ethValue};
+                var method = indexPresto.methods.mint(
+                    props.dfoCore.getContextElement("prestoAddress"),
+                    operations,
+                    metadata.indexContract.options.address,
+                    metadata.objectId,
+                    props.dfoCore.toFixed(parseFloat(mintValue) * 10 ** metadata.indexDecimals).toString(),
+                    props.dfoCore.address
+                );
+                sendingOptions.gasLimit = await method.estimateGas(sendingOptions);
+                var result = await method.send(sendingOptions);
+                props.addTransaction(result);
+            }
         } catch (error) {
             console.error(error)
         } finally {
@@ -218,7 +254,7 @@ const ExploreIndexToken = (props) => {
                     multiplier = parseInt(tokenValue) / parseInt(data[1]);
                     console.log(ethereumValue, tokenValue, data[1]);
                 }
-                return ethereumValue;
+                return {ethereumValue, liquidityPoolAddress, tokenAddress};
             }
             var swapForEthValues = [];
             try {
@@ -330,11 +366,8 @@ const ExploreIndexToken = (props) => {
         return <div className="InputTokensRegular">
             <div className="InputTokenRegular">
                 <Input address={address} tokenImage={metadata.ipfsInfo.image} step={0.0001} showBalance={true} balance={balance} min={0} showMax={true} value={burnValue} onChange={(e) => onBurnUpdate(e.target.value)} showCoin={true} name={metadata.symbol} />
-
             </div>
-            {
-                burnValue > 0 && <div className="ShowCollateralNeededBal"><h6>for</h6> {burnResult._tokens.map((token, index) => <p>{window.formatMoney(props.dfoCore.toDecimals(burnResult._amounts[index], metadata.decimals[token], 2))} {metadata.symbols[token]}</p>)}</div>
-            }
+            {burnValue > 0 && <div className="ShowCollateralNeededBal"><h6>for</h6> {burnResult._tokens.map((token, index) => <p>{window.formatMoney(props.dfoCore.toDecimals(burnResult._amounts[index], metadata.decimals[token], 2))} {metadata.symbols[token]}</p>)}</div>}
             <div className="Web3BTNs">
                 {
                     burnLoading ? <a className="Web3ActionBTN" disabled={burnLoading}>

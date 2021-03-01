@@ -33,9 +33,11 @@ const Mint = (props) => {
     const [amms, setAmms] = useState([]);
     const [selectedAmmIndex, setSelectedAmmIndex] = useState(null);
     const [mintByEthLoading, setMintByEthLoading] = useState(false);
+    const [wusdPresto, setWusdPresto] = useState(null);
 
     useEffect(async () => {
         getController();
+        setWusdPresto(await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDPrestoABI"), props.dfoCore.getContextElement("WUSDPrestoAddress")));
         var amms = [];
         const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
         var ammAddresses = await ammAggregator.methods.amms().call();
@@ -202,23 +204,77 @@ const Mint = (props) => {
         try {
             if ((firstAmount.value > 0 && secondAmount.value > 0) || lpTokenAmount.value > 0) {
                 const chosenPair = pairs[pair];
-                const { ammIndex, lpIndex, token0Contract, token1Contract, token0decimals, token1decimals } = chosenPair;
+                const { ammContract, liquidityPool, ammIndex, lpIndex, token0Contract, token1Contract, token0decimals, token1decimals } = chosenPair;
 
                 var result;
                 if (inputType !== 'eth' && !onlyByToken0 && !onlyByToken1) {
                     const gasLimit = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), inputType === 'lp').estimateGas({ from: props.dfoCore.address });
                     result = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), inputType === 'lp').send({ from: props.dfoCore.address, gasLimit });
                 } else {
-                    var sendingOptions = { from: props.dfoCore.address };
-                    var method;
-                    //TODO prepare input and call method
+                    var value = '0';
+                    var operations = [];
+                    var amm = amms[!isNaN(ammIndex) ? ammIndex : selectedAmmIndex];
+                    var ethereumAddress = amm.data[0];
+                    amm = amm.contract;
                     if (inputType === 'eth') {
+                        operations = [{
+                            inputTokenAddress : ethereumAddress,
+                            inputTokenAmount : ethValue0.firstTokenETH,
+                            ammPlugin : amm.options.address,
+                            liquidityPoolAddresses : [ethValue0.firstTokenETHLiquidityPoolAddress],
+                            swapPath : [token0Contract.options.address],
+                            enterInETH : true,
+                            exitInETH : false,
+                            receivers : [wusdPresto.options.address],
+                            receiversPercentages : []
+                        }, {
+                            inputTokenAddress : ethereumAddress,
+                            inputTokenAmount : ethValue1.secondTokenETH,
+                            ammPlugin : amm.options.address,
+                            liquidityPoolAddresses : [ethValue1.secondTokenETHLiquidityPoolAddress],
+                            swapPath : [token1Contract.options.address],
+                            enterInETH : true,
+                            exitInETH : false,
+                            receivers : [wusdPresto.options.address],
+                            receiversPercentages : []
+                        }];
 
+                        value = props.dfoCore.web3.utils.toBN(ethValue0.firstTokenETH).add(props.dfoCore.web3.utils.toBN(ethValue1.secondTokenETH)).toString();
                     } else {
-
+                        var halfValue = window.toDecimals(singleTokenAmount, onlyByToken0 ? token0decimals : token1decimals);
+                        halfValue = props.dfoCore.web3.utils.toBN(halfValue).div(props.dfoCore.web3.utils.toBN(2)).toString();
+                        operations = [{
+                            inputTokenAddress : (onlyByToken0 ? token0Contract : token1Contract).options.address,
+                            inputTokenAmount : halfValue,
+                            ammPlugin : ammContract.options.address,
+                            liquidityPoolAddresses : [liquidityPool],
+                            swapPath : [(onlyByToken0 ? token1Contract : token0Contract).options.address],
+                            enterInETH : false,
+                            exitInETH : false,
+                            receivers : [wusdPresto.options.address],
+                            receiversPercentages : []
+                        }, {
+                            inputTokenAddress :  (onlyByToken0 ? token0Contract : token1Contract).options.address,
+                            inputTokenAmount : onlyByToken0 ? firstAmount.full : secondAmount.full,
+                            ammPlugin : window.voidEthereumAddress,
+                            liquidityPoolAddresses : [],
+                            swapPath : [],
+                            enterInETH : false,
+                            exitInETH : false,
+                            receivers : [],
+                            receiversPercentages : []
+                        }];
                     }
-                    sendingOptions.gasLimit = method.estimateGas(sendingOptions);
-                    method.send({ ...sendingOptions, gasLimit: await method.estimateGas(sendingOptions) });
+                    var sendingOptions = { from : props.dfoCore.address, value };
+                    var method = wusdPresto.methods.addLiquidity(
+                        props.getContextElement("prestoAddress"),
+                        operations,
+                        wusdExtensionController.options.address,
+                        ammIndex,
+                        lpIndex
+                    );
+                    sendingOptions.gasLimit = await method.estimateGas(sendingOptions);
+                    result = await method.send({ ...sendingOptions, gasLimit: await method.estimateGas(sendingOptions) });
                 }
 
                 props.addTransaction(result);
@@ -324,6 +380,7 @@ const Mint = (props) => {
             async function calculateBestLP(firstToken, secondToken, firstDecimals, secondDecimals) {
 
                 var liquidityPoolAddress = (await amm.methods.byTokens([ethereumAddress, firstToken]).call())[2];
+                var firstTokenETHLiquidityPoolAddress = liquidityPoolAddress;
 
                 var token0Value = (await amm.methods.getSwapOutput(ethereumAddress, halfValue, [liquidityPoolAddress], [firstToken]).call())[1];
 
@@ -335,9 +392,10 @@ const Mint = (props) => {
                 const updatedSecondTokenAmount = props.dfoCore.formatNumber(props.dfoCore.normalizeValue(token1Value, secondDecimals));
 
                 liquidityPoolAddress = (await amm.methods.byTokens([ethereumAddress, secondToken]).call())[2];
+                var secondTokenETHLiquidityPoolAddress = liquidityPoolAddress;
                 var token1ValueETH = (await amm.methods.getSwapOutput(secondToken, token1Value, [liquidityPoolAddress], [ethereumAddress]).call())[1];
 
-                return { lpAmount, updatedFirstTokenAmount, updatedSecondTokenAmount, token0Value, token1Value, token1ValueETH };
+                return { lpAmount, updatedFirstTokenAmount, updatedSecondTokenAmount, token0Value, token1Value, token1ValueETH, firstTokenETHLiquidityPoolAddress, secondTokenETHLiquidityPoolAddress };
             }
 
             var bestLP = await calculateBestLP(chosenPair.token0Contract.options.address, chosenPair.token1Contract.options.address, token0decimals, token1decimals);
@@ -347,6 +405,8 @@ const Mint = (props) => {
             var secondTokenAmount = bestLP.token1Value;
             var firstTokenETH = halfValue;
             var secondTokenETH = bestLP.token1ValueETH;
+            var firstTokenETHLiquidityPoolAddress = bestLP.firstTokenETHLiquidityPoolAddress;
+            var secondTokenETHLiquidityPoolAddress = bestLP.secondTokenETHLiquidityPoolAddress;
 
             if (bestLP.updatedSecondTokenAmount > bestLP.updatedFirstTokenAmount) {
                 bestLP = await calculateBestLP(chosenPair.token1Contract.options.address, chosenPair.token0Contract.options.address, token1decimals, token0decimals);
@@ -356,10 +416,12 @@ const Mint = (props) => {
                 secondTokenAmount = bestLP.token0Value;
                 firstTokenETH = bestLP.token1ValueETH;
                 secondTokenETH = halfValue;
+                firstTokenETHLiquidityPoolAddress = bestLP.secondTokenETHLiquidityPoolAddress;
+                secondTokenETHLiquidityPoolAddress = bestLP.firstTokenETHLiquidityPoolAddress;
             }
 
-            setEthValue0(firstTokenETH);
-            setEthValue1(secondTokenETH);
+            setEthValue0({firstTokenETH, firstTokenETHLiquidityPoolAddress});
+            setEthValue1({secondTokenETH, secondTokenETHLiquidityPoolAddress});
             setLpTokenAmount({ value: props.dfoCore.toDecimals(lpAmount, decimalsLp), full: lpAmount });
             setFirstAmount({ value: props.dfoCore.toDecimals(firstTokenAmount, token0decimals), full: firstTokenAmount });
             setSecondAmount({ value: props.dfoCore.toDecimals(secondTokenAmount, token1decimals), full: secondTokenAmount });
@@ -452,11 +514,9 @@ const Mint = (props) => {
                 </div>
             </div>
             {mintByEthLoading && <Loading/>}
-            {!mintByEthLoading && 
-            <div className="FromETHPrestoDesc">
-            <p>Swapping for {window.formatMoney(firstAmount.value, 2)} {pairs[pair].symbol0} <Coin address={pairs[pair].token0} /> And {window.formatMoney(secondAmount.value, 2)} {pairs[pair].symbol1} <Coin address={pairs[pair].token1} /></p>
-                {amms.length > 0 && 
-                <select className="SelectRegular" value={selectedAmmIndex.toString()} onChange={onAmmChange}>
+            {!mintByEthLoading && <div className="FromETHPrestoDesc">
+                <p>Swapping for {window.formatMoney(firstAmount.value, 2)} {pairs[pair].symbol0} <Coin address={pairs[pair].token0} /> And {window.formatMoney(secondAmount.value, 2)} {pairs[pair].symbol1} <Coin address={pairs[pair].token1} /></p>
+                {amms.length > 0 && <select className="SelectRegular" value={selectedAmmIndex.toString()} onChange={onAmmChange}>
                     {amms.map((it, i) => <option key={it.address} value={i}>{it.info[0]}</option>)}
                 </select>}
             </div>}
@@ -514,7 +574,7 @@ const Mint = (props) => {
         return (
             <div className="Web3BTNs">
                 {
-                    inputType === 'lp' ? <div />
+                    inputType === 'lp' || inputType === 'eth' ? <div />
                         :
                         !firstTokenApproved ? <ApproveButton contract={pairs[pair].token0Contract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('first', res)} text={`Approve ${pairs[pair].symbol0}`} />
                             :
@@ -561,7 +621,7 @@ const Mint = (props) => {
                     }
                 </select>
                 {
-                    pair && isHealthyPair && <div className="QuestionRegular">
+                    pair !== '' && !isNaN(pair) && isHealthyPair && <div className="QuestionRegular">
                         <label className="PrestoSelector">
                             <span>From Pair</span>
                             <input name="inputType" type="radio" value="pair" checked={inputType === "pair"} onChange={onInputTypeChange} disabled={!pair} />
