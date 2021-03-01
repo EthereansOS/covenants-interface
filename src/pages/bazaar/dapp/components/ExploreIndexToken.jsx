@@ -242,12 +242,14 @@ const ExploreIndexToken = (props) => {
             <div className="InputTokenRegular">
                 <Input step={0.0001} showBalance={false} tokenImage={metadata.ipfsInfo.image} address={address} min={0} value={mintValue} onChange={(e) => onMintUpdate(e.target.value)} showCoin={true} name={metadata.symbol} />
             </div>
-            <label>
-                Buy them by eth.
+            <div className="QuestionRegular">
+            <label className="PrestoSelector">
+            <span>From ETH</span>
                 <input type="checkbox" checked={mintByEth} onChange={onByEth} />
             </label>
-            {mintByEth && <div className="InputTokenRegular">
-                {amms.length > 0 && <select value={selectedAmmIndex.toString()} onChange={onAmmChange}>
+            </div>
+            {mintByEth && <div className="QuestionRegular">
+                {amms.length > 0 && <select className="SelectRegular" value={selectedAmmIndex.toString()} onChange={onAmmChange}>
                     {amms.map((it, i) => <option key={it.address} value={i}>{it.info[0]}</option>)}
                 </select>}
             </div>}
@@ -263,10 +265,10 @@ const ExploreIndexToken = (props) => {
                     {mintResult.symbols[i]}
                     <Coin address={mintResult[0][i]} />
                 </div>)}
-                {mintByEthError && <h6>Error while calculating swap prices, maybe low liquidity?</h6>}
+                {mintByEthError && <h6>Insufficient liquidity in the selected AMM</h6>}
             </div>}
             {!mintByEth && mintValue > 0 && <div className="ShowCollateralNeededBal"><h6>Needed:</h6> {mintResult._tokens.map((token, index) => <p>{window.formatMoney(props.dfoCore.toDecimals(mintResult._amounts[index], metadata.decimals[token], 2))} {metadata.symbols[token]}</p>)}</div>}
-            <div className="ShowCollateralNeededBal">
+            {!mintByEth && <div className="ShowCollateralNeededBal">
                 <h6>Balances:</h6>
                 {
                     metadata.info._tokens.map((token, index) => {
@@ -275,7 +277,7 @@ const ExploreIndexToken = (props) => {
                         )
                     })
                 }
-            </div>
+            </div>}
             <div className="Web3BTNs">
                 {
                     unapproved.length > 0 && <ApproveButton contract={metadata.contracts[unapproved[0].token]} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("indexAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval(unapproved[0].token)} text={`Approve ${metadata.symbols[unapproved[0].token]}`} />

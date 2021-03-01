@@ -450,15 +450,15 @@ const Mint = (props) => {
                 <div className="InputTokenRegular">
                     <Input showMax={true} step={0.0001} address={window.voidEthereumAddress} value={ethValue} balance={ethBalance} min={0} onChange={(e) => updateEthAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name="ETH" />
                 </div>
-                {!mintByEthLoading && <div className="InputTokenRegular">
-                    {amms.length > 0 && <select value={selectedAmmIndex.toString()} onChange={onAmmChange}>
-                        {amms.map((it, i) => <option key={it.address} value={i}>{it.info[0]}</option>)}
-                    </select>}
-                </div>}
             </div>
             {mintByEthLoading && <Loading/>}
-            {!mintByEthLoading && <div className="FromETHPrestoDesc">
-                <p>Swapping for {window.formatMoney(firstAmount.value, 2)} {pairs[pair].symbol0} <Coin address={pairs[pair].token0} /> And {window.formatMoney(secondAmount.value, 2)} {pairs[pair].symbol1} <Coin address={pairs[pair].token1} /></p>
+            {!mintByEthLoading && 
+            <div className="FromETHPrestoDesc">
+            <p>Swapping for {window.formatMoney(firstAmount.value, 2)} {pairs[pair].symbol0} <Coin address={pairs[pair].token0} /> And {window.formatMoney(secondAmount.value, 2)} {pairs[pair].symbol1} <Coin address={pairs[pair].token1} /></p>
+                {amms.length > 0 && 
+                <select className="SelectRegular" value={selectedAmmIndex.toString()} onChange={onAmmChange}>
+                    {amms.map((it, i) => <option key={it.address} value={i}>{it.info[0]}</option>)}
+                </select>}
             </div>}
         </>
     }

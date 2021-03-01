@@ -71,11 +71,7 @@ a:disabled {cursor:wait !important;}
 .disclamer {font-size: 9px; color: #636363; width: 60%; text-align: center;}
 .disclamer a {text-decoration: underline !important;}
 .IndexRegularText iframe {border: 2px solid #9e6915; border-radius: 8px;}
-@keyframes slidebg {
-   to {
-     background-position:20vw;
-   }
- }
+@keyframes slidebg {to {background-position:20vw;}}
 .DescCov {text-align: center; width: 80%; display: inline-block; margin: 30px auto;}
 .DescCov p {font-size: 14px;}
 .DescCov h2 {text-align: center; font-size: 30px; font-weight: bold !important;}
@@ -89,7 +85,7 @@ a:disabled {cursor:wait !important;}
 .xTitle img {margin-right: 10px; width: 35px; height: 35px;}
 .HealthContainer {width:80%; display: inline-block; margin: 10px auto 40px auto;}
 .StatsIndicator {width: 45%; padding: 4px 0% 4px 5%; height: auto; display: inline-block;}
-.StatsBro {display: inline-block; text-align: left; width: 22%; padding-left: 3%; margin-right: 10% !important;vertical-align: middle !important;}
+.StatsBro {display: inline-block; text-align: left; width: 22%; padding-left: 3%; margin-right: 10% !important;vertical-align: top !important;}
 .StatsBroO {margin-bottom: 20px;}
 .StatsSis {width: 65%;text-align: left; display: inline-block; vertical-align: middle !important;}
 .StatsIndicator p, .StatsIndicator a {font-size: 13px;}
@@ -101,7 +97,7 @@ a:disabled {cursor:wait !important;}
 .health-bar aside span {background-color: transparent; color: #ffffff;}
 .DappBox {border-radius: 20px;padding: 50px; text-align: center; display: inline-block; width: 100%; min-height: 360px;}
 .Web3Disclamer {display: inline-block; text-align: center; margin: 20px auto;}
-.DappMenu {width: 100%;display: inline-block;margin: 0px auto 40px auto;text-align: center;margin-block-start: 0em;margin-block-end: 0em;margin-inline-start: 0px;margin-inline-end: 0px;padding-inline-start: 0px;}
+.DappMenu {width: 100%;display: inline-block;text-align: center;margin-block-start: 0em;margin-block-end: 0em;margin-inline-start: 0px;margin-inline-end: 0px;padding-inline-start: 0px;margin: 0px auto 40px auto;}
 .DappMenu li {display: inline-block;cursor: pointer;font-weight: bold;}
 .DappMenu li span {font-size: 15px; font-weight: bold;display: block;padding: 0.5rem 1rem;}
 .DappMenu .nav-selected {border-bottom: 8px #7474f7 solid;}
