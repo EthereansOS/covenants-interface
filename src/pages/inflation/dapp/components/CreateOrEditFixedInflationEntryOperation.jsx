@@ -345,22 +345,17 @@ const CreateOrEditFixedInflationEntryOperation = (props) => {
                             </div>
                         : <div />
                 }
-                {transferType && <div className="CreateList CreateListS">
-                    <TokenInput label={"Path"} placeholder={"Pool Address"} onClick={(address) => onAddPathToken(address)} text={"Load"} />
-                </div>}
                 {transferType && loading && <Loading />}
                 {transferType && !loading && pathTokens.map((pathToken, index) => {
                     var realInputToken = enterInETH ? amm.ethAddress : inputToken.address;
                     var lastOutputToken = pathTokens.length === 1 ? realInputToken : pathTokens[pathTokens.length - 2].outputTokenAddress;
                     return <Fragment key={pathToken.address}>
-                        <div className="row mb-4">
-                            {pathToken && <div className="col-12">
-                                <b>{pathToken.symbol} {pathToken.symbols.map((symbol) => <span>{symbol} </span>)}</b> {index === pathTokens.length - 1 ? <button className="btn btn-sm btn-outline-danger ml-1" onClick={() => removePathTokens(index)}><b>Remove</b></button> : <div />}
+                            {pathToken && <div className="PathSelected">
+                                <p>{pathToken.symbol} {pathToken.symbols.map((symbol) => <span>{symbol} </span>)}</p> {index === pathTokens.length - 1 ? <a className="backActionBTN" onClick={() => removePathTokens(index)}>x</a> : <div />}
                             </div>}
-                        </div>
-                        <div className="row w-50 mb-4">
-                            <select value={pathToken.outputTokenAddress} disabled={index !== pathTokens.length - 1} onChange={e => setPathTokens(pathTokens.map((pt, i) => i === index ? { ...pt, outputTokenAddress: e.target.value } : pt))} className="custom-select wusd-pair-select">
-                                {pathToken.lpTokensAddresses.filter(it => index !== pathTokens.length - 1 ? true : it !== lastOutputToken).map(lpTokenAddress => <option value={lpTokenAddress}>{pathToken.symbols[pathToken.lpTokensAddresses.indexOf(lpTokenAddress)]}</option>)}
+                        <div className="PathSelected">
+                            <select value={pathToken.outputTokenAddress} disabled={index !== pathTokens.length - 1} onChange={e => setPathTokens(pathTokens.map((pt, i) => i === index ? { ...pt, outputTokenAddress: e.target.value } : pt))} className="SelectRegular">
+                                {pathToken.lpTokensAddresses.filter(it => index !== pathTokens.length - 1 ? true : it !== lastOutputToken).map(lpTokenAddress => <option value={lpTokenAddress}>Output: {pathToken.symbols[pathToken.lpTokensAddresses.indexOf(lpTokenAddress)]}</option>)}
                             </select>
                         </div>
                     </Fragment>
@@ -377,6 +372,11 @@ const CreateOrEditFixedInflationEntryOperation = (props) => {
                     </label>
                     </div>
                 </div>}
+                {transferType && <div className="CreateList CreateListS">
+                    <TokenInput label={"Path"} placeholder={"Pool Address"} onClick={(address) => onAddPathToken(address)} text={"Load"} />
+                    <p>Insert a Liquidity Pool address to build the path for this swap operation</p>
+                </div>}
+                
                 {
                     transferType ? <>
                             <h6><b>Receiver(s)</b></h6>
