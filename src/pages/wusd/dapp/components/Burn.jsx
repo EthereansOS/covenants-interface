@@ -327,9 +327,7 @@ const Burn = (props) => {
         }
         if (outputType === 'eth') {
             return (<>
-                <div className="Resultsregular">
-                    <p><b>ETH balance</b>: {window.fromDecimals(ethBalance, 18)}</p>
-                </div>
+
                 <div className="FromETHPrestoDesc">
                     <p>Swapping {window.formatMoney(estimatedToken0.value, 2)} {pairs[pair].symbol0} <Coin address={pairs[pair].token0} /> And {window.formatMoney(estimatedToken0.value, 2)} {pairs[pair].symbol1} <Coin address={pairs[pair].token1} /> on </p>
                     {amms.length > 0 && <select className="SelectRegular" value={selectedAmmIndex.toString()} onChange={onAmmChange}>
