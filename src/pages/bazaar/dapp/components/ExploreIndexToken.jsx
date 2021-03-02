@@ -52,6 +52,10 @@ const ExploreIndexToken = (props) => {
         setAmms(amms);
     }, []);
 
+    useEffect(() => {
+        mintByEth && calculateByEth(selectedAmmIndex);
+    }, [mintResult]);
+
     const getContractMetadata = async () => {
         setLoading(true);
         try {
@@ -161,13 +165,12 @@ const ExploreIndexToken = (props) => {
         }
         setMintResult(infoData);
         setMintValue(value);
-        mintByEth && calculateByEth(selectedAmmIndex);
     }
 
     const mint = async () => {
         const tkns = metadata.info._tokens.map((token, index) => { return { approval: metadata.approvals[token], index, token } });
         const unapproved = tkns.filter((tkn) => !tkn.approval);
-        if (mintValue === 0 || unapproved.length > 0 || !mintValue) return;
+        if (!mintByEth && (mintValue === 0 || unapproved.length > 0 || !mintValue)) return;
         setMintLoading(true);
         try {
             if(!mintByEth) {
@@ -228,10 +231,13 @@ const ExploreIndexToken = (props) => {
     }
 
     async function calculateByEth(ammIndex) {
+        window.inputTimeout && clearTimeout(window.inputTimeout);
         setSwapForEthValues([]);
         setMintByEthError(false);
-        setMintByEthLoading(true);
-        window.inputTimeout && clearTimeout(window.inputTimeout);
+        setMintByEthLoading(false);
+        if(!mintResult) {
+            return;
+        }
         window.inputTimeout = setTimeout(async () => {
             setSwapForEthValues([]);
             setMintByEthError(false);
@@ -291,9 +297,9 @@ const ExploreIndexToken = (props) => {
             </div>}
             {mintByEth && mintByEthLoading && <Loading />}
             {mintByEth && <div className="InputTokenRegular">
-                {swapForEthValues.map((it, i) => <div key={it}>
+                {swapForEthValues.map((it, i) => <div key={it.tokenAddress}>
                     Swapping
-                    {window.fromDecimals(it, 18)}
+                    {window.fromDecimals(it.ethereumValue, 18)}
                     ETH
                     <Coin address={window.voidEthereumAddress} />
                     for
@@ -316,12 +322,12 @@ const ExploreIndexToken = (props) => {
             </div>}
             <div className="Web3BTNs">
                 {
-                    unapproved.length > 0 && <ApproveButton contract={metadata.contracts[unapproved[0].token]} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("indexAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval(unapproved[0].token)} text={`Approve ${metadata.symbols[unapproved[0].token]}`} />
+                    !mintByEth && unapproved.length > 0 && <ApproveButton contract={metadata.contracts[unapproved[0].token]} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("indexAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval(unapproved[0].token)} text={`Approve ${metadata.symbols[unapproved[0].token]}`} />
                 }
                 {
                     mintLoading ? <a className="Web3ActionBTN" disabled={mintLoading}>
                         <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    </a> : <a className="Web3ActionBTN" disabled={mintValue === 0 || unapproved.length > 0} onClick={() => mint()}>Mint</a>
+                    </a> : <a className="Web3ActionBTN" disabled={!mintByEth && (mintValue === 0 || unapproved.length > 0)} onClick={() => mint()}>Mint</a>
                 }
             </div>
         </div>

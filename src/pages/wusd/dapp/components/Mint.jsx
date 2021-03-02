@@ -57,7 +57,7 @@ const Mint = (props) => {
             console.log('clearing interval.');
             if (intervalId) clearInterval(intervalId);
         }
-    }, [])
+    }, []);
 
     useEffect(() => {
         if (intervalId) clearInterval(intervalId);
@@ -83,6 +83,10 @@ const Mint = (props) => {
             setIntervalId(interval);
         }
     }, [pair]);
+
+    useEffect(() => {
+        setChosenPair(pair);
+    }, [onlyByToken0, onlyByToken1]);
 
     const getController = async () => {
         setLoading(true);
@@ -162,8 +166,8 @@ const Mint = (props) => {
         try {
             if (pairIndex) {
                 const chosenPair = pairs[pairIndex];
-                const allowance0 = await chosenPair.token0Contract.methods.allowance(props.dfoCore.address, props.dfoCore.getContextElement("WUSDExtensionControllerAddress")).call();
-                const allowance1 = await chosenPair.token1Contract.methods.allowance(props.dfoCore.address, props.dfoCore.getContextElement("WUSDExtensionControllerAddress")).call();
+                const allowance0 = await chosenPair.token0Contract.methods.allowance(props.dfoCore.address, onlyByToken0 || onlyByToken1 ? wusdPresto.options.address : props.dfoCore.getContextElement("WUSDExtensionControllerAddress")).call();
+                const allowance1 = await chosenPair.token1Contract.methods.allowance(props.dfoCore.address, onlyByToken0 || onlyByToken1 ? wusdPresto.options.address : props.dfoCore.getContextElement("WUSDExtensionControllerAddress")).call();
                 const allowanceLp = await chosenPair.lpContract.methods.allowance(props.dfoCore.address, props.dfoCore.getContextElement("WUSDExtensionControllerAddress")).call();
                 setFirstTokenApproved(parseInt(allowance0) !== 0);
                 setSecondTokenApproved(parseInt(allowance1) !== 0);
@@ -267,7 +271,7 @@ const Mint = (props) => {
                     }
                     var sendingOptions = { from : props.dfoCore.address, value };
                     var method = wusdPresto.methods.addLiquidity(
-                        props.getContextElement("prestoAddress"),
+                        props.dfoCore.getContextElement("prestoAddress"),
                         operations,
                         wusdExtensionController.options.address,
                         ammIndex,
@@ -576,9 +580,9 @@ const Mint = (props) => {
                 {
                     inputType === 'lp' || inputType === 'eth' ? <div />
                         :
-                        !firstTokenApproved ? <ApproveButton contract={pairs[pair].token0Contract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('first', res)} text={`Approve ${pairs[pair].symbol0}`} />
+                        !firstTokenApproved && !onlyByToken1 ? <ApproveButton contract={pairs[pair].token0Contract} from={props.dfoCore.address} spender={onlyByToken0 ? wusdPresto.options.address : props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('first', res)} text={`Approve ${pairs[pair].symbol0}`} />
                             :
-                            !secondTokenApproved ? <ApproveButton contract={pairs[pair].token1Contract} from={props.dfoCore.address} spender={props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('second', res)} text={`Approve ${pairs[pair].symbol1}`} />
+                            !secondTokenApproved && !onlyByToken0 ? <ApproveButton contract={pairs[pair].token1Contract} from={props.dfoCore.address} spender={onlyByToken0 ? wusdPresto.options.address : props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('second', res)} text={`Approve ${pairs[pair].symbol1}`} />
                                 : <div />
                 }
 
