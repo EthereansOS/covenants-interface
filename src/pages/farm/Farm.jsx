@@ -9,14 +9,11 @@ const Farm = () => {
 
     return (
         <Switch>
-            {/*
-                <Route path="/farm/dapp">
-                    <FarmDapp />
-                </Route>
-
-            */}
+            <Route path="/farm/dapp">
+                <FarmDapp />
+            </Route>
             <Route path="/farm/">
-                <PageContainer image={dragonImage} imageHeight={300} text={lorem} launchDapp={false} title={"Farm"} buttonText={"Coming soon"} />
+                <PageContainer image={dragonImage} imageHeight={300} text={lorem} launchDapp={true} title={"Farm"} link={"/farm/dapp"} />
             </Route>
         </Switch>
     )

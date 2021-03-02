@@ -198,15 +198,15 @@ export default class DFOCore {
      */
     loadDeployedLiquidityMiningContracts = async(factoryAddress) => {
         try {
-            if (!factoryAddress) factoryAddress = this.getContextElement("liquidityMiningFactoryAddress");
-            const factoryContract = new this.web3.eth.Contract(this.getContextElement("LiquidityMiningFactoryABI"), factoryAddress);
-            const events = await factoryContract.getPastEvents('LiquidityMiningDeployed', { fromBlock: 11806961 });
+            if (!factoryAddress) factoryAddress = this.getContextElement("farmFactoryAddressRopsten");
+            const factoryContract = new this.web3.eth.Contract(this.getContextElement("FarmFactoryABI"), factoryAddress);
+            const events = await factoryContract.getPastEvents('FarmMainDeployed', { fromBlock: 11806961 });
             this.deployedLiquidityMiningContracts = [];
             await Promise.all(events.map(async(event) => {
                 try {
-                    const contract = new this.web3.eth.Contract(this.getContextElement("LiquidityMiningABI"), event.returnValues.liquidityMiningAddress);
+                    const contract = new this.web3.eth.Contract(this.getContextElement("FarmMainABI"), event.returnValues.liquidityMiningAddress);
                     const extensionAddress = await contract.methods._extension().call();
-                    const extensionContract = new this.web3.eth.Contract(this.getContextElement("LiquidityMiningExtensionABI"), extensionAddress);
+                    const extensionContract = new this.web3.eth.Contract(this.getContextElement("FarmExtensionABI"), extensionAddress);
                     const { host } = await extensionContract.methods.data().call();
                     this.deployedLiquidityMiningContracts.push({ address: event.returnValues.liquidityMiningAddress, sender: host });
                 } catch (error) {
