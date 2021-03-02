@@ -49,6 +49,10 @@ const Burn = (props) => {
             amm.data[2] && amms.push(amm);
         }
         setSelectedAmmIndex(0);
+        var uniswap = amms.filter(it => it.info[0] === 'UniswapV2')[0];
+        var index = amms.indexOf(uniswap);
+        amms.splice(index, 1);
+        amms.unshift(uniswap);
         setAmms(amms);
         const interval = setInterval(() => {
             if (wusdContract) {
