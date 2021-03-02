@@ -70,7 +70,7 @@ const Burn = (props) => {
 
     useEffect(() => {
         updateETHAmount(selectedAmmIndex)
-    });
+    }, [selectedAmmIndex, estimatedToken1]);
 
     const getController = async () => {
         setLoading(true);
