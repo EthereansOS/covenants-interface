@@ -298,7 +298,7 @@ const ExploreIndexToken = (props) => {
             {mintByEth && mintByEthLoading && <Loading />}
             {mintByEth && <div className="FromETHPrestoDesc">
                 {swapForEthValues.map((it, i) => <div key={it.tokenAddress}>
-                <p>Swapping for {window.fromDecimals(it.ethereumValue, 18)} ETH <Coin address={window.voidEthereumAddress} />for {window.fromDecimals(mintResult[1][i], 18)} {mintResult.symbols[i]} <Coin address={mintResult[0][i]} />
+                <p>Swapping for {window.fromDecimals(it.ethereumValue, 18)} ETH <Coin address={window.voidEthereumAddress} /> for {window.fromDecimals(mintResult[1][i], 18)} {mintResult.symbols[i]} <Coin address={mintResult[0][i]} />
                 </p></div>)}
                 {mintByEthError && <h6>Insufficient liquidity in the selected AMM</h6>}
             </div>}
