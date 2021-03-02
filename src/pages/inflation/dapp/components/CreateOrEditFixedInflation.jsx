@@ -213,29 +213,24 @@ const CreateOrEditFixedInflation = (props) => {
         [
             function () {
                 return <>
-                    <div className="row">
-                        <div className="col-12">
+                    <h6><b>Receiver</b></h6>
                             <h6>Host</h6>
                             <p></p>
-                            <select className="custom-select wusd-pair-select" value={extensionType} onChange={onExtensionType}>
-                                <option value="address">Address</option>
-                                <option value="deployedContract">Deployed Contract</option>
-                                {<option value="fromSourceCode">From Source Code</option>}
+                            <select className="SelectRegular" value={extensionType} onChange={onExtensionType}>
+                                <option value="address">Standard Extension (Address, wallet, Contract or Organization</option>
+                                <option value="deployedContract">Custom Extension (Deployed Contract)</option>
+                                {<option value="fromSourceCode">Custom Extension (Deploy Contract)</option>}
                             </select>
-                        </div>
-                        {(extensionType === 'address' || extensionType === 'deployedContract') && <div className="row">
-                            <div className="col-12">
-                                {extensionType === 'address' && <input type="text" placeholder="Host address" defaultValue={walletAddress} onKeyUp={e => setWalletAddress(window.isEthereumAddress(e.currentTarget.value) ? e.currentTarget.value : "")} />}
-                                {extensionType === 'deployedContract' && <input type="text" placeholder="Insert extension address" defaultValue={extensionAddress} onKeyUp={e => setExtensionAddress(window.isEthereumAddress(e.currentTarget.value) ? e.currentTarget.value : "")} />}
+                        {(extensionType === 'address' || extensionType === 'deployedContract') && 
+                            <div className="InputForm">
+                                {extensionType === 'address' && <input className="imputCool" type="text" placeholder="Host address" defaultValue={walletAddress} onKeyUp={e => setWalletAddress(window.isEthereumAddress(e.currentTarget.value) ? e.currentTarget.value : "")} />}
+                                {extensionType === 'deployedContract' && <input className="imputCool" type="text" placeholder="Insert extension address" defaultValue={extensionAddress} onKeyUp={e => setExtensionAddress(window.isEthereumAddress(e.currentTarget.value) ? e.currentTarget.value : "")} />}
                             </div>
-                        </div>}
+                        }
                         {extensionType === 'fromSourceCode' && <ContractEditor filterDeployedContract={filterDeployedContract} dfoCore={props.dfoCore} onContract={setCustomExtensionData} templateCode={fixedInflationExtensionTemplateCode} />}
-                        {extensionType !== 'address' && <div className="row">
-                            <div className="col-12">
-                                <input placeholder="Optional init payload" type="text" defaultValue={payload} onKeyUp={e => setPayload(e.currentTarget.value)} />
-                            </div>
+                        {extensionType !== 'address' && <div className="InputForm">
+                                <input className="imputCool" placeholder="Optional init payload" type="text" defaultValue={payload} onKeyUp={e => setPayload(e.currentTarget.value)} />
                         </div>}
-                    </div>
                 </>
             },
             function () {
@@ -337,36 +332,25 @@ const CreateOrEditFixedInflation = (props) => {
                     <h6>Edit Fixed Inflation Entry</h6>
                 </div>
             </div>
-            <div className="row">
-                <div className="col-12">
-                    <button disabled={deploying} onClick={back} className="btn btn-light">Back</button>
-                    {deploying ? <Loading /> : <button onClick={editEntry} className="btn btn-primary">Deploy</button>}
+            <div className="Web2ActionsBTNs">
+                    <a disabled={deploying} onClick={back} className="backActionBTN">Back</a>
+                    {deploying ? <Loading /> : <a onClick={editEntry} className="web2ActionBTN">Deploy</a>}
                     {deployMessage && <span>{deployMessage}</span>}
                 </div>
-            </div>
         </>
     }
 
     function render() {
         return <>
-            <div className="row">
-                <div className="col-12">
                     <h6>Deploy</h6>
-                </div>
-            </div>
-            <div className="row">
-                <div className="col-12">
                     {steps[step][0]()}
-                </div>
-            </div>
-            <div className="row">
-                <div className="col-12">
-                    <button disabled={deploying} onClick={back} className="btn btn-light">Back</button>
-                    {step !== steps.length - 1 && <button disabled={steps[step][1]()} onClick={() => setStep(step + 1)} className="btn btn-primary">Next</button>}
-                    {step === steps.length - 1 && (deploying ? <Loading /> : <button disabled={steps[step][1]()} onClick={deploy} className="btn btn-primary">Deploy</button>)}
+        
+                <div className="Web2ActionsBTNs">
+                    <a disabled={deploying} onClick={back} className="backActionBTN">Back</a>
+                    {step !== steps.length - 1 && <a disabled={steps[step][1]()} onClick={() => setStep(step + 1)} className="web2ActionBTN">Next</a>}
+                    {step === steps.length - 1 && (deploying ? <Loading /> : <a disabled={steps[step][1]()} onClick={deploy} className="Web3ActionBTN">Deploy</a>)}
                     {deployMessage && <span>{deployMessage}</span>}
                 </div>
-            </div>
         </>
     }
 

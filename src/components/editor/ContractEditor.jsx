@@ -75,9 +75,8 @@ const ContractEditor = (props) => {
 
     return (
         <>  
-            <div className="row mb-4">
-                <div className="col-md-6 col-12">
-                    <select className="custom-select wusd-pair-select" value={solVersion} onChange={(e) => setSolVersion(e.target.value)}>
+            <div className="CheckboxQuestions">
+                    <select className="SelectRegular" value={solVersion} onChange={(e) => setSolVersion(e.target.value)}>
                         <option value={""}>Choose version</option>
                         {
                             Object.keys(solidityVersions).map((item) => {
@@ -86,35 +85,29 @@ const ContractEditor = (props) => {
                         }
                     </select>
                 </div>
-                <div className="col-md-3"></div>
-                <div className="col-md-3 col-12">
-                    <div className="custom-file">
-                        <input type="file" className="custom-file-input" id="customFile" accept=".sol" onChange={(e) => onUploadFile(e)} />
-                        <label className="custom-file-label" htmlFor="customFile"></label>
+                <div className="InputForm">
+                    <div className="InputForm">
+                        <input type="file" className="imputCool" id="customFile" accept=".sol" onChange={(e) => onUploadFile(e)} />
                     </div>
-                </div>
             </div>
-            <div className="row mb-4" style={{width : '600px'}}>
+            <div className="CovCODEEDITOR">
                 <Editor
                     value={contractCode}
-                    height="80vh"
                     defaultLanguage="sol"
                     onChange={(value, event) => onUpdateContractCode(value, event)}
                 />
             </div>
-            {contractError && <div className="row">
-                <div className="col-md-6 col-12">
+            {contractError && 
+                <p>
                     {contractError}
-                </div>
-            </div>}
-            <div className="row">
-                <div className="col-md-6 col-12">
-                    {!compiling && <button onClick={() => compileContractCode()} disabled={!solVersion} className="btn btn-secondary">Compile</button>}
+                </p>}
+                <div className="Web2ActionsBTNs">
+                    {!compiling && <a onClick={() => compileContractCode()} disabled={!solVersion} className="web2ActionBTN">Compile</a>}
                     {compiling && <Loading/>}
                 </div>
-                <div className="col-md-6 col-12">
+                <div className="InputForm">
                     {
-                        contracts && <select className="custom-select wusd-pair-select" value={contract} onChange={(e) => setChosenContract(e.target.value)}>
+                        contracts && <select className="SelectRegular" value={contract} onChange={(e) => setChosenContract(e.target.value)}>
                             <option value={""}>Choose contract</option>
                             {
                                 Object.keys(contracts).map((item) => {
@@ -124,7 +117,6 @@ const ContractEditor = (props) => {
                         </select>
                     }
                 </div>
-            </div>
         </>
     )
 }

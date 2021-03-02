@@ -231,6 +231,10 @@ a:disabled {cursor:wait !important;}
 .TokenOperationExecute .SelectRegular {width: 20%;margin: auto 5px; display: inline-block; vertical-align: middle;}
 .ExploreCreate {text-align: right;}
 .InputForm h5 {font-size: 16px; margin: 30px auto 5px auto;}
+.InputForm .imputCool {width: 300px; border: 1px solid #9e6915;}
+.CovCODEEDITOR {width: 600px; height: 400px;; display: block; margin: 20px auto;}
+.CovCODEEDITOR section {width: 600px !important; height: 400px !important;display: block !important;}
+.monaco-editor {height: 400px !important;}
 .CheckboxQuestions {width: 100%; display: inline-block; margin: 10px auto;}
 .CheckboxQuestions label {width: 100%; display: inline-block; margin: 10px auto; text-align: center;}
 .CheckboxQuestions label h5 {display: inline-block;font-size: 16px; margin: auto 10px; vertical-align: middle;}
