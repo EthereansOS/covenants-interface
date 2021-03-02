@@ -385,7 +385,7 @@ const CreateOrEditFixedInflationEntryOperation = (props) => {
                                     if (exists) return;
                                     setReceivers(receivers.concat({ address: currentReceiver, percentage: receivers.length === 0 ? 100 : 0 }));
                                     setCurrentReceiver("");
-                                }} className="Web2ActionsBTN" type="button" id="button-add">+</a>
+                                }} className="Web2ActionBTN" type="button" id="button-add">+</a>
                         </div>
                         <div className="ReceiversList">
                             {
