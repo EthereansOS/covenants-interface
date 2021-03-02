@@ -49,6 +49,10 @@ const ExploreIndexToken = (props) => {
             amm.data[2] && amms.push(amm);
         }
         setSelectedAmmIndex(0);
+        var uniswap = amms.filter(it => it.info[0] === 'UniswapV2')[0];
+        var index = amms.indexOf(uniswap);
+        amms.splice(index, 1);
+        amms.unshift(uniswap);
         setAmms(amms);
     }, []);
 
@@ -173,7 +177,7 @@ const ExploreIndexToken = (props) => {
         if (!mintByEth && (mintValue === 0 || unapproved.length > 0 || !mintValue)) return;
         setMintLoading(true);
         try {
-            if(!mintByEth) {
+            if (!mintByEth) {
                 console.log(`minting ${props.dfoCore.toFixed(parseFloat(mintValue) * 10 ** metadata.indexDecimals).toString()}`)
                 const gas = await metadata.indexContract.methods.mint(metadata.objectId, props.dfoCore.toFixed(parseFloat(mintValue) * 10 ** metadata.indexDecimals).toString(), props.dfoCore.address).estimateGas({ from: props.dfoCore.address });
                 const result = await metadata.indexContract.methods.mint(metadata.objectId, props.dfoCore.toFixed(parseFloat(mintValue) * 10 ** metadata.indexDecimals).toString(), props.dfoCore.address).send({ from: props.dfoCore.address, gas })
@@ -183,22 +187,22 @@ const ExploreIndexToken = (props) => {
                 var operations = [];
                 var amm = amms[selectedAmmIndex];
                 var ethereumAddress = amm.data[0];
-                for(var i in swapForEthValues) {
+                for (var i in swapForEthValues) {
                     var data = swapForEthValues[i];
                     operations.push({
-                        inputTokenAddress : ethereumAddress,
-                        inputTokenAmount : data.ethereumValue,
-                        ammPlugin : amm.contract.options.address,
-                        liquidityPoolAddresses : [data.liquidityPoolAddress],
-                        swapPath : [data.tokenAddress],
-                        enterInETH : true,
-                        exitInETH : false,
-                        receivers : [indexPresto.options.address],
-                        receiversPercentages : []
+                        inputTokenAddress: ethereumAddress,
+                        inputTokenAmount: data.ethereumValue,
+                        ammPlugin: amm.contract.options.address,
+                        liquidityPoolAddresses: [data.liquidityPoolAddress],
+                        swapPath: [data.tokenAddress],
+                        enterInETH: true,
+                        exitInETH: false,
+                        receivers: [indexPresto.options.address],
+                        receiversPercentages: []
                     });
                     ethValue = props.dfoCore.web3.utils.toBN(ethValue).add(props.dfoCore.web3.utils.toBN(data.ethereumValue)).toString();
                 }
-                var sendingOptions = {from : props.dfoCore.address, value : ethValue};
+                var sendingOptions = { from: props.dfoCore.address, value: ethValue };
                 var method = indexPresto.methods.mint(
                     props.dfoCore.getContextElement("prestoAddress"),
                     operations,
@@ -235,7 +239,7 @@ const ExploreIndexToken = (props) => {
         setSwapForEthValues([]);
         setMintByEthError(false);
         setMintByEthLoading(false);
-        if(!mintResult) {
+        if (!mintResult) {
             return;
         }
         window.inputTimeout = setTimeout(async () => {
@@ -260,7 +264,7 @@ const ExploreIndexToken = (props) => {
                     multiplier = parseInt(tokenValue) / parseInt(data[1]);
                     console.log(ethereumValue, tokenValue, data[1]);
                 }
-                return {ethereumValue, liquidityPoolAddress, tokenAddress};
+                return { ethereumValue, liquidityPoolAddress, tokenAddress };
             }
             var swapForEthValues = [];
             try {
