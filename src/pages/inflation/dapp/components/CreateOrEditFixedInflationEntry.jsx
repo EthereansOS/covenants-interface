@@ -69,7 +69,8 @@ const CreateOrEditFixedInflationEntry = (props) => {
     var steps = [
         [function () {
             return <>
-                <div className="InputForm">
+            <p className="OnlyMobileVersion">Use a Desktop or a tablet to build Inflation Contracts</p>
+                <div className="InputForm NUUUMobileVersion">
                     <input className="TextRegular" placeholder="Title" onChange={e => setEntryName(e.currentTarget.value)} value={entryName} />
                     <h5>Block Interval:</h5>
                     <select className="SelectRegular" onChange={e => setBlockInterval(e.currentTarget.value)} value={blockInterval}>
@@ -136,7 +137,7 @@ const CreateOrEditFixedInflationEntry = (props) => {
                 <h6><b> {entryName}</b></h6>
                 {steps[step][0]()}
             </div>
-            <div className="Web2ActionsBTNs">
+            <div className="Web2ActionsBTNs NUUUMobileVersion">
                 {step !== 0 && <a onClick={() => setStep(step - 1)} className="backActionBTN">Back</a>}
                 {step !== steps.length - 1 && <a disabled={steps[step][1]()} onClick={() => !steps[step][1]() && setStep(step + 1)} className={"web2ActionBTN" + (steps[step][1]() ? " disabled" : "")}>Next</a>}
                 {step === steps.length - 1 && <a disabled={steps[step][1]()} onClick={() => !steps[step][1]() && props.saveEntry(entryName, lastBlock, blockInterval, callerRewardPercentage, operations)} className={"web2ActionBTN" + (steps[step][1]() ? " disabled" : "")}>Save</a>}
