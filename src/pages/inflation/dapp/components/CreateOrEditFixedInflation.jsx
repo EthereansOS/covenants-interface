@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import CreateOrEditFixedInflationEntry from './CreateOrEditFixedInflationEntry';
 import Loading from '../../../../components/shared/Loading';
 import ContractEditor from '../../../../components/editor/ContractEditor';
+import FixedInflationExtensionTemplateLocation from '../../../../data/FixedInflationExtensionTemplate.sol';
 
 const CreateOrEditFixedInflation = (props) => {
 
@@ -16,16 +17,18 @@ const CreateOrEditFixedInflation = (props) => {
     const [step, setStep] = useState(NaN);
     const [entry, setEntry] = useState(null);
     const [deploying, setDeploying] = useState(false);
-    const [extensionType, setExtensionType] = useState("wallet");
+    const [extensionType, setExtensionType] = useState("address");
     const [walletAddress, setWalletAddress] = useState("");
-    const [code, setCode] = useState("");
     const [payload, setPayload] = useState("");
     const [extensionAddress, setExtensionAddress] = useState("");
     const [deployMessage, setDeployMessage] = useState("");
     const [fixedInflationAddress, setFixedInflationAddress] = useState("");
     const [notFirstTime, setNotFirstTime] = useState(false);
+    const [fixedInflationExtensionTemplateCode, setFixedInflationExtensionTemplateCode] = useState("");
+    const [customExtensionData, setCustomExtensionData] = useState(null);
 
     useEffect(async function componentDidMount() {
+        setFixedInflationExtensionTemplateCode(await (await fetch(FixedInflationExtensionTemplateLocation)).text());
         if (!entry && !fixedInflationContractAddress) {
             return setEntry({
                 name: '',
@@ -105,7 +108,7 @@ const CreateOrEditFixedInflation = (props) => {
 
     function onExtensionType(e) {
         setWalletAddress("");
-        setCode("");
+        setCustomExtensionData(null);
         setExtensionType(e.currentTarget.value);
     }
 
@@ -115,7 +118,7 @@ const CreateOrEditFixedInflation = (props) => {
     }
 
     var deployMethodologies = {
-        async wallet() {
+        async address() {
             setDeployMessage("1/3 - Deploying Extension...");
             var sendingOptions = { from: props.dfoCore.address };
             var method = fixedInflationFactory.methods.cloneFixedInflationDefaultExtension();
@@ -133,6 +136,15 @@ const CreateOrEditFixedInflation = (props) => {
             setPayload(payload);
 
             await deployMethodologies.deployedContract(fixedInflationExtensionAddress, payload);
+        },
+        async fromSourceCode() {
+            setDeployMessage("1/3 - Deploying Custom Extension...");
+            var sendingOptions = {from : props.dfoCore.address};
+            var method = new props.dfoCore.web3.eth.Contract(customExtensionData.abi).deploy({data : customExtensionData.bytecode});
+            sendingOptions.gasLimit = await method.estimateGas(sendingOptions);
+            var customFixedInflationExtension = await method.send(sendingOptions);
+            setExtensionAddress(customFixedInflationExtension.options.address);
+            await deployMethodologies.deployedContract(customFixedInflationExtension.options.address);
         },
         async deployedContract(preDeployedContract, builtPayload) {
             setDeployMessage(`${preDeployedContract ? "2/3" : "1/2"} - Deploying Liqudity Mining Contract...`);
@@ -197,10 +209,6 @@ const CreateOrEditFixedInflation = (props) => {
         return elaboratedEntry;
     }
 
-    function setDeployContract(contract, payload) {
-        console.log(contract, payload);
-    }
-
     var steps = [
         [
             function () {
@@ -210,19 +218,19 @@ const CreateOrEditFixedInflation = (props) => {
                             <h6>Host</h6>
                             <p></p>
                             <select className="custom-select wusd-pair-select" value={extensionType} onChange={onExtensionType}>
-                                <option value="wallet">Wallet</option>
+                                <option value="address">Address</option>
                                 <option value="deployedContract">Deployed Contract</option>
-                                {/*<option value="fromSourceCode">From Source Code</option>*/}
+                                {<option value="fromSourceCode">From Source Code</option>}
                             </select>
                         </div>
-                        {(extensionType === 'wallet' || extensionType === 'deployedContract') && <div className="row">
+                        {(extensionType === 'address' || extensionType === 'deployedContract') && <div className="row">
                             <div className="col-12">
-                                {extensionType === 'wallet' && <input type="text" placeholder="Host address" defaultValue={walletAddress} onKeyUp={e => setWalletAddress(window.isEthereumAddress(e.currentTarget.value) ? e.currentTarget.value : "")} />}
+                                {extensionType === 'address' && <input type="text" placeholder="Host address" defaultValue={walletAddress} onKeyUp={e => setWalletAddress(window.isEthereumAddress(e.currentTarget.value) ? e.currentTarget.value : "")} />}
                                 {extensionType === 'deployedContract' && <input type="text" placeholder="Insert extension address" defaultValue={extensionAddress} onKeyUp={e => setExtensionAddress(window.isEthereumAddress(e.currentTarget.value) ? e.currentTarget.value : "")} />}
                             </div>
                         </div>}
-                        {extensionType === 'fromSourceCode' && <ContractEditor dfoCore={props.dfoCore} onFinish={setDeployContract} />}
-                        {extensionType !== 'wallet' && <div className="row">
+                        {extensionType === 'fromSourceCode' && <ContractEditor filterDeployedContract={filterDeployedContract} dfoCore={props.dfoCore} onContract={setCustomExtensionData} templateCode={fixedInflationExtensionTemplateCode} />}
+                        {extensionType !== 'address' && <div className="row">
                             <div className="col-12">
                                 <input placeholder="Optional init payload" type="text" defaultValue={payload} onKeyUp={e => setPayload(e.currentTarget.value)} />
                             </div>
@@ -231,9 +239,29 @@ const CreateOrEditFixedInflation = (props) => {
                 </>
             },
             function () {
-                return !(extensionType === 'wallet' ? walletAddress && walletAddress !== window.voidEthereumAddress : extensionType === 'deployedContract' ? extensionAddress : code)
+                return !(extensionType === 'address' ? walletAddress && walletAddress !== window.voidEthereumAddress : extensionType === 'deployedContract' ? extensionAddress : customExtensionData)
             }]
     ];
+
+    function filterDeployedContract(contractData) {
+        var abi = contractData.abi;
+        if(abi.filter(abiEntry => abiEntry.type === 'constructor').length > 0) {
+            return false;
+        }
+        if(abi.filter(abiEntry => abiEntry.type === 'function' && abiEntry.stateMutability === 'view' && abiEntry.name === 'active' && abiEntry.outputs && abiEntry.outputs.length === 1 && abiEntry.outputs[0].type === 'bool').length === 0) {
+            return false;
+        }
+        if(abi.filter(abiEntry => abiEntry.type === 'function' && abiEntry.stateMutability !== 'view' && abiEntry.stateMutability !== 'pure' && abiEntry.name === 'deactivationByFailure' && (!abiEntry.outputs || abiEntry.outputs.length === 0) && (!abiEntry.inputs || abiEntry.inputs.length === 0)).length === 0) {
+            return false;
+        }
+        if(abi.filter(abiEntry => abiEntry.type === 'function' && abiEntry.stateMutability !== 'view' && abiEntry.stateMutability !== 'pure' && abiEntry.name === 'receiveTokens' && (!abiEntry.outputs || abiEntry.outputs.length === 0) && abiEntry.inputs && abiEntry.inputs.length === 3 && abiEntry.inputs[0].type === 'address[]' && abiEntry.inputs[1].type === 'uint256[]' && abiEntry.inputs[2].type === 'uint256[]').length === 0) {
+            return false;
+        }
+        if(abi.filter(abiEntry => abiEntry.type === 'function' && abiEntry.stateMutability !== 'view' && abiEntry.stateMutability !== 'pure' && abiEntry.name === 'setActive' && (!abiEntry.outputs || abiEntry.outputs.length === 0) && abiEntry.inputs && abiEntry.inputs.length === 1 && abiEntry.inputs[0].type === 'bool').length === 0) {
+            return false;
+        }
+        return true;
+    }
 
     async function deploy() {
         setDeploying(true);
