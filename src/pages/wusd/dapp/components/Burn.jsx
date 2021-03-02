@@ -300,7 +300,7 @@ const Burn = (props) => {
         if(ethAmount && ethAmount.estimatedOutputETHValue === estimatedOutputETHValue) {
             return;
         }
-        setEthAmount({estimatedOutputETHValue, token0ETHLiquidityPool, token0ETHValue, token1ETHLiquidityPool, token1ETHValue});
+        setEthAmount({estimatedOutputETHValue, token0ETHLiquidityPool, token0ETHValue, token1ETHLiquidityPool, token1ETHValue, ethereumAddress});
     }
 
     const getWUSDToken = () => {
