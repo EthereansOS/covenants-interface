@@ -221,7 +221,7 @@ const Mint = (props) => {
                 } else {
                     var value = '0';
                     var operations = [];
-                    var amm = amms[!isNaN(ammIndex) ? ammIndex : selectedAmmIndex];
+                    var amm = amms[selectedAmmIndex];
                     var ethereumAddress = amm.data[0];
                     amm = amm.contract;
                     if (inputType === 'eth') {
@@ -586,7 +586,7 @@ const Mint = (props) => {
                         :
                         !firstTokenApproved && !onlyByToken1 ? <ApproveButton contract={pairs[pair].token0Contract} from={props.dfoCore.address} spender={onlyByToken0 ? wusdPresto.options.address : props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('first', res)} text={`Approve ${pairs[pair].symbol0}`} />
                             :
-                            !secondTokenApproved && !onlyByToken0 ? <ApproveButton contract={pairs[pair].token1Contract} from={props.dfoCore.address} spender={onlyByToken0 ? wusdPresto.options.address : props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('second', res)} text={`Approve ${pairs[pair].symbol1}`} />
+                            !secondTokenApproved && !onlyByToken0 ? <ApproveButton contract={pairs[pair].token1Contract} from={props.dfoCore.address} spender={onlyByToken1 ? wusdPresto.options.address : props.dfoCore.getContextElement("WUSDExtensionControllerAddress")} onError={(error) => console.error(error)} onApproval={(res) => onTokenApproval('second', res)} text={`Approve ${pairs[pair].symbol1}`} />
                                 : <div />
                 }
 

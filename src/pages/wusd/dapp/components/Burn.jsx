@@ -70,7 +70,7 @@ const Burn = (props) => {
 
     useEffect(() => {
         updateETHAmount(selectedAmmIndex)
-    });
+    }, [selectedAmmIndex, estimatedToken1]);
 
     const getController = async () => {
         setLoading(true);
@@ -232,7 +232,7 @@ const Burn = (props) => {
                 var operations = [{
                     inputTokenAddress : token0Contract.options.address,
                     inputTokenAmount : estimatedToken0.full,
-                    ammContract : amms[selectedAmmIndex].contract.option.address,
+                    ammContract : amms[selectedAmmIndex].contract.options.address,
                     liquidityPoolAddresses : [ethAmount.token0ETHLiquidityPool],
                     swapPath : [ethAmount.ethereumAddress],
                     enterInETH : false,
@@ -242,7 +242,7 @@ const Burn = (props) => {
                 }, {
                     inputTokenAddress : token1Contract.options.address,
                     inputTokenAmount : estimatedToken1.full,
-                    ammContract : amms[selectedAmmIndex].contract.option.address,
+                    ammContract : amms[selectedAmmIndex].contract.options.address,
                     liquidityPoolAddresses : [ethAmount.token1ETHLiquidityPool],
                     swapPath : [ethAmount.ethereumAddress],
                     enterInETH : false,
@@ -300,7 +300,7 @@ const Burn = (props) => {
         if(ethAmount && ethAmount.estimatedOutputETHValue === estimatedOutputETHValue) {
             return;
         }
-        setEthAmount({estimatedOutputETHValue, token0ETHLiquidityPool, token0ETHValue, token1ETHLiquidityPool, token1ETHValue});
+        setEthAmount({estimatedOutputETHValue, token0ETHLiquidityPool, token0ETHValue, token1ETHLiquidityPool, token1ETHValue, ethereumAddress});
     }
 
     const getWUSDToken = () => {
