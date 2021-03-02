@@ -296,17 +296,10 @@ const ExploreIndexToken = (props) => {
                 </select>}
             </div>}
             {mintByEth && mintByEthLoading && <Loading />}
-            {mintByEth && <div className="InputTokenRegular">
+            {mintByEth && <div className="FromETHPrestoDesc">
                 {swapForEthValues.map((it, i) => <div key={it.tokenAddress}>
-                    Swapping
-                    {window.fromDecimals(it.ethereumValue, 18)}
-                    ETH
-                    <Coin address={window.voidEthereumAddress} />
-                    for
-                    {window.fromDecimals(mintResult[1][i], 18)}
-                    {mintResult.symbols[i]}
-                    <Coin address={mintResult[0][i]} />
-                </div>)}
+                <p>Swapping for {window.fromDecimals(it.ethereumValue, 18)} ETH <Coin address={window.voidEthereumAddress} />for {window.fromDecimals(mintResult[1][i], 18)} {mintResult.symbols[i]} <Coin address={mintResult[0][i]} />
+                </p></div>)}
                 {mintByEthError && <h6>Insufficient liquidity in the selected AMM</h6>}
             </div>}
             {!mintByEth && mintValue > 0 && <div className="ShowCollateralNeededBal"><h6>Needed:</h6> {mintResult._tokens.map((token, index) => <p>{window.formatMoney(props.dfoCore.toDecimals(mintResult._amounts[index], metadata.decimals[token], 2))} {metadata.symbols[token]}</p>)}</div>}
