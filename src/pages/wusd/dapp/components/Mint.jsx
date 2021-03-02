@@ -221,7 +221,7 @@ const Mint = (props) => {
                 } else {
                     var value = '0';
                     var operations = [];
-                    var amm = amms[!isNaN(ammIndex) ? ammIndex : selectedAmmIndex];
+                    var amm = amms[selectedAmmIndex];
                     var ethereumAddress = amm.data[0];
                     amm = amm.contract;
                     if (inputType === 'eth') {
