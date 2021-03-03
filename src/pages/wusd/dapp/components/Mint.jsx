@@ -449,13 +449,30 @@ const Mint = (props) => {
         value = window.toDecimals(value, tokenDecimals);
         var halfValue = props.dfoCore.web3.utils.toBN(value).div(props.dfoCore.web3.utils.toBN(2)).toString();
 
-        async function calculateBestLP(firstToken, secondToken) {
+        async function calculateBestLP(firstToken, secondToken, firstTokenDecimals, secondTokenDecimals) {
 
             var token1Value = (await ammContract.methods.getSwapOutput(firstToken, halfValue, [liquidityPool], [secondToken]).call())[1];
 
-            var token0Value = (await ammContract.methods.byTokenAmount(liquidityPool, secondToken, token1Value).call());
+            var token0Value = await ammContract.methods.byTokenAmount(liquidityPool, secondToken, token1Value).call();
             var lpAmount = token0Value[0];
-            token0Value = token0Value[1][token0Value[2].indexOf(firstToken)];
+
+            token0Value = await ammContract.methods.byLiquidityPoolAmount(liquidityPool, lpAmount).call();
+            token1Value = token0Value[0][token0Value[1].indexOf(secondToken)];
+            token0Value = token0Value[0][token0Value[1].indexOf(firstToken)];
+
+            var normalizedValue = props.dfoCore.normalizeValue(value, firstTokenDecimals);
+            var obtainedValue = window.web3.utils.toBN(props.dfoCore.normalizeValue(token0Value, firstTokenDecimals)).add(window.web3.utils.toBN(props.dfoCore.normalizeValue(token1Value, secondTokenDecimals))).toString();
+
+            if(window.web3.utils.toBN(obtainedValue).gt(window.web3.utils.toBN(normalizedValue))) {
+                token0Value = window.fromDecimals(token0Value, firstTokenDecimals);
+                token1Value = window.toDecimals(token0Value, secondTokenDecimals);
+                lpAmount = await ammContract.methods.byTokenAmount(liquidityPool, secondToken, token1Value).call();
+                lpAmount = lpAmount[0];
+
+                token0Value = await ammContract.methods.byLiquidityPoolAmount(liquidityPool, lpAmount).call();
+                token1Value = token0Value[0][token0Value[1].indexOf(secondToken)];
+                token0Value = token0Value[0][token0Value[1].indexOf(firstToken)];
+            }
 
             return { lpAmount, token0Value, token1Value };
         }
@@ -467,12 +484,16 @@ const Mint = (props) => {
         try {
             var bestLP = await calculateBestLP(
                 onlyByToken0 ? pairs[pair].token0Contract.options.address : pairs[pair].token1Contract.options.address,
-                onlyByToken0 ? pairs[pair].token1Contract.options.address : pairs[pair].token0Contract.options.address
+                onlyByToken0 ? pairs[pair].token1Contract.options.address : pairs[pair].token0Contract.options.address,
+                onlyByToken0 ? pairs[pair].token0decimals : pairs[pair].token1decimals,
+                onlyByToken0 ? pairs[pair].token1decimals : pairs[pair].token0decimals
             );
             lpAmount = bestLP.lpAmount;
             token0Value = bestLP.token0Value;
             token1Value = bestLP.token1Value;
+            console.log(bestLP);
         } catch (e) {
+            console.error(e);
         }
 
         var firstTokenAmount = onlyByToken0 ? token0Value : token1Value;
@@ -484,10 +505,11 @@ const Mint = (props) => {
     }
 
     const getEstimatedAmount = () => {
-        if (firstAmount.value != 0 && secondAmount.value != 0) {
-            return parseFloat(firstAmount.value) + parseFloat(secondAmount.value);
+        try {
+            return window.fromDecimals(window.web3.utils.toBN(props.dfoCore.normalizeValue(firstAmount.full, pairs[pair].token0decimals)).add(window.web3.utils.toBN(props.dfoCore.normalizeValue(secondAmount.full, pairs[pair].token1decimals))).toString(), 18);
+        } catch(e) {
+            return 0;
         }
-        return 0;
     }
 
     function onSingleTokenChange(e, token) {
