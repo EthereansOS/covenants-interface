@@ -25,7 +25,7 @@ const Coin = (props) => {
         }
     }
 
-    return <img className={props.className} src={forcedImage || imageLink} onError={(e) => onImageError()} />
+    return <img className={props.className} height={24} src={forcedImage || imageLink} onError={(e) => onImageError()} />
 }
 
 Coin.propTypes = {

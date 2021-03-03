@@ -8,10 +8,6 @@ import ContractEditor from '../../../../components/editor/ContractEditor';
 
 const abi = new ethers.utils.AbiCoder();
 
-const code = `function add(a, b) {
-    return a + b;
-}`;
-
 const Create = (props) => {
     const [currentBlockNumber, setCurrentBlockNumber] = useState(0);
     const [selectedRewardToken, setSelectedRewardToken] = useState(null);
@@ -21,12 +17,11 @@ const Create = (props) => {
     const [hostDeployedContract, setHostDeployedContract] = useState(null);
     const [deployContract, setDeployContract] = useState(null);
     const [useDeployedContract, setUseDeployedContract] = useState(false);
-    const [hasLoadBalancer, setHasLoadBalancer] = useState(false);
-    const [pinnedSetupIndex, setPinnedSetupIndex] = useState(null);
     const [byMint, setByMint] = useState(false);
     const [freeLiquidityPoolToken, setFreeLiquidityPoolToken] = useState(null);
     const [freeRewardPerBlock, setFreeRewardPerBlock] = useState(0);
-    const [lockedPeriod, setLockedPeriod] = useState(null);
+    const [minStakeable, setMinSteakeable] = useState(0);
+    const [blockDuration, setBlockDuration] = useState(null);
     const [lockedStartBlock, setLockedStartBlock] = useState(0);
     const [lockedMainToken, setLockedMainToken] = useState(null);
     const [lockedMaxLiquidity, setLockedMaxLiquidity] = useState(0);
@@ -34,8 +29,8 @@ const Create = (props) => {
     const [lockedSecondaryToken, setLockedSecondaryToken] = useState(null);
     const [lockedHasPenaltyFee, setLockedHasPenaltyFee] = useState(false);
     const [lockedPenaltyFee, setLockedPenaltyFee] = useState(0);
-    const [lockedIsRenewable, setLockedIsRenewable] = useState(false);
-    const [lockedRenewTimes, setLockedRenewTimes] = useState(0);
+    const [isRenewable, setIsRenewable] = useState(false);
+    const [renewTimes, setRenewTimes] = useState(0);
     const [loading, setLoading] = useState(false);
     const [isAdd, setIsAdd] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
@@ -72,6 +67,9 @@ const Create = (props) => {
         const setup = {
             rewardPerBlock: freeRewardPerBlock,
             data: freeLiquidityPoolToken,
+            period: blockDuration,
+            minStakeable,
+            renewTimes
         }
         if (isAdd && editIndex) {
             props.removeFarmingSetup(editIndex);
@@ -81,21 +79,24 @@ const Create = (props) => {
         props.addFarmingSetup(setup);
         setFreeLiquidityPoolToken(null);
         setFreeRewardPerBlock(0);
+        setMinSteakeable(0);
+        setBlockDuration(null);
+        setRenewTimes(0);
+        setIsRenewable(false);
         setSelectedFarmingType(null);
         setIsAdd(false);
     }
 
     const addLockedFarmingSetup = () => {
         const setup = {
-            period: lockedPeriod,
-            startBlock: lockedStartBlock,
-            endBlock: lockedStartBlock + lockedPeriod,
+            period: blockDuration,
             data: lockedMainToken,
             maxLiquidity: lockedMaxLiquidity,
             rewardPerBlock: lockedRewardPerBlock,
             penaltyFee: lockedPenaltyFee,
-            renewTimes: lockedRenewTimes,
+            renewTimes,
             secondaryToken: lockedSecondaryToken,
+            minStakeable,
         }
         if (isAdd && editIndex) {
             props.removeFarmingSetup(editIndex);
@@ -103,15 +104,16 @@ const Create = (props) => {
             setEditIndex(null);
         }
         props.addFarmingSetup(setup);
-        setLockedPeriod(null);
+        setBlockDuration(null);
         setLockedStartBlock(0);
         setLockedMainToken(null);
         setLockedMaxLiquidity(0);
         setLockedRewardPerBlock(0);
         setLockedHasPenaltyFee(false);
         setLockedPenaltyFee(0);
-        setLockedIsRenewable(false);
-        setLockedRenewTimes(0);
+        setIsRenewable(false);
+        setRenewTimes(0);
+        setMinSteakeable(0);
         setLockedSecondaryToken(null);
         setSelectedFarmingType(null);
         setIsAdd(false);
@@ -119,22 +121,26 @@ const Create = (props) => {
     }
 
     const editSetup = (setup, index) => {
-        if (!setup.endBlock) {
+        if (!setup.maxLiquidity) {
             // free setup
+            setMinSteakeable(setup.minStakeable);
+            setBlockDuration(setup.period);
             setFreeLiquidityPoolToken(setup.data);
             setFreeRewardPerBlock(setup.rewardPerBlock);
             setSelectedFarmingType('free');
+            setIsRenewable(parseInt(setup.renewTimes) !== 0);
+            setRenewTimes(setup.renewTimes);
         } else {
             // locked setup
-            setLockedPeriod(setup.period);
-            setLockedStartBlock(setup.startBlock);
+            setMinSteakeable(setup.minStakeable);
+            setBlockDuration(setup.period);
             setLockedMainToken(setup.data);
             setLockedMaxLiquidity(setup.maxLiquidity);
             setLockedRewardPerBlock(setup.rewardPerBlock);
             setLockedHasPenaltyFee(parseInt(setup.penaltyFee) !== 0);
             setLockedPenaltyFee(setup.penaltyFee);
-            setLockedIsRenewable(parseInt(setup.renewTimes) !== 0);
-            setLockedRenewTimes(setup.renewTimes);
+            setIsRenewable(parseInt(setup.renewTimes) !== 0);
+            setRenewTimes(setup.renewTimes);
             setLockedSecondaryToken(setup.secondaryToken);
             setSelectedFarmingType('locked');
         }
@@ -161,36 +167,36 @@ const Create = (props) => {
         try {
             const host = selectedHost === 'wallet' ? hostWalletAddress : hostDeployedContract;
             const hasExtension = (selectedHost === "deployed-contract" && hostDeployedContract && !deployContract);
-            const data = { setups: [], rewardTokenAddress: selectedRewardToken.address, byMint, hasLoadBalancer, pinnedSetupIndex, deployContract, host, hasExtension, extensionInitData: extensionPayload || '' };
-            const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
+            const data = { setups: [], rewardTokenAddress: selectedRewardToken.address, byMint, deployContract, host, hasExtension, extensionInitData: extensionPayload || '' };
+            const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddressRopsten'));
             for (let i = 0; i < props.farmingSetups.length; i++) {
                 const setup = props.farmingSetups[i];
-                const isFree = !setup.endBlock;
+                const isFree = !setup.maxLiquidity;
                 const result = await ammAggregator.methods.findByLiquidityPool(isFree ? setup.data.address : setup.secondaryToken).call();
+                console.log(result);
+                console.log(setup);
                 const { amm } = result;
                 const ammContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMABI'), amm);
                 const res = await ammContract.methods.byLiquidityPool(isFree ? setup.data.address : setup.secondaryToken).call();
-                const involvingETH = res['2'].filter((address) => isWeth(address)).length > 0 ;
-                data.setups.push(
-                    [
-                        amm,//uniswapAMM.options.address,
-                        0,
-                        isFree ? setup.data.address : setup.secondaryToken,
-                        isFree ? props.dfoCore.voidEthereumAddress : setup.data.address,
-                        isFree ? 0 : setup.startBlock,
-                        isFree ? 0 : (parseInt(setup.startBlock) + parseInt(setup.period)),
-                        props.dfoCore.fromDecimals(setup.rewardPerBlock),
-                        isFree ? props.dfoCore.fromDecimals(setup.rewardPerBlock) : 0,
-                        0,
-                        0,
-                        isFree ? 0 : props.dfoCore.fromDecimals(setup.maxLiquidity),
-                        0,
-                        isFree,
-                        isFree ? 0 : setup.renewTimes,
-                        isFree ? 0 : props.dfoCore.fromDecimals(setup.penaltyFee / 100),
-                        involvingETH
-                    ]
-                )
+                const involvingETH = res['2'].filter((address) => isWeth(address)).length > 0;
+                const parsedSetup = 
+                [
+                    isFree,
+                    parseInt(setup.period),
+                    props.dfoCore.fromDecimals(setup.rewardPerBlock),
+                    props.dfoCore.fromDecimals(setup.minStakeable),
+                    !isFree ? props.dfoCore.fromDecimals(setup.maxLiquidity) : 0,
+                    setup.renewTimes,
+                    amm,
+                    isFree ? setup.data.address : setup.secondaryToken,
+                    result[2][0],
+                    props.dfoCore.voidEthereumAddress,
+                    involvingETH,
+                    isFree ? 0 : props.dfoCore.fromDecimals(parseFloat(parseFloat(setup.penaltyFee) / 100).toString()),
+                    0,
+                    0
+                ];
+                data.setups.push(parsedSetup)
             }
             console.log(data);
             setDeployData(data);
@@ -207,18 +213,27 @@ const Create = (props) => {
         let deployTransaction = null;
         setDeployLoading(true);
         try {
-            const { setups, rewardTokenAddress, hasLoadBalancer, pinnedSetupIndex, extensionAddress, extensionInitData } = deployData;
-            const factoryAddress = props.dfoCore.getContextElement("liquidityMiningFactoryAddress");
-            const liquidityMiningFactory = await props.dfoCore.getContract(props.dfoCore.getContextElement("LiquidityMiningFactoryABI"), factoryAddress);
-            const types = ["address", "bytes", "address", "address", "bytes", "bool", "uint256"];
-            const encodedSetups = abi.encode(["tuple(address,uint256,address,address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,bool,uint256,uint256,bool)[]"], [setups]);
-            const params = [extensionAddress ? extensionAddress : hostDeployedContract, extensionInitData || extensionPayload || "0x", props.dfoCore.getContextElement("ethItemOrchestratorAddress"), rewardTokenAddress, encodedSetups, hasLoadBalancer, pinnedSetupIndex || 0];
+            const { setups, rewardTokenAddress, extensionAddress, extensionInitData } = deployData;
+            const factoryAddress = props.dfoCore.getContextElement("farmFactoryAddressRopsten");
+            const farmFactory = await props.dfoCore.getContract(props.dfoCore.getContextElement("FarmFactoryABI"), factoryAddress);
+            const types = [
+                "address",
+                "bytes",
+                "address",
+                "address",
+                "bytes",
+            ];
+            console.log(deployData);
+            const encodedSetups = abi.encode(["tuple(bool,uint256,uint256,uint256,uint256,uint256,address,address,address,address,bool,uint256,uint256,uint256)[]"], [setups]);
+            const params = [extensionAddress ? extensionAddress : hostDeployedContract, extensionInitData || extensionPayload || "0x", props.dfoCore.getContextElement("ethItemOrchestratorAddressRopsten"), rewardTokenAddress, encodedSetups || 0];
             console.log(params)
             console.log(extensionInitData);
             const payload = props.dfoCore.web3.utils.sha3(`init(${types.join(',')})`).substring(0, 10) + (props.dfoCore.web3.eth.abi.encodeParameters(types, params).substring(2));
             console.log(payload);
-            const gasLimit = await liquidityMiningFactory.methods.deploy(payload).estimateGas({ from: props.dfoCore.address });
-            deployTransaction = await liquidityMiningFactory.methods.deploy(payload).send({ from: props.dfoCore.address, gasLimit });
+            const gas = await farmFactory.methods.deploy(payload, true).estimateGas({ from: props.dfoCore.address });
+            // const gas = 8000000;
+            console.log(gas);
+            deployTransaction = await farmFactory.methods.deploy(payload, true).send({ from: props.dfoCore.address, gas });
             console.log(deployTransaction);
         } catch (error) {
             console.error(error);
@@ -245,14 +260,14 @@ const Create = (props) => {
         try {
             const { byMint, host, deployContract } = deployData;
             if (!deployContract) {
-                const factoryAddress = props.dfoCore.getContextElement("liquidityMiningFactoryAddress");
-                const liquidityMiningFactory = await props.dfoCore.getContract(props.dfoCore.getContextElement("LiquidityMiningFactoryABI"), factoryAddress);
-                const cloneGasLimit = await liquidityMiningFactory.methods.cloneLiquidityMiningDefaultExtension().estimateGas({ from: props.dfoCore.address });
-                const cloneExtensionTransaction = await liquidityMiningFactory.methods.cloneLiquidityMiningDefaultExtension().send({ from: props.dfoCore.address, gasLimit: cloneGasLimit });
+                const factoryAddress = props.dfoCore.getContextElement("farmFactoryAddressRopsten");
+                const farmFactory = await props.dfoCore.getContract(props.dfoCore.getContextElement("FarmFactoryABI"), factoryAddress);
+                const cloneGasLimit = await farmFactory.methods.cloneFarmDefaultExtension().estimateGas({ from: props.dfoCore.address });
+                const cloneExtensionTransaction = await farmFactory.methods.cloneFarmDefaultExtension().send({ from: props.dfoCore.address, gasLimit: cloneGasLimit });
                 const cloneExtensionReceipt = await props.dfoCore.web3.eth.getTransactionReceipt(cloneExtensionTransaction.transactionHash);
                 const extensionAddress = props.dfoCore.web3.eth.abi.decodeParameter("address", cloneExtensionReceipt.logs.filter(it => it.topics[0] === props.dfoCore.web3.utils.sha3('ExtensionCloned(address)'))[0].topics[1])
-                const liquidityMiningExtension = new props.dfoCore.web3.eth.Contract(props.dfoCore.getContextElement("LiquidityMiningExtensionABI"), extensionAddress);
-                const extensionInitData = liquidityMiningExtension.methods.init(byMint, host).encodeABI()
+                const farmExtension = new props.dfoCore.web3.eth.Contract(props.dfoCore.getContextElement("FarmExtensionABI"), extensionAddress);
+                const extensionInitData = farmExtension.methods.init(byMint, host).encodeABI()
                 setDeployData({ ...deployData, extensionAddress, extensionInitData });
             } else {
                 const { contract, payload } = deployContract;
@@ -331,7 +346,7 @@ const Create = (props) => {
                     return (
                         <div key={i} className="row align-items-center text-left mb-md-2 mb-4">
                             <div className="col-md-9 col-12">
-                                <b style={{fontSize: 14}}>{ !setup.startBlock ? "Free setup" : "Locked setup" } { setup.data.name }{ setup.startBlock ? `${setup.data.symbol}` : ` | ${setup.data.tokens.map((token) => `${token.symbol}` )}` } - Reward: {setup.rewardPerBlock} {props.farmingContract.rewardToken.symbol}/block</b>
+                                <b style={{fontSize: 14}}>{ !setup.maxLiquidity ? "Free setup" : "Locked setup" } { setup.data.name }{ setup.maxLiquidity ? `${setup.data.symbol}` : ` | ${setup.data.tokens.map((token) => `${token.symbol}` )}` } - Reward: {setup.rewardPerBlock} {props.farmingContract.rewardToken.symbol}/block</b>
                             </div>
                             <div className="col-md-3 col-12 flex">
                                 <button className="btn btn-sm btn-outline-danger mr-1" onClick={() => props.removeFarmingSetup(i)}><b>X</b></button> <button onClick={() => editSetup(setup, i)} className="btn btn-sm btn-danger ml-1"><b>EDIT</b></button>
@@ -349,7 +364,7 @@ const Create = (props) => {
                         setSelectedRewardToken(null);
                         props.farmingSetups.forEach((_, index) => props.removeFarmingSetup(index));
                         props.updateFarmingContract(null);
-                    }} className="btn btn-light mr-4">Cancel</button> <button onClick={() => setIsAddLoadBalancer(true)} className="btn btn-secondary ml-4">Next</button>
+                    }} className="btn btn-light mr-4">Cancel</button> <button onClick={() => setIsDeploy(true)} className="btn btn-secondary ml-4">Next</button>
                 </div>
             </div>
         </div>
@@ -370,6 +385,7 @@ const Create = (props) => {
                         <p style={{fontSize: 14}}>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quaerat animi ipsam nemo at nobis odit temporibus autem possimus quae vel, ratione numquam modi rem accusamus, veniam neque voluptates necessitatibus enim!</p>
                     </div>
                     <div className="row justify-content-center">
+                        <button onClick={() => props.setFarmingContractStep(0) } className="btn btn-light mr-4">Cancel</button>
                         <button onClick={() => props.setFarmingContractStep(1)} disabled={!selectedFarmingType} className="btn btn-primary">Next</button>
                     </div>
                 </div>
@@ -412,7 +428,6 @@ const Create = (props) => {
                         address: tkAddress
                     })
                 }
-                
             }))
             setFreeLiquidityPoolToken({ 
                 address, 
@@ -438,21 +453,33 @@ const Create = (props) => {
     const goToFirstStep = () => {
         setFreeLiquidityPoolToken(null);
         setFreeRewardPerBlock(0);
-        setLockedPeriod(null);
+        setBlockDuration(null);
         setLockedStartBlock(0);
         setLockedMainToken(null);
         setLockedMaxLiquidity(0);
         setLockedRewardPerBlock(0);
         setLockedHasPenaltyFee(false);
         setLockedPenaltyFee(0);
-        setLockedIsRenewable(false);
-        setLockedRenewTimes(0);
+        setIsRenewable(false);
+        setRenewTimes(0);
         setLockedSecondaryToken(null);
         props.setFarmingContractStep(0);
     }
 
     const getFreeFirstStep = () => {
         return <div className="col-12">
+            <div className="row mb-4">
+                <div className="col-12">
+                    <select className="custom-select wusd-pair-select" value={blockDuration} onChange={(e) => setBlockDuration(e.target.value)}>
+                        <option value={0}>Choose setup duration</option>
+                        {
+                            Object.keys(props.dfoCore.getContextElement("blockIntervals")).map((key, index) => {
+                                return <option key={index} value={props.dfoCore.getContextElement("blockIntervals")[key]}>{key}</option>
+                            })
+                        }
+                    </select>
+                </div>
+            </div>
             <div className="row justify-content-center mb-4">
                 <div className="col-9">
                     <TokenInput label={"Liquidity pool address"} placeholder={"Liquidity pool address"} width={60} onClick={(address) => onSelectFreeLiquidityPoolToken(address)} text={"Load"} />
@@ -484,11 +511,31 @@ const Create = (props) => {
                             <div className="row mb-4">
                                 <p className="text-center">*Monthly/yearly reward are calculated in a forecast based on 3000 Blocks/m and 36000/y.</p>
                             </div>
+                            <div className="row justify-content-center mb-4">
+                                <div className="col-6">
+                                    <Input min={0} showCoin={true} address={selectedRewardToken.address} value={minStakeable} name={selectedRewardToken.symbol} label={"Min stakeable"} onChange={(e) => setMinSteakeable(e.target.value)} />
+                                </div>
+                            </div>
+                            <div className="row justify-content-center">
+                                <div className="form-check my-4">
+                                    <input className="form-check-input" type="checkbox" value={isRenewable} onChange={(e) => setIsRenewable(e.target.checked)} id="repeat" />
+                                    <label className="form-check-label" htmlFor="repeat">
+                                        Repeat
+                                    </label>
+                                </div>
+                            </div>
+                            {
+                                isRenewable && <div className="row mb-4 justify-content-center">
+                                    <div className="col-md-6 col-12">
+                                        <Input min={0} width={50} value={renewTimes} onChange={(e) => setRenewTimes(e.target.value)} />
+                                    </div>
+                                </div>
+                            }
                         </>
                     }
                     <div className="row justify-content-center mb-4">
                         <button onClick={() => goToFirstStep() } className="btn btn-light mr-4">Cancel</button>
-                        <button onClick={() => addFreeFarmingSetup() } disabled={!freeLiquidityPoolToken || freeRewardPerBlock <= 0} className="btn btn-secondary ml-4">{isEdit ? 'Edit' : 'Add'}</button>
+                        <button onClick={() => addFreeFarmingSetup() } disabled={!freeLiquidityPoolToken || freeRewardPerBlock <= 0 || minStakeable <= 0 || !blockDuration} className="btn btn-secondary ml-4">{isEdit ? 'Edit' : 'Add'}</button>
                     </div>
                 </>
             }
@@ -499,22 +546,14 @@ const Create = (props) => {
         return <div className="col-12">
             <div className="row mb-4">
                 <div className="col-12">
-                    <select className="custom-select wusd-pair-select" value={lockedPeriod} onChange={(e) => setLockedPeriod(e.target.value)}>
-                        <option value={0}>Choose locked period</option>
+                    <select className="custom-select wusd-pair-select" value={blockDuration} onChange={(e) => setBlockDuration(e.target.value)}>
+                        <option value={0}>Choose setup duration</option>
                         {
                             Object.keys(props.dfoCore.getContextElement("blockIntervals")).map((key, index) => {
                                 return <option key={index} value={props.dfoCore.getContextElement("blockIntervals")[key]}>{key}</option>
                             })
                         }
                     </select>
-                </div>
-            </div>
-            <div className="row mb-4">
-                <p className="text-center text-small">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Omnis delectus incidunt laudantium distinctio velit reprehenderit quaerat, deserunt sint fugit ex consectetur voluptas suscipit numquam. Officiis maiores quaerat quod necessitatibus perspiciatis!</p>
-            </div>
-            <div className="row justify-content-center mb-4">
-                <div className="col-6">
-                    <Input label={"Start block"} min={currentBlockNumber} value={lockedStartBlock || currentBlockNumber} onChange={(e) => setLockedStartBlock(parseInt(e.target.value))} />
                 </div>
             </div>
             <div className="row mb-4">
@@ -553,6 +592,11 @@ const Create = (props) => {
                                     </div>
                                 </div>
                             }
+                            <div className="row justify-content-center mb-4">
+                                <div className="col-6">
+                                    <Input min={0} showCoin={true} address={selectedRewardToken.address} value={minStakeable} name={selectedRewardToken.symbol} label={"Min stakeable"} onChange={(e) => setMinSteakeable(e.target.value)} />
+                                </div>
+                            </div>
                             <div className="row justify-content-center mt-4 mb-4">
                                 <div className="col-6">
                                     <Input label={"Max stakeable"} min={0} showCoin={true} address={lockedMainToken.address} value={lockedMaxLiquidity} name={lockedMainToken.symbol} onChange={(e) => setLockedMaxLiquidity(e.target.value)} />
@@ -576,7 +620,7 @@ const Create = (props) => {
                     }
                     <div className="row justify-content-center mb-4">
                         <button onClick={() => goToFirstStep() } className="btn btn-light mr-4">Cancel</button>
-                        <button onClick={() => props.setFarmingContractStep(2) } disabled={!lockedMainToken || lockedRewardPerBlock <= 0 || !lockedMaxLiquidity || !lockedSecondaryToken || !lockedStartBlock || !lockedPeriod} className="btn btn-secondary ml-4">Next</button>
+                        <button onClick={() => props.setFarmingContractStep(2) } disabled={!lockedMainToken || lockedRewardPerBlock <= 0 || !lockedMaxLiquidity || !lockedSecondaryToken || !lockedStartBlock || !blockDuration} className="btn btn-secondary ml-4">Next</button>
                     </div>
                 </>
             }
@@ -606,16 +650,16 @@ const Create = (props) => {
                 </div>
                 <div className="row justify-content-center">
                     <div className="form-check my-4">
-                        <input className="form-check-input" type="checkbox" value={lockedIsRenewable} onChange={(e) => setLockedIsRenewable(e.target.checked)} id="repeat" />
+                        <input className="form-check-input" type="checkbox" value={isRenewable} onChange={(e) => setIsRenewable(e.target.checked)} id="repeat" />
                         <label className="form-check-label" htmlFor="repeat">
                             Repeat
                         </label>
                     </div>
                 </div>
                 {
-                    lockedIsRenewable && <div className="row mb-4 justify-content-center">
+                    isRenewable && <div className="row mb-4 justify-content-center">
                         <div className="col-md-6 col-12">
-                            <Input min={0} width={50} address={lockedMainToken.address} value={lockedRenewTimes} onChange={(e) => setLockedRenewTimes(e.target.value)} />
+                            <Input min={0} width={50} address={lockedMainToken.address} value={renewTimes} onChange={(e) => setRenewTimes(e.target.value)} />
                         </div>
                     </div>
                 }
@@ -624,53 +668,7 @@ const Create = (props) => {
                 </div>
                 <div className="row justify-content-center mb-4">
                     <button onClick={() => goToFirstStep() } className="btn btn-light mr-4">Cancel</button>
-                    <button onClick={() => addLockedFarmingSetup() } disabled={(lockedIsRenewable && lockedRenewTimes === 0) || (lockedHasPenaltyFee && lockedPenaltyFee === 0)} className="btn btn-secondary ml-4">Next</button>
-                </div>
-            </div>
-        )
-    }
-
-    const getLockedThirdStep = () => {
-        return (
-            <div className="col-12">
-                <div className="row justify-content-center">
-                    <div className="form-check my-4">
-                        <input className="form-check-input" type="checkbox" value={hasLoadBalancer} onChange={(e) => setHasLoadBalancer(e.target.checked)} id="penaltyFee" />
-                        <label className="form-check-label" htmlFor="penaltyFee">
-                            Load balancer
-                        </label>
-                    </div>
-                </div>
-                {
-                    hasLoadBalancer && <div className="row mb-4 justify-content-center">
-                        <div className="col-md-9 col-12">
-                            <select className="custom-select wusd-pair-select" value={pinnedSetupIndex} onChange={(e) => setPinnedSetupIndex(e.target.value)}>
-                                <option value={null}>Choose setup..</option>
-                                {
-                                    props.farmingSetups.map((setup, index) => {
-                                        console.log(setup.data);
-                                        return <option key={index} value={index} disabled={setup.startBlock}>
-                                            { !setup.startBlock ? "Free setup" : "Locked setup" } { setup.data.name }{ setup.startBlock ? `${setup.data.symbol}` : ` | ${setup.data.tokens.map((token) => `${token.symbol}` )}` } - Reward: {setup.rewardPerBlock} {props.farmingContract.rewardToken.symbol}/block
-                                        </option>;
-                                    })
-                                }
-                            </select>
-                        </div>
-                    </div>
-                }
-                <div className="row mb-4">
-                    <p className="text-center text-small">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Omnis delectus incidunt laudantium distinctio velit reprehenderit quaerat, deserunt sint fugit ex consectetur voluptas suscipit numquam. Officiis maiores quaerat quod necessitatibus perspiciatis!</p>
-                </div>
-                <div className="row justify-content-center mb-4">
-                    <button onClick={() => {
-                        setHasLoadBalancer(false);
-                        setPinnedSetupIndex(null);
-                        setIsAddLoadBalancer(false);
-                    } } className="btn btn-light mr-4">Cancel</button>
-                    <button onClick={() => {
-                        setIsAddLoadBalancer(false);
-                        setIsDeploy(true);
-                    }} className="btn btn-secondary ml-4">Next</button>
+                    <button onClick={() => addLockedFarmingSetup() } disabled={(isRenewable && renewTimes === 0) || (lockedHasPenaltyFee && lockedPenaltyFee === 0)} className="btn btn-secondary ml-4">Next</button>
                 </div>
             </div>
         )
@@ -772,10 +770,10 @@ const Create = (props) => {
             <div className="col-12">
                 <div className="row flex-column align-items-start mb-4">
                     <h5 className="text-secondary"><b>Farm {props.farmingContract.rewardToken.symbol}</b></h5>
-                    <b>{isAddLoadBalancer || isDeploy ? "Advanced setup" : "Setups list"}</b>
+                    <b>Setups list</b>
                 </div>
                 {
-                    isAddLoadBalancer ? getLockedThirdStep() : isDeploy ? getLockedFourthStep() : <div className="col-12">
+                    isDeploy ? getLockedFourthStep() : <div className="col-12">
                         {
                             (props.farmingSetups.length > 0 && !isAdd) && getFarmingSetups()
                         }

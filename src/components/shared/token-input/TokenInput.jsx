@@ -6,6 +6,7 @@ const TokenInput = (props) => {
     const [tokenAddress, setTokenAddress] = useState(props.tokenAddress || "");
 
     function onClickLocal() {
+        if (!tokenAddress) return;
         onClick(tokenAddress);
         props.deleteAfterInsert && setTokenAddress('');
     }
