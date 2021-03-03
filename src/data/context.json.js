@@ -157,7 +157,7 @@ export default {
     "WUSDAddress": "0x7c974104df9dd7fb91205ab3d66d15aff1049de8",
     "WUSDPrestoAddress" : "0x1a0107aC208775820B14B998460F1333a145A854",
     "WUSDPrestoAddressRopsten" : "0x7c974104df9dd7fb91205ab3d66d15aff1049de8",
-    "prestoAddress" : "0xb2F54a772160C90EB70fb324b5364C3986e411F7",
+    "prestoAddress" : "0x3660c73E030C497cccbE8aaabdc7431fAEB6E495",
     "prestoAddressRopsten" : "0x7c974104df9dd7fb91205ab3d66d15aff1049de8",
     "icons": {
         "0x7c974104df9dd7fb91205ab3d66d15aff1049de8": "https://gateway.ipfs.io/ipfs/QmXjPmCChUCNeMSoRpSb3wKUARxbucZSQ3W5sZwMf749RX",
