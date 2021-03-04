@@ -190,19 +190,29 @@ const Burn = (props) => {
             return setIsHealthyPair(false);
         }
 
-        var token0WusdAmount = props.dfoCore.fromDecimals(amount.toString(), token0decimals);
-        var byTokenAmount0Value = await ammContract.methods.byTokenAmount(liquidityPool, liquidityPoolTokens[0], props.dfoCore.toFixed(token0WusdAmount).toString()).call();
+        var token0Amount = window.toDecimals(amount.toString(), token0decimals);
+        token0Amount = window.web3.utils.toBN(token0Amount).div(window.web3.utils.toBN(2)).toString();
+        var byTokenValue = await ammContract.methods.byTokenAmount(liquidityPool, liquidityPoolTokens[0], token0Amount).call();
+        var token1Amount = byTokenValue[1][1];
 
-        var token1WusdAmount = props.dfoCore.fromDecimals(amount.toString(), token1decimals);
-        var byTokenAmount1Value = await ammContract.methods.byTokenAmount(liquidityPool, liquidityPoolTokens[1], props.dfoCore.toFixed(token1WusdAmount).toString()).call();
+        var token0WUSD = props.dfoCore.normalizeValue(token0Amount, token0decimals);
+        var token1WUSD = props.dfoCore.normalizeValue(token1Amount, token1decimals);
 
-        var byTokenAmountValue = parseInt(byTokenAmount0Value[0]) < parseInt(byTokenAmount1Value[0]) ? byTokenAmount0Value : byTokenAmount1Value;
+        var sum = window.web3.utils.toBN(token0WUSD).add(window.web3.utils.toBN(token1WUSD));
+        if(sum.gt(window.web3.utils.toBN(window.toDecimals(amount, 18)))) {
+            token1Amount = window.toDecimals(amount.toString(), token1decimals);
+            token1Amount = window.web3.utils.toBN(token1Amount).div(window.web3.utils.toBN(2)).toString();
+            byTokenValue = await ammContract.methods.byTokenAmount(liquidityPool, liquidityPoolTokens[1], token1Amount).call();
+            token0Amount = byTokenValue[1][0];
+        }
 
-        var token0Amount = window.web3.utils.toBN(byTokenAmountValue[1][0]).div(window.web3.utils.toBN(2)).toString();
-        var token1Amount = window.web3.utils.toBN(byTokenAmountValue[1][1]).div(window.web3.utils.toBN(2)).toString();
-        var lpTokenAmount = window.web3.utils.toBN(byTokenAmountValue[0]).div(window.web3.utils.toBN(2)).toString();
+        var lpTokenAmount = byTokenValue[0];
 
-        console.log(token0Amount, token1Amount);
+        var byLiquidityPool = await ammContract.methods.byLiquidityPoolAmount(liquidityPool, lpTokenAmount).call();
+        token0Amount = byLiquidityPool[0][0];
+        token1Amount = byLiquidityPool[0][1];
+
+        console.log({token0Amount, token1Amount, lpTokenAmount});
 
         setEstimatedToken0({ full: token0Amount, value: window.formatMoney(props.dfoCore.toDecimals(token0Amount, token0decimals), 2) });
         setEstimatedToken1({ full: token1Amount, value: window.formatMoney(props.dfoCore.toDecimals(token1Amount, token1decimals), 2) });
@@ -333,7 +343,7 @@ const Burn = (props) => {
             return (<>
 
                 <div className="FromETHPrestoDesc">
-                    <p>Swapping {window.formatMoney(estimatedToken0.value, 2)} {pairs[pair].symbol0} <Coin address={pairs[pair].token0} /> And {window.formatMoney(estimatedToken0.value, 2)} {pairs[pair].symbol1} <Coin address={pairs[pair].token1} /> on </p>
+                    <p>Swapping {window.formatMoney(estimatedToken0.value, 2)} {pairs[pair].symbol0} <Coin address={pairs[pair].token0} /> And {window.formatMoney(estimatedToken1.value, 2)} {pairs[pair].symbol1} <Coin address={pairs[pair].token1} /> on </p>
                     {amms.length > 0 && <select className="SelectRegular" value={selectedAmmIndex.toString()} onChange={onAmmChange}>
                         {amms.map((it, i) => <option key={it.address} value={i}>{it.info[0]}</option>)}
                     </select>}

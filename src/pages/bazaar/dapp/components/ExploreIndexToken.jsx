@@ -34,7 +34,7 @@ const ExploreIndexToken = (props) => {
 
     useEffect(async () => {
         getContractMetadata();
-        setIndexPresto(await props.dfoCore.getContract(props.dfoCore.getContextElement("IndexPrestoABI"), props.dfoCore.getContextElement("IndexPrestoAddress")));
+        setIndexPresto(await props.dfoCore.getContract(props.dfoCore.getContextElement("IndexPrestoABI"), props.dfoCore.getContextElement("indexPrestoAddress")));
         var amms = [];
         const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
         var ammAddresses = await ammAggregator.methods.amms().call();
