@@ -168,7 +168,7 @@ const Create = (props) => {
             const host = selectedHost === 'wallet' ? hostWalletAddress : hostDeployedContract;
             const hasExtension = (selectedHost === "deployed-contract" && hostDeployedContract && !deployContract);
             const data = { setups: [], rewardTokenAddress: selectedRewardToken.address, byMint, deployContract, host, hasExtension, extensionInitData: extensionPayload || '' };
-            const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddressRopsten'));
+            const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
             for (let i = 0; i < props.farmingSetups.length; i++) {
                 const setup = props.farmingSetups[i];
                 const isFree = !setup.maxLiquidity;
@@ -214,7 +214,7 @@ const Create = (props) => {
         setDeployLoading(true);
         try {
             const { setups, rewardTokenAddress, extensionAddress, extensionInitData } = deployData;
-            const factoryAddress = props.dfoCore.getContextElement("farmFactoryAddressRopsten");
+            const factoryAddress = props.dfoCore.getContextElement("farmFactoryAddress");
             const farmFactory = await props.dfoCore.getContract(props.dfoCore.getContextElement("FarmFactoryABI"), factoryAddress);
             const types = [
                 "address",
@@ -225,7 +225,7 @@ const Create = (props) => {
             ];
             console.log(deployData);
             const encodedSetups = abi.encode(["tuple(bool,uint256,uint256,uint256,uint256,uint256,address,address,address,address,bool,uint256,uint256,uint256)[]"], [setups]);
-            const params = [extensionAddress ? extensionAddress : hostDeployedContract, extensionInitData || extensionPayload || "0x", props.dfoCore.getContextElement("ethItemOrchestratorAddressRopsten"), rewardTokenAddress, encodedSetups || 0];
+            const params = [extensionAddress ? extensionAddress : hostDeployedContract, extensionInitData || extensionPayload || "0x", props.dfoCore.getContextElement("ethItemOrchestratorAddress"), rewardTokenAddress, encodedSetups || 0];
             console.log(params)
             console.log(extensionInitData);
             const payload = props.dfoCore.web3.utils.sha3(`init(${types.join(',')})`).substring(0, 10) + (props.dfoCore.web3.eth.abi.encodeParameters(types, params).substring(2));
@@ -260,7 +260,7 @@ const Create = (props) => {
         try {
             const { byMint, host, deployContract } = deployData;
             if (!deployContract) {
-                const factoryAddress = props.dfoCore.getContextElement("farmFactoryAddressRopsten");
+                const factoryAddress = props.dfoCore.getContextElement("farmFactoryAddress");
                 const farmFactory = await props.dfoCore.getContract(props.dfoCore.getContextElement("FarmFactoryABI"), factoryAddress);
                 const cloneGasLimit = await farmFactory.methods.cloneFarmDefaultExtension().estimateGas({ from: props.dfoCore.address });
                 const cloneExtensionTransaction = await farmFactory.methods.cloneFarmDefaultExtension().send({ from: props.dfoCore.address, gas: cloneGasLimit });
@@ -277,12 +277,12 @@ const Create = (props) => {
                 console.log(extension.options.address);
                 setDeployData({ ...deployData, extensionAddress: extension.options.address, extensionInitData: payload });
             }
+            setDeployStep(!error ? deployStep + 1 : deployStep);
         } catch (error) {
             console.error(error);
             error = true;
         } finally {
             setDeployLoading(false);
-            setDeployStep(!error ? deployStep + 1 : deployStep);
         }
     }
 
@@ -406,7 +406,7 @@ const Create = (props) => {
         if (!address) return;
         try {
             setLoading(true);
-            const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddressRopsten'));
+            const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
             const res = await ammAggregator.methods.info(address).call();
             const name = res['name'];
             const ammAddress = res['amm'];
@@ -759,7 +759,7 @@ const Create = (props) => {
                     <button onClick={() => {
                         initializeDeployData();
                         setDeployStep((selectedHost === 'deployed-contract' && hostDeployedContract && !deployContract) ? 2 : 1);
-                    }} className="btn btn-secondary ml-4" disabled={!selectedHost || (selectedHost === 'wallet' && (!hostWalletAddress || !isValidAddress(hostWalletAddress))) || (selectedHost === 'deployed-contract' && ((!useDeployedContract && (!deployContract || !deployContract.contract)) || (useDeployedContract && !hostDeployedContract)))}>Deploy</button>
+                    }} className="btn btn-secondary ml-4" /*disabled={!selectedHost || (selectedHost === 'wallet' && (!hostWalletAddress || !isValidAddress(hostWalletAddress))) || (selectedHost === 'deployed-contract' && ((!useDeployedContract && (!deployContract || !deployContract.contract)) || (useDeployedContract && !hostDeployedContract)))}*/>Deploy</button>
                 </div>
             </div>
         )

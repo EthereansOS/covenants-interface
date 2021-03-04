@@ -24,14 +24,15 @@ export default class DFOCore {
      */
     constructor(context) {
         this.context = context;
+        typeof window !== 'undefined' && (window.dfoCore = this);
     }
 
     /**
      * initializes the DFOCore object.
      * the logic is not inside the constructor function since we need
      * to leverage async/await syntax.
-     * @param {*} web3 
-     * @param {*} providerOptions 
+     * @param {*} web3
+     * @param {*} providerOptions
      */
     init = async(web3, providerOptions = {}) => {
         // return if already initialized
@@ -78,11 +79,51 @@ export default class DFOCore {
                 });
                 this.provider = provider;
             }
+
+            this.web3.currentProvider.setMaxListeners && this.web3.currentProvider.setMaxListeners(0);
+            this.web3.eth.transactionBlockTimeout = 999999999;
+            this.web3.eth.transactionPollingTimeout = new Date().getTime();
+            this.web3.startBlock = await this.web3.eth.getBlockNumber();
+            window.web3ForLogs = window.web3 = this.web3;
+
             // set the core as initialized
             this.initialized = true;
-            window.web3 = this.web3;
+            await this.tryLoadCustomWeb3();
         } catch (error) {
             this.initialized = false;
+        }
+    }
+
+    tryLoadCustomWeb3 = async () => {
+        window.context = {};
+        var localContext;
+        try {
+            localContext = await (await fetch('assets/data/context.local.json')).json();
+            window.context = window.deepCopy(window.context, localContext);
+
+            if(window.context.blockchainConnectionString) {
+                var web3 = new Web3(window.context.blockchainConnectionString, null, { transactionConfirmationBlocks: 1 });
+                web3.currentProvider.setMaxListeners && web3.currentProvider.setMaxListeners(0);
+                web3.eth.transactionBlockTimeout = 999999999;
+                web3.eth.transactionPollingTimeout = new Date().getTime();
+                web3.startBlock = await web3.eth.getBlockNumber();
+                this.chainId = await web3.eth.getChainId();
+                this.address = (await web3.eth.getAccounts())[0];
+                window.web3ForLogs = window.web3 = this.web3 = web3;
+            }
+
+            if(window.context.blockchainConnectionForLogString) {
+                var web3 = new Web3(window.context.blockchainConnectionForLogString);
+                web3.currentProvider.setMaxListeners && web3.currentProvider.setMaxListeners(0);
+                web3.eth.transactionBlockTimeout = 999999999;
+                web3.eth.transactionPollingTimeout = new Date().getTime();
+                web3.startBlock = await web3.eth.getBlockNumber();
+                window.web3ForLogs = web3;
+            }
+
+        } catch(e) {
+            console.error(e);
+            !localContext && console.clear();
         }
     }
 
@@ -198,17 +239,23 @@ export default class DFOCore {
      */
     loadDeployedLiquidityMiningContracts = async(factoryAddress) => {
         try {
-            if (!factoryAddress) factoryAddress = this.getContextElement("farmFactoryAddressRopsten");
-            const factoryContract = new this.web3.eth.Contract(this.getContextElement("FarmFactoryABI"), factoryAddress);
-            const events = await factoryContract.getPastEvents('FarmMainDeployed', { fromBlock: 9771086 });
+            if (!factoryAddress) factoryAddress = this.getContextElement("farmFactoryAddress");
+            const events = await window.getLogs({
+                address : factoryAddress,
+                topics : [
+                    this.web3.utils.sha3('FarmMainDeployed(address,address,bytes)')
+                ]
+            });
             this.deployedLiquidityMiningContracts = [];
             await Promise.all(events.map(async(event) => {
+                //var farmMainAddress = event.returnValues.farmMainAddress;
+                var farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
                 try {
-                    const contract = new this.web3.eth.Contract(this.getContextElement("FarmMainABI"), event.returnValues.farmMainAddress);
+                    const contract = new this.web3.eth.Contract(this.getContextElement("FarmMainABI"), farmMainAddress);
                     const extensionAddress = await contract.methods._extension().call();
                     const extensionContract = new this.web3.eth.Contract(this.getContextElement("FarmExtensionABI"), extensionAddress);
                     const { host } = await extensionContract.methods.data().call();
-                    this.deployedLiquidityMiningContracts.push({ address: event.returnValues.farmMainAddress, sender: host });
+                    this.deployedLiquidityMiningContracts.push({ address: farmMainAddress, sender: host });
                 } catch (error) {
                     console.error(error);
                 }

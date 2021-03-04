@@ -94,7 +94,7 @@ window.loadDFO = async function loadDFO(address, allAddresses) {
     return dfo;
 };
 
-window.getLogs = async function(a, endOnFirstResult) {
+window.getLogs = async function getLogs(a, endOnFirstResult) {
     var args = JSON.parse(JSON.stringify(a));
     var logs = [];
     args.fromBlock = args.fromBlock || window.numberToString(window.getNetworkElement('deploySearchStart') || 0);
@@ -157,7 +157,7 @@ window.onEthereumUpdate = function onEthereumUpdate(millis) {
 
 window.createWeb3 = async function createWeb3(connectionProvider) {
     var web3 = new window.Web3Browser(connectionProvider);
-    web3.currentProvider.setMaxListeners && window.web3.currentProvider.setMaxListeners(0);
+    web3.currentProvider.setMaxListeners && web3.currentProvider.setMaxListeners(0);
     web3.eth.transactionBlockTimeout = 999999999;
     web3.eth.transactionPollingTimeout = new Date().getTime();
     web3.startBlock = await web3.eth.getBlockNumber();
@@ -205,7 +205,7 @@ window.loadContext = async function loadContext() {
     } catch (e) {
         console.clear && console.clear();
     }
-    window.context = window.deepCopy(context, localContext);
+    return window.context = window.deepCopy(context, localContext);
 };
 
 window.deepCopy = function deepCopy(data, extension) {
