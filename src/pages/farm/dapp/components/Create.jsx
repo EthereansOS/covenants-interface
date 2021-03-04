@@ -263,7 +263,7 @@ const Create = (props) => {
                 const factoryAddress = props.dfoCore.getContextElement("farmFactoryAddressRopsten");
                 const farmFactory = await props.dfoCore.getContract(props.dfoCore.getContextElement("FarmFactoryABI"), factoryAddress);
                 const cloneGasLimit = await farmFactory.methods.cloneFarmDefaultExtension().estimateGas({ from: props.dfoCore.address });
-                const cloneExtensionTransaction = await farmFactory.methods.cloneFarmDefaultExtension().send({ from: props.dfoCore.address, gasLimit: cloneGasLimit });
+                const cloneExtensionTransaction = await farmFactory.methods.cloneFarmDefaultExtension().send({ from: props.dfoCore.address, gas: cloneGasLimit });
                 const cloneExtensionReceipt = await props.dfoCore.web3.eth.getTransactionReceipt(cloneExtensionTransaction.transactionHash);
                 const extensionAddress = props.dfoCore.web3.eth.abi.decodeParameter("address", cloneExtensionReceipt.logs.filter(it => it.topics[0] === props.dfoCore.web3.utils.sha3('ExtensionCloned(address)'))[0].topics[1])
                 const farmExtension = new props.dfoCore.web3.eth.Contract(props.dfoCore.getContextElement("FarmExtensionABI"), extensionAddress);
@@ -279,7 +279,7 @@ const Create = (props) => {
             }
         } catch (error) {
             console.error(error);
-            error = false;
+            error = true;
         } finally {
             setDeployLoading(false);
             setDeployStep(!error ? deployStep + 1 : deployStep);
@@ -406,7 +406,7 @@ const Create = (props) => {
         if (!address) return;
         try {
             setLoading(true);
-            const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
+            const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddressRopsten'));
             const res = await ammAggregator.methods.info(address).call();
             const name = res['name'];
             const ammAddress = res['amm'];
@@ -698,7 +698,7 @@ const Create = (props) => {
         } else if (deployStep === 2) {
             return <div className="col-12 flex flex-column justify-content-center align-items-center">
                 <div className="row mb-4">
-                    <h6><b>Deploy Farming Cotnract</b></h6>
+                    <h6><b>Deploy Farming Contract</b></h6>
                 </div>
                 <div className="row">
                     <button onClick={() => deploy()} className="btn btn-secondary">Deploy contract</button>

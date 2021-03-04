@@ -8,18 +8,41 @@ const ExploreFarmingContract = (props) => {
     const { address } = useParams();
     const [farmingSetups, setFarmingSetups] = useState([]);
     const [contract, setContract] = useState(null);
+    const [isHost, setIsHost] = useState(false);
+    const [isExtensionActive, setIsExtensionActive] = useState(false);
 
     useEffect(() => {
         getContractMetadata()
     }, []);
 
     const getContractMetadata = async () => {
-        const lmContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('LiquidityMiningABI'), address);
-        const rewardTokenAddress = await lmContract.methods._rewardTokenAddress().call();
+        const lmContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('FarmMainABI'), address);
         setContract(lmContract);
+        const rewardTokenAddress = await lmContract.methods._rewardTokenAddress().call();
+        const extensionAddress = await lmContract.methods._extension().call();
+        const extensionContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('FarmExtensionABI'), extensionAddress);
+        const host = await extensionContract.methods.data().call();
+        const isActive = await extensionContract.methods.active().call();
+        setIsHost(host["host"].toLowerCase() === props.dfoCore.address.toLowerCase());
+        setIsExtensionActive(isActive);
         const setups = await lmContract.methods.setups().call();
-        console.log(rewardTokenAddress);
-        setFarmingSetups(setups.map((setup) => { return {...setup, rewardTokenAddress }}));
+        const res = [];
+        await Promise.all(setups.map(async (setup) => {
+            const setupInfo = await lmContract.methods._setupsInfo(setup.infoIndex).call();
+            res.push({...setup, setupInfo, rewardTokenAddress })
+        }))
+        setFarmingSetups(res);
+        console.log(setups);
+    }
+
+    const toggleExtension = async () => {
+
+        const extensionAddress = await contract.methods._extension().call();
+        const extensionContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('FarmExtensionABI'), extensionAddress);
+        const isActive = await extensionContract.methods.active().call();
+        const gas =  await extensionContract.methods.setActive(!isActive).estimateGas({ from: props.dfoCore.address });
+        const result = await extensionContract.methods.setActive(!isActive).send({ from: props.dfoCore.address, gas });
+        await getContractMetadata();
     }
 
     return (
@@ -27,14 +50,17 @@ const ExploreFarmingContract = (props) => {
             {
                 contract ? 
                 <div className="row">
-                    <FarmingComponent className="FarmContractOpen" dfoCore={props.dfoCore} contract={contract} goBack={true} hostedBy={true} />
+                    <FarmingComponent className="FarmContractOpen" dfoCore={props.dfoCore} contract={contract} goBack={true} hostedBy={isHost} />
                 </div> : <div/>
+            }
+            {
+                isHost && <button className="btn btn-primary" onClick={() => toggleExtension()}>{isExtensionActive ? "Disable" : "Enable"} extension</button>
             }
             <div className="ListOfThings">
                 {
                     farmingSetups.length > 0 ? farmingSetups.map((farmingSetup, setupIndex) => {
                         return (
-                            <SetupComponent className="FarmSetup" setupIndex={setupIndex} lmContract={contract} dfoCore={props.dfoCore} setup={farmingSetup} hostedBy={true} hasBorder />
+                            <SetupComponent className="FarmSetup" setupIndex={setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={props.dfoCore} setup={farmingSetup} hostedBy={true} hasBorder />
                         )
                     }) : <div className="col-12 justify-content-center">
                         <div className="spinner-border text-secondary" role="status">

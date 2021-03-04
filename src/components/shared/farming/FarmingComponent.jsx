@@ -17,16 +17,25 @@ const FarmingComponent = (props) => {
         const rewardToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), rewardTokenAddress);
         const symbol = await rewardToken.methods.symbol().call();
         const extensionAddress = await contract.methods._extension().call();
-        const extensionContract = await dfoCore.getContract(dfoCore.getContextElement('LiquidityMiningExtensionABI'), extensionAddress);
+        const extensionContract = await dfoCore.getContract(dfoCore.getContextElement('FarmExtensionABI'), extensionAddress);
         const { host, byMint } = await extensionContract.methods.data().call();
         
         const setups = await contract.methods.setups().call();
-        const freeSetups = setups.filter((setup) => setup.free).length;
-        const lockedSetups = setups.length - freeSetups;
+        const freeSetups = [];
+        await Promise.all(setups.map(async (setup) => {
+            const setupInfo = await contract.methods._setupsInfo(setup.infoIndex).call();
+            if (setupInfo.free) {
+                freeSetups.push(setup);
+            }
+        }))
+        const lockedSetups = setups.length - freeSetups.length;
 
+        /*
         const { data } = await axios.get(dfoCore.getContextElement("coingeckoCoinPriceURL") + rewardTokenAddress);
         console.log(data);
         const rewardTokenPriceUsd = data[rewardTokenAddress.toLowerCase()].usd;
+        */
+        const rewardTokenPriceUsd = 1;
         const yearlyBlocks = 36000;
 
         let valueLocked = 0;
@@ -64,6 +73,8 @@ const FarmingComponent = (props) => {
             host: `${host.substring(0, 5)}...${host.substring(host.length - 3, host.length)}`,
             fullhost: `${host}`,
         });
+
+        console.log('farming component done.');
     }
 
     return (
@@ -82,7 +93,7 @@ const FarmingComponent = (props) => {
                             <div className="FarmThings">
                                     <p><b>APY</b>: {metadata.apy}</p>
                                     <p><b>Rewards/block</b>: {metadata.rewardPerBlock}</p>
-                                    <p><b>Setups</b>: {metadata.freeSetups} free | {metadata.lockedSetups} Locked</p>
+                                    <p><b>Setups</b>: {metadata.freeSetups.length} free | {metadata.lockedSetups} Locked</p>
                                     <p><b>Host</b>: <a target="_blank" href={"https://etherscan.io/address/" + metadata.fullhost}>{metadata.host}</a></p>
                             </div>
                             </> : <div className="col-12 justify-content-center">

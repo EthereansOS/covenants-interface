@@ -200,15 +200,15 @@ export default class DFOCore {
         try {
             if (!factoryAddress) factoryAddress = this.getContextElement("farmFactoryAddressRopsten");
             const factoryContract = new this.web3.eth.Contract(this.getContextElement("FarmFactoryABI"), factoryAddress);
-            const events = await factoryContract.getPastEvents('FarmMainDeployed', { fromBlock: 11806961 });
+            const events = await factoryContract.getPastEvents('FarmMainDeployed', { fromBlock: 9771086 });
             this.deployedLiquidityMiningContracts = [];
             await Promise.all(events.map(async(event) => {
                 try {
-                    const contract = new this.web3.eth.Contract(this.getContextElement("FarmMainABI"), event.returnValues.liquidityMiningAddress);
+                    const contract = new this.web3.eth.Contract(this.getContextElement("FarmMainABI"), event.returnValues.farmMainAddress);
                     const extensionAddress = await contract.methods._extension().call();
                     const extensionContract = new this.web3.eth.Contract(this.getContextElement("FarmExtensionABI"), extensionAddress);
                     const { host } = await extensionContract.methods.data().call();
-                    this.deployedLiquidityMiningContracts.push({ address: event.returnValues.liquidityMiningAddress, sender: host });
+                    this.deployedLiquidityMiningContracts.push({ address: event.returnValues.farmMainAddress, sender: host });
                 } catch (error) {
                     console.error(error);
                 }
@@ -266,6 +266,7 @@ export default class DFOCore {
     }
 
     isValidPosition = (position) => {
+        console.log(position);
         return position.uniqueOwner !== this.voidEthereumAddress && position.creationBlock !== '0';
     }
 
