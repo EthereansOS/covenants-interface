@@ -1,10 +1,23 @@
 import { PageContainer } from "../../components";
+import dragonImage from '../../assets/images/index.png';
 
 const Covenants = () => {
     return (
-<div className="page-container IndexRegular">
+<div className="DappBox IndexRegular">
     <div className="IndexRegularContents">
         <div className="CoveExpl">
+            <div className="CovSide">
+                <figure className="CovDiversity">
+                    <img src={dragonImage}></img>
+                </figure>
+                <div className="CovAMMs">
+                    <h5>Supported AMMs</h5>
+                    <a target="blank" href="https://uniswap.org/">&#129412; UniSwapV2</a>
+                    <a target="blank" href="https://balancer.finance/">&#9878;&#65039; BalancerV1</a>
+                    <a target="blank" href="https://mooniswap.info/home">&#127769; MooniSwapV1</a>
+                    <a target="blank" href="https://sushiswap.fi/">&#127843; SushiSwapV1</a>
+                </div>
+            </div>
             <div className="CovDesc">
                 <h3>The Aggregator</h3>
                 <p>At the heart of every Covenant is the Aggregator. By liberating on-chain AMM aggregation, it allows any wallet, DAPP, DFO, DAO or customized smart contract to farm, inflate, multi-swap, arbitrage, craft liquidity, collateralize stablecoins and more across multiple AMMs at the same time.</p>
@@ -26,13 +39,6 @@ const Covenants = () => {
                     <a target="blank">Index Factory</a>
                     <a target="blank" href="https://etherscan.io/address/0x81391d117a03A6368005e447197739D06550D4CD">Aggregator Factory</a>
                 </div>
-            </div>
-            <div className="CovAMMs">
-                <h5>Supported AMMs</h5>
-                <a target="blank" href="https://uniswap.org/">&#129412; UniSwapV2</a>
-                <a target="blank" href="https://balancer.finance/">&#9878;&#65039; BalancerV1</a>
-                <a target="blank" href="https://mooniswap.info/home">&#127769; MooniSwapV1</a>
-                <a target="blank" href="https://sushiswap.fi/">&#127843; SushiSwapV1</a>
             </div>
         </div>
     </div>

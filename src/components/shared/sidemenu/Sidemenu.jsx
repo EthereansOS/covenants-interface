@@ -30,6 +30,7 @@ const Sidemenu = (props) => {
 
     return (
         <ul className={`nav app-sidemenu flex-column Menuone ${props.sidemenuClass}`}>
+            <h5 className="OnlyMobileVersion">Menu</h5>
         {
             menu.map(
                 (menuItem, index) => (
