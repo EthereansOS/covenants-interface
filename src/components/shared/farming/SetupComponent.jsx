@@ -16,7 +16,7 @@ const SetupComponent = (props) => {
     const [edit, setEdit] = useState(false);
     const [isHost, setIsHost] = useState(true);
     const [farmTokenCollection, setFarmTokenCollection] = useState(null);
-    const [farmTokenApproval, setFarmTokenApproval] = useState(false);
+    const [farmTokenBalance, setFarmTokenBalance] = useState(0);
     const [canActivateSetup, setCanActivateSetup] = useState(false);
     const [addLiquidityType, setAddLiquidityType] = useState(""); 
     const [setupTokens, setSetupTokens] = useState([]);
@@ -63,12 +63,23 @@ const SetupComponent = (props) => {
             }
             */
             const setups = await lmContract.methods.setups().call();
-            console.log(setups);
             const farmSetup = setups[parseInt(setupIndex)];
             const farmSetupInfo = await lmContract.methods._setupsInfo(farmSetup.infoIndex).call();
-            console.log(farmSetupInfo);
-            const farmTokenCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), await lmContract.methods._farmTokenCollection().call());
+            const farmTokenCollectionAddress = await lmContract.methods._farmTokenCollection().call();
+            console.log(farmTokenCollectionAddress);
+            const farmTokenCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), farmTokenCollectionAddress);
             setFarmTokenCollection(farmTokenCollection);
+            if (!farmSetup.free) {
+                // retrieve farm token data
+                const objectId = farmSetup.objectId;
+                console.log(objectId);
+                if (objectId !== "0") {
+                    const ftBalance = await farmTokenCollection.methods.balanceOf(props.dfoCore.address, objectId).call();
+                    setFarmTokenBalance(ftBalance);
+                } else {
+                    setFarmTokenBalance(0);
+                }
+            }
             setUpdatedRenewTimes(farmSetupInfo.renewTimes);
             setUpdatedRewardPerBlock(farmSetup.rewardPerBlock);
             setSetup(farmSetup);
@@ -288,12 +299,12 @@ const SetupComponent = (props) => {
         setLoading(true);
         try {
             if (setupInfo.free) {
-                console.log(manageStatus.liquidityPoolAmount);
                 const removedLiquidity = removalAmount === 100 ? manageStatus.liquidityPoolAmount : props.dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString().split('.')[0];
-                console.log(removedLiquidity);
                 const gasLimit = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, 0, unwrapPair, removedLiquidity).estimateGas({ from: dfoCore.address });
-                console.log(`gas cost ${gasLimit}`)
                 const result = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, 0, unwrapPair, removedLiquidity).send({ from: dfoCore.address, gasLimit });
+            } else {
+                const gasLimit = await lmContract.methods.withdrawLiquidity(0, setup.objectId, unwrapPair, farmTokenBalance).estimateGas({ from: dfoCore.address });
+                const result = await lmContract.methods.withdrawLiquidity(0, setup.objectId, unwrapPair, farmTokenBalance).send({ from: dfoCore.address, gasLimit });
             }
             await getSetupMetadata();
         } catch (error) {
@@ -477,6 +488,24 @@ const SetupComponent = (props) => {
                         }
                         <hr/>
                     </div>
+                }
+                {
+                    (parseInt(farmTokenBalance) > 0 && parseInt(blockNumber) >= parseInt(setup.endBlock)) && <>
+                        <div className="row mt-4">
+                            <b>Farm token balance</b>: {window.formatMoney(props.dfoCore.toDecimals(farmTokenBalance, 18), 2)}
+                        </div>
+                        <div className="row mt-2">
+                            <div className="form-check">
+                                <input className="form-check-input" type="checkbox" value={unwrapPair} onChange={(e) => setUnwrapPair(e.target.checked)} id="getLpToken" />
+                                <label className="form-check-label" htmlFor="getLpToken">
+                                    Unwrap tokens
+                                </label>
+                            </div>
+                        </div>
+                        <div className="row mt-2">
+                            <button onClick={() => removeLiquidity()} className="btn btn-primary">Withdraw liquidity</button>
+                        </div>
+                        </>
                 }
                 {
                     (parseInt(setup.endBlock) > parseInt(blockNumber) || currentPosition) && 
