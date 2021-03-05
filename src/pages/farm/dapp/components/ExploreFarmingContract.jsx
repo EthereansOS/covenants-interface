@@ -30,10 +30,12 @@ const ExploreFarmingContract = (props) => {
         const res = [];
         await Promise.all(setups.map(async (setup, i) => {
             const setupInfo = await lmContract.methods._setupsInfo(setup.infoIndex).call();
-            res.push({...setup, setupInfo, rewardTokenAddress })
+            if (setup.rewardPerBlock !== "0") {
+                res.push({...setup, setupInfo, rewardTokenAddress, setupIndex: i })
+            }
         }))
+        console.log(res);
         setFarmingSetups(res);
-        console.log(setups);
     }
 
     const toggleExtension = async () => {
@@ -61,7 +63,7 @@ const ExploreFarmingContract = (props) => {
                 {
                     farmingSetups.length > 0 ? farmingSetups.map((farmingSetup, setupIndex) => {
                         return (
-                            <SetupComponent className="FarmSetup" setupIndex={setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={props.dfoCore} setup={farmingSetup} hostedBy={true} hasBorder />
+                            <SetupComponent className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={props.dfoCore} setup={farmingSetup} hostedBy={true} hasBorder />
                         )
                     }) : <div className="col-12 justify-content-center">
                         <div className="spinner-border text-secondary" role="status">
