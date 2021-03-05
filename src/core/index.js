@@ -316,7 +316,6 @@ export default class DFOCore {
     }
 
     isValidPosition = (position) => {
-        console.log(position);
         return position.uniqueOwner !== this.voidEthereumAddress && position.creationBlock !== '0';
     }
 

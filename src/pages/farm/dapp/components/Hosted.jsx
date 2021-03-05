@@ -27,7 +27,7 @@ const Hosted = (props) => {
                 {
                     farmingContracts.map((farmingContract) => {
                         return (
-                            <FarmingComponent className="col-12 mb-4" dfoCore={props.dfoCore} contract={farmingContract} hostedBy={true} showSettings={true} hasBorder />
+                            <FarmingComponent className="col-12 mb-4" dfoCore={props.dfoCore} contract={farmingContract} hostedBy={true} hasBorder />
                         )
                     })
                 }

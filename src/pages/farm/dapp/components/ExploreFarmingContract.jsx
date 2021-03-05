@@ -63,7 +63,7 @@ const ExploreFarmingContract = (props) => {
                 {
                     farmingSetups.length > 0 ? farmingSetups.map((farmingSetup, setupIndex) => {
                         return (
-                            <SetupComponent className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={props.dfoCore} setup={farmingSetup} hostedBy={true} hasBorder />
+                            <SetupComponent className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={props.dfoCore} setup={farmingSetup} hostedBy={isHost} isExtensionActive={isExtensionActive} hasBorder />
                         )
                     }) : <div className="col-12 justify-content-center">
                         <div className="spinner-border text-secondary" role="status">
