@@ -477,6 +477,8 @@ a:disabled {cursor:wait !important;}
    .MenuMobileIndex .nav-link {display: block;padding: 0.2rem 0em;text-align: left;}
    .MenuMobileIndex .sidemenu-active {position: static; border: none;}
    .MenuMobileIndex .Menuone h5 {color: #ffffff;}
+   .Menuone .NoALL {display: none !important;}
+   .MenuMobileIndex .NoALL {display: inline-block !important;}
    .PrestoSelector {margin: 0 0px 3px 3px !important;padding: 0px 4px !important;}
    .InputTokenRegularS .PrestoSelector {left: auto;right: 0px;top: -28px;}
    .PrestoSelector span {font-size: 12px;margin: auto 4px auto auto;}
