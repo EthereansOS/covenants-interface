@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 
 const FarmingComponent = (props) => {
-    const { className, dfoCore, contract, goBack, hasBorder, hostedBy } = props;
+    const { className, dfoCore, contract, goBack, hasBorder, hostedBy, showSettings } = props;
     const [metadata, setMetadata] = useState(null);
 
     useEffect(() => {
@@ -53,7 +53,6 @@ const FarmingComponent = (props) => {
         }))
 
         const apy = (rewardPerBlock * rewardTokenPriceUsd * yearlyBlocks * 100) / valueLocked;
-        console.log(apy);
         
         await Promise.all(setups.map(async (setup) => {
             const { rewardPerBlock } = setup;
@@ -74,7 +73,6 @@ const FarmingComponent = (props) => {
             fullhost: `${host}`,
         });
 
-        console.log('farming component done.');
     }
 
     return (
@@ -88,6 +86,7 @@ const FarmingComponent = (props) => {
                                 <aside>
                                     <h6><b>{metadata.name}</b></h6>
                                     <Link to={ goBack ? `/farm/dapp/` : `/farm/dapp/${metadata.contractAddress}`} className={ goBack ? "backActionBTN" : "web2ActionBTN" }>{ goBack ? "Back" : "Enter" }</Link>
+                                    { showSettings ?  <a className="web2ActionBTN">Settings</a> : <></>}
                                 </aside>
                             </div>
                             <div className="FarmThings">

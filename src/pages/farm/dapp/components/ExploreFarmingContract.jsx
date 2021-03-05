@@ -23,11 +23,12 @@ const ExploreFarmingContract = (props) => {
         const extensionContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('FarmExtensionABI'), extensionAddress);
         const host = await extensionContract.methods.data().call();
         const isActive = await extensionContract.methods.active().call();
-        setIsHost(host["host"].toLowerCase() === props.dfoCore.address.toLowerCase());
+        const isHost = host["host"].toLowerCase() === props.dfoCore.address.toLowerCase();
+        setIsHost(isHost);
         setIsExtensionActive(isActive);
         const setups = await lmContract.methods.setups().call();
         const res = [];
-        await Promise.all(setups.map(async (setup) => {
+        await Promise.all(setups.map(async (setup, i) => {
             const setupInfo = await lmContract.methods._setupsInfo(setup.infoIndex).call();
             res.push({...setup, setupInfo, rewardTokenAddress })
         }))

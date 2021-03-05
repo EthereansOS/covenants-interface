@@ -15,11 +15,9 @@ const Hosted = (props) => {
         const hostedContracts = props.dfoCore.getHostedLiquidityMiningContracts();
         const mappedContracts = await Promise.all(
             hostedContracts.map(async (contract) => { 
-                console.log(contract);
-                return props.dfoCore.getContract(props.dfoCore.getContextElement('LiquidityMiningABI'), contract.address);
+                return props.dfoCore.getContract(props.dfoCore.getContextElement('FarmMainABI'), contract.address);
             })
         );
-        console.log(mappedContracts);
         setFarmingContracts(mappedContracts);
     }
 
@@ -29,7 +27,7 @@ const Hosted = (props) => {
                 {
                     farmingContracts.map((farmingContract) => {
                         return (
-                            <FarmingComponent className="col-12 mb-4" dfoCore={props.dfoCore} contract={farmingContract} hostedBy={true} hasBorder />
+                            <FarmingComponent className="col-12 mb-4" dfoCore={props.dfoCore} contract={farmingContract} hostedBy={true} showSettings={true} hasBorder />
                         )
                     })
                 }

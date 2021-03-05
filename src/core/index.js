@@ -240,16 +240,29 @@ export default class DFOCore {
     loadDeployedLiquidityMiningContracts = async(factoryAddress) => {
         try {
             if (!factoryAddress) factoryAddress = this.getContextElement("farmFactoryAddress");
-            const events = await window.getLogs({
+            console.log(factoryAddress)
+            const farmFactory = new this.web3.eth.Contract(this.getContextElement("FarmFactoryABI"), factoryAddress);
+            const events = await farmFactory.getPastEvents('FarmMainDeployed', { fromBlock: await window.web3ForLogs.eth.getBlockNumber() - 100 });
+            /*
+            const events = await window.web3.eth.getPastLogs({
                 address : factoryAddress,
                 topics : [
                     this.web3.utils.sha3('FarmMainDeployed(address,address,bytes)')
-                ]
+                ],
+                fromBlock: window.web3ForLogs.startBlock,
             });
+            */
+            console.log(events);
             this.deployedLiquidityMiningContracts = [];
+            /*
+            events.push({
+                topics: [0, "0xA78869fb382E683a81AA42066326911183023731"]
+            })
+            */
             await Promise.all(events.map(async(event) => {
-                //var farmMainAddress = event.returnValues.farmMainAddress;
-                var farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
+                var farmMainAddress = event.returnValues.farmMainAddress;
+                // var farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
+                // var farmMainAddress = event.topics[1];
                 try {
                     const contract = new this.web3.eth.Contract(this.getContextElement("FarmMainABI"), farmMainAddress);
                     const extensionAddress = await contract.methods._extension().call();
@@ -261,6 +274,7 @@ export default class DFOCore {
                 }
             }));
         } catch (error) {
+            console.error(error);
             this.deployedLiquidityMiningContracts = [];
         }
     }

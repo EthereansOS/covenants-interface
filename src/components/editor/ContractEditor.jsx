@@ -55,7 +55,7 @@ const ContractEditor = (props) => {
         setCompiling(true);
         setContracts(null);
         setContract(null);
-        onContract(null)
+        onContract(null);
         try {
             const result = await window.SolidityUtilities.compile(contractCode, solVersion);
             var cleanedList = cleanList(result.optimized);

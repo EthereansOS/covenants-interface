@@ -230,10 +230,10 @@ const Create = (props) => {
             console.log(extensionInitData);
             const payload = props.dfoCore.web3.utils.sha3(`init(${types.join(',')})`).substring(0, 10) + (props.dfoCore.web3.eth.abi.encodeParameters(types, params).substring(2));
             console.log(payload);
-            const gas = await farmFactory.methods.deploy(payload, true).estimateGas({ from: props.dfoCore.address });
+            const gas = await farmFactory.methods.deploy(payload).estimateGas({ from: props.dfoCore.address });
             // const gas = 8000000;
             console.log(gas);
-            deployTransaction = await farmFactory.methods.deploy(payload, true).send({ from: props.dfoCore.address, gas });
+            deployTransaction = await farmFactory.methods.deploy(payload).send({ from: props.dfoCore.address, gas });
             console.log(deployTransaction);
         } catch (error) {
             console.error(error);
@@ -739,7 +739,7 @@ const Create = (props) => {
                             </label>
                         </div>
                         {
-                            !useDeployedContract ? <ContractEditor dfoCore={props.dfoCore} onFinish={(contract, payload) => setDeployContract({contract, payload})} /> : <>
+                            !useDeployedContract ? <ContractEditor dfoCore={props.dfoCore} onContract={(contract) => setDeployContract({contract})} /> : <>
                                 <div className="row mb-2">
                                     <input type="text" className="form-control" value={hostDeployedContract} onChange={(e) => setHostDeployedContract(e.target.value.toString())} placeholder={"Deployed contract address"} aria-label={"Deployed contract address"}/>
                                 </div>

@@ -26,6 +26,7 @@ const Explore = (props) => {
             setFarmingContracts(mappedContracts);
             setStartingContracts(mappedContracts);
         } catch (error) {
+            console.log(error);
             setFarmingContracts([]);
             setStartingContracts([]);
         } finally {
