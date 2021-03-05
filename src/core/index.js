@@ -106,7 +106,7 @@ export default class DFOCore {
                 web3.currentProvider.setMaxListeners && web3.currentProvider.setMaxListeners(0);
                 web3.eth.transactionBlockTimeout = 999999999;
                 web3.eth.transactionPollingTimeout = new Date().getTime();
-                web3.startBlock = await web3.eth.getBlockNumber();
+                web3.startBlock = window.formatNumber(await web3.eth.getBlockNumber()) - 100;
                 this.chainId = await web3.eth.getChainId();
                 this.address = (await web3.eth.getAccounts())[0];
                 window.web3ForLogs = window.web3 = this.web3 = web3;
@@ -242,27 +242,16 @@ export default class DFOCore {
             if (!factoryAddress) factoryAddress = this.getContextElement("farmFactoryAddress");
             console.log(factoryAddress)
             const farmFactory = new this.web3.eth.Contract(this.getContextElement("FarmFactoryABI"), factoryAddress);
-            const events = await farmFactory.getPastEvents('FarmMainDeployed', { fromBlock: await window.web3ForLogs.eth.getBlockNumber() - 100 });
-            /*
-            const events = await window.web3.eth.getPastLogs({
+            const events = await window.getLogs({
                 address : factoryAddress,
                 topics : [
                     this.web3.utils.sha3('FarmMainDeployed(address,address,bytes)')
-                ],
-                fromBlock: window.web3ForLogs.startBlock,
+                ]
             });
-            */
             console.log(events);
             this.deployedLiquidityMiningContracts = [];
-            /*
-            events.push({
-                topics: [0, "0xA78869fb382E683a81AA42066326911183023731"]
-            })
-            */
             await Promise.all(events.map(async(event) => {
-                var farmMainAddress = event.returnValues.farmMainAddress;
-                // var farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
-                // var farmMainAddress = event.topics[1];
+                var farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
                 try {
                     const contract = new this.web3.eth.Contract(this.getContextElement("FarmMainABI"), farmMainAddress);
                     const extensionAddress = await contract.methods._extension().call();

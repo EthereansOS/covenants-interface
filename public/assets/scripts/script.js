@@ -165,7 +165,7 @@ window.createWeb3 = async function createWeb3(connectionProvider) {
 };
 
 window.getNetworkElement = function getNetworkElement(element) {
-    var network = window.context.ethereumNetwork[window.networkId];
+    var network = window.context.ethereumNetwork && window.context.ethereumNetwork[window.networkId];
     if (network === undefined || network === null) {
         return;
     }
