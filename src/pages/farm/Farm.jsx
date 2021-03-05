@@ -13,7 +13,7 @@ const Farm = () => {
                 <FarmDapp />
             </Route>
             <Route path="/farm/">
-                <PageContainer image={dragonImage} imageHeight={300} text={lorem} title={"Farm"} buttonText={"Coming soon"} launchDapp={false} /*link={"/farm/dapp"} launchDapp={true}*/ />
+                <PageContainer image={dragonImage} imageHeight={300} text={lorem} title={"Farm"} link={"/farm/dapp"} launchDapp={true} />
             </Route>
         </Switch>
     )

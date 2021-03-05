@@ -80,7 +80,7 @@ a:disabled {cursor:wait !important;}
 .DescCov h2 {text-align: center; font-size: 30px; font-weight: bold !important;}
 .DescCov h5 {text-align: center; font-size: 20px;font-weight: bold !important; margin: 10px auto;}
 .CovTITLE {margin: 2px auto; display: inline-block; width: 90%; text-align: center;}
-.CovTITLE figure {width: 65%; display: inline-block; height: auto; margin: 0 0 0rem;}
+.CovTITLE figure {width: 47%; display: inline-block; height: auto; margin: 0 0 0rem;}
 .CovTITLE figure img {width: 100%; display: inline-block; height: auto;}
 .LogoWUSD {width: 80%; margin: 10px auto;display: inline-block;}
 .LogoWUSD img {width: 100%; display: inline-block; height: auto;}
