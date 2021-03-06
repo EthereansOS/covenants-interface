@@ -17,6 +17,7 @@ const SetupComponent = (props) => {
     const [edit, setEdit] = useState(false);
     const [isHost, setIsHost] = useState(hostedBy);
     const [farmTokenCollection, setFarmTokenCollection] = useState(null);
+    const [farmTokenSymbol, setFarmTokenSymbol] = useState("");
     const [farmTokenBalance, setFarmTokenBalance] = useState(0);
     const [canActivateSetup, setCanActivateSetup] = useState(false);
     const [addLiquidityType, setAddLiquidityType] = useState(""); 
@@ -75,6 +76,8 @@ const SetupComponent = (props) => {
                 const objectId = farmSetup.objectId;
                 if (objectId !== "0") {
                     const ftBalance = await farmTokenCollection.methods.balanceOf(props.dfoCore.address, objectId).call();
+                    const ftSymbol = await farmTokenCollection.methods.symbol(objectId).call();
+                    setFarmTokenSymbol(ftSymbol);
                     setFarmTokenBalance(ftBalance);
                 } else {
                     setFarmTokenBalance(0);
@@ -121,8 +124,8 @@ const SetupComponent = (props) => {
             const lpTokenBalance = await lpToken.methods.balanceOf(dfoCore.address).call();
             const lpTokenApproval = await lpToken.methods.allowance(dfoCore.address, lmContract.options.address).call();
             setLpTokenInfo({ contract: lpToken, symbol: lpTokenSymbol, decimals: lpTokenDecimals, balance: lpTokenBalance, approval: parseInt(lpTokenApproval) !== 0 });
-
-            setBlockNumber(await dfoCore.getBlockNumber());
+            const bNumber = await dfoCore.getBlockNumber();
+            setBlockNumber(bNumber);
             const ammContract = await dfoCore.getContract(dfoCore.getContextElement('AMMABI'), farmSetupInfo.ammPlugin);
             setAmmContract(ammContract);
             
@@ -165,8 +168,20 @@ const SetupComponent = (props) => {
                 const liquidityPoolTokenAmount = position['liquidityPoolTokenAmount'];
                 const mainTokenAmount = position['mainTokenAmount'];
                 const amounts = await ammContract.methods.byLiquidityPoolAmount(farmSetupInfo.liquidityPoolTokenAddress, liquidityPoolTokenAmount).call();
-                const availableReward = await lmContract.methods.calculateLockedFarmingReward(0, 0, true, position.positionId).call();
-                setLockedAvailableRewards(parseInt(availableReward.reward) + parseInt(position.lockedRewardPerBlock));
+                if (!farmSetupInfo.free) {
+                    const availableReward = await lmContract.methods.calculateLockedFarmingReward(0, 0, true, position.positionId).call();
+                    console.log(availableReward.reward);
+                    let lockedReward = parseInt(availableReward.reward) + parseInt(position.lockedRewardPerBlock);
+                    setLockedAvailableRewards(lockedReward);
+                } else {
+                    const availableReward = await lmContract.methods.calculateFreeFarmingReward(position.positionId, true).call();
+                    console.log(availableReward);
+                    let freeReward = parseInt(availableReward);
+                    if (blockNumber < parseInt(farmSetup.endBlock)) {
+                        freeReward += (parseInt(farmSetup.rewardPerBlock) * (parseInt(position.liquidityPoolTokenAmount) / parseInt(farmSetup.totalSupply)))
+                    }
+                    setFreeAvailableRewards(freeReward);
+                }
                 setManageStatus({ free, creationBlock, positionSetupIndex, liquidityPoolAmount: liquidityPoolTokenAmount, mainTokenAmount, tokensAmounts: amounts['tokensAmounts'], tokens  })
             }
             setAddLiquidityType("");
@@ -179,8 +194,8 @@ const SetupComponent = (props) => {
                 rewardTokenPriceUsd = 0;
             }
             const yearlyBlocks = 2304000;
-            if (setup.totalSupply !== "0") {
-                setApy(parseInt(dfoCore.toDecimals(farmSetup.rewardPerBlock, rewardTokenDecimals)) * yearlyBlocks * rewardTokenPriceUsd / parseInt(dfoCore.toDecimals(farmSetup.totalSupply, rewardTokenDecimals)));
+            if (farmSetup.totalSupply !== "0") {
+                setApy((parseInt(farmSetup.rewardPerBlock) * yearlyBlocks)/ parseInt(farmSetup.totalSupply) * rewardTokenPriceUsd);
             }
         } catch (error) {
             console.error(error);
@@ -329,6 +344,7 @@ const SetupComponent = (props) => {
         setLoading(true);
         try {
             const gasLimit = await lmContract.methods.withdrawReward(currentPosition.positionId).estimateGas({ from: dfoCore.address });
+            console.log(gasLimit);
             const result = await lmContract.methods.withdrawReward(currentPosition.positionId).send({ from: dfoCore.address, gasLimit});
             await getSetupMetadata();
         } catch (error) {
@@ -383,6 +399,36 @@ const SetupComponent = (props) => {
         }
     }
 
+    const disableSetup = async () => {
+        setLoading(true);
+        try {
+            const updatedSetup = {
+                free: false,
+                blockDuration: 0,
+                originalRewardPerBlock: 0, 
+                minStakeable: 0,
+                maxStakeable: 0,
+                renewTimes: 0,
+                ammPlugin: dfoCore.voidEthereumAddress,
+                liquidityPoolTokenAddress: dfoCore.voidEthereumAddress,
+                mainTokenAddress: dfoCore.voidEthereumAddress,
+                ethereumAddress: dfoCore.voidEthereumAddress,
+                involvingETH: false,
+                penaltyFee: 0,
+                setupsCount: 0,
+                lastSetupIndex: 0,
+            };
+            const updatedSetupConfiguration = { add: false, disable: true, index: parseInt(setupIndex), info: updatedSetup };
+            const gasLimit = await extensionContract.methods.setFarmingSetups([updatedSetupConfiguration]).estimateGas({ from: dfoCore.address });
+            const result = await extensionContract.methods.setFarmingSetups([updatedSetupConfiguration]).send({ from: dfoCore.address, gasLimit });
+            await getSetupMetadata();
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
     const getButton = () => {
         return <>
             {
@@ -398,13 +444,11 @@ const SetupComponent = (props) => {
                     <a className="backActionBTN" onClick={() => { setOpen(false); setEdit(false) }}>Close</a>
             }
             {
-                (parseInt(setup.startBlock) > 0 && blockNumber < parseInt(setup.startBlock)) ? 
-                    <a className="web2ActionBTN" disabled={true}>{setup.startBlock}</a>
-                    : (currentPosition && !open) ? 
+                ((currentPosition || parseInt(farmTokenBalance)  > 0) && !open) ? 
                     <a className="web2ActionBTN" onClick={() => { setOpen(true); setEdit(false); }}>Manage</a>
-                    : (setup.rewardPerBlock > 0 && !open && parseInt(setup.startBlock) <= blockNumber && setup.active && extensionActive) ? 
+                    : (setup.rewardPerBlock > 0 && !open && parseInt(setup.startBlock) <= blockNumber && parseInt(setup.endBlock) > blockNumber && setup.active && extensionActive) ? 
                     <a className="web2ActionBTN" onClick={() => { setOpen(true); setEdit(false); }}>Farm</a>
-                     : <div/>
+                    : <div/>
             }
         </>
     }
@@ -446,6 +490,7 @@ const SetupComponent = (props) => {
                     </div>
                     <div className="col-12">
                         <button onClick={() => updateSetup()} className="btn btn-secondary">Update</button>
+                        { setup.active && <button onClick={() => disableSetup()} className="btn btn-primary">Disable</button> }
                     </div>
             </div>
         </div>
@@ -468,12 +513,12 @@ const SetupComponent = (props) => {
                             setupInfo.free && <>
                                 <div className="col-md-6 col-12">
                                     <h6 style={{fontSize: 14}}>
-                                        <b>Available reward:</b> {dfoCore.toDecimals(dfoCore.toFixed(freeAvailableRewards), rewardTokenInfo.decimals, 8)} {rewardTokenInfo.symbol}
+                                        <b>Available reward:</b> {dfoCore.toDecimals(dfoCore.toFixed(freeAvailableRewards), rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}
                                     </h6>
                                 </div>
                                 {
-                                    freeAvailableRewards === 0 && <div className="col-md-6 col-12">
-                                        <button onClick={() => withdrawReward()} className="btn btn-primary">Redeem</button>
+                                    parseInt(freeAvailableRewards) > 0 && <div className="col-md-6 col-12">
+                                        <button onClick={() => withdrawReward()} className="btn btn-primary">Withdraw reward</button>
                                     </div>
                                 }
                             </>
@@ -482,18 +527,18 @@ const SetupComponent = (props) => {
                             !setupInfo.free && <>
                                 <div className="col-md-6 col-12">
                                     <h6 style={{fontSize: 14}}>
-                                        <b>Available reward:</b> {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(setup.endBlock) <= blockNumber ? currentPosition.reward : lockedAvailableRewards), rewardTokenInfo.decimals), 4)} {rewardTokenInfo.symbol}
+                                        <b>Available reward:</b> {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(lockedAvailableRewards), rewardTokenInfo.decimals), 4)} {rewardTokenInfo.symbol}
                                     </h6>
                                 </div>
                                 {
                                     parseInt(lockedAvailableRewards) > 0 && <div className="col-md-6 col-12">
-                                        <button onClick={() => withdrawReward()} className="btn btn-primary">Partial reward</button>
+                                        <button onClick={() => withdrawReward()} className="btn btn-primary">Withdraw reward</button>
                                     </div>
                                 }
                             </>
                         }
                         {
-                            !setupInfo.free && <>
+                            (!setupInfo.free && blockNumber >= parseInt(setup.startBlock) && blockNumber < parseInt(setup.endBlock)) && <>
                                 <hr/>
                                 <div className="col-md-6">
                                     <p style={{fontSize: 14}}>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quaerat animi ipsam nemo at nobis odit temporibus autem possimus quae vel, ratione numquam modi rem accusamus, veniam neque voluptates necessitatibus enim!</p>
@@ -517,7 +562,7 @@ const SetupComponent = (props) => {
                 {
                     (parseInt(farmTokenBalance) > 0 && parseInt(blockNumber) >= parseInt(setup.endBlock)) && <>
                         <div className="row mt-4">
-                            <b>Farm token balance</b>: {window.formatMoney(props.dfoCore.toDecimals(farmTokenBalance, 18), 2)}
+                            <b>Farm token balance</b>: {window.formatMoney(props.dfoCore.toDecimals(farmTokenBalance, 18), 2)} {farmTokenSymbol}
                         </div>
                         <div className="row mt-2">
                             <div className="form-check">
@@ -692,13 +737,11 @@ const SetupComponent = (props) => {
                     {
                         setupInfo.free ? <>
                             <div className="SetupFarmingInstructions">
-                                {/* @todo - Insert  APY Calc*/}
-                                <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}<Coin address={token.address} /> </figure>)} = <b>APY</b>: {apy}% <span>(Unstable)</span></p>
+                                <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}<Coin address={token.address} /> </figure>)} = <b>APY</b>: {window.formatMoney(apy, 0)}% <span>(Unstable)</span></p>
                             </div>
                         </> : <>
                             <div className="SetupFarmingInstructions">
-                                {/* @todo - Insert  APY Calc*/}
-                                <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+' : ''}<Coin address={token.address} /></figure>)} = <b>APY</b>: {apy}%</p>                 
+                                <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+' : ''}<Coin address={token.address} /></figure>)} = <b>APY</b>: {window.formatMoney(apy, 0)}%</p>                 
                                 </div>
                         </>
                     }
@@ -707,8 +750,6 @@ const SetupComponent = (props) => {
                         setupInfo.free ? <>
                             <p><b>Reward/Block</b>: {props.dfoCore.toDecimals(setup.rewardPerBlock)} {rewardTokenInfo.symbol} <span>(Shared)</span></p>
                         </> : <>
-                            {/* @todo - Insert  Reward for main token staked and Available to stake*/}
-                            {/* @todo - Setup Reward Token Symbol don't work*/}
                             <p><b>Max Stakeable</b>: {window.formatMoney(dfoCore.toDecimals(setupInfo.maxStakeable), 4)} {rewardTokenInfo.symbol}</p> 
                             { parseInt(setup.endBlock) > blockNumber && <p><b>Available</b>: {window.formatMoney(dfoCore.toDecimals(parseInt(setupInfo.maxStakeable) - parseInt(setup.totalSupply)), 4)} {rewardTokenInfo.symbol}</p>}
                             <p><b>1 {setupTokens[0].symbol} Staked</b> = {parseFloat((setup.rewardPerBlock * (1 / setupInfo.maxStakeable)).toPrecision(4))} {rewardTokenInfo.symbol}/block</p>

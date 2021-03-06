@@ -42,7 +42,9 @@ const FarmingComponent = (props) => {
                 rewardPerBlock += parseInt(setup.rewardPerBlock);
                 // valueLocked += parseInt(dfoCore.toDecimals(setup.totalSupply, 18, 18));
             }
-            setupInfo.free ? totalFreeSetups += 1 : totalLockedSetups += 1;
+            if (setup.rewardPerBlock !== "0") {
+                setupInfo.free ? totalFreeSetups += 1 : totalLockedSetups += 1;
+            }
         }))
 
         setMetadata({

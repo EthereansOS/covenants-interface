@@ -2,45 +2,50 @@ import { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Coin, Input, TokenInput } from '../../../../components/shared';
 import { setFarmingContractStep, updateFarmingContract, addFarmingSetup, removeFarmingSetup  } from '../../../../store/actions';
-import Editor from "@monaco-editor/react";
 import { ethers } from "ethers";
 import ContractEditor from '../../../../components/editor/ContractEditor';
 
 const abi = new ethers.utils.AbiCoder();
 
 const Create = (props) => {
+    // utils
+    const [loading, setLoading] = useState(false);
     const [currentBlockNumber, setCurrentBlockNumber] = useState(0);
+    // booleans
+    const [isAdd, setIsAdd] = useState(false);
+    const [isEdit, setIsEdit] = useState(false);
+    const [isDeploy, setIsDeploy] = useState(false);
+    // edit data
+    const [editIndex, setEditIndex] = useState(null);
+    // reward token
     const [selectedRewardToken, setSelectedRewardToken] = useState(null);
-    const [selectedFarmingType, setSelectedFarmingType] = useState(null);
-    const [selectedHost, setSelectedHost] = useState("");
-    const [hostWalletAddress, setHostWalletAddress] = useState(null);
-    const [hostDeployedContract, setHostDeployedContract] = useState(null);
-    const [deployContract, setDeployContract] = useState(null);
-    const [useDeployedContract, setUseDeployedContract] = useState(false);
     const [byMint, setByMint] = useState(false);
-    const [freeLiquidityPoolToken, setFreeLiquidityPoolToken] = useState(null);
-    const [freeRewardPerBlock, setFreeRewardPerBlock] = useState(0);
+    // setups state
+    const [selectedFarmingType, setSelectedFarmingType] = useState("");
     const [minStakeable, setMinSteakeable] = useState(0);
     const [blockDuration, setBlockDuration] = useState(null);
-    const [lockedStartBlock, setLockedStartBlock] = useState(0);
+    const [isRenewable, setIsRenewable] = useState(false);
+    const [renewTimes, setRenewTimes] = useState(0);
+    // free setup state
+    const [freeLiquidityPoolToken, setFreeLiquidityPoolToken] = useState(null);
+    const [freeRewardPerBlock, setFreeRewardPerBlock] = useState(0);
+    // locked setup state
     const [lockedMainToken, setLockedMainToken] = useState(null);
     const [lockedMaxLiquidity, setLockedMaxLiquidity] = useState(0);
     const [lockedRewardPerBlock, setLockedRewardPerBlock] = useState(0);
     const [lockedSecondaryToken, setLockedSecondaryToken] = useState(null);
     const [lockedHasPenaltyFee, setLockedHasPenaltyFee] = useState(false);
     const [lockedPenaltyFee, setLockedPenaltyFee] = useState(0);
-    const [isRenewable, setIsRenewable] = useState(false);
-    const [renewTimes, setRenewTimes] = useState(0);
-    const [loading, setLoading] = useState(false);
-    const [isAdd, setIsAdd] = useState(false);
-    const [isEdit, setIsEdit] = useState(false);
-    const [editIndex, setEditIndex] = useState(null);
-    const [isAddLoadBalancer, setIsAddLoadBalancer] = useState(false);
-    const [isDeploy, setIsDeploy] = useState(false);
+    // deploy data
+    const [hostWalletAddress, setHostWalletAddress] = useState(null);
+    const [hostDeployedContract, setHostDeployedContract] = useState(null);
+    const [deployContract, setDeployContract] = useState(null);
+    const [useDeployedContract, setUseDeployedContract] = useState(false);
+    const [extensionPayload, setExtensionPayload] = useState("");
+    const [selectedHost, setSelectedHost] = useState("");
     const [deployLoading, setDeployLoading] = useState(false);
     const [deployStep, setDeployStep] = useState(0);
     const [deployData, setDeployData] = useState(null);
-    const [extensionPayload, setExtensionPayload] = useState("");
 
     useEffect(() => {
         if (props.farmingContract?.rewardToken) {
@@ -49,18 +54,12 @@ const Create = (props) => {
         if (currentBlockNumber === 0) {
             props.dfoCore.getBlockNumber().then((blockNumber) => {
                 setCurrentBlockNumber(blockNumber);
-                setLockedStartBlock(blockNumber);
             });
         }
     }, []);
 
     const isWeth = (address) => {
         return (address.toLowerCase() === props.dfoCore.getContextElement('wethTokenAddress').toLowerCase()) || (address === props.dfoCore.voidEthereumAddress);
-    }
-
-    const isValidAddress = (address) => {
-        // TODO update check
-        return address.length === 42;
     }
 
     const addFreeFarmingSetup = () => {
@@ -105,7 +104,6 @@ const Create = (props) => {
         }
         props.addFarmingSetup(setup);
         setBlockDuration(null);
-        setLockedStartBlock(0);
         setLockedMainToken(null);
         setLockedMaxLiquidity(0);
         setLockedRewardPerBlock(0);
@@ -248,7 +246,6 @@ const Create = (props) => {
                 setSelectedRewardToken(null);
                 setByMint(false);
                 setIsDeploy(false);
-                setIsAddLoadBalancer(false);
             }
             setDeployLoading(false);
         }
@@ -454,7 +451,6 @@ const Create = (props) => {
         setFreeLiquidityPoolToken(null);
         setFreeRewardPerBlock(0);
         setBlockDuration(null);
-        setLockedStartBlock(0);
         setLockedMainToken(null);
         setLockedMaxLiquidity(0);
         setLockedRewardPerBlock(0);
@@ -620,7 +616,7 @@ const Create = (props) => {
                     }
                     <div className="row justify-content-center mb-4">
                         <button onClick={() => goToFirstStep() } className="btn btn-light mr-4">Cancel</button>
-                        <button onClick={() => props.setFarmingContractStep(2) } disabled={!lockedMainToken || lockedRewardPerBlock <= 0 || !lockedMaxLiquidity || !lockedSecondaryToken || !lockedStartBlock || !blockDuration} className="btn btn-secondary ml-4">Next</button>
+                        <button onClick={() => props.setFarmingContractStep(2) } disabled={!lockedMainToken || lockedRewardPerBlock <= 0 || !lockedMaxLiquidity || !lockedSecondaryToken || !blockDuration} className="btn btn-secondary ml-4">Next</button>
                     </div>
                 </>
             }
@@ -753,7 +749,6 @@ const Create = (props) => {
                 <div className="row justify-content-center my-4">
                     <button onClick={() => {
                         setSelectedHost(null);
-                        setIsAddLoadBalancer(true);
                         setIsDeploy(false);
                     } } className="btn btn-light mr-4">Cancel</button>
                     <button onClick={() => {
