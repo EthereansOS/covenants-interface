@@ -4,38 +4,22 @@ import { Coin, Input, TokenInput } from '../../../../components/shared';
 import { setFarmingContractStep, updateFarmingContract, addFarmingSetup, removeFarmingSetup  } from '../../../../store/actions';
 import { ethers } from "ethers";
 import ContractEditor from '../../../../components/editor/ContractEditor';
+import CreateOrEditFarmingSetups from './CreateOrEditFarmingSetups';
 
 const abi = new ethers.utils.AbiCoder();
 
 const Create = (props) => {
+    const { inputRewardToken } = props;
     // utils
     const [loading, setLoading] = useState(false);
     const [currentBlockNumber, setCurrentBlockNumber] = useState(0);
     // booleans
-    const [isAdd, setIsAdd] = useState(false);
-    const [isEdit, setIsEdit] = useState(false);
     const [isDeploy, setIsDeploy] = useState(false);
-    // edit data
-    const [editIndex, setEditIndex] = useState(null);
     // reward token
-    const [selectedRewardToken, setSelectedRewardToken] = useState(null);
+    const [selectedRewardToken, setSelectedRewardToken] = useState(inputRewardToken || null);
     const [byMint, setByMint] = useState(false);
-    // setups state
-    const [selectedFarmingType, setSelectedFarmingType] = useState("");
-    const [minStakeable, setMinSteakeable] = useState(0);
-    const [blockDuration, setBlockDuration] = useState(null);
-    const [isRenewable, setIsRenewable] = useState(false);
-    const [renewTimes, setRenewTimes] = useState(0);
-    // free setup state
-    const [freeLiquidityPoolToken, setFreeLiquidityPoolToken] = useState(null);
-    const [freeRewardPerBlock, setFreeRewardPerBlock] = useState(0);
-    // locked setup state
-    const [lockedMainToken, setLockedMainToken] = useState(null);
-    const [lockedMaxLiquidity, setLockedMaxLiquidity] = useState(0);
-    const [lockedRewardPerBlock, setLockedRewardPerBlock] = useState(0);
-    const [lockedSecondaryToken, setLockedSecondaryToken] = useState(null);
-    const [lockedHasPenaltyFee, setLockedHasPenaltyFee] = useState(false);
-    const [lockedPenaltyFee, setLockedPenaltyFee] = useState(0);
+    // setups
+    const [farmingSetups, setFarmingSetups] = useState([]);
     // deploy data
     const [hostWalletAddress, setHostWalletAddress] = useState(null);
     const [hostDeployedContract, setHostDeployedContract] = useState(null);
@@ -58,97 +42,24 @@ const Create = (props) => {
         }
     }, []);
 
+    const addFarmingSetup = (setup) => {
+        setFarmingSetups(farmingSetups.concat(setup));
+    }
+
+    const editFarmingSetup = (setup, index) => {
+        const updatedSetups = farmingSetups.map((s, i) => {
+            return i !== index ? s : setup;
+        })
+        setFarmingSetups(updatedSetups);
+    }
+
+    const removeFarmingSetup = (i) => {
+        const updatedSetups = farmingSetups.filter((_, index) => index !== i);
+        setFarmingSetups(updatedSetups);
+    }
+
     const isWeth = (address) => {
         return (address.toLowerCase() === props.dfoCore.getContextElement('wethTokenAddress').toLowerCase()) || (address === props.dfoCore.voidEthereumAddress);
-    }
-
-    const addFreeFarmingSetup = () => {
-        const setup = {
-            rewardPerBlock: freeRewardPerBlock,
-            data: freeLiquidityPoolToken,
-            period: blockDuration,
-            minStakeable,
-            renewTimes
-        }
-        if (isAdd && editIndex) {
-            props.removeFarmingSetup(editIndex);
-            setIsEdit(false);
-            setEditIndex(null);
-        }
-        props.addFarmingSetup(setup);
-        setFreeLiquidityPoolToken(null);
-        setFreeRewardPerBlock(0);
-        setMinSteakeable(0);
-        setBlockDuration(null);
-        setRenewTimes(0);
-        setIsRenewable(false);
-        setSelectedFarmingType(null);
-        setIsAdd(false);
-    }
-
-    const addLockedFarmingSetup = () => {
-        const setup = {
-            period: blockDuration,
-            data: lockedMainToken,
-            maxLiquidity: lockedMaxLiquidity,
-            rewardPerBlock: lockedRewardPerBlock,
-            penaltyFee: lockedPenaltyFee,
-            renewTimes,
-            secondaryToken: lockedSecondaryToken,
-            minStakeable,
-        }
-        if (isAdd && editIndex) {
-            props.removeFarmingSetup(editIndex);
-            setIsEdit(false);
-            setEditIndex(null);
-        }
-        props.addFarmingSetup(setup);
-        setBlockDuration(null);
-        setLockedMainToken(null);
-        setLockedMaxLiquidity(0);
-        setLockedRewardPerBlock(0);
-        setLockedHasPenaltyFee(false);
-        setLockedPenaltyFee(0);
-        setIsRenewable(false);
-        setRenewTimes(0);
-        setMinSteakeable(0);
-        setLockedSecondaryToken(null);
-        setSelectedFarmingType(null);
-        setIsAdd(false);
-        props.setFarmingContractStep(0);
-    }
-
-    const editSetup = (setup, index) => {
-        if (!setup.maxLiquidity) {
-            // free setup
-            setMinSteakeable(setup.minStakeable);
-            setBlockDuration(setup.period);
-            setFreeLiquidityPoolToken(setup.data);
-            setFreeRewardPerBlock(setup.rewardPerBlock);
-            setSelectedFarmingType('free');
-            setIsRenewable(parseInt(setup.renewTimes) !== 0);
-            setRenewTimes(setup.renewTimes);
-        } else {
-            // locked setup
-            setMinSteakeable(setup.minStakeable);
-            setBlockDuration(setup.period);
-            setLockedMainToken(setup.data);
-            setLockedMaxLiquidity(setup.maxLiquidity);
-            setLockedRewardPerBlock(setup.rewardPerBlock);
-            setLockedHasPenaltyFee(parseInt(setup.penaltyFee) !== 0);
-            setLockedPenaltyFee(setup.penaltyFee);
-            setIsRenewable(parseInt(setup.renewTimes) !== 0);
-            setRenewTimes(setup.renewTimes);
-            setLockedSecondaryToken(setup.secondaryToken);
-            setSelectedFarmingType('locked');
-        }
-        setIsAdd(true);
-        setIsEdit(true);
-        setEditIndex(index);
-    }
-
-    const onUpdatePenaltyFee = (value) => {
-        setLockedPenaltyFee(value > 100 ? 100 : value);
     }
 
     const onSelectRewardToken = async (address) => {
@@ -167,15 +78,15 @@ const Create = (props) => {
             const hasExtension = (selectedHost === "deployed-contract" && hostDeployedContract && !deployContract);
             const data = { setups: [], rewardTokenAddress: selectedRewardToken.address, byMint, deployContract, host, hasExtension, extensionInitData: extensionPayload || '' };
             const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
-            for (let i = 0; i < props.farmingSetups.length; i++) {
-                const setup = props.farmingSetups[i];
+            for (let i = 0; i < farmingSetups.length; i++) {
+                const setup = farmingSetups[i];
                 const isFree = !setup.maxLiquidity;
-                const result = await ammAggregator.methods.findByLiquidityPool(isFree ? setup.data.address : setup.secondaryToken).call();
+                const result = await ammAggregator.methods.findByLiquidityPool(isFree ? setup.data.address : setup.secondaryToken.address).call();
                 console.log(result);
                 console.log(setup);
                 const { amm } = result;
                 const ammContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMABI'), amm);
-                const res = await ammContract.methods.byLiquidityPool(isFree ? setup.data.address : setup.secondaryToken).call();
+                const res = await ammContract.methods.byLiquidityPool(isFree ? setup.data.address : setup.secondaryToken.address).call();
                 const involvingETH = res['2'].filter((address) => isWeth(address)).length > 0;
                 const parsedSetup = 
                 [
@@ -186,7 +97,7 @@ const Create = (props) => {
                     !isFree ? props.dfoCore.fromDecimals(setup.maxLiquidity) : 0,
                     setup.renewTimes,
                     amm,
-                    isFree ? setup.data.address : setup.secondaryToken,
+                    isFree ? setup.data.address : setup.secondaryToken.address,
                     result[2][0],
                     props.dfoCore.voidEthereumAddress,
                     involvingETH,
@@ -239,8 +150,8 @@ const Create = (props) => {
         } finally {
             if (!error && deployTransaction) {
                 props.updateFarmingContract(null);
-                await Promise.all(props.farmingSetups.map(async (_, i) => {
-                    props.removeFarmingSetup(i);
+                await Promise.all(farmingSetups.map(async (_, i) => {
+                    removeFarmingSetup(i);
                 }));
                 props.setFarmingContractStep(0);
                 setSelectedRewardToken(null);
@@ -264,7 +175,7 @@ const Create = (props) => {
                 const cloneExtensionReceipt = await props.dfoCore.web3.eth.getTransactionReceipt(cloneExtensionTransaction.transactionHash);
                 const extensionAddress = props.dfoCore.web3.eth.abi.decodeParameter("address", cloneExtensionReceipt.logs.filter(it => it.topics[0] === props.dfoCore.web3.utils.sha3('ExtensionCloned(address)'))[0].topics[1])
                 const farmExtension = new props.dfoCore.web3.eth.Contract(props.dfoCore.getContextElement("FarmExtensionABI"), extensionAddress);
-                const extensionInitData = farmExtension.methods.init(byMint, host).encodeABI()
+                const extensionInitData = farmExtension.methods.init(byMint, host, host).encodeABI()
                 setDeployData({ ...deployData, extensionAddress, extensionInitData });
             } else {
                 const { contract, payload } = deployContract;
@@ -285,16 +196,9 @@ const Create = (props) => {
 
     const getCreationComponent = () => {
         return <div className="col-12">
-            {
-                deployStep === 3 && <div className="row justify-content-center mb-4">
-                    <div className="col-12">
-                        <h3 className="text-secondary"><b>Deploy successful!</b></h3>
-                    </div>
-                </div>
-            }
             <div className="row justify-content-center mb-4">
                 <div className="col-9">
-                    <TokenInput placeholder={"Reward token"} onClick={(address) => onSelectRewardToken(address)} text={"Load"} />
+                    <TokenInput placeholder={"Reward token"} label={"Reward token address"} onClick={(address) => onSelectRewardToken(address)} text={"Load"} />
                 </div>
             </div>
             {
@@ -311,7 +215,7 @@ const Create = (props) => {
                 </div>
                 {
                     selectedRewardToken && <div className="col-12">
-                        <p style={{fontSize: 14}}>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quaerat animi ipsam nemo at nobis odit temporibus autem possimus quae vel, ratione numquam modi rem accusamus, veniam neque voluptates necessitatibus enim!</p>
+                        <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quaerat animi ipsam nemo at nobis odit temporibus autem possimus quae vel, ratione numquam modi rem accusamus, veniam neque voluptates necessitatibus enim!</p>
                     </div>
                 }
                 {
@@ -336,341 +240,7 @@ const Create = (props) => {
         </div>
     }
 
-    const getFarmingSetups = () => {
-        return <div className="col-12 p-0">
-            {
-                props.farmingSetups.map((setup, i) => {
-                    return (
-                        <div key={i} className="row align-items-center text-left mb-md-2 mb-4">
-                            <div className="col-md-9 col-12">
-                                <b style={{fontSize: 14}}>{ !setup.maxLiquidity ? "Free setup" : "Locked setup" } { setup.data.name }{ setup.maxLiquidity ? `${setup.data.symbol}` : ` | ${setup.data.tokens.map((token) => `${token.symbol}` )}` } - Reward: {setup.rewardPerBlock} {props.farmingContract.rewardToken.symbol}/block</b>
-                            </div>
-                            <div className="col-md-3 col-12 flex">
-                                <button className="btn btn-sm btn-outline-danger mr-1" onClick={() => props.removeFarmingSetup(i)}><b>X</b></button> <button onClick={() => editSetup(setup, i)} className="btn btn-sm btn-danger ml-1"><b>EDIT</b></button>
-                            </div>
-                        </div>
-                    )
-                })
-            }
-            <div className="row justify-content-between mt-4">
-                <div className="col-12 flex justify-content-start mb-4">
-                    <button onClick={() => setIsAdd(true)} className="btn btn-light">Add setup</button>
-                </div>
-                <div className="col-12 mt-4">
-                    <button onClick={() => {
-                        setSelectedRewardToken(null);
-                        props.farmingSetups.forEach((_, index) => props.removeFarmingSetup(index));
-                        props.updateFarmingContract(null);
-                    }} className="btn btn-light mr-4">Cancel</button> <button onClick={() => setIsDeploy(true)} className="btn btn-secondary ml-4">Next</button>
-                </div>
-            </div>
-        </div>
-    }
-
-    const getEmptyFarmingSetups = () => {
-        if (props.creationStep === 0) {
-            return (
-                <div className="col-12">
-                    <div className="row justify-content-center mb-4">
-                        <h6><b>Select farming type</b></h6>
-                    </div>
-                    <div className="row justify-content-center mb-4">
-                        <button onClick={() => setSelectedFarmingType(selectedFarmingType !== 'free' ? 'free' : null)} className={`btn ${selectedFarmingType === 'free' ? "btn-secondary" : "btn-outline-secondary"} mr-4`}>Free Farming</button>
-                        <button onClick={() => setSelectedFarmingType(selectedFarmingType !== 'locked' ? 'locked' : null)} className={`btn ${selectedFarmingType === 'locked' ? "btn-secondary" : "btn-outline-secondary"}`}>Locked</button>
-                    </div>
-                    <div className="row mb-4">
-                        <p style={{fontSize: 14}}>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quaerat animi ipsam nemo at nobis odit temporibus autem possimus quae vel, ratione numquam modi rem accusamus, veniam neque voluptates necessitatibus enim!</p>
-                    </div>
-                    <div className="row justify-content-center">
-                        <button onClick={() => props.setFarmingContractStep(0) } className="btn btn-light mr-4">Cancel</button>
-                        <button onClick={() => props.setFarmingContractStep(1)} disabled={!selectedFarmingType} className="btn btn-primary">Next</button>
-                    </div>
-                </div>
-            );
-        } else if (props.creationStep === 1) {
-            if (!selectedFarmingType) {
-                props.setFarmingContractStep(0);
-                return <div/>;
-            }
-            return selectedFarmingType === 'free' ? getFreeFirstStep() : getLockedFirstStep();
-        } else if (props.creationStep === 2) {
-            return getLockedSecondStep();
-        }
-        return <div/>
-    }
-
-    const onSelectFreeLiquidityPoolToken = async (address) => {
-        if (!address) return;
-        try {
-            setLoading(true);
-            const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
-            const res = await ammAggregator.methods.info(address).call();
-            const name = res['name'];
-            const ammAddress = res['amm'];
-            const ammContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMABI'), ammAddress);
-            const lpInfo = await ammContract.methods.byLiquidityPool(address).call();
-            console.log(lpInfo);
-            const tokens = [];
-            await Promise.all(lpInfo[2].map(async (tkAddress) => {
-                if (isWeth(tkAddress)) {
-                    tokens.push({
-                        symbol: 'ETH',
-                        address: props.dfoCore.getContextElement('wethTokenAddress'),
-                    })
-                } else {
-                    const currentToken = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), tkAddress);
-                    const symbol = await currentToken.methods.symbol().call();
-                    tokens.push({
-                        symbol,
-                        address: tkAddress
-                    })
-                }
-            }))
-            setFreeLiquidityPoolToken({ 
-                address, 
-                name,
-                tokens,
-            });
-        } catch (error) {
-            setFreeLiquidityPoolToken(null);
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    const onSelectMainToken = async (address) => {
-        setLoading(true);
-        const mainTokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), address);
-        const symbol = await mainTokenContract.methods.symbol().call();
-        setLockedMainToken({ symbol, address });
-        setLoading(false);
-    }
-
-    const goToFirstStep = () => {
-        setFreeLiquidityPoolToken(null);
-        setFreeRewardPerBlock(0);
-        setBlockDuration(null);
-        setLockedMainToken(null);
-        setLockedMaxLiquidity(0);
-        setLockedRewardPerBlock(0);
-        setLockedHasPenaltyFee(false);
-        setLockedPenaltyFee(0);
-        setIsRenewable(false);
-        setRenewTimes(0);
-        setLockedSecondaryToken(null);
-        props.setFarmingContractStep(0);
-    }
-
-    const getFreeFirstStep = () => {
-        return <div className="col-12">
-            <div className="row mb-4">
-                <div className="col-12">
-                    <select className="custom-select wusd-pair-select" value={blockDuration} onChange={(e) => setBlockDuration(e.target.value)}>
-                        <option value={0}>Choose setup duration</option>
-                        {
-                            Object.keys(props.dfoCore.getContextElement("blockIntervals")).map((key, index) => {
-                                return <option key={index} value={props.dfoCore.getContextElement("blockIntervals")[key]}>{key}</option>
-                            })
-                        }
-                    </select>
-                </div>
-            </div>
-            <div className="row justify-content-center mb-4">
-                <div className="col-9">
-                    <TokenInput label={"Liquidity pool address"} placeholder={"Liquidity pool address"} width={60} onClick={(address) => onSelectFreeLiquidityPoolToken(address)} text={"Load"} />
-                </div>
-            </div>
-            {
-                loading ? <div className="row justify-content-center">
-                    <div className="spinner-border text-secondary" role="status">
-                        <span className="visually-hidden"></span>
-                    </div>
-                </div> :  <>
-                    <div className="row mb-4">
-                        { (freeLiquidityPoolToken && freeLiquidityPoolToken.tokens.length > 0) && <div className="col-12">
-                                <b>{freeLiquidityPoolToken.name} | {freeLiquidityPoolToken.tokens.map((token) => <>{token.symbol} </>)}</b> {freeLiquidityPoolToken.tokens.map((token) => <Coin address={token.address} className="mr-2" /> )}
-                            </div>
-                        }
-                    </div>
-                    {
-                        freeLiquidityPoolToken && <>
-                            <div className="row justify-content-center mb-4">
-                                <div className="col-6">
-                                    <Input min={0} showCoin={true} address={selectedRewardToken.address} value={freeRewardPerBlock} name={selectedRewardToken.symbol} label={"Reward per block"} onChange={(e) => setFreeRewardPerBlock(e.target.value)} />
-                                </div>
-                            </div>
-                            <div className="row justify-content-center align-items-center flex-column mb-2">
-                                <p className="text-center"><b>Monthly*: {freeRewardPerBlock * 3000} {selectedRewardToken.symbol}</b></p>
-                                <p className="text-center"><b>Yearly*: {freeRewardPerBlock * 36000} {selectedRewardToken.symbol}</b></p>
-                            </div>
-                            <div className="row mb-4">
-                                <p className="text-center">*Monthly/yearly reward are calculated in a forecast based on 3000 Blocks/m and 36000/y.</p>
-                            </div>
-                            <div className="row justify-content-center mb-4">
-                                <div className="col-6">
-                                    <Input min={0} showCoin={true} address={selectedRewardToken.address} value={minStakeable} name={selectedRewardToken.symbol} label={"Min stakeable"} onChange={(e) => setMinSteakeable(e.target.value)} />
-                                </div>
-                            </div>
-                            <div className="row justify-content-center">
-                                <div className="form-check my-4">
-                                    <input className="form-check-input" type="checkbox" value={isRenewable} onChange={(e) => setIsRenewable(e.target.checked)} id="repeat" />
-                                    <label className="form-check-label" htmlFor="repeat">
-                                        Repeat
-                                    </label>
-                                </div>
-                            </div>
-                            {
-                                isRenewable && <div className="row mb-4 justify-content-center">
-                                    <div className="col-md-6 col-12">
-                                        <Input min={0} width={50} value={renewTimes} onChange={(e) => setRenewTimes(e.target.value)} />
-                                    </div>
-                                </div>
-                            }
-                        </>
-                    }
-                    <div className="row justify-content-center mb-4">
-                        <button onClick={() => goToFirstStep() } className="btn btn-light mr-4">Cancel</button>
-                        <button onClick={() => addFreeFarmingSetup() } disabled={!freeLiquidityPoolToken || freeRewardPerBlock <= 0 || minStakeable <= 0 || !blockDuration} className="btn btn-secondary ml-4">{isEdit ? 'Edit' : 'Add'}</button>
-                    </div>
-                </>
-            }
-        </div>
-    }
-
-    const getLockedFirstStep = () => {
-        return <div className="col-12">
-            <div className="row mb-4">
-                <div className="col-12">
-                    <select className="custom-select wusd-pair-select" value={blockDuration} onChange={(e) => setBlockDuration(e.target.value)}>
-                        <option value={0}>Choose setup duration</option>
-                        {
-                            Object.keys(props.dfoCore.getContextElement("blockIntervals")).map((key, index) => {
-                                return <option key={index} value={props.dfoCore.getContextElement("blockIntervals")[key]}>{key}</option>
-                            })
-                        }
-                    </select>
-                </div>
-            </div>
-            <div className="row mb-4">
-                <p className="text-center text-small">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Omnis delectus incidunt laudantium distinctio velit reprehenderit quaerat, deserunt sint fugit ex consectetur voluptas suscipit numquam. Officiis maiores quaerat quod necessitatibus perspiciatis!</p>
-            </div>
-            <div className="row justify-content-center mb-4">
-                <div className="col-9">
-                    <TokenInput label={"Main token"} placeholder={"Main token address"} width={60} onClick={(address) => onSelectMainToken(address)} text={"Load"} />
-                </div>
-            </div>
-            {
-                loading ? <div className="row justify-content-center">
-                    <div className="spinner-border text-secondary" role="status">
-                        <span className="visually-hidden"></span>
-                    </div>
-                </div> :  <>
-                    <div className="row mb-4">
-                        { lockedMainToken && <div className="col-12">
-                                <b>{lockedMainToken.symbol}</b> <Coin address={lockedMainToken.address} className="ml-2" />
-                            </div>
-                        }
-                    </div>
-                    {
-                        lockedMainToken && <>
-                            <hr/>
-                            <div className="row justify-content-center my-4">
-                                <div className="col-9">
-                                    <TokenInput label={"Liquidity pool token"} placeholder={"Liquidity pool token address"} width={60} onClick={(address) => setLockedSecondaryToken(address !== lockedMainToken.address ? address : lockedSecondaryToken)} text={"Load"} />
-                                </div>
-                            </div>
-                            {
-                                lockedSecondaryToken && <div key={lockedSecondaryToken} className="row align-items-center mb-2">
-                                    <div className="col-md-9 col-12">{lockedSecondaryToken}</div>
-                                    <div className="col-md-3 col-12">
-                                        <button className="btn btn-outline-danger btn-sm" onClick={() => setLockedSecondaryToken(null)}>Remove</button>
-                                    </div>
-                                </div>
-                            }
-                            <div className="row justify-content-center mb-4">
-                                <div className="col-6">
-                                    <Input min={0} showCoin={true} address={selectedRewardToken.address} value={minStakeable} name={selectedRewardToken.symbol} label={"Min stakeable"} onChange={(e) => setMinSteakeable(e.target.value)} />
-                                </div>
-                            </div>
-                            <div className="row justify-content-center mt-4 mb-4">
-                                <div className="col-6">
-                                    <Input label={"Max stakeable"} min={0} showCoin={true} address={lockedMainToken.address} value={lockedMaxLiquidity} name={lockedMainToken.symbol} onChange={(e) => setLockedMaxLiquidity(e.target.value)} />
-                                </div>
-                            </div>
-                            <div className="row mb-4">
-                                <p className="text-center text-small">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Omnis delectus incidunt laudantium distinctio velit reprehenderit quaerat, deserunt sint fugit ex consectetur voluptas suscipit numquam. Officiis maiores quaerat quod necessitatibus perspiciatis!</p>
-                            </div>
-                            <div className="row justify-content-center mb-4">
-                                <div className="col-6">
-                                    <Input label={"Reward per block"} min={0} showCoin={true} address={lockedMainToken.address} value={lockedRewardPerBlock} name={lockedMainToken.symbol} onChange={(e) => setLockedRewardPerBlock(e.target.value)} />
-                                </div>
-                            </div>
-                            <div className="row mb-4">
-                                <p className="text-center text-small">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Omnis delectus incidunt laudantium distinctio velit reprehenderit quaerat, deserunt sint fugit ex consectetur voluptas suscipit numquam. Officiis maiores quaerat quod necessitatibus perspiciatis!</p>
-                            </div>
-                            <div className="row justify-content-center align-items-center flex-column mb-2">
-                                <p className="text-center"><b>Reward/block per {lockedMainToken.symbol}: {!lockedMaxLiquidity ? 0 : parseFloat((lockedRewardPerBlock * (1 / lockedMaxLiquidity)).toPrecision(4))} {lockedMainToken.symbol}</b></p>
-                            </div>
-                        </>
-                    }
-                    <div className="row justify-content-center mb-4">
-                        <button onClick={() => goToFirstStep() } className="btn btn-light mr-4">Cancel</button>
-                        <button onClick={() => props.setFarmingContractStep(2) } disabled={!lockedMainToken || lockedRewardPerBlock <= 0 || !lockedMaxLiquidity || !lockedSecondaryToken || !blockDuration} className="btn btn-secondary ml-4">Next</button>
-                    </div>
-                </>
-            }
-        </div>
-    }
-
-    const getLockedSecondStep = () => {
-        return (
-            <div className="col-12">
-                <div className="row justify-content-center">
-                    <div className="form-check my-4">
-                        <input className="form-check-input" type="checkbox" value={lockedHasPenaltyFee} onChange={(e) => setLockedHasPenaltyFee(e.target.checked)} id="penaltyFee" />
-                        <label className="form-check-label" htmlFor="penaltyFee">
-                            Penalty fee
-                        </label>
-                    </div>
-                </div>
-                {
-                    lockedHasPenaltyFee && <div className="row mb-4 justify-content-center">
-                        <div className="col-md-6 col-12 flex justify-content-center">
-                            <input type="number" className="form-control w-50" step={0.001} max={100} min={0} value={lockedPenaltyFee} onChange={(e) => onUpdatePenaltyFee(e.target.value)} />
-                        </div>
-                    </div>
-                }
-                <div className="row mb-4">
-                    <p className="text-center text-small">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Omnis delectus incidunt laudantium distinctio velit reprehenderit quaerat, deserunt sint fugit ex consectetur voluptas suscipit numquam. Officiis maiores quaerat quod necessitatibus perspiciatis!</p>
-                </div>
-                <div className="row justify-content-center">
-                    <div className="form-check my-4">
-                        <input className="form-check-input" type="checkbox" value={isRenewable} onChange={(e) => setIsRenewable(e.target.checked)} id="repeat" />
-                        <label className="form-check-label" htmlFor="repeat">
-                            Repeat
-                        </label>
-                    </div>
-                </div>
-                {
-                    isRenewable && <div className="row mb-4 justify-content-center">
-                        <div className="col-md-6 col-12">
-                            <Input min={0} width={50} address={lockedMainToken.address} value={renewTimes} onChange={(e) => setRenewTimes(e.target.value)} />
-                        </div>
-                    </div>
-                }
-                <div className="row mb-4">
-                    <p className="text-center text-small">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Omnis delectus incidunt laudantium distinctio velit reprehenderit quaerat, deserunt sint fugit ex consectetur voluptas suscipit numquam. Officiis maiores quaerat quod necessitatibus perspiciatis!</p>
-                </div>
-                <div className="row justify-content-center mb-4">
-                    <button onClick={() => goToFirstStep() } className="btn btn-light mr-4">Cancel</button>
-                    <button onClick={() => addLockedFarmingSetup() } disabled={(isRenewable && renewTimes === 0) || (lockedHasPenaltyFee && lockedPenaltyFee === 0)} className="btn btn-secondary ml-4">Next</button>
-                </div>
-            </div>
-        )
-    }
-
-    const getLockedFourthStep = () => {
+    const getDeployComponent = () => {
 
         if (deployLoading) {
             return <div className="col-12">
@@ -765,18 +335,26 @@ const Create = (props) => {
             <div className="col-12">
                 <div className="row flex-column align-items-start mb-4">
                     <h5 className="text-secondary"><b>Farm {props.farmingContract.rewardToken.symbol}</b></h5>
-                    <b>Setups list</b>
                 </div>
-                {
-                    isDeploy ? getLockedFourthStep() : <div className="col-12">
-                        {
-                            (props.farmingSetups.length > 0 && !isAdd) && getFarmingSetups()
-                        }
-                        {
-                            (props.farmingSetups.length === 0 || isAdd) && getEmptyFarmingSetups()
-                        }
-                    </div>
-                }
+                <CreateOrEditFarmingSetups 
+                    rewardToken={selectedRewardToken} 
+                    farmingSetups={farmingSetups} 
+                    onAddFarmingSetup={(setup) => addFarmingSetup(setup)} 
+                    onRemoveFarmingSetup={(i) => removeFarmingSetup(i)} 
+                    onEditFarmingSetup={(setup, i) => editFarmingSetup(setup, i)} 
+                    onCancel={() => { setFarmingSetups([]); props.updateFarmingContract(null);}} 
+                    onFinish={() => setIsDeploy(true)} 
+                />
+            </div>
+        )
+    }
+
+    if (isDeploy) {
+        return (
+            <div className="create-component">
+                <div className="row mb-4">
+                    { getDeployComponent() }
+                </div>
             </div>
         )
     }

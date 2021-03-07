@@ -13,6 +13,7 @@ const TokenInput = (props) => {
 
     return (
         <div className="LoadInput">
+            { label && <h6><b>{label}</b></h6> }
             <input type="text" className="TextRegular" value={tokenAddress} onChange={(e) => setTokenAddress(e.target.value)} placeholder={placeholder} aria-label={placeholder}/>
             <a className="web2ActionBTN" onClick={onClickLocal}>{text}</a>
         </div>

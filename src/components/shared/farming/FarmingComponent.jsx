@@ -69,7 +69,7 @@ const FarmingComponent = (props) => {
                             metadata ? <>
                             <div className="FarmTitle">
                                 <figure>
-                                    <Coin address={metadata.rewardTokenAddress} />
+                                    <Coin height={45} address={metadata.rewardTokenAddress} />
                                 </figure>
                                 <aside>
                                     <h6><b>{metadata.name}</b></h6>

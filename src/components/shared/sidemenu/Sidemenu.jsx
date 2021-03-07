@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 
 const menu = [
     {
-        name: 'Farm', path: '/farm', asset: require('../../../assets/images/farm.png').default, hasDapp: false,
+        name: 'Farm', path: '/farm', asset: require('../../../assets/images/farm.png').default, hasDapp: true,
     },
     {
         name: 'Inflation', path: '/inflation', asset: require('../../../assets/images/cloud.png').default, hasDapp: true,

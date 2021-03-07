@@ -4,7 +4,7 @@ import { Input, ApproveButton } from '..';
 import axios from 'axios';
 
 const SetupComponent = (props) => {
-    let { className, dfoCore, setupIndex, lmContract, manage, farm, redeem, hostedBy, isExtensionActive } = props;
+    let { className, dfoCore, setupIndex, lmContract, manage, farm, redeem, hostedBy } = props;
     const [setup, setSetup] = useState(null);
     const [setupInfo, setSetupInfo] = useState(null);
     const [open, setOpen] = useState(false);
@@ -13,7 +13,6 @@ const SetupComponent = (props) => {
     const [AMM, setAMM] = useState({ name: "", version: ""});
     const [ammContract, setAmmContract] = useState(null);
     const [extensionContract, setExtensionContract] = useState(null);
-    const [extensionActive, setExtensionActive] = useState(isExtensionActive);
     const [edit, setEdit] = useState(false);
     const [isHost, setIsHost] = useState(hostedBy);
     const [farmTokenCollection, setFarmTokenCollection] = useState(null);
@@ -43,7 +42,6 @@ const SetupComponent = (props) => {
     const [apy, setApy] = useState(0);
 
     useEffect(() => {
-        
         getSetupMetadata();
     }, []);
 
@@ -300,6 +298,7 @@ const SetupComponent = (props) => {
                 // adding liquidity to the setup
                 if (!currentPosition) {
                     const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value: setupInfo.involvingETH ? ethTokenValue : 0  });
+                    console.log(gasLimit);
                     const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit, value: setupInfo.involvingETH ? ethTokenValue : 0  });
                 
                 } else {
@@ -311,6 +310,7 @@ const SetupComponent = (props) => {
                 
                 // opening position
                 const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value: setupInfo.involvingETH && !stake.amountIsLiquidityPool ? ethTokenValue : 0  });
+                console.log(gasLimit);
                 const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit, value: setupInfo.involvingETH && !stake.amountIsLiquidityPool ? ethTokenValue : 0  });
             }
             await getSetupMetadata();
@@ -327,9 +327,11 @@ const SetupComponent = (props) => {
             if (setupInfo.free) {
                 const removedLiquidity = removalAmount === 100 ? manageStatus.liquidityPoolAmount : props.dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString().split('.')[0];
                 const gasLimit = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, 0, unwrapPair, removedLiquidity).estimateGas({ from: dfoCore.address });
+                console.log(gasLimit);
                 const result = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, 0, unwrapPair, removedLiquidity).send({ from: dfoCore.address, gasLimit });
             } else {
                 const gasLimit = await lmContract.methods.withdrawLiquidity(0, setup.objectId, unwrapPair, farmTokenBalance).estimateGas({ from: dfoCore.address });
+                console.log(gasLimit);
                 const result = await lmContract.methods.withdrawLiquidity(0, setup.objectId, unwrapPair, farmTokenBalance).send({ from: dfoCore.address, gasLimit });
             }
             await getSetupMetadata();
@@ -432,7 +434,7 @@ const SetupComponent = (props) => {
     const getButton = () => {
         return <>
             {
-                (canActivateSetup && extensionActive) && 
+                canActivateSetup && 
                     <a className="web2ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
             }
             {
@@ -446,7 +448,7 @@ const SetupComponent = (props) => {
             {
                 ((currentPosition || parseInt(farmTokenBalance)  > 0) && !open) ? 
                     <a className="web2ActionBTN" onClick={() => { setOpen(true); setEdit(false); }}>Manage</a>
-                    : (setup.rewardPerBlock > 0 && !open && parseInt(setup.startBlock) <= blockNumber && parseInt(setup.endBlock) > blockNumber && setup.active && extensionActive) ? 
+                    : (setup.rewardPerBlock > 0 && !open && parseInt(setup.startBlock) <= blockNumber && parseInt(setup.endBlock) > blockNumber && setup.active) ? 
                     <a className="web2ActionBTN" onClick={() => { setOpen(true); setEdit(false); }}>Farm</a>
                     : <div/>
             }
@@ -716,7 +718,7 @@ const SetupComponent = (props) => {
         return (
             <div className={className}>
                 <div className="row px-2 farming-component-main-row">
-                    <div className="col-12 justify-content-center">
+                    <div className="col-12 flex justify-content-center align-items-center">
                         <div className="spinner-border text-secondary" role="status">
                             <span className="visually-hidden"></span>
                         </div>
