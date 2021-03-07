@@ -134,9 +134,11 @@ const Create = (props) => {
             ];
             console.log(deployData);
             const encodedSetups = abi.encode(["tuple(bool,uint256,uint256,uint256,uint256,uint256,address,address,address,address,bool,uint256,uint256,uint256)[]"], [setups]);
-            const params = [extensionAddress ? extensionAddress : hostDeployedContract, extensionInitData || extensionPayload || "0x", props.dfoCore.getContextElement("ethItemOrchestratorAddress"), rewardTokenAddress, encodedSetups || 0];
+            const params = [extensionAddress ? extensionAddress : hostDeployedContract, extensionPayload || extensionInitData || "0x", props.dfoCore.getContextElement("ethItemOrchestratorAddress"), rewardTokenAddress, encodedSetups || 0];
             console.log(params)
             console.log(extensionInitData);
+            console.log(extensionPayload);
+            console.log(extensionAddress);
             const payload = props.dfoCore.web3.utils.sha3(`init(${types.join(',')})`).substring(0, 10) + (props.dfoCore.web3.eth.abi.encodeParameters(types, params).substring(2));
             console.log(payload);
             const gas = await farmFactory.methods.deploy(payload).estimateGas({ from: props.dfoCore.address });
@@ -156,7 +158,7 @@ const Create = (props) => {
                 props.setFarmingContractStep(0);
                 setSelectedRewardToken(null);
                 setByMint(false);
-                setIsDeploy(false);
+                setDeployStep(deployStep + 1);
             }
             setDeployLoading(false);
         }
@@ -175,15 +177,15 @@ const Create = (props) => {
                 const cloneExtensionReceipt = await props.dfoCore.web3.eth.getTransactionReceipt(cloneExtensionTransaction.transactionHash);
                 const extensionAddress = props.dfoCore.web3.eth.abi.decodeParameter("address", cloneExtensionReceipt.logs.filter(it => it.topics[0] === props.dfoCore.web3.utils.sha3('ExtensionCloned(address)'))[0].topics[1])
                 const farmExtension = new props.dfoCore.web3.eth.Contract(props.dfoCore.getContextElement("FarmExtensionABI"), extensionAddress);
-                const extensionInitData = farmExtension.methods.init(byMint, host, host).encodeABI()
+                const extensionInitData = farmExtension.methods.init(byMint, host, host).encodeABI();
                 setDeployData({ ...deployData, extensionAddress, extensionInitData });
             } else {
-                const { contract, payload } = deployContract;
+                const { contract } = deployContract;
                 const { abi, bytecode } = contract;
                 const gasLimit = await new props.dfoCore.web3.eth.Contract(abi).deploy({ data: bytecode }).estimateGas({ from: props.dfoCore.address });
                 const extension = await new props.dfoCore.web3.eth.Contract(abi).deploy({ data: bytecode }).send({ from: props.dfoCore.address, gasLimit });
                 console.log(extension.options.address);
-                setDeployData({ ...deployData, extensionAddress: extension.options.address, extensionInitData: payload });
+                setDeployData({ ...deployData, extensionAddress: extension.options.address });
             }
             setDeployStep(!error ? deployStep + 1 : deployStep);
         } catch (error) {
@@ -268,6 +270,12 @@ const Create = (props) => {
                 </div>
                 <div className="row">
                     <button onClick={() => deploy()} className="btn btn-secondary">Deploy contract</button>
+                </div>
+            </div>
+        } else if (deployStep === 3) {
+            return <div className="col-12 flex flex-column justify-content-center align-items-center">
+                <div className="row mb-4">
+                    <h6 className="text-secondary"><b>Deploy successful!</b></h6>
                 </div>
             </div>
         }

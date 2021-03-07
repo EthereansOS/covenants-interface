@@ -51,21 +51,26 @@ const ContractEditor = (props) => {
     }
 
     const compileContractCode = async () => {
-        setContractError("");
-        setCompiling(true);
-        setContracts(null);
-        setContract(null);
-        onContract(null);
         try {
-            const result = await window.SolidityUtilities.compile(contractCode, solVersion);
-            var cleanedList = cleanList(result.optimized);
-            setContracts(cleanedList);
-            setContract(Object.keys(cleanedList)[0]);
-            onContract(Object.values(cleanedList)[0]);
-        } catch(e) {
-            setContractError(e.message || e);
+            setContractError("");
+            setCompiling(true);
+            setContracts(null);
+            setContract(null);
+            onContract(null);
+            try {
+                const result = await window.SolidityUtilities.compile(contractCode, solVersion);
+                var cleanedList = cleanList(result.optimized);
+                setContracts(cleanedList);
+                setContract(Object.keys(cleanedList)[0]);
+                onContract(Object.values(cleanedList)[0]);
+            } catch(e) {
+                setContractError(e.message || e);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setCompiling(false);
         }
-        setCompiling(false);
     }
 
     const setChosenContract = (value) => {
