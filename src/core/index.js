@@ -316,7 +316,7 @@ export default class DFOCore {
     }
 
     isValidPosition = (position) => {
-        return position.uniqueOwner !== this.voidEthereumAddress && position.creationBlock !== '0';
+        return position.uniqueOwner !== this.voidEthereumAddress && position.creationBlock !== '0' && position.uniqueOwner === this.address;
     }
 
     loadPositions = async() => {

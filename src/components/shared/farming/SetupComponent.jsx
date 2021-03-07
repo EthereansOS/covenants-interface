@@ -14,8 +14,6 @@ const SetupComponent = (props) => {
     const [ammContract, setAmmContract] = useState(null);
     const [extensionContract, setExtensionContract] = useState(null);
     const [edit, setEdit] = useState(false);
-    const [isHost, setIsHost] = useState(hostedBy);
-    const [farmTokenCollection, setFarmTokenCollection] = useState(null);
     const [farmTokenSymbol, setFarmTokenSymbol] = useState("");
     const [farmTokenBalance, setFarmTokenBalance] = useState(0);
     const [canActivateSetup, setCanActivateSetup] = useState(false);
@@ -30,7 +28,6 @@ const SetupComponent = (props) => {
     const [lockedAvailableRewards, setLockedAvailableRewards] = useState(0);
     const [lpTokenInfo, setLpTokenInfo] = useState(null);
     const [rewardTokenInfo, setRewardTokenInfo] = useState(null);
-    const [extension, setExtension] = useState(null);
     const [removalAmount, setRemovalAmount] = useState(0);
     const [manageStatus, setManageStatus] = useState(null);
     const [unwrapPair, setUnwrapPair] = useState(false);
@@ -38,12 +35,54 @@ const SetupComponent = (props) => {
     const [updatedRewardPerBlock, setUpdatedRewardPerBlock] = useState(0);
     const [updatedRenewTimes, setUpdatedRenewTimes] = useState(0);
     const [openPositionForAnotherWallet, setOpenPositionForAnotherWallet] = useState(false);
-    const [uniqueOwner, setUniqueOwner] = useState(dfoCore.voidEthereumAddress);
+    const [uniqueOwner, setUniqueOwner] = useState("");
     const [apy, setApy] = useState(0);
+    const [intervalId, setIntervalId] = useState(null);
 
     useEffect(() => {
         getSetupMetadata();
+        return () => {
+            console.log('clearing interval.');
+            if (intervalId) clearInterval(intervalId);
+        }
     }, []);
+
+    useEffect(() => {
+        if (intervalId) clearInterval(intervalId);
+        if (setupTokens && setupTokens.length > 0) {
+            const interval = setInterval(async () => {
+                const lpTokenBalance = await lpTokenInfo.contract.methods.balanceOf(dfoCore.address).call();
+                const lpTokenApproval = await lpTokenInfo.contract.methods.allowance(dfoCore.address, lmContract.options.address).call();
+                setLpTokenInfo({ ...lpTokenInfo, balance: lpTokenBalance, approval: parseInt(lpTokenApproval) !== 0 });
+                const tokenAddress = setupInfo.liquidityPoolTokenAddress;
+                let res;
+                if (setupInfo.free) {
+                    res = await ammContract.methods.byLiquidityPoolAmount(tokenAddress, setup.totalSupply).call();
+                } else {
+                    res = await ammContract.methods.byTokenAmount(tokenAddress, setupInfo.mainTokenAddress, setup.totalSupply).call();
+                    res = await ammContract.methods.byLiquidityPoolAmount(tokenAddress, res.liquidityPoolAmount).call();
+                }
+                const tokens = [];
+                const approvals = [];
+                const contracts = [];
+                for(let i = 0; i < res.liquidityPoolTokens.length; i++) {
+                    const address = res.liquidityPoolTokens[i];
+                    const token = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), address);
+                    const symbol = !isWeth(address) ? await token.methods.symbol().call() : 'ETH';
+                    const decimals = await token.methods.decimals().call();
+                    const balance = !isWeth(address) ? await token.methods.balanceOf(dfoCore.address).call() : await dfoCore.web3.eth.getBalance(dfoCore.address);
+                    const approval = !isWeth(address) ? await token.methods.allowance(dfoCore.address, lmContract.options.address).call() : true;
+                    approvals.push(parseInt(approval) !== 0);
+                    tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: res.tokensAmounts[i], decimals, address, symbol });
+                    contracts.push(token);
+                }
+                setSetupTokens(tokens);
+                setTokensContracts(contracts);
+                setTokensApprovals(approvals);
+            }, 2000);
+            setIntervalId(interval);
+        }
+    }, [tokensApprovals]);
 
     const isWeth = (address) => {
         return address.toLowerCase() === props.dfoCore.getContextElement('wethTokenAddress').toLowerCase();
@@ -68,7 +107,6 @@ const SetupComponent = (props) => {
             const farmSetupInfo = await lmContract.methods._setupsInfo(farmSetup.infoIndex).call();
             const farmTokenCollectionAddress = await lmContract.methods._farmTokenCollection().call();
             const farmTokenCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), farmTokenCollectionAddress);
-            setFarmTokenCollection(farmTokenCollection);
             if (!farmSetup.free) {
                 // retrieve farm token data
                 const objectId = farmSetup.objectId;
@@ -97,6 +135,7 @@ const SetupComponent = (props) => {
                 const { topics } = event;
                 var positionId = props.dfoCore.web3.eth.abi.decodeParameter("uint256", topics[1]);
                 const pos = await lmContract.methods.position(positionId).call();
+                console.log(pos);
                 if (dfoCore.isValidPosition(pos) && parseInt(pos.setupIndex) === parseInt(setupIndex)) {
                     position = { ...pos, positionId: positionId };
                 }
@@ -106,7 +145,6 @@ const SetupComponent = (props) => {
                 setOpen(false);
             }
             const extensionAddress = await lmContract.methods._extension().call();
-            setExtension(extensionAddress);
             const extContract = await dfoCore.getContract(dfoCore.getContextElement("FarmExtensionABI"), extensionAddress);
             setExtensionContract(extContract);
             const rewardTokenAddress = await lmContract.methods._rewardTokenAddress().call();
@@ -270,7 +308,7 @@ const SetupComponent = (props) => {
                 setupIndex,
                 amount: 0,
                 amountIsLiquidityPool: addLiquidityType === 'add-lp' ? true : false,
-                positionOwner: dfoCore.voidEthereumAddress,
+                positionOwner: uniqueOwner || dfoCore.voidEthereumAddress,
             };
             
             let ethTokenIndex = null;
@@ -438,7 +476,7 @@ const SetupComponent = (props) => {
                     <a className="web2ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
             }
             {
-                (isHost && extensionContract && !edit && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex) && isHost) && 
+                (hostedBy && extensionContract && !edit && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex) && hostedBy) && 
                     <a className="web2ActionBTN" onClick={() => { setOpen(false); setEdit(true) }}>Edit</a>
             }
             {
@@ -621,7 +659,7 @@ const SetupComponent = (props) => {
                             {
                                 openPositionForAnotherWallet &&  <div className="row justify-content-center mb-4">
                                         <div className="col-md-9 col-12">
-                                        <input type="text" value={uniqueOwner} onChange={(e) => setUniqueOwner(e.target.value)} className="form-control" id="uniqueOwner" ></input>
+                                        <input type="text" placeholder={"Position owner address"} value={uniqueOwner} onChange={(e) => setUniqueOwner(e.target.value)} className="form-control" id="uniqueOwner" ></input>
                                     </div>
                                 </div>
                             }
