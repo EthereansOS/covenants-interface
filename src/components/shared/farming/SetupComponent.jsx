@@ -94,7 +94,7 @@ const SetupComponent = (props) => {
                 toBlock: await window.web3ForLogs.eth.getBlockNumber(),
             });
             await Promise.all(events.map(async (event) => {
-                const { topics } = events[0];
+                const { topics } = event;
                 var positionId = props.dfoCore.web3.eth.abi.decodeParameter("uint256", topics[1]);
                 const pos = await lmContract.methods.position(positionId).call();
                 if (dfoCore.isValidPosition(pos) && parseInt(pos.setupIndex) === parseInt(setupIndex)) {

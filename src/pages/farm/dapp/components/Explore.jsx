@@ -17,9 +17,9 @@ const Explore = (props) => {
     const getDeployedContracts = async () => {
         setLoading(true);
         try {
-            await props.dfoCore.loadDeployedLiquidityMiningContracts();
+            await props.dfoCore.loadDeployedFarmingContracts();
             const mappedContracts = await Promise.all(
-                props.dfoCore.deployedLiquidityMiningContracts.map(async (contract) => { 
+                props.dfoCore.deployedFarmingContracts.map(async (contract) => { 
                     return props.dfoCore.getContract(props.dfoCore.getContextElement('FarmMainABI'), contract.address);
                 })
             );

@@ -158,7 +158,7 @@ const ExploreFarmingContract = (props) => {
                 {
                     (!isAdd && farmingSetups.length > 0) && farmingSetups.map((farmingSetup, setupIndex) => {
                         return (
-                            <SetupComponent className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={props.dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
+                            <SetupComponent key={setupIndex} className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={props.dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
                         )
                     })
                 }

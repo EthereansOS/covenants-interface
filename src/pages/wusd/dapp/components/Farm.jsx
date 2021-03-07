@@ -14,7 +14,7 @@ const Farm = (props) => {
     const getFarmingSetups = async () => {
         setLoading(true);
         try {
-            await props.dfoCore.loadDeployedLiquidityMiningContracts();
+            await props.dfoCore.loadDeployedFarmingContracts();
         } catch (error) {
             console.error(error);
         } finally {

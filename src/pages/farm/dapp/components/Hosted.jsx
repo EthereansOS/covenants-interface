@@ -19,7 +19,7 @@ const Hosted = (props) => {
     const getContracts = async () => {
         setLoading(true);
         try {
-            const hostedContracts = props.dfoCore.getHostedLiquidityMiningContracts();
+            const hostedContracts = props.dfoCore.getHostedFarmingContracts();
             const mappedContracts = await Promise.all(
                 hostedContracts.map(async (contract) => { 
                     return props.dfoCore.getContract(props.dfoCore.getContextElement('FarmMainABI'), contract.address);

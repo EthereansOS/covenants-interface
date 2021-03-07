@@ -7,7 +7,7 @@ export default class DFOCore {
     context;
     contracts = {};
     deployedFixedInflationContracts = [];
-    deployedLiquidityMiningContracts = [];
+    deployedFarmingContracts = [];
     indexTokens = [];
     ipfsClient;
     eventEmitters = {};
@@ -237,7 +237,7 @@ export default class DFOCore {
     /**
      * retrieves all the deployed liquidity mining contracts from the given factory address.
      */
-    loadDeployedLiquidityMiningContracts = async(factoryAddress) => {
+    loadDeployedFarmingContracts = async(factoryAddress) => {
         try {
             if (!factoryAddress) factoryAddress = this.getContextElement("farmFactoryAddress");
             console.log(factoryAddress)
@@ -249,7 +249,7 @@ export default class DFOCore {
                 ]
             });
             console.log(events);
-            this.deployedLiquidityMiningContracts = [];
+            this.deployedFarmingContracts = [];
             await Promise.all(events.map(async(event) => {
                 var farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
                 try {
@@ -257,14 +257,14 @@ export default class DFOCore {
                     const extensionAddress = await contract.methods._extension().call();
                     const extensionContract = new this.web3.eth.Contract(this.getContextElement("FarmExtensionABI"), extensionAddress);
                     const { host } = await extensionContract.methods.data().call();
-                    this.deployedLiquidityMiningContracts.push({ address: farmMainAddress, sender: host });
+                    this.deployedFarmingContracts.push({ address: farmMainAddress, sender: host });
                 } catch (error) {
                     console.error(error);
                 }
             }));
         } catch (error) {
             console.error(error);
-            this.deployedLiquidityMiningContracts = [];
+            this.deployedFarmingContracts = [];
         }
     }
 
@@ -311,8 +311,8 @@ export default class DFOCore {
         }
     }
 
-    getHostedLiquidityMiningContracts = () => {
-        return this.deployedLiquidityMiningContracts.filter((item) => item.sender.toLowerCase() === this.address.toLowerCase());
+    getHostedFarmingContracts = () => {
+        return this.deployedFarmingContracts.filter((item) => item.sender.toLowerCase() === this.address.toLowerCase());
     }
 
     isValidPosition = (position) => {
@@ -322,9 +322,10 @@ export default class DFOCore {
     loadPositions = async() => {
         try {
             this.positions = [];
-            await this.loadDeployedLiquidityMiningContracts();
-            await Promise.all(this.deployedLiquidityMiningContracts.map(async(c) => {
-                const contract = new this.web3.eth.Contract(this.getContextElement("LiquidityMiningABI"), c.address);
+            await this.loadDeployedFarmingContracts();
+            await Promise.all(this.deployedFarmingContracts.map(async(c) => {
+                const contract = new this.web3.eth.Contract(this.getContextElement("FarmMainABI"), c.address);
+                /*
                 const events = await contract.getPastEvents('Transfer', { filter: { to: this.address }, fromBlock: 11806961 });
                 await Promise.all(events.map(async(event) => {
                     const { returnValues } = event;
@@ -335,20 +336,29 @@ export default class DFOCore {
                         this.positions.push({...setup, contract, setupIndex: position.setupIndex });
                     }
                 }))
+                */
+                const events = await window.getLogs({
+                    address : c.address,
+                    topics : [
+                        window.web3.utils.sha3("Transfer(uint256,address,address)")
+                    ],
+                    fromBlock: await window.web3ForLogs.eth.getBlockNumber() - 1000,
+                    toBlock: await window.web3ForLogs.eth.getBlockNumber(),
+                });
+                await Promise.all(events.map(async (event) => {
+                    const { topics } = event;
+                    var positionId = this.web3.eth.abi.decodeParameter("uint256", topics[1]);
+                    const pos = await contract.methods.position(positionId).call();
+                    const setup = (await contract.methods.setups().call())[pos.setupIndex];
+                    const setupInfo = await contract.methods._setupsInfo(setup.infoIndex).call();
+                    if (this.isValidPosition(pos) && !this.positions.includes({...setup, contract, setupIndex: pos.setupIndex })) {
+                        this.positions.push({...setup, contract, setupInfo, setupIndex: pos.setupIndex });
+                    }
+                }))
             }));
         } catch (error) {
             console.error(error);
             this.positions = [];
-        }
-    }
-
-    /**
-     * pushes the contract address inside the core array.
-     * @param {*} contractAddress new liquidity mining contract address.
-     */
-    addDeployedLiquidityMiningContract = async(contractAddress) => {
-        if (!this.deployedLiquidityMiningContracts.includes(contractAddress)) {
-            this.deployedLiquidityMiningContracts.push(contractAddress);
         }
     }
 
