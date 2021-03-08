@@ -60,7 +60,7 @@ const Mint = (props) => {
     }, [pair]);
 
     useEffect(() => {
-        setChosenPair(pair);
+        pairs && pairs.length > 0 && setChosenPair(pair);
     }, [onlyByToken0, onlyByToken1]);
 
     const getController = async () => {
@@ -484,7 +484,6 @@ const Mint = (props) => {
             token1Value = bestLP.token1Value;
             console.log(bestLP);
         } catch (e) {
-            console.error(e);
         }
 
         var firstTokenAmount = onlyByToken0 ? token0Value : token1Value;
