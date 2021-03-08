@@ -19,7 +19,7 @@ const Mint = (props) => {
     const [lpTokenBalance, setLpTokenBalance] = useState(0);
     const [lpTokenApproved, setLpTokenApproved] = useState(false);
     const [wusdExtensionController, setWusdExtensionController] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [mintLoading, setMintLoading] = useState(false);
     const [isHealthyPair, setIsHealthyPair] = useState(true);
     const [intervalId, setIntervalId] = useState(null);
@@ -35,28 +35,8 @@ const Mint = (props) => {
     const [mintByEthLoading, setMintByEthLoading] = useState(false);
     const [wusdPresto, setWusdPresto] = useState(null);
 
-    useEffect(async () => {
+    useEffect(() => {
         getController();
-        setWusdPresto(await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDPrestoABI"), props.dfoCore.getContextElement("WUSDPrestoAddress")));
-        var amms = [];
-        const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
-        var ammAddresses = await ammAggregator.methods.amms().call();
-        for (var address of ammAddresses) {
-            var contract = await props.dfoCore.getContract(props.dfoCore.getContextElement("AMMABI"), address);
-            var amm = {
-                address,
-                contract,
-                info: await contract.methods.info().call(),
-                data: await contract.methods.data().call()
-            }
-            amm.data[2] && amms.push(amm);
-        }
-        setSelectedAmmIndex(0);
-        var uniswap = amms.filter(it => it.info[0] === 'UniswapV2')[0];
-        var index = amms.indexOf(uniswap);
-        amms.splice(index, 1);
-        amms.unshift(uniswap);
-        setAmms(amms);
         return () => {
             console.log('clearing interval.');
             if (intervalId) clearInterval(intervalId);
@@ -69,18 +49,9 @@ const Mint = (props) => {
             const interval = setInterval(async () => {
                 if (pair && pairs[pair]) {
                     const chosenPair = pairs[pair];
-                    chosenPair.token0Contract.methods.balanceOf(props.dfoCore.address).call()
-                        .then((result) => {
-                            setFirstTokenBalance(props.dfoCore.toDecimals(result, parseInt(chosenPair.token0decimals)));
-                        })
-                    chosenPair.token1Contract.methods.balanceOf(props.dfoCore.address).call()
-                        .then((result) => {
-                            setSecondTokenBalance(props.dfoCore.toDecimals(result, parseInt(chosenPair.token1decimals)));
-                        })
-                    chosenPair.lpContract.methods.balanceOf(props.dfoCore.address).call()
-                        .then((result) => {
-                            setLpTokenBalance(props.dfoCore.toDecimals(result, parseInt(chosenPair.decimalsLp)));
-                        })
+                    setFirstTokenBalance(props.dfoCore.toDecimals(await chosenPair.token0Contract.methods.balanceOf(props.dfoCore.address).call(), parseInt(chosenPair.token0decimals)));
+                    setSecondTokenBalance(props.dfoCore.toDecimals(await chosenPair.token1Contract.methods.balanceOf(props.dfoCore.address).call(), parseInt(chosenPair.token1decimals)));
+                    setLpTokenBalance(props.dfoCore.toDecimals(await chosenPair.lpContract.methods.balanceOf(props.dfoCore.address).call(), parseInt(chosenPair.decimalsLp)));
                     setEthBalance(props.dfoCore.toDecimals(await props.dfoCore.web3.eth.getBalance(props.dfoCore.address), 18));
                 }
             }, 2000);
@@ -138,6 +109,26 @@ const Mint = (props) => {
             }))
             allowedPairs = allowedPairs.sort((a, b) => (a.ammName + a.symbol0 + a.symbol1).localeCompare(b.ammName + b.symbol0 + b.symbol1));
             setPairs(allowedPairs);
+            setWusdPresto(await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDPrestoABI"), props.dfoCore.getContextElement("WUSDPrestoAddress")));
+            let amms = [];
+            const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
+            const ammAddresses = await ammAggregator.methods.amms().call();
+            for (let address of ammAddresses) {
+                const ammContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("AMMABI"), address);
+                const amm = {
+                    address,
+                    contract: ammContract,
+                    info: await ammContract.methods.info().call(),
+                    data: await ammContract.methods.data().call()
+                }
+                amm.data[2] && amms.push(amm);
+            }
+            setSelectedAmmIndex(0);
+            const uniswap = amms.filter(it => it.info[0] === 'UniswapV2')[0];
+            const index = amms.indexOf(uniswap);
+            amms.splice(index, 1);
+            amms.unshift(uniswap);
+            setAmms(amms);
         } catch (error) {
             console.error(error);
         } finally {
@@ -439,7 +430,7 @@ const Mint = (props) => {
         setMintByEthLoading(false);
     }
 
-    async function onSingleTokenAmount(e) {
+    const onSingleTokenAmount = async (e) => {
         setSingleTokenAmount(e.target.value);
         var value = parseFloat(e.target.value);
 
@@ -512,7 +503,7 @@ const Mint = (props) => {
         }
     }
 
-    function onSingleTokenChange(e, token) {
+    const onSingleTokenChange = (e, token) => {
         if (token === "token0") {
             setOnlyByToken0(e.target.checked);
         }
@@ -526,17 +517,17 @@ const Mint = (props) => {
         })
     }
 
-    function onInputTypeChange(e) {
+    const onInputTypeChange = (e) => {
         setInputType(e.target.value);
         clear();
     }
 
-    function onAmmChange(e) {
+    const onAmmChange = (e) => {
         setSelectedAmmIndex(parseInt(e.target.value));
         updateEthAmount(ethValue, parseInt(e.target.value));
     }
 
-    function renderByETH() {
+    const renderByETH = () => {
         return <>
             <div className="InputTokensRegular">
                 <div className="InputTokenRegular">
@@ -629,7 +620,7 @@ const Mint = (props) => {
 
     if (loading) {
         return (
-            <div className="mint-component">
+            <div className="MintBurn">
                 <div className="col-12 justify-content-center">
                     <div className="spinner-border text-secondary" role="status">
                         <span className="visually-hidden"></span>

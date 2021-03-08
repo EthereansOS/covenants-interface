@@ -31,42 +31,24 @@ const Burn = (props) => {
     const [selectedAmmIndex, setSelectedAmmIndex] = useState(null);
     const [ethBalance, setEthBalance] = useState("0");
     const [ethAmount, setEthAmount] = useState({});
+    const [intervalId, setIntervalId] = useState(null);
 
-    useEffect(async () => {
+    useEffect(() => {
         getController();
-        setWusdPresto(await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDPrestoABI"), props.dfoCore.getContextElement("WUSDPrestoAddress")));
-        var amms = [];
-        const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
-        var ammAddresses = await ammAggregator.methods.amms().call();
-        for (var address of ammAddresses) {
-            var contract = await props.dfoCore.getContract(props.dfoCore.getContextElement("AMMABI"), address);
-            var amm = {
-                address,
-                contract,
-                info: await contract.methods.info().call(),
-                data: await contract.methods.data().call()
-            }
-            amm.data[2] && amms.push(amm);
-        }
-        setSelectedAmmIndex(0);
-        var uniswap = amms.filter(it => it.info[0] === 'UniswapV2')[0];
-        var index = amms.indexOf(uniswap);
-        amms.splice(index, 1);
-        amms.unshift(uniswap);
-        setAmms(amms);
-        const interval = setInterval(() => {
-            if (wusdContract) {
-                wusdContract.methods.balanceOf(props.dfoCore.address).call()
-                    .then((result) => {
-                        setWusdBalance(props.dfoCore.toDecimals(result, wusdDecimals));
-                    })
-            }
-        }, 2000);
-
         return () => {
-            clearInterval(interval);
+            console.log('clearing interval.');
+            clearInterval(intervalId);
         }
     }, []);
+
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            if (wusdContract) {
+                setWusdBalance(props.dfoCore.toDecimals(await wusdContract.methods.balanceOf(props.dfoCore.address).call(), wusdDecimals));
+            }
+        }, 2000);
+        setIntervalId(interval);
+    }, [wusdContract])
 
     useEffect(() => {
         updateETHAmount(selectedAmmIndex)
@@ -119,6 +101,26 @@ const Burn = (props) => {
             setWusdDecimals(decimals);
             setWusdBalance(props.dfoCore.toDecimals(balance, decimals));
             setPairs(allowedPairs);
+            setWusdPresto(await props.dfoCore.getContract(props.dfoCore.getContextElement("WUSDPrestoABI"), props.dfoCore.getContextElement("WUSDPrestoAddress")));
+            const amms = [];
+            const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
+            const ammAddresses = await ammAggregator.methods.amms().call();
+            for (let address of ammAddresses) {
+                const ammContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("AMMABI"), address);
+                const amm = {
+                    address,
+                    contract: ammContract,
+                    info: await ammContract.methods.info().call(),
+                    data: await ammContract.methods.data().call()
+                }
+                amm.data[2] && amms.push(amm);
+            }
+            setSelectedAmmIndex(0);
+            const uniswap = amms.filter(it => it.info[0] === 'UniswapV2')[0];
+            const index = amms.indexOf(uniswap);
+            amms.splice(index, 1);
+            amms.unshift(uniswap);
+            setAmms(amms);
         } catch (error) {
             console.error(error);
         } finally {
@@ -276,19 +278,19 @@ const Burn = (props) => {
         }
     }
 
-    async function onOutputTypeChange(e) {
+    const onOutputTypeChange = async (e) => {
         setOutputType(e.target.value);
         if (e.target.value === 'eth') {
             setEthBalance(await props.dfoCore.web3.eth.getBalance(props.dfoCore.address));
         }
     }
 
-    function onAmmChange(e) {
+    const onAmmChange = (e) => {
         setSelectedAmmIndex(parseInt(e.target.value));
         updateETHAmount(parseInt(e.target.value));
     }
 
-    async function updateETHAmount(ammIndex) {
+    const updateETHAmount = async (ammIndex) => {
         if(!amms || amms.length === 0 || pair === '' || isNaN(pair)) {
             return;
         }
