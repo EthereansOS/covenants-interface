@@ -41,13 +41,16 @@ const ExploreFarmingContract = (props) => {
             setIsHost(isHost);
             const setups = await lmContract.methods.setups().call();
             const res = [];
-            await Promise.all(setups.map(async (setup, i) => {
-                const setupInfo = await lmContract.methods._setupsInfo(setup.infoIndex).call();
+            for (let i = 0; i < setups.length; i++) {
+                const setup = setups[i];
+                const setupInfo = await lmContract.methods._setupsInfo(setups[i].infoIndex).call();
                 if (setup.rewardPerBlock !== "0") {
                     res.push({...setup, setupInfo, rewardTokenAddress, setupIndex: i })
                 }
-            }))
-            setFarmingSetups(res);
+            }
+            const sortedRes = res.sort((a, b) => b.active - a.active);
+            console.log(sortedRes);
+            setFarmingSetups(sortedRes);
         } catch (error) {
             console.error(error);
         } finally {
