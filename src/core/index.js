@@ -100,19 +100,29 @@ export default class DFOCore {
         try {
             localContext = await (await fetch('assets/data/context.local.json')).json();
             window.context = window.deepCopy(window.context, localContext);
-
-            if(window.context.blockchainConnectionString) {
-                var web3 = new Web3(window.context.blockchainConnectionString, null, { transactionConfirmationBlocks: 1 });
-                web3.currentProvider.setMaxListeners && web3.currentProvider.setMaxListeners(0);
-                web3.eth.transactionBlockTimeout = 999999999;
-                web3.eth.transactionPollingTimeout = new Date().getTime();
-                web3.startBlock = window.formatNumber(await web3.eth.getBlockNumber()) - 100;
+            await Promise.all(window.context.testScripts.map(it => new Promise(function(ok) {
+                var script = document.createElement('script');
+                script.src = it;
+                script.type = 'text/javascript';
+                script.onload = ok;
+                document.getElementsByTagName('head')[0].appendChild(script);
+            })));
+            if (window.context.blockchainConnectionString) {
+                window.provider = window.Ganache.provider({
+                    total_accounts: 15,
+                    default_balance_ether: 9999999999999999999,
+                    fork: window.context.blockchainConnectionString,
+                    asyncRequestProcessing : true,
+                    db : window.MemDOWN(),
+                    gasLimit: window.gasLimit = parseInt((await new Web3(window.context.blockchainConnectionString).eth.getBlock("latest")).gasLimit)
+                });
+                var web3 = new Web3(window.provider, null, { transactionConfirmationBlocks: 1 });
+                web3.startBlock = window.formatNumber(await web3.eth.getBlockNumber());
                 this.chainId = await web3.eth.getChainId();
                 this.address = (await web3.eth.getAccounts())[0];
                 window.web3ForLogs = window.web3 = this.web3 = web3;
             }
-
-            if(window.context.blockchainConnectionForLogString) {
+            if (window.context.blockchainConnectionForLogString) {
                 var web3 = new Web3(window.context.blockchainConnectionForLogString);
                 web3.currentProvider.setMaxListeners && web3.currentProvider.setMaxListeners(0);
                 web3.eth.transactionBlockTimeout = 999999999;
@@ -120,8 +130,7 @@ export default class DFOCore {
                 web3.startBlock = await web3.eth.getBlockNumber();
                 window.web3ForLogs = web3;
             }
-
-        } catch(e) {
+        } catch (e) {
             console.error(e);
             !localContext && console.clear();
         }
@@ -243,8 +252,8 @@ export default class DFOCore {
             console.log(factoryAddress)
             const farmFactory = new this.web3.eth.Contract(this.getContextElement("FarmFactoryABI"), factoryAddress);
             const events = await window.getLogs({
-                address : factoryAddress,
-                topics : [
+                address: factoryAddress,
+                topics: [
                     this.web3.utils.sha3('FarmMainDeployed(address,address,bytes)')
                 ]
             });
@@ -290,7 +299,7 @@ export default class DFOCore {
         }
     };
 
-    loadIndexTokens = async (indexAddress) => {
+    loadIndexTokens = async(indexAddress) => {
         try {
             if (!indexAddress) indexAddress = this.getContextElement("indexAddress");
             const indexContract = new this.web3.eth.Contract(this.getContextElement("IndexABI"), indexAddress);
@@ -300,7 +309,7 @@ export default class DFOCore {
                 try {
                     const exists = this.indexTokens.filter((indexToken) => indexToken.address.toLowerCase() === event.returnValues.interoperableInterfaceAddress.toLowerCase()).length > 0;
                     if (!exists) {
-                        this.indexTokens.push({ address: event.returnValues.interoperableInterfaceAddress, objectId: event.returnValues.id});
+                        this.indexTokens.push({ address: event.returnValues.interoperableInterfaceAddress, objectId: event.returnValues.id });
                     }
                 } catch (error) {
                     console.error(error);
@@ -382,7 +391,7 @@ export default class DFOCore {
         };
     }
 
-    uploadDataToIpfs = async (data) => {
+    uploadDataToIpfs = async(data) => {
         this.ipfsClient = this.ipfsClient || new window.IpfsHttpClient(this.getContextElement('ipfsHost'));
         const upload = await this.ipfsClient.add(data, { pin: true });
         return upload;

@@ -27,4 +27,4 @@ yarn-error.log*
 package-lock.json
 .env
 
-/**/*context.local.json
+/public/assets/data
