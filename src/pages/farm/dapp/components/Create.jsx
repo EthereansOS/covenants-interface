@@ -5,6 +5,7 @@ import { setFarmingContractStep, updateFarmingContract, addFarmingSetup, removeF
 import { ethers } from "ethers";
 import ContractEditor from '../../../../components/editor/ContractEditor';
 import CreateOrEditFarmingSetups from './CreateOrEditFarmingSetups';
+import FarmingExtensionTemplateLocation from '../../../../data/FarmingExtensionTemplate.sol';
 
 const abi = new ethers.utils.AbiCoder();
 
@@ -31,7 +32,10 @@ const Create = (props) => {
     const [deployStep, setDeployStep] = useState(0);
     const [deployData, setDeployData] = useState(null);
 
-    useEffect(() => {
+    const [farmingExtensionTemplateCode, setFarmingExtensionTemplateCode] = useState("");
+
+    useEffect(async () => {
+        setFarmingExtensionTemplateCode(await (await fetch(FarmingExtensionTemplateLocation)).text());
         if (props.farmingContract?.rewardToken) {
             setSelectedRewardToken(props.farmingContract.rewardToken);
         }
@@ -180,8 +184,7 @@ const Create = (props) => {
                 const extensionInitData = farmExtension.methods.init(byMint, host, host).encodeABI();
                 setDeployData({ ...deployData, extensionAddress, extensionInitData });
             } else {
-                const { contract } = deployContract;
-                const { abi, bytecode } = contract;
+                const { abi, bytecode } = deployContract;
                 const gasLimit = await new props.dfoCore.web3.eth.Contract(abi).deploy({ data: bytecode }).estimateGas({ from: props.dfoCore.address });
                 const extension = await new props.dfoCore.web3.eth.Contract(abi).deploy({ data: bytecode }).send({ from: props.dfoCore.address, gasLimit });
                 console.log(extension.options.address);
@@ -194,6 +197,20 @@ const Create = (props) => {
         } finally {
             setDeployLoading(false);
         }
+    }
+
+    function filterDeployedContract(contractData) {
+        var abi = contractData.abi;
+        if(abi.filter(abiEntry => abiEntry.type === 'constructor').length > 0) {
+            return false;
+        }
+        if(abi.filter(abiEntry => abiEntry.type === 'function' && abiEntry.stateMutability !== 'view' && abiEntry.stateMutability !== 'pure' && abiEntry.name === 'transferTo' && (!abiEntry.outputs || abiEntry.outputs.length === 0) && abiEntry.inputs && abiEntry.inputs.length === 1 && abiEntry.inputs[0].type === 'uint256').length === 0) {
+            return false;
+        }
+        if(abi.filter(abiEntry => abiEntry.type === 'function' && abiEntry.stateMutability === 'payable' && abiEntry.name === 'backToYou' && (!abiEntry.outputs || abiEntry.outputs.length === 0) && abiEntry.inputs && abiEntry.inputs.length === 1 && abiEntry.inputs[0].type === 'uint256').length === 0) {
+            return false;
+        }
+        return true;
     }
 
     const getCreationComponent = () => {
@@ -313,7 +330,7 @@ const Create = (props) => {
                             </label>
                         </div>
                         {
-                            !useDeployedContract ? <ContractEditor dfoCore={props.dfoCore} onContract={(contract) => setDeployContract({contract})} /> : <>
+                            !useDeployedContract ? <ContractEditor filterDeployedContract={filterDeployedContract} dfoCore={props.dfoCore} onContract={setDeployContract} templateCode={farmingExtensionTemplateCode} /> : <>
                                 <div className="row mb-2">
                                     <input type="text" className="form-control" value={hostDeployedContract} onChange={(e) => setHostDeployedContract(e.target.value.toString())} placeholder={"Deployed contract address"} aria-label={"Deployed contract address"}/>
                                 </div>
