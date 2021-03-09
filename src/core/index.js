@@ -100,7 +100,7 @@ export default class DFOCore {
         try {
             localContext = await (await fetch('assets/data/context.local.json')).json();
             window.context = window.deepCopy(window.context, localContext);
-            await Promise.all(window.context.testScripts.map(it => new Promise(function(ok) {
+            window.context.testScripts && await Promise.all(window.context.testScripts.map(it => new Promise(function(ok) {
                 var script = document.createElement('script');
                 script.src = it;
                 script.type = 'text/javascript';
@@ -108,15 +108,18 @@ export default class DFOCore {
                 document.getElementsByTagName('head')[0].appendChild(script);
             })));
             if (window.context.blockchainConnectionString) {
-                window.provider = window.Ganache.provider({
+                window.provider = window.Ganache ? window.Ganache.provider({
                     total_accounts: 15,
                     default_balance_ether: 9999999999999999999,
                     fork: window.context.blockchainConnectionString,
                     asyncRequestProcessing : true,
                     db : window.MemDOWN(),
                     gasLimit: window.gasLimit = parseInt((await new Web3(window.context.blockchainConnectionString).eth.getBlock("latest")).gasLimit)
-                });
+                }) : window.context.blockchainConnectionString;
                 var web3 = new Web3(window.provider, null, { transactionConfirmationBlocks: 1 });
+                !window.Ganache && web3.currentProvider.setMaxListeners && window.web3.currentProvider.setMaxListeners(0);
+                !window.Ganache && (web3.eth.transactionBlockTimeout = 999999999);
+                !window.Ganache && (web3.eth.transactionPollingTimeout = new Date().getTime());
                 web3.startBlock = window.formatNumber(await web3.eth.getBlockNumber());
                 this.chainId = await web3.eth.getChainId();
                 this.address = (await web3.eth.getAccounts())[0];
