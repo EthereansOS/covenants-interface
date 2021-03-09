@@ -22,6 +22,7 @@ const Create = (props) => {
     // setups
     const [farmingSetups, setFarmingSetups] = useState([]);
     // deploy data
+    const [treasuryAddress, setTreasuryAddress] = useState(null);
     const [hostWalletAddress, setHostWalletAddress] = useState(null);
     const [hostDeployedContract, setHostDeployedContract] = useState(null);
     const [deployContract, setDeployContract] = useState(null);
@@ -62,10 +63,6 @@ const Create = (props) => {
         setFarmingSetups(updatedSetups);
     }
 
-    const isWeth = (address) => {
-        return (address.toLowerCase() === props.dfoCore.getContextElement('wethTokenAddress').toLowerCase()) || (address === props.dfoCore.voidEthereumAddress);
-    }
-
     const onSelectRewardToken = async (address) => {
         setLoading(true);
         const rewardToken = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), address);
@@ -86,12 +83,8 @@ const Create = (props) => {
                 const setup = farmingSetups[i];
                 const isFree = !setup.maxLiquidity;
                 const result = await ammAggregator.methods.findByLiquidityPool(isFree ? setup.data.address : setup.secondaryToken.address).call();
-                console.log(result);
-                console.log(setup);
                 const { amm } = result;
-                const ammContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMABI'), amm);
-                const res = await ammContract.methods.byLiquidityPool(isFree ? setup.data.address : setup.secondaryToken.address).call();
-                const involvingETH = res['2'].filter((address) => isWeth(address)).length > 0;
+
                 const parsedSetup = 
                 [
                     isFree,
@@ -104,7 +97,7 @@ const Create = (props) => {
                     isFree ? setup.data.address : setup.secondaryToken.address,
                     result[2][0],
                     props.dfoCore.voidEthereumAddress,
-                    involvingETH,
+                    setup.involvingEth,
                     isFree ? 0 : props.dfoCore.fromDecimals(parseFloat(parseFloat(setup.penaltyFee) / 100).toString()),
                     0,
                     0
@@ -181,7 +174,7 @@ const Create = (props) => {
                 const cloneExtensionReceipt = await props.dfoCore.web3.eth.getTransactionReceipt(cloneExtensionTransaction.transactionHash);
                 const extensionAddress = props.dfoCore.web3.eth.abi.decodeParameter("address", cloneExtensionReceipt.logs.filter(it => it.topics[0] === props.dfoCore.web3.utils.sha3('ExtensionCloned(address)'))[0].topics[1])
                 const farmExtension = new props.dfoCore.web3.eth.Contract(props.dfoCore.getContextElement("FarmExtensionABI"), extensionAddress);
-                const extensionInitData = farmExtension.methods.init(byMint, host, host).encodeABI();
+                const extensionInitData = farmExtension.methods.init(byMint, host, treasuryAddress || props.dfoCore.voidEthereumAddress).encodeABI();
                 setDeployData({ ...deployData, extensionAddress, extensionInitData });
             } else {
                 const { abi, bytecode } = deployContract;
@@ -277,7 +270,8 @@ const Create = (props) => {
                     <h6><b>Deploy extension</b></h6>
                 </div>
                 <div className="row">
-                    <button onClick={() => deployExtension()} className="btn btn-secondary">Deploy extension</button>
+                    <button onClick={() => setDeployStep(0)} className="btn btn-light mr-4">Back</button>
+                    <button onClick={() => deployExtension()} className="btn btn-secondary ml-4">Deploy extension</button>
                 </div>
             </div>
         } else if (deployStep === 2) {
@@ -317,10 +311,14 @@ const Create = (props) => {
                 {
                     selectedHost === 'wallet' ? <>
                         <div className="row mb-2">
-                            <input type="text" className="form-control" value={hostWalletAddress} onChange={(e) => setHostWalletAddress(e.target.value.toString())} placeholder={"Wallet address"} aria-label={"Wallet address"}/>
+                            <input type="text" className="form-control" value={hostWalletAddress || ""} onChange={(e) => setHostWalletAddress(e.target.value.toString())} placeholder={"Wallet address"} aria-label={"Wallet address"}/>
                         </div>
                         <div className="row mb-4">
                             <p className="text-left text-small">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Omnis delectus incidunt laudantium distinctio velit reprehenderit quaerat, deserunt sint fugit ex consectetur voluptas suscipit numquam. Officiis maiores quaerat quod necessitatibus perspiciatis!</p>
+                        </div>
+                        <div className="row mb-4">
+                            <h6><b>Treasury address</b></h6>
+                            <input type="text" className="form-control" value={treasuryAddress || ""} onChange={(e) => setTreasuryAddress(e.target.value.toString())} placeholder={"Treasury address"} aria-label={"Treasury address"}/>
                         </div>
                     </> : selectedHost === 'deployed-contract' ? <>
                         <div className="form-check my-4">
@@ -339,13 +337,14 @@ const Create = (props) => {
                     </> : <div/>
                 }
                 <div>
+                    <h6><b>Extension payload</b></h6>
                     <input type="text" className="form-control" value={extensionPayload || ""} onChange={(e) => setExtensionPayload(e.target.value.toString())} placeholder={"Payload"} aria-label={"Payload"}/>
                 </div>
                 <div className="row justify-content-center my-4">
                     <button onClick={() => {
                         setSelectedHost(null);
                         setIsDeploy(false);
-                    } } className="btn btn-light mr-4">Cancel</button>
+                    } } className="btn btn-light mr-4">Back</button>
                     <button onClick={() => {
                         initializeDeployData();
                         setDeployStep((selectedHost === 'deployed-contract' && hostDeployedContract && !deployContract) ? 2 : 1);

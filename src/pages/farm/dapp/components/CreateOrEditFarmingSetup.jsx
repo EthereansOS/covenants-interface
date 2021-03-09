@@ -10,6 +10,9 @@ const CreateOrEditFarmingSetup = (props) => {
     const [blockDuration, setBlockDuration] = useState((editSetup && editSetup.period) ? editSetup.period : 0);
     const [isRenewable, setIsRenewable] = useState((editSetup && editSetup.renewTimes) ? editSetup.renewTimes > 0 : false);
     const [renewTimes, setRenewTimes] = useState((editSetup && editSetup.renewTimes) ? editSetup.renewTimes : 0);
+    const [involvingEth, setInvolvingEth] = useState((editSetup && editSetup.involvingEth) ? editSetup.involvingEth : false);
+    const [ethAddress, setEthAddress] = useState((editSetup && editSetup.ethAddress) ? editSetup.ethAddress : "");
+    const [ethSelectData, setEthSelectData] = useState((editSetup && editSetup.ethSelectData) ? editSetup.ethSelectData : null);
     // free setup state
     const [freeLiquidityPoolToken, setFreeLiquidityPoolToken] = useState((editSetup && editSetup.data) ? editSetup.data : null);
     const [freeRewardPerBlock, setFreeRewardPerBlock] = useState((editSetup && editSetup.rewardPerBlock) ? editSetup.rewardPerBlock : 0);
@@ -23,17 +26,17 @@ const CreateOrEditFarmingSetup = (props) => {
     // current step
     const [currentStep, setCurrentStep] = useState(0);
 
-    const isWeth = (address) => {
-        return (address.toLowerCase() === dfoCore.getContextElement('wethTokenAddress').toLowerCase()) || (address === dfoCore.voidEthereumAddress);
-    }
-
     const onSelectMainToken = async (address) => {
         if (!address) return;
         setLoading(true);
         try {
-            const mainTokenContract = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), address);
-            const symbol = await mainTokenContract.methods.symbol().call();
-            setLockedMainToken({ symbol, address });
+            if (address === dfoCore.voidEthereumAddress) {
+                setLockedMainToken({ symbol: 'ETH', address });
+            } else {
+                const mainTokenContract = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), address);
+                const symbol = await mainTokenContract.methods.symbol().call();
+                setLockedMainToken({ symbol, address });
+            }
         } catch (error) {
             console.error(error);
             setLockedMainToken(null);
@@ -51,16 +54,25 @@ const CreateOrEditFarmingSetup = (props) => {
             const name = res['name'];
             const ammAddress = res['amm'];
             const ammContract = await dfoCore.getContract(dfoCore.getContextElement('AMMABI'), ammAddress);
+            const ammData = await ammContract.methods.data().call();
+            if (ammData[0] === dfoCore.voidEthereumAddress) {
+                setEthAddress(dfoCore.voidEthereumAddress);
+                setEthSelectData(null);
+            } else {
+                setEthAddress(ammData[0]);
+                const notEthToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), ammData[0]);
+                const notEthTokenSymbol = await notEthToken.methods.symbol().call();
+                setEthSelectData({ symbol: notEthTokenSymbol })
+            }
             const secondatoryTokenInfo = await ammContract.methods.byLiquidityPool(address).call();
             const tokens = [];
             await Promise.all(secondatoryTokenInfo[2].map(async (tkAddress) => {
-                if (isWeth(tkAddress)) {
-                    tokens.push({ symbol: 'ETH', address: dfoCore.getContextElement('wethTokenAddress') })
-                } else {
-                    const currentToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), tkAddress);
-                    const symbol = await currentToken.methods.symbol().call();
-                    tokens.push({ symbol, address: tkAddress })
+                if (tkAddress.toLowerCase() === ammData[0].toLowerCase()) {
+                    setInvolvingEth(true);
                 }
+                const currentToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), tkAddress);
+                const symbol = await currentToken.methods.symbol().call();
+                tokens.push({ symbol, address: tkAddress, isEth: tkAddress.toLowerCase() === ammData[0].toLowerCase() })
             }));
             setLockedSecondaryToken({ 
                 address, 
@@ -85,16 +97,25 @@ const CreateOrEditFarmingSetup = (props) => {
             const name = res['name'];
             const ammAddress = res['amm'];
             const ammContract = await dfoCore.getContract(dfoCore.getContextElement('AMMABI'), ammAddress);
+            const ammData = await ammContract.methods.data().call();
+            if (ammData[0] === dfoCore.voidEthereumAddress) {
+                setEthAddress(dfoCore.voidEthereumAddress);
+                setEthSelectData(null);
+            } else {
+                setEthAddress(ammData[0]);
+                const notEthToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), ammData[0]);
+                const notEthTokenSymbol = await notEthToken.methods.symbol().call();
+                setEthSelectData({ symbol: notEthTokenSymbol })
+            }
             const lpInfo = await ammContract.methods.byLiquidityPool(address).call();
             const tokens = [];
             await Promise.all(lpInfo[2].map(async (tkAddress) => {
-                if (isWeth(tkAddress)) {
-                    tokens.push({ symbol: 'ETH', address: dfoCore.getContextElement('wethTokenAddress') })
-                } else {
-                    const currentToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), tkAddress);
-                    const symbol = await currentToken.methods.symbol().call();
-                    tokens.push({ symbol, address: tkAddress })
+                if (tkAddress.toLowerCase() === ammData[0].toLowerCase()) {
+                    setInvolvingEth(true);
                 }
+                const currentToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), tkAddress);
+                const symbol = await currentToken.methods.symbol().call();
+                tokens.push({ symbol, address: tkAddress, isEth: tkAddress.toLowerCase() === ammData[0].toLowerCase() })
             }));
             setFreeLiquidityPoolToken({ 
                 address, 
@@ -140,12 +161,22 @@ const CreateOrEditFarmingSetup = (props) => {
                 </div> :  <>
                     <div className="row mb-4">
                         { (freeLiquidityPoolToken && freeLiquidityPoolToken.tokens.length > 0) && <div className="col-12">
-                                <b>{freeLiquidityPoolToken.name} | {freeLiquidityPoolToken.tokens.map((token) => <>{token.symbol} </>)}</b> {freeLiquidityPoolToken.tokens.map((token) => <Coin address={token.address} className="mr-2" /> )}
+                                <b>{freeLiquidityPoolToken.name} | {freeLiquidityPoolToken.tokens.map((token) => <>{!token.isEth ? token.symbol : involvingEth ? 'ETH' : token.symbol} </>)}</b> {freeLiquidityPoolToken.tokens.map((token) => <Coin address={token.address} className="mr-2" /> )}
                             </div>
                         }
                     </div>
                     {
                         freeLiquidityPoolToken && <>
+                            {
+                                (ethSelectData) && <div className="row justify-content-center mb-4">
+                                    <div className="form-check">
+                                        <input className="form-check-input" type="checkbox" checked={involvingEth} onChange={(e) => setInvolvingEth(e.target.checked)} id="involvingEth" />
+                                        <label className="form-check-label" htmlFor="involvingEth">
+                                            Use {ethSelectData.symbol} as ETH
+                                        </label>
+                                    </div>
+                                </div>
+                            }
                             <div className="row justify-content-center mb-4">
                                 <div className="col-6">
                                     <Input min={0} showCoin={true} address={rewardToken.address} value={freeRewardPerBlock} name={rewardToken.symbol} label={"Reward per block"} onChange={(e) => setFreeRewardPerBlock(e.target.value)} />
@@ -181,9 +212,9 @@ const CreateOrEditFarmingSetup = (props) => {
                         </>
                     }
                     <div className="row justify-content-center mb-4">
-                        <button onClick={() => onCancel() } className="btn btn-light mr-4">Cancel</button>
+                        <button onClick={() => onCancel() } className="btn btn-light mr-4">Back</button>
                         <button 
-                            onClick={() => editSetup ? onEditFarmingSetup({ rewardPerBlock: freeRewardPerBlock, data: freeLiquidityPoolToken, period: blockDuration, minStakeable, renewTimes }, editSetupIndex) : onAddFarmingSetup({ rewardPerBlock: freeRewardPerBlock, data: freeLiquidityPoolToken, period: blockDuration, minStakeable, renewTimes }) } 
+                            onClick={() => editSetup ? onEditFarmingSetup({ rewardPerBlock: freeRewardPerBlock, data: freeLiquidityPoolToken, period: blockDuration, minStakeable, renewTimes, involvingEth, ethAddress, ethSelectData }, editSetupIndex) : onAddFarmingSetup({ rewardPerBlock: freeRewardPerBlock, data: freeLiquidityPoolToken, period: blockDuration, minStakeable, renewTimes, involvingEth, ethAddress, ethSelectData }) } 
                             disabled={!freeLiquidityPoolToken || freeRewardPerBlock <= 0 || minStakeable <= 0 || !blockDuration} 
                             className="btn btn-secondary ml-4"
                         >
@@ -240,16 +271,26 @@ const CreateOrEditFarmingSetup = (props) => {
                             {
                                 (lockedSecondaryToken && lockedSecondaryToken.tokens.length > 0) && <div key={lockedSecondaryToken.address} className="row align-items-center mb-4">
                                     <div className="col-md-9 col-12">
-                                        <b>{lockedSecondaryToken.name} | {lockedSecondaryToken.tokens.map((token) => <>{token.symbol} </>)}</b> {lockedSecondaryToken.tokens.map((token) => <Coin address={token.address} className="mr-2" /> )}
+                                        <b>{lockedSecondaryToken.name} | {lockedSecondaryToken.tokens.map((token) => <>{!token.isEth ? token.symbol : involvingEth ? 'ETH' : token.symbol} </>)}</b> {lockedSecondaryToken.tokens.map((token) => <Coin address={token.address} className="mr-2" /> )}
                                     </div>
                                     <div className="col-md-3 col-12">
                                         <button className="btn btn-outline-danger btn-sm" onClick={() => setLockedSecondaryToken(null)}>Remove</button>
                                     </div>
                                 </div>
                             }
+                            {
+                                (lockedSecondaryToken && ethSelectData) && <div className="row justify-content-center mb-4">
+                                    <div className="form-check">
+                                        <input className="form-check-input" type="checkbox" checked={involvingEth} onChange={(e) => setInvolvingEth(e.target.checked)} id="involvingEth" />
+                                        <label className="form-check-label" htmlFor="involvingEth">
+                                            Use {ethSelectData.symbol} as ETH
+                                        </label>
+                                    </div>
+                                </div>
+                            }
                             <div className="row justify-content-center mb-4">
                                 <div className="col-6">
-                                    <Input min={0} showCoin={true} address={rewardToken.address} value={minStakeable} name={rewardToken.symbol} label={"Min stakeable"} onChange={(e) => setMinSteakeable(e.target.value)} />
+                                    <Input min={0} showCoin={true} address={lockedMainToken.address} value={minStakeable} name={lockedMainToken.symbol} label={"Min stakeable"} onChange={(e) => setMinSteakeable(e.target.value)} />
                                 </div>
                             </div>
                             <div className="row justify-content-center mt-4 mb-4">
@@ -274,7 +315,7 @@ const CreateOrEditFarmingSetup = (props) => {
                         </>
                     }
                     <div className="row justify-content-center mb-4">
-                        <button onClick={() => onCancel() } className="btn btn-light mr-4">Cancel</button>
+                        <button onClick={() => onCancel() } className="btn btn-light mr-4">Back</button>
                         <button onClick={() => setCurrentStep(1) } disabled={!lockedMainToken || lockedRewardPerBlock <= 0 || !lockedMaxLiquidity || !lockedSecondaryToken || !blockDuration} className="btn btn-secondary ml-4">Next</button>
                     </div>
                 </>
@@ -322,7 +363,7 @@ const CreateOrEditFarmingSetup = (props) => {
                     <p className="text-center text-small">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Omnis delectus incidunt laudantium distinctio velit reprehenderit quaerat, deserunt sint fugit ex consectetur voluptas suscipit numquam. Officiis maiores quaerat quod necessitatibus perspiciatis!</p>
                 </div>
                 <div className="row justify-content-center mb-4">
-                    <button onClick={() => setCurrentStep(0) } className="btn btn-light mr-4">Cancel</button>
+                    <button onClick={() => setCurrentStep(0) } className="btn btn-light mr-4">Back</button>
                     <button onClick={() => editSetup ? onEditFarmingSetup({
                         period: blockDuration,
                         data: lockedMainToken,
@@ -332,6 +373,9 @@ const CreateOrEditFarmingSetup = (props) => {
                         renewTimes,
                         secondaryToken: lockedSecondaryToken,
                         minStakeable,
+                        involvingEth,
+                        ethAddress,
+                        ethSelectData
                     }, editSetupIndex) : onAddFarmingSetup({
                         period: blockDuration,
                         data: lockedMainToken,
@@ -341,6 +385,9 @@ const CreateOrEditFarmingSetup = (props) => {
                         renewTimes,
                         secondaryToken: lockedSecondaryToken,
                         minStakeable,
+                        involvingEth,
+                        ethAddress,
+                        ethSelectData
                     })} disabled={(isRenewable && renewTimes === 0) || (lockedHasPenaltyFee && lockedPenaltyFee === 0)} className="btn btn-secondary ml-4">
                         {editSetup ? 'Edit' : 'Add'}
                     </button>

@@ -41,7 +41,7 @@ const CreateOrEditFarmingSetups = (props) => {
                     <button onClick={() => {
                         farmingSetups.forEach((_, index) => onRemoveFarmingSetup(index));
                         onCancel();
-                    }} className="btn btn-light mr-4">Cancel</button>
+                    }} className="btn btn-light mr-4">Back</button>
                     <button onClick={() => setCurrentStep(1)} disabled={!selectedFarmingType} className="btn btn-primary">Next</button>
                 </div>
             </div>
@@ -55,7 +55,7 @@ const CreateOrEditFarmingSetups = (props) => {
                     return (
                         <div key={i} className="row align-items-center text-left mb-md-2 mb-4">
                             <div className="col-md-9 col-12">
-                                <b style={{fontSize: 14}}>{ !setup.maxLiquidity ? "Free setup" : "Locked setup" } { setup.data.name }{ setup.maxLiquidity ? `${setup.data.symbol}` : ` | ${setup.data.tokens.map((token) => `${token.symbol}` )}` } - Reward: {setup.rewardPerBlock} {rewardToken.symbol}/block</b>
+                                <b style={{fontSize: 14}}>{ !setup.maxLiquidity ? "Free setup" : "Locked setup" } { setup.data.name }{ setup.maxLiquidity ? `${setup.data.symbol}` : ` | ${setup.data.tokens.map((token) => `${(setup.involvingEth && token.address.toLowerCase() === setup.ethAddress.toLowerCase()) ? 'ETH' : token.symbol}` )}` } - Reward: {setup.rewardPerBlock} {rewardToken.symbol}/block</b>
                             </div>
                             <div className="col-md-3 col-12 flex">
                                 <button className="btn btn-sm btn-outline-danger mr-1" onClick={() => onRemoveFarmingSetup(i)}><b>X</b></button> <button onClick={() => { setEditSetup(setup); setEditSetupIndex(i); }} className="btn btn-sm btn-danger ml-1"><b>EDIT</b></button>
@@ -72,7 +72,7 @@ const CreateOrEditFarmingSetups = (props) => {
                     <button onClick={() => {
                         farmingSetups.forEach((_, index) => onRemoveFarmingSetup(index));
                         onCancel();
-                    }} className="btn btn-light mr-4">Cancel</button> <button onClick={() => onFinish()} className="btn btn-secondary ml-4">Next</button>
+                    }} className="btn btn-light mr-4">Back</button> <button onClick={() => onFinish()} className="btn btn-secondary ml-4">Next</button>
                 </div>
             </div>
         </div>
