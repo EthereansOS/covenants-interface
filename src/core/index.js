@@ -254,11 +254,13 @@ export default class DFOCore {
             if (!factoryAddress) factoryAddress = this.getContextElement("farmFactoryAddress");
             console.log(factoryAddress)
             const farmFactory = new this.web3.eth.Contract(this.getContextElement("FarmFactoryABI"), factoryAddress);
-            const events = await window.getLogs({
+            const events = await this.web3.eth.getPastLogs({
                 address: factoryAddress,
                 topics: [
                     this.web3.utils.sha3('FarmMainDeployed(address,address,bytes)')
-                ]
+                ],
+                fromBlock : '0',
+                toBlock : 'latest'
             });
             console.log(events);
             this.deployedFarmingContracts = [];
