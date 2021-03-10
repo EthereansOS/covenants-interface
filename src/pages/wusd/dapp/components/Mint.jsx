@@ -204,11 +204,11 @@ const Mint = (props) => {
             if ((firstAmount.value > 0 && secondAmount.value > 0) || lpTokenAmount.value > 0) {
                 const chosenPair = pairs[pair];
                 const { ammContract, liquidityPool, ammIndex, lpIndex, token0Contract, token1Contract, token0decimals, token1decimals } = chosenPair;
-
+                const tokens = [token0Contract.options.address, token1Contract.options.address];
                 var result;
                 if (inputType !== 'eth' && !onlyByToken0 && !onlyByToken1) {
                     const gasLimit = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), inputType === 'lp').estimateGas({ from: props.dfoCore.address });
-                    result = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), inputType === 'lp').send({ from: props.dfoCore.address, gasLimit });
+                    result = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), inputType === 'lp').send({ from: props.dfoCore.address, gasLimit: props.dfoCore.applyGasMultiplier(gasLimit, tokens) });
                 } else {
                     var value = '0';
                     var operations = [];
@@ -273,7 +273,7 @@ const Mint = (props) => {
                         lpIndex
                     );
                     sendingOptions.gasLimit = await method.estimateGas(sendingOptions);
-                    result = await method.send({ ...sendingOptions, gasLimit: await method.estimateGas(sendingOptions) });
+                    result = await method.send({ ...sendingOptions, gasLimit: props.dfoCore.applyGasMultiplier(sendingOptions.gasLimit, tokens) });
                 }
 
                 props.addTransaction(result);

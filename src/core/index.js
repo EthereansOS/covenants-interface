@@ -253,7 +253,6 @@ export default class DFOCore {
         try {
             if (!factoryAddress) factoryAddress = this.getContextElement("farmFactoryAddress");
             console.log(factoryAddress)
-            const farmFactory = new this.web3.eth.Contract(this.getContextElement("FarmFactoryABI"), factoryAddress);
             const events = await this.web3.eth.getPastLogs({
                 address: factoryAddress,
                 topics: [
@@ -264,8 +263,9 @@ export default class DFOCore {
             });
             console.log(events);
             this.deployedFarmingContracts = [];
-            await Promise.all(events.map(async(event) => {
-                var farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
+            for (let i = 0; i < events.length; i++) {
+                const event = events[i];
+                const farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
                 try {
                     const contract = new this.web3.eth.Contract(this.getContextElement("FarmMainABI"), farmMainAddress);
                     const extensionAddress = await contract.methods._extension().call();
@@ -275,7 +275,7 @@ export default class DFOCore {
                 } catch (error) {
                     console.error(error);
                 }
-            }));
+            }
         } catch (error) {
             console.error(error);
             this.deployedFarmingContracts = [];
@@ -333,6 +333,12 @@ export default class DFOCore {
         return position.uniqueOwner !== this.voidEthereumAddress && position.creationBlock !== '0' && position.uniqueOwner === this.address;
     }
 
+    applyGasMultiplier = (gasLimit, tokens) => {
+        const gasMultiplierTokens = this.getContextElement("gasMultiplierTokens");
+        const hasGasMultiplierToken = tokens.some((it) => gasMultiplierTokens.includes(it));
+        return hasGasMultiplierToken ? parseInt(gasLimit) * parseFloat(this.getContextElement("gasMultiplier")) : gasLimit;
+    }
+
     loadPositions = async() => {
         try {
             this.positions = [];
@@ -359,16 +365,25 @@ export default class DFOCore {
                     fromBlock: await window.web3ForLogs.eth.getBlockNumber() - 1000,
                     toBlock: await window.web3ForLogs.eth.getBlockNumber(),
                 });
-                await Promise.all(events.map(async (event) => {
+                const found = [];
+                for (let i = 0; i < events.length; i++) {
+                    const event = events[i];
                     const { topics } = event;
-                    var positionId = this.web3.eth.abi.decodeParameter("uint256", topics[1]);
-                    const pos = await contract.methods.position(positionId).call();
-                    const setup = (await contract.methods.setups().call())[pos.setupIndex];
-                    const setupInfo = await contract.methods._setupsInfo(setup.infoIndex).call();
-                    if (this.isValidPosition(pos) && !this.positions.includes({...setup, contract, setupIndex: pos.setupIndex })) {
-                        this.positions.push({...setup, contract, setupInfo, setupIndex: pos.setupIndex });
+                    var owner = this.web3.eth.abi.decodeParameter("address", topics[3]);
+                    console.log(owner);
+                    if (owner.toLowerCase() === this.address.toLowerCase()) {
+                        var positionId = this.web3.eth.abi.decodeParameter("uint256", topics[1]);
+                        const pos = await contract.methods.position(positionId).call();
+                        if (!found.includes(pos.setupIndex)) {
+                            const setup = (await contract.methods.setups().call())[pos.setupIndex];
+                            const setupInfo = await contract.methods._setupsInfo(setup.infoIndex).call();
+                            if (this.isValidPosition(pos) && !this.positions.includes({...setup, contract, setupIndex: pos.setupIndex })) {
+                                this.positions.push({...setup, contract, setupInfo, setupIndex: pos.setupIndex });
+                                found.push(pos.setupIndex);
+                            }
+                        }
                     }
-                }))
+                }
             }));
         } catch (error) {
             console.error(error);

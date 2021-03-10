@@ -38,6 +38,7 @@ const SetupComponent = (props) => {
     const [uniqueOwner, setUniqueOwner] = useState("");
     const [apy, setApy] = useState(0);
     const [intervalId, setIntervalId] = useState(null);
+    const [rewardInterval, setRewardInterval] = useState(null);
 
     useEffect(() => {
         getSetupMetadata();
@@ -79,6 +80,33 @@ const SetupComponent = (props) => {
                 setSetupTokens(tokens);
                 setTokensContracts(contracts);
                 setTokensApprovals(approvals);
+                if (currentPosition && currentPosition.positionId) {
+                    const positionId = currentPosition.positionId;
+                    const position = await lmContract.methods.position(positionId).call();
+                    setCurrentPosition(position.creationBlock != "0" ? { ...position, positionId } : null);
+                    if (position.creationBlock != "0") {
+                        const free = position['free'];
+                        const creationBlock = position['creationBlock'];
+                        const positionSetupIndex = position['setupIndex'];
+                        const liquidityPoolTokenAmount = position['liquidityPoolTokenAmount'];
+                        const mainTokenAmount = position['mainTokenAmount'];
+                        const amounts = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, liquidityPoolTokenAmount).call();
+                        if (!setupInfo.free) {
+                            const availableReward = await lmContract.methods.calculateLockedFarmingReward(0, 0, true, positionId).call();
+                            console.log(availableReward.reward);
+                            let lockedReward = parseInt(availableReward.reward) + parseInt(position.lockedRewardPerBlock);
+                            setLockedAvailableRewards(lockedReward);
+                        } else {
+                            const availableReward = await lmContract.methods.calculateFreeFarmingReward(positionId, true).call();
+                            let freeReward = parseInt(availableReward);
+                            if (blockNumber < parseInt(setup.endBlock)) {
+                                freeReward += (parseInt(setup.rewardPerBlock) * (parseInt(position.liquidityPoolTokenAmount) / parseInt(setup.totalSupply)))
+                            }
+                            setFreeAvailableRewards(freeReward);
+                        }
+                        setManageStatus({ free, creationBlock, positionSetupIndex, liquidityPoolAmount: liquidityPoolTokenAmount, mainTokenAmount, tokensAmounts: amounts['tokensAmounts'], tokens  })
+                    }
+                }
             }, 2000);
             setIntervalId(interval);
         }
@@ -104,6 +132,7 @@ const SetupComponent = (props) => {
             */
             const setups = await lmContract.methods.setups().call();
             const farmSetup = setups[parseInt(setupIndex)];
+            console.log(farmSetup);
             const farmSetupInfo = await lmContract.methods._setupsInfo(farmSetup.infoIndex).call();
             const farmTokenCollectionAddress = await lmContract.methods._farmTokenCollection().call();
             const farmTokenCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), farmTokenCollectionAddress);

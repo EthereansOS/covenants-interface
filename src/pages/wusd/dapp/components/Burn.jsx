@@ -235,11 +235,11 @@ const Burn = (props) => {
 
             const chosenPair = pairs[pair];
             const { ammContract, liquidityPool, token0decimals, token1decimals, decimalsLp, token0Contract, token1Contract } = chosenPair;
-
+            const tokens = [token0Contract.options.address, token1Contract.options.address];
             var res;
             if(outputType !== 'eth') {
                 const gasLimit = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusdAmount], collectionData).estimateGas({ from: props.dfoCore.address });
-                res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusdAmount], collectionData).send({ from: props.dfoCore.address, gasLimit });
+                res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusdAmount], collectionData).send({ from: props.dfoCore.address, gasLimit: props.dfoCore.applyGasMultiplier(gasLimit, tokens) });
             } else {
                 var operations = [{
                     inputTokenAddress : token0Contract.options.address,
@@ -265,7 +265,7 @@ const Burn = (props) => {
                 var payload = abi.encode(["bytes", "address", "tuple(address,uint256,address,address[],address[],bool,bool,address[],uint256[])[]"],[collectionData, props.dfoCore.getContextElement("prestoAddress"), operations.map(it => Object.values(it))]);
                 var sendingOptions = {from : props.dfoCore.address};
                 var method = wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdPresto.options.address, [wusdObjectId], [wusdAmount], payload);
-                sendingOptions.gasLimit = await method.estimateGas(sendingOptions);
+                sendingOptions.gasLimit = props.dfoCore.applyGasMultiplier(await method.estimateGas(sendingOptions), tokens);
                 res = await method.send(sendingOptions);
             }
 

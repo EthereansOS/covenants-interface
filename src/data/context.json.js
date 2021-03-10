@@ -37,6 +37,8 @@ export default {
     "blockSearchSection": 9000000,
     "transactionConfirmations": 0,
     "transactionConfirmationsTimeoutMillis": 7000,
+    "gasMultiplier": 1.2,
+    "gasMultiplierTokens": [],
     "defaultItemData" : {
       "Native" : {
           "collection" : {
