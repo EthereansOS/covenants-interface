@@ -5,11 +5,12 @@ import { default as context } from '../../../data/context.json';
 import { useState } from 'react';
 import { DappMenu } from '../../../components';
 import { Create, Explore, ExploreFarmingContract, Hosted, Positions } from './components';
-import { Switch, Route, useHistory } from 'react-router';
+import { Switch, Route, useHistory, useLocation } from 'react-router';
 
 const Dapp = (props) => {
     const history = useHistory();
-    const [currentTab, setCurrentTab] = useState('explore');
+    const location = useLocation();
+    const [currentTab, setCurrentTab] = useState(location.pathname.includes("/farm/dapp/create") ? 'create' : 'explore');
 
     const connectCore = async () => {
         const core = new DFOCore(context);
@@ -59,6 +60,9 @@ const Dapp = (props) => {
                 <div className="col-12 dapp-col text-center">
                     <DappMenu className="DappMenu" onClick={(name) => setTab(name)} currentTab={currentTab} options={['Explore', 'Positions', 'Hosted', 'Create']} />
                             <Switch>
+                                <Route path="/farm/dapp/create/:address">
+                                    <Create />
+                                </Route>
                                 <Route path="/farm/dapp/:address">
                                     <ExploreFarmingContract />
                                 </Route>

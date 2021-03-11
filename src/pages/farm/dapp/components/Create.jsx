@@ -6,10 +6,12 @@ import { ethers } from "ethers";
 import ContractEditor from '../../../../components/editor/ContractEditor';
 import CreateOrEditFarmingSetups from './CreateOrEditFarmingSetups';
 import FarmingExtensionTemplateLocation from '../../../../data/FarmingExtensionTemplate.sol';
+import { useParams } from 'react-router';
 
 const abi = new ethers.utils.AbiCoder();
 
 const Create = (props) => {
+    const { address } = useParams();
     const { inputRewardToken } = props;
     // utils
     const [loading, setLoading] = useState(false);
@@ -32,13 +34,14 @@ const Create = (props) => {
     const [deployLoading, setDeployLoading] = useState(false);
     const [deployStep, setDeployStep] = useState(0);
     const [deployData, setDeployData] = useState(null);
-
     const [farmingExtensionTemplateCode, setFarmingExtensionTemplateCode] = useState("");
 
     useEffect(async () => {
         setFarmingExtensionTemplateCode(await (await fetch(FarmingExtensionTemplateLocation)).text());
         if (props.farmingContract?.rewardToken) {
             setSelectedRewardToken(props.farmingContract.rewardToken);
+        } else if (address) {
+            onSelectRewardToken(address);
         }
         if (currentBlockNumber === 0) {
             props.dfoCore.getBlockNumber().then((blockNumber) => {
@@ -66,7 +69,6 @@ const Create = (props) => {
     const onSelectRewardToken = async (address) => {
         setLoading(true);
         const rewardToken = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), address);
-        console.log(rewardToken);
         const symbol = await rewardToken.methods.symbol().call();
         setSelectedRewardToken({ symbol, address });
         setLoading(false);
