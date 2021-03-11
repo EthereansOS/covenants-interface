@@ -252,7 +252,7 @@ export default class DFOCore {
     loadDeployedFarmingContracts = async(factoryAddress) => {
         try {
             if (!factoryAddress) factoryAddress = this.getContextElement("farmFactoryAddress");
-            console.log(factoryAddress)
+            this.deployedFarmingContracts = [];
             const events = await this.web3.eth.getPastLogs({
                 address: factoryAddress,
                 topics: [
@@ -261,8 +261,6 @@ export default class DFOCore {
                 fromBlock : '0',
                 toBlock : 'latest'
             });
-            console.log(events);
-            this.deployedFarmingContracts = [];
             for (let i = 0; i < events.length; i++) {
                 const event = events[i];
                 const farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
@@ -342,7 +340,9 @@ export default class DFOCore {
     loadPositions = async() => {
         try {
             this.positions = [];
-            await this.loadDeployedFarmingContracts();
+            if (this.deployedFarmingContracts.length === 0) {
+                await this.loadDeployedFarmingContracts();
+            }
             await Promise.all(this.deployedFarmingContracts.map(async(c) => {
                 const contract = new this.web3.eth.Contract(this.getContextElement("FarmMainABI"), c.address);
                 /*
@@ -377,7 +377,7 @@ export default class DFOCore {
                         if (!found.includes(pos.setupIndex)) {
                             const setup = (await contract.methods.setups().call())[pos.setupIndex];
                             const setupInfo = await contract.methods._setupsInfo(setup.infoIndex).call();
-                            if (this.isValidPosition(pos) && !this.positions.includes({...setup, contract, setupIndex: pos.setupIndex })) {
+                            if (this.isValidPosition(pos) && !this.positions.includes({...setup, contract, setupInfo, setupIndex: pos.setupIndex })) {
                                 this.positions.push({...setup, contract, setupInfo, setupIndex: pos.setupIndex });
                                 found.push(pos.setupIndex);
                             }
