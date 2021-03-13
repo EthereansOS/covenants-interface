@@ -60,16 +60,23 @@ const Explore = (props) => {
 
     return (
         <div className="MainExploration">
-            <h6><b>Reward token address</b></h6>
-            <input type="text" className="TextRegular" placeholder="Reward token address.." value={tokenFilter} onChange={(e) => onChangeTokenFilter(e.target.value)} />
-            {/*<div className="SortSection">
+            <div className="SortBox">
+                <input type="text" className="TextRegular" placeholder="Sort by token address.." value={tokenFilter} onChange={(e) => onChangeTokenFilter(e.target.value)} />
+                <div className="SortOptions">
                     <select className="SelectRegular">
                         <option value="">Sort by..</option>
-                        <option value="1">One</option>
-                        <option value="2">Two</option>
-                        <option value="3">Three</option>
+                        <option value="1">Higher Rewards per day</option>
+                        <option value="2">Lower Rewards per day</option>
+                        <option value="3">Higher APY</option>
+                        <option value="4">Lower APY</option>
+                        <option value="5">More Setups</option>
+                        <option value="5">Less Setups</option>
                     </select>
-            </div> */}
+                <label>
+                    <input type="checkbox"></input><p>Only Active</p>
+                </label>
+                </div>
+            </div>
             {
                 loading ? 
                 <div className="row mt-4">

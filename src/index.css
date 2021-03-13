@@ -202,20 +202,21 @@ a:disabled {cursor:wait !important;}
 .FarmThings {width: 55%; margin-left: 4%; display: inline-block; vertical-align: middle;}
 .FarmThings p {display: inline-block; width: 95%; font-size: 14px; margin-bottom: 5px;}
 .FarmThings p a {text-decoration: underline !important;}
+.FarmContractOpen .FarmThings p {font-size: 12px;margin-block-start: 0em;margin-block-end: 0em;}
 .FarmSetupMain {width: 100%; display: inline-block;}
 .FarmSetupMain h5 {width: 40%; display: inline-block; font-size: 16px; vertical-align: top;}
 .FarmSetupMain h5 a {font-size: 11px; margin: 5px 5px; display: inline-block; padding: 2px 5px; border-radius: 5px; cursor: pointer;}
 .FarmSetupMain aside {width: 55%; display: inline-block;vertical-align: top; margin-left: 2%;}
 .FarmSetupMain aside p {font-size: 12px; width: 100%; text-align: right; margin-bottom: 5px;}
-.SetupFarmingInstructions {width: 100%; display: inline-block; margin-top: 10px; text-align: center;}
-.SetupFarmingInstructions p {display: inline-block; font-size: 16px; margin-bottom: 2px;}
+.SetupFarmingInstructions {width: 100%; display: inline-block; margin-top: 10px; text-align: left;}
+.SetupFarmingInstructions p {display: inline-block; font-size: 16px; margin-bottom: 2px; width: 66%; margin-left: 2%;}
 .SetupFarmingInstructions p span {font-size: 12px;}
 .SetupFarmingInstructions figure {display: inline-block; margin-right: 5px;}
 .SetupFarmingInstructions img {width: 40px; height: auto;}
 .SetupFarmingOthers {display: inline-block; width: 65%; margin: 0px 1%;vertical-align: middle;}
 .SetupFarmingOthers p {font-size: 13px; margin: 5px; display: inline-block;}
 .SetupFarmingOthers p span {font-size: 11px;}
-.SetupFarmingBotton {display: inline-block; width: 30%; vertical-align: middle; text-align: right;}
+.SetupFarmingBotton {display: inline-block; width: 15%; vertical-align: middle; text-align: left;}
 .InflationContract h4 {font-size: 20px; display: inline-block; width: 70%; font-weight: bold; vertical-align: middle; margin-bottom: 20px;}
 .InflationContractLinks {display: inline-block; width: 28%; text-align: right;vertical-align: middle;}
 .InflationContractLinks a {font-size: 11px; margin: 5px 5px; display: inline-block; padding: 2px 5px; border-radius: 5px; cursor: pointer;}
@@ -298,7 +299,13 @@ a:disabled {cursor:wait !important;}
 .InputForm .Web2ActionsBTNs {width: 100%;}
 .CreateListOp {width: 100%; padding: 10px 10px; border: 1px solid #9e6915; border-radius: 12px;}
 .CreateListOp p {font-size: 15px;}
-
+.SortBox {width: 99%; display: block; margin: 5px auto; text-align: center;}
+.SortBox .TextRegular {width: 40%; display: inline-block; margin: auto 5px auto auto;}
+.SortOptions {width: 55%;display: inline-block; margin: auto auto auto 10px;}
+.SortOptions label {display: inline-block; text-align: right; width: 40%;}
+.SortOptions label input {display: inline-block; width: auto; vertical-align: middle;}
+.SortOptions label p {display: inline-block;vertical-align: middle; margin-block-start: 0em; margin-block-end: 0em; margin-bottom: 0; margin-left: 10px; font-size: 13px;}
+.SortOptions .SelectRegular {width: 50%;}
 
 
 .fantasy {background-color: #4d4c4a !important;}

@@ -73,15 +73,25 @@ const FarmingComponent = (props) => {
                                 </figure>
                                 <aside>
                                     <h6><b>{metadata.name}</b></h6>
-                                    <Link to={ goBack ? `/farm/dapp/` : `/farm/dapp/${metadata.contractAddress}`} className={ goBack ? "backActionBTN" : "web2ActionBTN" }>{ goBack ? "Back" : "Enter" }</Link>
+                                    <Link to={ goBack ? `/farm/dapp/` : `/farm/dapp/${metadata.contractAddress}`} className={ goBack ? "backActionBTN" : "web2ActionBTN" }>{ goBack ? "Back" : "Open" }</Link>
                                 </aside>
                             </div>
                             <div className="FarmThings">
-                                    <p><b>Rewards/block</b>: {metadata.rewardPerBlock}</p>
-                                    <p><b>Active setups</b>: {metadata.freeSetups.length} free | {metadata.lockedSetups.length} locked</p>
-                                    <p><b>Setups</b>: {metadata.totalFreeSetups} free | {metadata.totalLockedSetups} locked</p>
-                                    <p><b>Host</b>: <a target="_blank" href={"https://etherscan.io/address/" + metadata.fullhost}>{metadata.host}</a></p>
+                                    <p><b>Tot Rewards/Day</b>: {metadata.rewardPerBlock}</p>
+                                    <p><b>APY</b>: 20%</p> {/*If 0 (no coingecko Info) insert "Not Available"*/}
+                                    <p><b>Active Setups</b>: {metadata.freeSetups.length} {metadata.lockedSetups.length} </p>
+                                    {goBack && <>
+                                        <p><b>Host</b>: <a target="_blank" href={"https://etherscan.io/address/" + metadata.fullhost}>{metadata.host}</a></p>
+                                        <p><b>Contract</b>: <a target="_blank" href={"https://etherscan.io/address/" + metadata.fullhost}>{metadata.host}</a></p>
+                                    </>}
+                                    {/*(Deprecated)<p><b>Setups</b>: {metadata.totalFreeSetups} free | {metadata.totalLockedSetups} locked</p>*/}
+                                    {/*<p><b>Host</b>: <a target="_blank" href={"https://etherscan.io/address/" + metadata.fullhost}>{metadata.host}</a></p>*/}
                             </div>
+                            {goBack && <>
+                                <div className="FarmThings">
+                                    
+                                </div>
+                            </>}
                             </> : <div className="col-12 justify-content-center">
                                 <div className="spinner-border text-secondary" role="status">
                                     <span className="visually-hidden"></span>
