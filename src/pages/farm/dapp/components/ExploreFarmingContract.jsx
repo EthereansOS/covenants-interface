@@ -7,9 +7,11 @@ import CreateOrEditFarmingSetups from './CreateOrEditFarmingSetups';
 
 
 const ExploreFarmingContract = (props) => {
+    const { dfoCore } = props;
     const { address } = useParams();
     const [farmingSetups, setFarmingSetups] = useState([]);
     const [contract, setContract] = useState(null);
+    const [metadata, setMetadata] = useState(null);
     const [isHost, setIsHost] = useState(false);
     const [isAdd, setIsAdd] = useState(false);
     const [isFinished, setIsFinished] = useState(false);
@@ -20,37 +22,75 @@ const ExploreFarmingContract = (props) => {
     const [newFarmingSetups, setNewFarmingSetups] = useState([]);
 
     useEffect(() => {
-        getContractMetadata()
+        if (dfoCore) {
+            getContractMetadata();
+        }
     }, []);
 
    
     const getContractMetadata = async () => {
         setLoading(true);
         try {
-            const lmContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('FarmMainABI'), address);
+            const lmContract = await dfoCore.getContract(dfoCore.getContextElement('FarmMainABI'), address);
             setContract(lmContract);
             const rewardTokenAddress = await lmContract.methods._rewardTokenAddress().call();
-            const rewardToken = await props.dfoCore.getContract(props.dfoCore.getContextElement("ERC20ABI"), rewardTokenAddress);
+            const rewardToken = await dfoCore.getContract(dfoCore.getContextElement("ERC20ABI"), rewardTokenAddress);
             const rewardTokenSymbol = await rewardToken.methods.symbol().call();
             setToken({ symbol: rewardTokenSymbol, address: rewardTokenAddress });
             const extensionAddress = await lmContract.methods._extension().call();
-            const extensionContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('FarmExtensionABI'), extensionAddress);
+            const extensionContract = await dfoCore.getContract(dfoCore.getContextElement('FarmExtensionABI'), extensionAddress);
             setExtension(extensionContract);
-            const host = await extensionContract.methods.data().call();
-            const isHost = host["host"].toLowerCase() === props.dfoCore.address.toLowerCase();
+            const { host, byMint } = await extensionContract.methods.data().call();
+            const isHost = host.toLowerCase() === dfoCore.address.toLowerCase();
             setIsHost(isHost);
             const setups = await lmContract.methods.setups().call();
+            const freeSetups = [];
+            const lockedSetups = [];
+            let totalFreeSetups = 0;
+            let totalLockedSetups = 0;
+
+            /*
+            const { data } = await axios.get(dfoCore.getContextElement("coingeckoCoinPriceURL") + rewardTokenAddress);
+            console.log(data);
+            const rewardTokenPriceUsd = data[rewardTokenAddress.toLowerCase()].usd;
+            const yearlyBlocks = 36000;
+    
+            let valueLocked = 0;
+            */
+            let rewardPerBlock = 0;
+
             const res = [];
             for (let i = 0; i < setups.length; i++) {
                 const setup = setups[i];
                 const setupInfo = await lmContract.methods._setupsInfo(setups[i].infoIndex).call();
                 if (setup.rewardPerBlock !== "0") {
+                    setupInfo.free ? totalFreeSetups += 1 : totalLockedSetups += 1;
                     res.push({...setup, setupInfo, rewardTokenAddress, setupIndex: i })
+                }
+                if (setup.active) {
+                    setupInfo.free ? freeSetups.push(setup) : lockedSetups.push(setup);
+                    rewardPerBlock += parseInt(setup.rewardPerBlock);
+                    // valueLocked += parseInt(dfoCore.toDecimals(setup.totalSupply, 18, 18));
                 }
             }
             const sortedRes = res.sort((a, b) => b.active - a.active);
             console.log(sortedRes);
             setFarmingSetups(sortedRes);
+    
+            const metadata = {
+                name: `Farm ${rewardTokenSymbol}`,
+                contractAddress: lmContract.options.address,
+                rewardTokenAddress: rewardToken.options.address,
+                rewardPerBlock: `${(dfoCore.toDecimals(dfoCore.toFixed(rewardPerBlock).toString()))} ${rewardTokenSymbol}`,
+                byMint,
+                freeSetups,
+                lockedSetups,
+                totalFreeSetups,
+                totalLockedSetups,
+                host: `${host.substring(0, 5)}...${host.substring(host.length - 3, host.length)}`,
+                fullhost: `${host}`,
+            };
+            setMetadata({ contract: lmContract, metadata, isActive: freeSetups + lockedSetups > 0 });
         } catch (error) {
             console.error(error);
         } finally {
@@ -59,7 +99,7 @@ const ExploreFarmingContract = (props) => {
     }
 
     const isWeth = (address) => {
-        return (address.toLowerCase() === props.dfoCore.getContextElement('wethTokenAddress').toLowerCase()) || (address === props.dfoCore.voidEthereumAddress);
+        return (address.toLowerCase() === dfoCore.getContextElement('wethTokenAddress').toLowerCase()) || (address === dfoCore.voidEthereumAddress);
     }
     
     const addFarmingSetup = (setup) => {
@@ -83,13 +123,13 @@ const ExploreFarmingContract = (props) => {
         setSetupsLoading(true);
         try {
             const newSetupsInfo = [];
-            const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
+            const ammAggregator = await dfoCore.getContract(dfoCore.getContextElement('AMMAggregatorABI'), dfoCore.getContextElement('ammAggregatorAddress'));
             await Promise.all(newFarmingSetups.map(async (_, i) => {
                 const setup = newFarmingSetups[i];
                 const isFree = !setup.maxLiquidity;
                 const result = await ammAggregator.methods.findByLiquidityPool(isFree ? setup.data.address : setup.secondaryToken.address).call();
                 const { amm } = result;
-                const ammContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMABI'), amm);
+                const ammContract = await dfoCore.getContract(dfoCore.getContextElement('AMMABI'), amm);
                 const res = await ammContract.methods.byLiquidityPool(isFree ? setup.data.address : setup.secondaryToken.address).call();
                 const involvingETH = res['2'].filter((address) => isWeth(address)).length > 0;
                 const setupInfo = 
@@ -100,25 +140,25 @@ const ExploreFarmingContract = (props) => {
                     info: {
                         free: isFree,
                         blockDuration: parseInt(setup.period),
-                        originalRewardPerBlock: props.dfoCore.fromDecimals(setup.rewardPerBlock),
-                        minStakeable: props.dfoCore.fromDecimals(setup.minStakeable),
-                        maxStakeable: !isFree ? props.dfoCore.fromDecimals(setup.maxLiquidity) : 0,
+                        originalRewardPerBlock: dfoCore.fromDecimals(setup.rewardPerBlock),
+                        minStakeable: dfoCore.fromDecimals(setup.minStakeable),
+                        maxStakeable: !isFree ? dfoCore.fromDecimals(setup.maxLiquidity) : 0,
                         renewTimes: setup.renewTimes,
                         ammPlugin:  amm,
                         liquidityPoolTokenAddress: isFree ? setup.data.address : setup.secondaryToken.address,
                         mainTokenAddress: result[2][0],
-                        ethereumAddress: props.dfoCore.voidEthereumAddress,
+                        ethereumAddress: dfoCore.voidEthereumAddress,
                         involvingETH,
-                        penaltyFee: isFree ? 0 : props.dfoCore.fromDecimals(parseFloat(parseFloat(setup.penaltyFee) / 100).toString()),
+                        penaltyFee: isFree ? 0 : dfoCore.fromDecimals(parseFloat(parseFloat(setup.penaltyFee) / 100).toString()),
                         setupsCount: 0,
                         lastSetupIndex: 0,
                     }
                 };
                 newSetupsInfo.push(setupInfo);
             }));
-            const gas = await extension.methods.setFarmingSetups(newSetupsInfo).estimateGas({ from: props.dfoCore.address });
+            const gas = await extension.methods.setFarmingSetups(newSetupsInfo).estimateGas({ from: dfoCore.address });
             console.log(`gas ${gas}`);
-            const result = await extension.methods.setFarmingSetups(newSetupsInfo).send({ from: props.dfoCore.address, gas });
+            const result = await extension.methods.setFarmingSetups(newSetupsInfo).send({ from: dfoCore.address, gas });
         } catch (error) {
             console.error(error);
         } finally {
@@ -147,9 +187,9 @@ const ExploreFarmingContract = (props) => {
     return (
         <div className="ListOfThings">
             {
-                contract ? 
+                (contract && metadata) ? 
                 <div className="row">
-                    <FarmingComponent className="FarmContractOpen" dfoCore={props.dfoCore} contract={contract} goBack={true} hostedBy={isHost} />
+                    <FarmingComponent className="FarmContractOpen" dfoCore={dfoCore} contract={metadata.contract} metadata={metadata.metadata} goBack={true} hostedBy={isHost} />
                 </div> : <div/>
             }
             {
@@ -161,7 +201,7 @@ const ExploreFarmingContract = (props) => {
                 {
                     (!isAdd && farmingSetups.length > 0) && farmingSetups.map((farmingSetup, setupIndex) => {
                         return (
-                            <SetupComponent key={setupIndex} className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={props.dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
+                            <SetupComponent key={setupIndex} className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
                         )
                     })
                 }

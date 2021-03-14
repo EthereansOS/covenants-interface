@@ -122,6 +122,7 @@ const Explore = (props) => {
         }
         switch (value) {
             case "":
+                setFarmingContracts(filteredFarmingContracts);
                 break;
             case "1":
                 setFarmingContracts(filteredFarmingContracts.sort((a, b) => parseInt(b.metadata.rewardPerBlock) - parseInt(a.metadata.rewardPerBlock)));
