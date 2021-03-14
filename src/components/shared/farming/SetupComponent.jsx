@@ -665,7 +665,6 @@ const SetupComponent = (props) => {
             }
             {
                 (parseInt(setup.endBlock) > parseInt(blockNumber) || currentPosition) &&
-                    <div className="col-md-6">
                         <div className="QuestionRegular">
                             {setup.active && (setupInfo.free || !currentPosition) && parseInt(setup.endBlock) > parseInt(blockNumber) && <>
                                 <label className="PrestoSelector">
