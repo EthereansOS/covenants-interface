@@ -70,13 +70,13 @@ const SetupComponent = (props) => {
                 const contracts = [];
                 for (let i = 0; i < res.liquidityPoolTokens.length; i++) {
                     const address = res.liquidityPoolTokens[i];
-                    const token = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), address);
-                    const symbol = !isWeth(address) ? await token.methods.symbol().call() : 'ETH';
-                    const decimals = await token.methods.decimals().call();
-                    const balance = !isWeth(address) ? await token.methods.balanceOf(dfoCore.address).call() : await dfoCore.web3.eth.getBalance(dfoCore.address);
-                    const approval = !isWeth(address) ? await token.methods.allowance(dfoCore.address, lmContract.options.address).call() : true;
+                    const token = !isWeth(setupInfo, address) ? await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), address) : null;
+                    const symbol = token ? await token.methods.symbol().call() : 'ETH';
+                    const decimals = token ? await token.methods.decimals().call() : 18;
+                    const balance = token ? await token.methods.balanceOf(dfoCore.address).call() : await dfoCore.web3.eth.getBalance(dfoCore.address);
+                    const approval = token ? await token.methods.allowance(dfoCore.address, lmContract.options.address).call() : true;
                     approvals.push(parseInt(approval) !== 0);
-                    tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: res.tokensAmounts[i], decimals, address, symbol });
+                    tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: res.tokensAmounts[i], decimals, address: token ? address : dfoCore.voidEthereumAddress, symbol });
                     contracts.push(token);
                 }
                 setSetupTokens(tokens);
@@ -95,7 +95,6 @@ const SetupComponent = (props) => {
                         const amounts = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, liquidityPoolTokenAmount).call();
                         if (!setupInfo.free) {
                             const availableReward = await lmContract.methods.calculateLockedFarmingReward(0, 0, true, positionId).call();
-                            console.log(availableReward.reward);
                             let lockedReward = parseInt(availableReward.reward) + parseInt(position.lockedRewardPerBlock);
                             setLockedAvailableRewards(lockedReward);
                         } else {
@@ -114,8 +113,8 @@ const SetupComponent = (props) => {
         }
     }, [tokensApprovals]);
 
-    const isWeth = (address) => {
-        return address.toLowerCase() === props.dfoCore.getContextElement('wethTokenAddress').toLowerCase();
+    const isWeth = (setupInfo, address) => {
+        return address.toLowerCase() === setupInfo.ethereumAddress.toLowerCase() && setupInfo.involvingETH;
     }
 
     const getSetupMetadata = async () => {
@@ -136,6 +135,7 @@ const SetupComponent = (props) => {
             const farmSetup = setups[parseInt(setupIndex)];
             console.log(farmSetup);
             const farmSetupInfo = await lmContract.methods._setupsInfo(farmSetup.infoIndex).call();
+            console.log(farmSetupInfo);
             const farmTokenCollectionAddress = await lmContract.methods._farmTokenCollection().call();
             const farmTokenCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), farmTokenCollectionAddress);
             if (!farmSetup.free) {
@@ -182,7 +182,6 @@ const SetupComponent = (props) => {
             const rewardToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), rewardTokenAddress);
             const rewardTokenSymbol = await rewardToken.methods.symbol().call();
             const rewardTokenDecimals = await rewardToken.methods.decimals().call();
-            console.log(`reward token balance: ${await rewardToken.methods.balanceOf(dfoCore.address).call()}`);
             setRewardTokenInfo({ contract: rewardToken, symbol: rewardTokenSymbol, decimals: rewardTokenDecimals, address: rewardTokenAddress });
 
             const lpToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), farmSetupInfo.liquidityPoolTokenAddress);
@@ -212,13 +211,13 @@ const SetupComponent = (props) => {
             const contracts = [];
             for (let i = 0; i < res.liquidityPoolTokens.length; i++) {
                 const address = res.liquidityPoolTokens[i];
-                const token = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), address);
-                const symbol = !isWeth(address) ? await token.methods.symbol().call() : 'ETH';
-                const decimals = await token.methods.decimals().call();
-                const balance = !isWeth(address) ? await token.methods.balanceOf(dfoCore.address).call() : await dfoCore.web3.eth.getBalance(dfoCore.address);
-                const approval = !isWeth(address) ? await token.methods.allowance(dfoCore.address, lmContract.options.address).call() : true;
+                const token = !isWeth(farmSetupInfo, address) ? await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), address) : null;
+                const symbol = token ? await token.methods.symbol().call() : 'ETH';
+                const decimals = token ? await token.methods.decimals().call() : 18;
+                const balance = token ? await token.methods.balanceOf(dfoCore.address).call() : await dfoCore.web3.eth.getBalance(dfoCore.address);
+                const approval = token ? await token.methods.allowance(dfoCore.address, lmContract.options.address).call() : true;
                 approvals.push(parseInt(approval) !== 0);
-                tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: res.tokensAmounts[i], decimals, address, symbol });
+                tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: res.tokensAmounts[i], decimals, address: token ? address : dfoCore.voidEthereumAddress, symbol });
                 contracts.push(token);
             }
             const info = await ammContract.methods.info().call();
@@ -345,11 +344,12 @@ const SetupComponent = (props) => {
             let ethTokenValue = 0;
             if (setupInfo.involvingETH) {
                 await Promise.all(setupTokens.map(async (token, i) => {
-                    if (isWeth(token.address)) {
+                    if (token.address === props.dfoCore.voidEthereumAddress) {
                         ethTokenIndex = i;
                     }
                 }))
             }
+            console.log(ethTokenIndex);
             let lpAmount = dfoCore.toFixed(dfoCore.fromDecimals(lpTokenAmount.toString()));
             const res = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, lpAmount).call();
             // const res = await ammContract.methods.byTokensAmount(setupInfo.liquidityPoolTokenAddress,  , stake.amount).call();
@@ -360,7 +360,9 @@ const SetupComponent = (props) => {
                 stake.amount = stake.amountIsLiquidityPool ? lpAmount : res.tokensAmounts[0];
                 ethTokenValue = res.tokensAmounts[ethTokenIndex];
             }
-
+            console.log(ethTokenValue);
+            console.log(stake);
+            console.log(currentPosition);
 
             if ((currentPosition && isValidPosition(currentPosition)) || setupInfo.free) {
                 // adding liquidity to the setup
@@ -800,13 +802,8 @@ const SetupComponent = (props) => {
                              </div>
              }
              <div className="row justify-content-center mt-4">
-                 {
-                     !lpTokenInfo.approval && <div className="col-md-6 col-12">
-                         {getApproveButton(true)}
-                     </div>
-                 }
                  <div className="col-md-6 col-12">
-                     <button className="btn btn-secondary" onClick={() => addLiquidity()} disabled={!lpTokenInfo.approval || parseFloat(lpTokenAmount) === 0}>Add</button>
+                     <button className="btn btn-secondary" onClick={() => addLiquidity()} disabled={parseFloat(ethAmount) === 0}>Add</button>
                  </div>
              </div>
          </> : inputType === 'remove' ? <> {(currentPosition && setupInfo.free) && <>

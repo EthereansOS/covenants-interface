@@ -5,13 +5,14 @@ import { FarmingComponent } from '../../../../components';
 const contracts = [{address: '0xc3BE549499f1e504c793a6c89371Bd7A98229500'}, {address: '0x761E02FEC5A21C6d3F284bd536dB2D2d33d5540B'}];
 
 const Hosted = (props) => {
+    const { dfoCore } = props;
     const [tokenFilter, setTokenFilter] = useState("");
     const [farmingContracts, setFarmingContracts] = useState([]);
     const [startingContracts, setStartingContracts] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (props.dfoCore) {
+        if (dfoCore) {
             getContracts();
         }
     }, [])
@@ -19,10 +20,58 @@ const Hosted = (props) => {
     const getContracts = async () => {
         setLoading(true);
         try {
-            const hostedContracts = props.dfoCore.getHostedFarmingContracts();
+            const hostedContracts = dfoCore.getHostedFarmingContracts();
             const mappedContracts = await Promise.all(
-                hostedContracts.map(async (contract) => { 
-                    return props.dfoCore.getContract(props.dfoCore.getContextElement('FarmMainABI'), contract.address);
+                hostedContracts.map(async (c) => { 
+                    const contract = await dfoCore.getContract(dfoCore.getContextElement('FarmMainABI'), c.address)
+                    const rewardTokenAddress = await contract.methods._rewardTokenAddress().call();
+                    const rewardToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), rewardTokenAddress);
+                    const symbol = await rewardToken.methods.symbol().call();
+                    const extensionAddress = await contract.methods._extension().call();
+                    const extensionContract = await dfoCore.getContract(dfoCore.getContextElement('FarmExtensionABI'), extensionAddress);
+                    const { host, byMint } = await extensionContract.methods.data().call();
+                    
+                    const setups = await contract.methods.setups().call();
+                    const freeSetups = [];
+                    const lockedSetups = [];
+                    let totalFreeSetups = 0;
+                    let totalLockedSetups = 0;
+            
+                    /*
+                    const { data } = await axios.get(dfoCore.getContextElement("coingeckoCoinPriceURL") + rewardTokenAddress);
+                    console.log(data);
+                    const rewardTokenPriceUsd = data[rewardTokenAddress.toLowerCase()].usd;
+                    const yearlyBlocks = 36000;
+            
+                    let valueLocked = 0;
+                    */
+                    let rewardPerBlock = 0;
+                    await Promise.all(setups.map(async (setup) => {
+                        const setupInfo = await contract.methods._setupsInfo(setup.infoIndex).call();
+                        if (setup.active) {
+                            setupInfo.free ? freeSetups.push(setup) : lockedSetups.push(setup);
+                            rewardPerBlock += parseInt(setup.rewardPerBlock);
+                            // valueLocked += parseInt(dfoCore.toDecimals(setup.totalSupply, 18, 18));
+                        }
+                        if (setup.rewardPerBlock !== "0") {
+                            setupInfo.free ? totalFreeSetups += 1 : totalLockedSetups += 1;
+                        }
+                    }))
+            
+                    const metadata = {
+                        name: `Farm ${symbol}`,
+                        contractAddress: contract.options.address,
+                        rewardTokenAddress: rewardToken.options.address,
+                        rewardPerBlock: `${(dfoCore.toDecimals(dfoCore.toFixed(rewardPerBlock).toString()))} ${symbol}`,
+                        byMint,
+                        freeSetups,
+                        lockedSetups,
+                        totalFreeSetups,
+                        totalLockedSetups,
+                        host: `${host.substring(0, 5)}...${host.substring(host.length - 3, host.length)}`,
+                        fullhost: `${host}`,
+                    };
+                    return { contract, metadata };
                 })
             );
             setFarmingContracts(mappedContracts);
@@ -81,7 +130,7 @@ const Hosted = (props) => {
                     {
                         farmingContracts.length > 0 && farmingContracts.map((farmingContract) => {
                             return (
-                                <FarmingComponent className="FarmContract" dfoCore={props.dfoCore} contract={farmingContract} hostedBy={true} hasBorder />
+                                <FarmingComponent className="FarmContract" dfoCore={dfoCore} contract={farmingContract.contract} metadata={farmingContract.metadata} hostedBy={true} hasBorder />
                             )
                         })
                     }
