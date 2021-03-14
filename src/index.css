@@ -213,9 +213,14 @@ a:disabled {cursor:wait !important;}
 .SetupFarmingInstructions p span {font-size: 12px;}
 .SetupFarmingInstructions figure {display: inline-block; margin-right: 5px;}
 .SetupFarmingInstructions img {width: 40px; height: auto;}
-.SetupFarmingOthers {display: inline-block; width: 65%; margin: 0px 1%;vertical-align: middle;}
+.SetupFarmingOthers {display: inline-block; width: 100%; margin: 10px 0%;vertical-align: middle;}
 .SetupFarmingOthers p {font-size: 13px; margin: 5px; display: inline-block;}
 .SetupFarmingOthers p span {font-size: 11px;}
+.YourFarmingPositions {width: 100%; border-top: 1px solid; padding-top: 10px; text-align: center;}
+.YourFarmingPositions p {font-size: 13px; margin: 5px; display: inline-block; width: 100%;}
+.YourFarmingPositions .web2ActionBTN {margin: 5px;}
+.FarmYou {width: 48%; display: inline-block; margin-right: 2%; vertical-align: middle; text-align: left;}
+.Farmed {width: 48%; display: inline-block;vertical-align: middle; text-align: right;}
 .SetupFarmingBotton {display: inline-block; width: 15%; vertical-align: middle; text-align: left;}
 .InflationContract h4 {font-size: 20px; display: inline-block; width: 70%; font-weight: bold; vertical-align: middle; margin-bottom: 20px;}
 .InflationContractLinks {display: inline-block; width: 28%; text-align: right;vertical-align: middle;}
@@ -306,7 +311,13 @@ a:disabled {cursor:wait !important;}
 .SortOptions label input {display: inline-block; width: auto; vertical-align: middle;}
 .SortOptions label p {display: inline-block;vertical-align: middle; margin-block-start: 0em; margin-block-end: 0em; margin-bottom: 0; margin-left: 10px; font-size: 13px;}
 .SortOptions .SelectRegular {width: 50%;}
-
+.FarmActions .QuestionRegular {text-align: center !important;}
+.FarmActions .InputTokenRegular {display: block;margin: 30px auto 0px auto;}
+.OptionalThingsFarmers {width: 95%; margin: 20px auto; display: block; text-align: center;}
+.OptionalThingsFarmers input {display: inline-block; font-size: 14px; vertical-align: middle;}
+.OptionalThingsFarmers p {display: inline-block; font-size: 14px; vertical-align: middle;}
+.FarmActions .Web3BTNs {display: block;margin: 20px auto 0px auto;}
+.LockedFarmPositions {display: block; margin: 30px auto; width: 100%;}
 
 .fantasy {background-color: #4d4c4a !important;}
 .fantasy .LogoM {background-position: 0 -50px;}
