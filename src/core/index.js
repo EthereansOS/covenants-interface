@@ -362,7 +362,7 @@ export default class DFOCore {
                     topics : [
                         window.web3.utils.sha3("Transfer(uint256,address,address)")
                     ],
-                    fromBlock: await window.web3ForLogs.eth.getBlockNumber() - 1000,
+                    fromBlock: await window.web3ForLogs.eth.getBlockNumber() - 100000,
                     toBlock: await window.web3ForLogs.eth.getBlockNumber(),
                 });
                 const found = [];

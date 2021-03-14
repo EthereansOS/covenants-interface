@@ -7,7 +7,7 @@ const Explore = (props) => {
     const [tokenFilter, setTokenFilter] = useState("");
     const [farmingContracts, setFarmingContracts] = useState([]);
     const [startingContracts, setStartingContracts] = useState([]);
-    const [activeOnly, setActiveOnly] = useState(false);
+    const [activeOnly, setActiveOnly] = useState(true);
     const [selectFilter, setSelectFilter] = useState("");
     const [loading, setLoading] = useState(true);
 
@@ -71,11 +71,12 @@ const Explore = (props) => {
                         host: `${host.substring(0, 5)}...${host.substring(host.length - 3, host.length)}`,
                         fullhost: `${host}`,
                     };
-                    return { contract, metadata, isActive: freeSetups + lockedSetups > 0 };
+                    return { contract, metadata, isActive: freeSetups.length + lockedSetups.length > 0 };
                 })
             );
-            setFarmingContracts(mappedContracts);
-            setStartingContracts(mappedContracts);
+            console.log(mappedContracts);
+            setFarmingContracts(mappedContracts.sort((a, b) => (a.isActive === b.isActive) ? 0 : a.isActive ? -1 : 1));
+            setStartingContracts(mappedContracts.sort((a, b) => (a.isActive === b.isActive) ? 0 : a.isActive ? -1 : 1));
         } catch (error) {
             console.log(error);
             setFarmingContracts([]);
@@ -131,10 +132,10 @@ const Explore = (props) => {
                 setFarmingContracts(filteredFarmingContracts.sort((a, b) => parseInt(a.metadata.rewardPerBlock) - parseInt(b.metadata.rewardPerBlock)));
                 break;
             case "5":
-                setFarmingContracts(filteredFarmingContracts.sort((a, b) => parseInt(b.metadata.freeSetups + b.metadata.lockedSetups) - parseInt(a.metadata.freeSetups + a.metadata.lockedSetups)));
+                setFarmingContracts(filteredFarmingContracts.sort((a, b) => parseInt(b.metadata.freeSetups.length + b.metadata.lockedSetups.length) - parseInt(a.metadata.freeSetups.length + a.metadata.lockedSetups.length)));
                 break
             case "6":
-                setFarmingContracts(filteredFarmingContracts.sort((a, b) => parseInt(a.metadata.freeSetups + a.metadata.lockedSetups) > parseInt(b.metadata.freeSetups + b.metadata.lockedSetups)));
+                setFarmingContracts(filteredFarmingContracts.sort((a, b) => parseInt(a.metadata.freeSetups.length + a.metadata.lockedSetups.length) > parseInt(b.metadata.freeSetups.length + b.metadata.lockedSetups.length)));
                 break
             default:
                 break

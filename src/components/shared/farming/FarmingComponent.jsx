@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 
 const FarmingComponent = (props) => {
     const { className, goBack, metadata } = props;
+    console.log("metadata", metadata);
+    const symbol = metadata.name.replace("Farm ", "");
 
     return (
         <div className={className}>
@@ -18,7 +20,7 @@ const FarmingComponent = (props) => {
                     </aside>
                 </div>
                 <div className="FarmThings">
-                        <p><b>Tot Rewards/Day</b>: {metadata.rewardPerBlock}</p>
+                        <p><b>Tot Rewards/Day</b>: {parseInt(metadata.rewardPerBlock.replace(` ${symbol}`, "")) * 6400} {symbol}</p>
                         <p><b>APY</b>: 20%</p> {/*If 0 (no coingecko Info) insert "Not Available"*/}
                         <p><b>Active Setups</b>: {metadata.freeSetups.length + metadata.lockedSetups.length} </p>
                         {goBack && <>
