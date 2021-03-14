@@ -564,7 +564,7 @@ const SetupComponent = (props) => {
     }
 
     const getEdit = () => {
-        return <div className="pb-4 px-4">
+        return <div className="FarmActions">
             <hr />
             <div className="row mt-2 align-items-center justify-content-start">
                 {
@@ -585,7 +585,7 @@ const SetupComponent = (props) => {
     }
 
     const getManageAdvanced = () => {
-        return <div className="pb-4 px-4">
+        return <div className="FarmActions">
             {
                 currentPosition &&
                 <div className="row mt-2 align-items-center justify-content-start">
@@ -667,20 +667,19 @@ const SetupComponent = (props) => {
             }
             {
                 (parseInt(setup.endBlock) > parseInt(blockNumber) || currentPosition) &&
-                <div className="row mt-4">
                     <div className="col-md-6">
                         <div className="QuestionRegular">
                             {setup.active && (setupInfo.free || !currentPosition) && parseInt(setup.endBlock) > parseInt(blockNumber) && <>
                                 <label className="PrestoSelector">
-                                    <span>Add Liquidity by Pair</span>
+                                    <span>From Pair</span>
                                     <input name="inputType" type="radio" value="add-pair" checked={inputType === "add-pair"} onChange={onInputTypeChange} />
                                 </label>
                                 <label className="PrestoSelector">
-                                    <span>Add Liquidity by ETH</span>
+                                    <span>From ETH</span>
                                     <input name="inputType" type="radio" value="add-eth" checked={inputType === "add-eth"} onChange={onInputTypeChange} />
                                 </label>
                                 <label className="PrestoSelector">
-                                    <span>Add Liquidity by LP Token</span>
+                                    <span>From LP Token</span>
                                     <input name="inputType" type="radio" value="add-lp" checked={inputType === "add-lp"} onChange={onInputTypeChange} />
                                 </label>
                             </>}
@@ -689,28 +688,21 @@ const SetupComponent = (props) => {
                                 <input name="inputType" type="radio" value="remove" checked={inputType === "remove"} onChange={onInputTypeChange} />
                             </label>}
                         </div>
-                    </div>
-                </div>
             }
             {inputType === 'add-pair' ? <>
-                <div className="row justify-content-center mt-4">
-                    <div className="col-md-9 col-12">
                         {
                             setupTokens.map((setupToken, i) => {
-                                return <div className="row text-center mb-4">
+                                return <div className="InputTokenRegular">
                                     <Input showMax={true} address={setupToken.address} value={tokensAmounts[i]} balance={setupToken.balance} min={0} onChange={(e) => onUpdateTokenAmount(e.target.value, i)} showCoin={true} showBalance={true} name={setupToken.symbol} />
                                 </div>
                             })
                         }
-                    </div>
-                </div>
                 {
-                    (!setupInfo.free || !currentPosition) && <div className="form-check">
+                    (!setupInfo.free || !currentPosition) && 
+                    <label className="OptionalThingsFarmers" htmlFor="openPositionWallet1">
                         <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => setOpenPositionForAnotherWallet(e.target.checked)} id="openPositionWallet1" />
-                        <label className="form-check-label" htmlFor="openPositionWallet1">
-                            Open position for another wallet
-                                    </label>
-                    </div>
+                        <p>External Owner</p>
+                    </label>
                 }
                 {
                     openPositionForAnotherWallet && <div className="row justify-content-center mb-4">
@@ -724,31 +716,24 @@ const SetupComponent = (props) => {
                         <b>Estimated earnings (total)</b>: {window.formatMoney(lockedEstimatedReward, 2)} {rewardTokenInfo.symbol}/block
                                 </div>
                 }
-                <div className="row justify-content-center mt-4">
+                <div className="Web3BTNs">
                     {
-                        tokensApprovals.some((value) => !value) && <div className="col-md-6 col-12">
+                        tokensApprovals.some((value) => !value) && <>
                             {getApproveButton()}
-                        </div>
+                        </>
                     }
-                    <div className="col-md-6 col-12">
-                        <button className="btn btn-secondary" onClick={() => addLiquidity()} disabled={tokensApprovals.some((value) => !value) || tokensAmounts.some((value) => value === 0)}>Add</button>
-                    </div>
+                        <a className="Web3ActionBTN" onClick={() => addLiquidity()} disabled={tokensApprovals.some((value) => !value) || tokensAmounts.some((value) => value === 0)}>Add</a>
                 </div>
             </> : inputType === 'add-lp' ? <>
-                <div className="row justify-content-center mt-4">
-                    <div className="col-md-9 col-12">
-                        <div className="row text-center mb-4">
+
+                        <div className="InputTokenRegular">
                             <Input showMax={true} address={lpTokenInfo.contract.options.address} value={lpTokenAmount} balance={dfoCore.toDecimals(lpTokenInfo.balance, lpTokenInfo.decimals)} min={0} onChange={(e) => onUpdateLpTokenAmount(e.target.value)} showCoin={true} showBalance={true} name={lpTokenInfo.symbol} />
                         </div>
-                    </div>
-                </div>
                 {
-                    (!setupInfo.free || !currentPosition) && <div className="form-check">
+                    (!setupInfo.free || !currentPosition) && <label className="OptionalThingsFarmers" htmlFor="openPosition2">
                         <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => setOpenPositionForAnotherWallet(e.target.checked)} id="openPosition2" />
-                        <label className="form-check-label" htmlFor="openPosition2">
-                            Open position for another wallet
-                                    </label>
-                    </div>
+                         <p>External Owner</p>
+                    </label>
                 }
                 {
                     openPositionForAnotherWallet && <div className="row justify-content-center mb-4">
@@ -776,18 +761,17 @@ const SetupComponent = (props) => {
              inputType === 'add-eth' ? <>
              <div className="row justify-content-center mt-4">
                  <div className="col-md-9 col-12">
-                     <div className="row text-center mb-4">
+                     <div className="InputTokenRegular">
                          <Input showMax={true} address={window.voidEthereumAddress} value={ethAmount} balance={dfoCore.toDecimals(ethBalanceOf, 18)} min={0} onChange={e => updateEthAmount(e.target.value)} showCoin={true} showBalance={true} name={"ETH"} />
                      </div>
                  </div>
              </div>
              {
-                 (!setupInfo.free || !currentPosition) && <div className="form-check">
-                     <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => setOpenPositionForAnotherWallet(e.target.checked)} id="openPosition2" />
-                     <label className="form-check-label" htmlFor="openPosition2">
-                         Open position for another wallet
-                                 </label>
-                 </div>
+                 (!setupInfo.free || !currentPosition) && 
+                     <label className="OptionalThingsFarmers" htmlFor="openPosition2">
+                        <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => setOpenPositionForAnotherWallet(e.target.checked)} id="openPosition2" />
+                         <p>External Owner</p>
+                    </label>
              }
              {
                  openPositionForAnotherWallet && <div className="row justify-content-center mb-4">
@@ -863,6 +847,10 @@ const SetupComponent = (props) => {
                 <aside>
                     <p><b>block end</b>: <a target="_blank" href={"https://etherscan.io/block/" + setup.endBlock}>{setup.endBlock}</a></p>
                     <p><b>Min to Stake</b>: {props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(setupInfo.minStakeable).toString()), 2)} {rewardTokenInfo.symbol}</p>
+                    {!setupInfo.free && <>
+                    <p><b><a>Farm Token Total Supply</a></b>: 1,000,000</p>
+                    <p><b><a>Unlock Tax</a></b>: 10 buidl</p>
+                    </>}
                 </aside>
                 {
                     setupInfo.free ? <>
@@ -881,12 +869,62 @@ const SetupComponent = (props) => {
                 <div className="SetupFarmingOthers">
                     {
                         setupInfo.free ? <>
-                            <p><b>Tot Reward/day</b>: {props.dfoCore.toDecimals(setup.rewardPerBlock)} {rewardTokenInfo.symbol} - {props.dfoCore.toDecimals(setup.rewardPerBlock)} {rewardTokenInfo.symbol} per Block  <span>(Shared)</span></p>
-                            <p><b>Deposited</b>: {props.dfoCore.toDecimals(setup.rewardPerBlock)} {rewardTokenInfo.symbol} - {props.dfoCore.toDecimals(setup.rewardPerBlock)} {rewardTokenInfo.symbol}</p>
+                            <p><b>Tot Reward/day</b>: {props.dfoCore.toDecimals(setup.rewardPerBlock)} {rewardTokenInfo.symbol} <span>(Shared)</span> - <b>Total Deposited</b>: {props.dfoCore.toDecimals(setup.rewardPerBlock)} {rewardTokenInfo.symbol} - {props.dfoCore.toDecimals(setup.rewardPerBlock)} {rewardTokenInfo.symbol}</p>
                         </> : <>
                             <p><b>Max Stakeable</b>: {window.formatMoney(dfoCore.toDecimals(setupInfo.maxStakeable), 4)} {rewardTokenInfo.symbol}</p>
                             {parseInt(setup.endBlock) > blockNumber && <p><b>Available</b>: {window.formatMoney(dfoCore.toDecimals(parseInt(setupInfo.maxStakeable) - parseInt(setup.totalSupply)), 4)} {rewardTokenInfo.symbol}</p>}
-                            <p><b>1 {setupTokens[0].symbol} Staked</b> = {parseFloat((setup.rewardPerBlock * (1 / setupInfo.maxStakeable)).toPrecision(4))} {rewardTokenInfo.symbol}/block</p>
+                        </>
+                    }
+                </div>
+                <div className="YourFarmingPositions">
+                    {
+                        setupInfo.free ? <>
+                        <div className="FarmYou">
+                            <p><b>Your Deposit</b>: 10 LP (100 buidl - 20 ETH)</p>
+                            <p><b>Earnings per Day</b>: 20 buidl</p>
+                                <a className="web2ActionBTN">Farm</a>
+                                <a className="web2ActionBTN">Withdraw</a>   
+                        </div>
+                        <div className="Farmed">
+                            <p><b>Unclamed</b>: 10 buidl</p>
+                            <a className="web2ActionBTN">Claim</a>
+                        </div>
+                        </> : <>
+                        <div className="LockedFarmTokensPosition"> 
+                            <p><b>Your Farm Token Supply</b>: 10 FT (100 buidl - 20 ETH)</p>
+                            <a className="web2ActionBTN">Withdraw Liquidity</a>
+                            <a className="web2ActionBTN">Farm</a>
+                        </div>
+                        <div className="LockedFarmPositions">
+                            <div className="FarmYou">
+                                <p><b>Position Weight</b>: 20 buidl - 0.1 FT</p>
+                                <a className="web2ActionBTN">Unlock</a>
+                            </div>
+                            <div className="Farmed">
+                                <p><b>Unclamed</b>: 10 buidl</p>
+                                <a className="web2ActionBTN">Claim</a>
+                            </div>
+                        </div>
+                        <div className="LockedFarmPositions">
+                            <div className="FarmYou">
+                            <p><b>Position Weight</b>: 20 buidl - 0.1 FT</p>
+                                <a className="web2ActionBTN">Unlock</a>
+                            </div>
+                            <div className="Farmed">
+                                <p><b>Unclamed</b>: 10 buidl</p>
+                                <a className="web2ActionBTN">Claim</a>
+                            </div>
+                        </div>
+                        <div className="LockedFarmPositions">
+                            <div className="FarmYou">
+                            <p><b>Position Weight</b>: 20 buidl - 0.1 FT</p>
+                                <a className="web2ActionBTN">Unlock</a>
+                            </div>
+                            <div className="Farmed">
+                                <p><b>Unclamed</b>: 10 buidl</p>
+                                <a className="web2ActionBTN">Claim</a>
+                            </div>
+                        </div>
                         </>
                     }
                 </div>
