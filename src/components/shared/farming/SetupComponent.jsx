@@ -139,7 +139,7 @@ const SetupComponent = (props) => {
                     setLockedPositionRewards(lockRewards);
                     setLockedPositions(lockPositions);
                 }
-            }, 2000);
+            }, 5000);
             setIntervalId(interval);
         }
     }, [tokensApprovals]);
@@ -215,6 +215,7 @@ const SetupComponent = (props) => {
                 setOpen(false);
             }
             const extensionAddress = await lmContract.methods._extension().call();
+            console.log(`extension address ${extensionAddress}`);
             const extContract = await dfoCore.getContract(dfoCore.getContextElement("FarmExtensionABI"), extensionAddress);
             setExtensionContract(extContract);
             const rewardTokenAddress = await lmContract.methods._rewardTokenAddress().call();
