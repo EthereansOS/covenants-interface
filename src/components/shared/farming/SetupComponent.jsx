@@ -590,7 +590,10 @@ const SetupComponent = (props) => {
     }
 
     const getEdit = () => {
-        return <div className="pb-4 px-4">
+        return 
+        
+        {/* @locked For upcoming release
+        <div className="pb-4 px-4">
             <hr />
             <div className="row mt-2 align-items-center justify-content-start">
                 {
@@ -607,7 +610,7 @@ const SetupComponent = (props) => {
                     {setup.active && <button onClick={() => disableSetup()} className="btn btn-primary">Disable</button>}
                 </div>
             </div>
-        </div>
+        </div>*/}
     }
 
     const getManageAdvanced = () => {
@@ -696,16 +699,15 @@ const SetupComponent = (props) => {
                     </label>
                 }
                 {
-                    openPositionForAnotherWallet && <div className="row justify-content-center mb-4">
-                        <div className="col-md-9 col-12">
+                    openPositionForAnotherWallet && 
+                        <div className="InputTokenRegular">
                             <input type="text" placeholder={"Position owner address"} value={uniqueOwner} onChange={(e) => setUniqueOwner(e.target.value)} className="form-control" id="uniqueOwner" ></input>
                         </div>
-                    </div>
                 }
                 {
-                    (!setupInfo.free && rewardTokenInfo) && <div className="row justify-content-center mt-4">
-                        <b>Estimated earnings (total)</b>: {window.formatMoney(lockedEstimatedReward, 2)} {rewardTokenInfo.symbol}/block
-                                </div>
+                    (!setupInfo.free && rewardTokenInfo) && <>
+                        <p><b>Estimated earnings until end block</b>: {window.formatMoney(lockedEstimatedReward, 2)} {rewardTokenInfo.symbol}</p> {/* @todo rewards until the end block not Reward per block */}
+                    </>
                 }
                 <div className="Web3BTNs">
                     {
