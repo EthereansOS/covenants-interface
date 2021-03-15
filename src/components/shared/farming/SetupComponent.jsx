@@ -590,7 +590,10 @@ const SetupComponent = (props) => {
     }
 
     const getEdit = () => {
-        return <div className="pb-4 px-4">
+        return 
+        
+        {/* @locked For upcoming release
+        <div className="pb-4 px-4">
             <hr />
             <div className="row mt-2 align-items-center justify-content-start">
                 {
@@ -607,24 +610,20 @@ const SetupComponent = (props) => {
                     {setup.active && <button onClick={() => disableSetup()} className="btn btn-primary">Disable</button>}
                 </div>
             </div>
-        </div>
+        </div>*/}
     }
 
     const getManageAdvanced = () => {
         if (withdrawOpen && currentPosition && setupInfo.free) {
             return <div className="FarmActions">
-                <div className="row justify-content-center mt-4">
-                    <div className="form-group w-100">
-                        <label htmlFor="formControlRange" className="text-secondary"><b>Amount:</b> {removalAmount}%</label>
                         <input type="range" value={removalAmount} onChange={(e) => setRemovalAmount(e.target.value)} className="form-control-range" id="formControlRange" />
-                    </div>
-                </div>
-                <div className="row mt-2 justify-content-evenly">
-                    <a className="web2ActionBTN mr-2" onClick={() => setRemovalAmount(10)} >10%</a>
-                    <a className="web2ActionBTN mr-2" onClick={() => setRemovalAmount(25)} >25%</a>
-                    <a className="web2ActionBTN mr-2" onClick={() => setRemovalAmount(50)} >50%</a>
-                    <a className="web2ActionBTN mr-2" onClick={() => setRemovalAmount(75)} >75%</a>
-                    <a className="web2ActionBTN mr-2" onClick={() => setRemovalAmount(90)} >90%</a>
+                <div className="Web2ActionsBTNs">
+                <p><b>Amount:</b> {removalAmount}% ({window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString(), lpTokenInfo.decimals), 2)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span> {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.tokensAmounts[i]) * removalAmount / 100).toString(), token.decimals), 2)} {token.symbol} </span>)})</p>
+                    <a className="web2ActionBTN" onClick={() => setRemovalAmount(10)} >10%</a>
+                    <a className="web2ActionBTN" onClick={() => setRemovalAmount(25)} >25%</a>
+                    <a className="web2ActionBTN" onClick={() => setRemovalAmount(50)} >50%</a>
+                    <a className="web2ActionBTN" onClick={() => setRemovalAmount(75)} >75%</a>
+                    <a className="web2ActionBTN" onClick={() => setRemovalAmount(90)} >90%</a>
                     <a className="web2ActionBTN" onClick={() => setRemovalAmount(100)} >MAX</a>
                 </div>
                 <div className="row mt-4">
@@ -644,7 +643,7 @@ const SetupComponent = (props) => {
                         <b>Remove: </b>
                             { outputType === 'to-lp' ? `${window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString(), lpTokenInfo.decimals), 2)} ${lpTokenInfo.symbol}` : `${manageStatus.tokens.map((token, i) => `${window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.tokensAmounts[i]) * removalAmount / 100).toString(), token.decimals), 2)} ${token.symbol}`)}`}</h6>
                 </div>
-                <div className="row justify-content-center mt-4">
+                <div className="Web2ActionsBTNs">
                     <a onClick={() => removeLiquidity()} className="Web3ActionBTN">Remove</a>
                 </div>
             </div>
@@ -687,16 +686,15 @@ const SetupComponent = (props) => {
                     </label>
                 }
                 {
-                    openPositionForAnotherWallet && <div className="row justify-content-center mb-4">
-                        <div className="col-md-9 col-12">
+                    openPositionForAnotherWallet && 
+                        <div className="InputTokenRegular">
                             <input type="text" placeholder={"Position owner address"} value={uniqueOwner} onChange={(e) => setUniqueOwner(e.target.value)} className="form-control" id="uniqueOwner" ></input>
                         </div>
-                    </div>
                 }
                 {
-                    (!setupInfo.free && rewardTokenInfo) && <div className="row justify-content-center mt-4">
-                        <b>Estimated earnings (total)</b>: {window.formatMoney(lockedEstimatedReward, 2)} {rewardTokenInfo.symbol}/block
-                                </div>
+                    (!setupInfo.free && rewardTokenInfo) && <>
+                        <p><b>Estimated earnings until end block</b>: {window.formatMoney(lockedEstimatedReward, 2)} {rewardTokenInfo.symbol}</p> {/* @todo rewards until the end block not Reward per block */}
+                    </>
                 }
                 <div className="Web3BTNs">
                     {

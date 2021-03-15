@@ -388,8 +388,11 @@ const Create = (props) => {
     return (
         <div className="create-component">
             <div className="row mb-4">
+                <p>Coming Soon</p>
+                {/* @locked for upcoming release 
                 { !props.farmingContract && getCreationComponent() }
                 { props.farmingContract && getFarmingContractStatus() }
+                */}
             </div>
         </div>
     )
