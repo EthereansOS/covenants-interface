@@ -5,16 +5,20 @@ import axios from 'axios';
 
 const SetupComponent = (props) => {
     let { className, dfoCore, setupIndex, lmContract, hostedBy } = props;
+    // general info and setup data
     const [setup, setSetup] = useState(null);
     const [setupInfo, setSetupInfo] = useState(null);
-    const [open, setOpen] = useState(false);
-    const [withdrawOpen, setWithdrawOpen] = useState(false);
     const [blockNumber, setBlockNumber] = useState(0);
     const [loading, setLoading] = useState(true);
+    // panel status
+    const [open, setOpen] = useState(false);
+    const [edit, setEdit] = useState(false);
+    const [withdrawOpen, setWithdrawOpen] = useState(false);
+    // amm data
     const [AMM, setAMM] = useState({ name: "", version: "" });
     const [ammContract, setAmmContract] = useState(null);
+    
     const [extensionContract, setExtensionContract] = useState(null);
-    const [edit, setEdit] = useState(false);
     const [farmTokenSymbol, setFarmTokenSymbol] = useState("");
     const [farmTokenBalance, setFarmTokenBalance] = useState(0);
     const [canActivateSetup, setCanActivateSetup] = useState(false);
@@ -34,7 +38,6 @@ const SetupComponent = (props) => {
     const [lockedPositions, setLockedPositions] = useState([]);
     const [lockedPositionStatuses, setLockedPositionStatuses] = useState([]);
     const [lockedPositionRewards, setLockedPositionRewards] = useState([]);
-    const [lockedAvailableRewards, setLockedAvailableRewards] = useState(0);
     const [updatedRewardPerBlock, setUpdatedRewardPerBlock] = useState(0);
     const [updatedRenewTimes, setUpdatedRenewTimes] = useState(0);
     const [openPositionForAnotherWallet, setOpenPositionForAnotherWallet] = useState(false);
@@ -922,7 +925,7 @@ const SetupComponent = (props) => {
                             <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>
                         }
                         {
-                            !open && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Farm</a>
+                            (!open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Farm</a>
                         }
                         {
                             (open) &&

@@ -184,6 +184,9 @@ const ExploreFarmingContract = (props) => {
         );
     }
 
+    const lockedSetups = farmingSetups.filter((s) => !s.setupInfo.free);
+    const freeSetups = farmingSetups.filter((s) => s.setupInfo.free);
+
     return (
         <div className="ListOfThings">
             {
@@ -199,11 +202,30 @@ const ExploreFarmingContract = (props) => {
             }
             <div className="ListOfThings">
                 {
-                    (!isAdd && farmingSetups.length > 0) && farmingSetups.map((farmingSetup, setupIndex) => {
-                        return (
-                            <SetupComponent key={setupIndex} className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
-                        )
-                    })
+                    (!isAdd && farmingSetups.length > 0) && <div>
+                        <h3>Locked setups</h3>
+                        {
+                            lockedSetups.length === 0 && <p><b>No locked setups available.</b></p>
+                        }
+                        { 
+                            lockedSetups.map((farmingSetup, setupIndex) => {
+                                return (
+                                    <SetupComponent key={setupIndex} className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
+                                )
+                            })
+                        }
+                        <h3>Free setups</h3>
+                        {
+                            freeSetups.length === 0 && <p><b>No free setups available.</b></p>
+                        }
+                        {
+                            freeSetups.map((farmingSetup, setupIndex) => {
+                                return (
+                                    <SetupComponent key={setupIndex} className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
+                                )
+                            })
+                        }
+                    </div>
                 }
                 {
                     (isAdd && !isFinished) && <CreateOrEditFarmingSetups 
