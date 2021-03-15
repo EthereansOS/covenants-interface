@@ -440,7 +440,7 @@ const SetupComponent = (props) => {
     }
 
     const removeLiquidity = async () => {
-        if (!removalAmount || removalAmount === 0) return;
+        if (setupInfo.free && (!removalAmount || removalAmount === 0)) return;
         setLoading(true);
         try {
             if (setupInfo.free) {
@@ -626,7 +626,7 @@ const SetupComponent = (props) => {
                     <a className="web2ActionBTN" onClick={() => setRemovalAmount(90)} >90%</a>
                     <a className="web2ActionBTN" onClick={() => setRemovalAmount(100)} >MAX</a>
                 </div>
-                <div className="row mt-4">
+                <div className="row">
                         <div className="QuestionRegular">
                             <label className="PrestoSelector">
                                 <span>To Pair</span>
@@ -638,11 +638,15 @@ const SetupComponent = (props) => {
                             </label>
                         </div>
                 </div>
-                <div className="row mt-4">
-                    <h6>
-                        <b>Remove: </b>
-                            { outputType === 'to-lp' ? `${window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString(), lpTokenInfo.decimals), 2)} ${lpTokenInfo.symbol}` : `${manageStatus.tokens.map((token, i) => `${window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.tokensAmounts[i]) * removalAmount / 100).toString(), token.decimals), 2)} ${token.symbol}`)}`}</h6>
-                </div>
+                {
+                    /*
+                    <div className="row mt-4">
+                        <h6>
+                            <b>Remove: </b>
+                                { outputType === 'to-lp' ? `${window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString(), lpTokenInfo.decimals), 2)} ${lpTokenInfo.symbol}` : `${manageStatus.tokens.map((token, i) => `${window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.tokensAmounts[i]) * removalAmount / 100).toString(), token.decimals), 2)} ${token.symbol}`)}`}</h6>
+                    </div>
+                    */
+                }
                 <div className="Web2ActionsBTNs">
                     <a onClick={() => removeLiquidity()} className="Web3ActionBTN">Remove</a>
                 </div>
@@ -894,7 +898,7 @@ const SetupComponent = (props) => {
                             <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>
                         }
                         {
-                            !open && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Farm</a>
+                            (!open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Farm</a>
                         }
                         {
                             (open) &&
