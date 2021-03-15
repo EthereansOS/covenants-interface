@@ -615,7 +615,7 @@ const SetupComponent = (props) => {
             return <div className="FarmActions">
                         <input type="range" value={removalAmount} onChange={(e) => setRemovalAmount(e.target.value)} className="form-control-range" id="formControlRange" />
                 <div className="Web2ActionsBTNs">
-                <h6><b>Amount:</b> {removalAmount}% ({window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString(), lpTokenInfo.decimals), 2)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span> {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.tokensAmounts[i]) * removalAmount / 100).toString(), token.decimals), 2)} {token.symbol} </span>)})</h6>
+                <p><b>Amount:</b> {removalAmount}% ({window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString(), lpTokenInfo.decimals), 2)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span> {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.tokensAmounts[i]) * removalAmount / 100).toString(), token.decimals), 2)} {token.symbol} </span>)})</p>
                     <a className="web2ActionBTN" onClick={() => setRemovalAmount(10)} >10%</a>
                     <a className="web2ActionBTN" onClick={() => setRemovalAmount(25)} >25%</a>
                     <a className="web2ActionBTN" onClick={() => setRemovalAmount(50)} >50%</a>
@@ -653,7 +653,7 @@ const SetupComponent = (props) => {
                         */
                         }
                 </div>
-                <div className="row justify-content-center mt-4">
+                <div className="Web2ActionsBTNs">
                     <a onClick={() => removeLiquidity()} className="Web3ActionBTN">Remove</a>
                 </div>
             </div>
