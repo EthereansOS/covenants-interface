@@ -223,20 +223,21 @@ const SetupComponent = (props) => {
             const rewardTokenApproval = await rewardToken.methods.allowance(dfoCore.address, lmContract.options.address).call();
             setRewardTokenInfo({ contract: rewardToken, symbol: rewardTokenSymbol, decimals: rewardTokenDecimals, address: rewardTokenAddress, approval: parseInt(rewardTokenApproval) !== 0  });
 
+            const bNumber = await dfoCore.getBlockNumber();
+            setBlockNumber(bNumber);
+            const ammContract = await dfoCore.getContract(dfoCore.getContextElement('AMMABI'), farmSetupInfo.ammPlugin);
+            setAmmContract(ammContract);
+
             const lpToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), farmSetupInfo.liquidityPoolTokenAddress);
             const lpTokenSymbol = await lpToken.methods.symbol().call();
             const lpTokenDecimals = await lpToken.methods.decimals().call();
             const lpTokenBalance = await lpToken.methods.balanceOf(dfoCore.address).call();
             const lpTokenApproval = await lpToken.methods.allowance(dfoCore.address, lmContract.options.address).call();
             setLpTokenInfo({ contract: lpToken, symbol: lpTokenSymbol, decimals: lpTokenDecimals, balance: lpTokenBalance, approval: parseInt(lpTokenApproval) !== 0 });
-            const bNumber = await dfoCore.getBlockNumber();
-            setBlockNumber(bNumber);
-            const ammContract = await dfoCore.getContract(dfoCore.getContextElement('AMMABI'), farmSetupInfo.ammPlugin);
-            setAmmContract(ammContract);
 
             const activateSetup = parseInt(farmSetupInfo.renewTimes) > 0 && !farmSetup.active && parseInt(farmSetupInfo.lastSetupIndex) === parseInt(setupIndex);
-
             setCanActivateSetup(activateSetup);
+
             const tokenAddress = farmSetupInfo.liquidityPoolTokenAddress;
             let res;
             if (farmSetupInfo.free) {
@@ -638,114 +639,24 @@ const SetupComponent = (props) => {
         }
 
         return <div className="FarmActions">
-            { /*
-                currentPosition &&
-                <div className="row align-items-center justify-content-start">
-                    <hr />
-                    {
-                        <div className="col-12 mt-4">
-                            <h6 style={{ fontSize: 14 }}>
-                                <b>Your position: </b>
-                                {window.formatMoney(dfoCore.toDecimals(manageStatus.liquidityPoolAmount, lpTokenInfo.decimals), 2)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span> {window.formatMoney(dfoCore.toDecimals(manageStatus.tokensAmounts[i], token.decimals), 2)} {token.symbol} </span>)}
-                                    ({setupInfo.free ? parseFloat(parseInt(manageStatus.liquidityPoolAmount / setup.totalSupply) * 100) : parseFloat(parseInt(manageStatus.mainTokenAmount) / parseInt(setupInfo.maxStakeable) * 100).toPrecision(2)}%)
-                                </h6>
-                        </div>
-                    }
-                    { 
-                        setupInfo.free && <>
-                            <div className="col-md-6 col-12">
-                                <h6 style={{ fontSize: 14 }}>
-                                    <b>Available reward:</b> {dfoCore.toDecimals(dfoCore.toFixed(freeAvailableRewards), rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}
-                                </h6>
-                            </div>
-                            {
-                                parseInt(freeAvailableRewards) > 0 && <div className="col-md-6 col-12">
-                                    <button onClick={() => withdrawReward()} className="btn btn-primary">Withdraw reward</button>
-                                </div>
-                            }
-                        </>
-                        
-                    }
-                    {
-                        
-                        !setupInfo.free && <>
-                            <div className="col-md-6 col-12">
-                                <h6 style={{ fontSize: 14 }}>
-                                    <b>Available reward:</b> {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(lockedAvailableRewards), rewardTokenInfo.decimals), 4)} {rewardTokenInfo.symbol}
-                                </h6>
-                            </div>
-                            {
-                                parseInt(lockedAvailableRewards) > 0 && <div className="col-md-6 col-12">
-                                    <button onClick={() => withdrawReward()} className="btn btn-primary">Withdraw reward</button>
-                                </div>
-                            }
-                        </>
-                        
-                    }
-                    {
-                        (!setupInfo.free && blockNumber >= parseInt(setup.startBlock) && blockNumber < parseInt(setup.endBlock)) && <>
-                            <hr />
-                            <div className="col-md-6">
-                                <p style={{ fontSize: 14 }}>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quaerat animi ipsam nemo at nobis odit temporibus autem possimus quae vel, ratione numquam modi rem accusamus, veniam neque voluptates necessitatibus enim!</p>
-                            </div>
-                            <div className="col-md-6">
-                                <div className="form-check">
-                                    <input className="form-check-input" type="checkbox" value={unwrapPair} onChange={(e) => setUnwrapPair(e.target.checked)} id="getLpToken" />
-                                    <label className="form-check-label" htmlFor="getLpToken">
-                                        Unwrap tokens
-                                        </label>
-                                </div>
-                            </div>
-                            <div className="col-12">
-                                <button onClick={() => unlockPosition()} className="btn btn-secondary">Unlock position</button>
-                            </div>
-                        </>
-                    }
-                    <hr />
-                </div>
-                */
-            }
-            { /*
-                (parseInt(farmTokenBalance) > 0 && parseInt(blockNumber) >= parseInt(setup.endBlock)) && <>
-                    <div className="row">
-                        <b>Farm token balance</b>: {window.formatMoney(props.dfoCore.toDecimals(farmTokenBalance, 18), 2)} {farmTokenSymbol}
-                    </div>
-                    <div className="row mt-2">
-                        <div className="form-check">
-                            <input className="form-check-input" type="checkbox" value={unwrapPair} onChange={(e) => setUnwrapPair(e.target.checked)} id="getLpToken" />
-                            <label className="form-check-label" htmlFor="getLpToken">
-                                Unwrap tokens
-                                </label>
-                        </div>
-                    </div>
-                    <div className="row mt-2">
-                        <button onClick={() => removeLiquidity()} className="btn btn-primary">Withdraw liquidity</button>
-                    </div>
-                </>
-                */
-            }
             {
                 (parseInt(setup.endBlock) > parseInt(blockNumber) || currentPosition) &&
                         <div className="QuestionRegular">
                             {setup.active && (setupInfo.free || !currentPosition) && parseInt(setup.endBlock) > parseInt(blockNumber) && <>
-                                <label className="PrestoSelector">
-                                    <span>From Pair</span>
-                                    <input name="inputType" type="radio" value="add-pair" checked={inputType === "add-pair"} onChange={onInputTypeChange} />
-                                </label>
-                                <label className="PrestoSelector">
-                                    <span>From ETH</span>
-                                    <input name="inputType" type="radio" value="add-eth" checked={inputType === "add-eth"} onChange={onInputTypeChange} />
-                                </label>
-                                <label className="PrestoSelector">
-                                    <span>From LP Token</span>
-                                    <input name="inputType" type="radio" value="add-lp" checked={inputType === "add-lp"} onChange={onInputTypeChange} />
-                                </label>
-                            </>}
-                            { /* (currentPosition && setupInfo.free) && <label className="PrestoSelector">
-                                <span>Remove Liquidity</span>
-                                <input name="inputType" type="radio" value="remove" checked={inputType === "remove"} onChange={onInputTypeChange} />
-                            </label>
-                            */}
+                                    <label className="PrestoSelector">
+                                        <span>From Pair</span>
+                                        <input name="inputType" type="radio" value="add-pair" checked={inputType === "add-pair"} onChange={onInputTypeChange} />
+                                    </label>
+                                    <label className="PrestoSelector">
+                                        <span>From ETH</span>
+                                        <input name="inputType" type="radio" value="add-eth" checked={inputType === "add-eth"} onChange={onInputTypeChange} />
+                                    </label>
+                                    <label className="PrestoSelector">
+                                        <span>From LP Token</span>
+                                        <input name="inputType" type="radio" value="add-lp" checked={inputType === "add-lp"} onChange={onInputTypeChange} />
+                                    </label>
+                                </>
+                            }
                         </div>
             }
             {inputType === 'add-pair' ? <>
@@ -888,13 +799,14 @@ const SetupComponent = (props) => {
                 <div className="SetupFarmingOthers">
                     {
                         setupInfo.free ? <>
-                            <p><b>Tot Reward/day</b>: {window.formatMoney(props.dfoCore.toDecimals(parseInt(setup.rewardPerBlock) * 6400), 2)} {rewardTokenInfo.symbol} - {props.dfoCore.toDecimals(setup.rewardPerBlock)} {rewardTokenInfo.symbol} per Block <span>(Shared)</span></p>
-                            <p><b>Deposited</b>: {props.dfoCore.toDecimals(setup.rewardPerBlock)} {rewardTokenInfo.symbol} - {props.dfoCore.toDecimals(setup.rewardPerBlock)} {rewardTokenInfo.symbol}</p>
+                            <p><b>Reward/day</b>: {window.formatMoney(props.dfoCore.toDecimals(parseInt(setup.rewardPerBlock) * 6400), 2)} {rewardTokenInfo.symbol} <span>(Shared)</span></p>
+                            <p><b>Deposits</b>: {window.formatMoney(props.dfoCore.toDecimals(parseInt(setup.totalSupply), lpTokenInfo.decimals), 2)} {lpTokenInfo.symbol} ({setupTokens.map((token, index) => <span>{window.formatMoney(props.dfoCore.toDecimals(token.liquidity, token.decimals), 2)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span> )})</p>
                         </> : <>
-                            <p><b>Max Stakeable</b>: {window.formatMoney(dfoCore.toDecimals(setupInfo.maxStakeable), 4)} {rewardTokenInfo.symbol}</p>
-                            {parseInt(setup.endBlock) > blockNumber && <p><b>Available</b>: {window.formatMoney(dfoCore.toDecimals(parseInt(setupInfo.maxStakeable) - parseInt(setup.totalSupply)), 4)} {rewardTokenInfo.symbol}</p>}
-                            <p><b>1 {setupTokens[0].symbol} Staked</b> = {parseFloat((setup.rewardPerBlock * (1 / setupInfo.maxStakeable)).toPrecision(4))} {rewardTokenInfo.symbol}/block</p>
-                        </>
+                            {parseInt(setup.endBlock) > blockNumber && <div>
+                            <p><b>Max Stakeable</b>: {window.formatMoney(dfoCore.toDecimals(setupInfo.maxStakeable), 4)} {rewardTokenInfo.symbol} (Available: {window.formatMoney(dfoCore.toDecimals(parseInt(setupInfo.maxStakeable) - parseInt(setup.totalSupply)), 4)} {rewardTokenInfo.symbol})</p>
+                            <p><b>{parseFloat((setup.rewardPerBlock * (1 / setupInfo.maxStakeable)).toPrecision(4))} {rewardTokenInfo.symbol} {/*Rewards until end block @todo*/}</b> (fixed) for every {setupTokens[0].symbol} locked until the end block</p>
+                            </div>}
+                            </>
                     }
                 </div>
             </div>

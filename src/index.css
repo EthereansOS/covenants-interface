@@ -318,6 +318,7 @@ a:disabled {cursor:wait !important;}
 .OptionalThingsFarmers p {display: inline-block; font-size: 14px; vertical-align: middle;}
 .FarmActions .Web3BTNs {display: block;margin: 20px auto 0px auto;}
 .LockedFarmPositions {display: block; margin: 30px auto; width: 100%;}
+.ListOfThings h3 {font-size: 20px;}
 
 .fantasy {background-color: #4d4c4a !important;}
 .fantasy .LogoM {background-position: 0 -50px;}
