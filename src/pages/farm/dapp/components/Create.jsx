@@ -140,9 +140,9 @@ const Create = (props) => {
             console.log(extensionAddress);
             const payload = props.dfoCore.web3.utils.sha3(`init(${types.join(',')})`).substring(0, 10) + (props.dfoCore.web3.eth.abi.encodeParameters(types, params).substring(2));
             console.log(payload);
-            const gas = await farmFactory.methods.deploy(payload).estimateGas({ from: props.dfoCore.address });
-            // const gas = 8000000;
-            console.log(gas);
+            //const gas = await farmFactory.methods.deploy(payload).estimateGas({ from: props.dfoCore.address });
+            const gas = 8000000;
+            //console.log(gas);
             deployTransaction = await farmFactory.methods.deploy(payload).send({ from: props.dfoCore.address, gas });
             console.log(deployTransaction);
         } catch (error) {
@@ -388,11 +388,11 @@ const Create = (props) => {
     return (
         <div className="create-component">
             <div className="row mb-4">
-                <p>Coming Soon</p>
                 {/* @locked for upcoming release 
+                <p>Coming Soon</p>
+                */}
                 { !props.farmingContract && getCreationComponent() }
                 { props.farmingContract && getFarmingContractStatus() }
-                */}
             </div>
         </div>
     )
