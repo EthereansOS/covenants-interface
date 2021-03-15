@@ -861,7 +861,6 @@ const SetupComponent = (props) => {
                         lockedPositions.length > 0 && <>
                             <div className="LockedFarmTokensPosition"> 
                                 <p><b>Your Farm Token Supply</b>: {window.formatMoney(props.dfoCore.toDecimals(farmTokenBalance, 18), 2)} {farmTokenSymbol} (100 buidl - 20 ETH)</p>
-
                             </div>
                             {
                                 lockedPositions.map((position, index) => {
@@ -887,7 +886,7 @@ const SetupComponent = (props) => {
                             canActivateSetup &&  <a className="web2ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
                         }                                
                         {
-                            parseInt(blockNumber) >= parseInt(setup.endBlock) && <a className="web2ActionBTN" onClick={() => removeLiquidity()}>Withdraw Liquidity</a>
+                            (parseInt(blockNumber) >= parseInt(setup.endBlock) && parseInt(farmTokenBalance) > 0) && <a className="web2ActionBTN" onClick={() => removeLiquidity()}>Withdraw Liquidity</a>
                         }
                         {
                             (hostedBy && extensionContract && !edit && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex) && hostedBy) &&
