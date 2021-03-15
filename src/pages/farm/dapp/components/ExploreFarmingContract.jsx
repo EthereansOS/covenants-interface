@@ -203,10 +203,7 @@ const ExploreFarmingContract = (props) => {
             <div className="ListOfThings">
                 {
                     (!isAdd && farmingSetups.length > 0) && <div>
-                        <h3>Free setups</h3>
-                        {
-                            freeSetups.length === 0 && <p><b>No free setups available.</b></p>
-                        }
+                        { freeSetups.length > 0 && <h3>Free setups</h3> }
                         {
                             freeSetups.map((farmingSetup, setupIndex) => {
                                 return (
@@ -214,10 +211,7 @@ const ExploreFarmingContract = (props) => {
                                 )
                             })
                         }
-                        <h3>Locked setups</h3>
-                        {
-                            lockedSetups.length === 0 && <p><b>No locked setups available.</b></p>
-                        }
+                        { lockedSetups.length > 0 && <h3>Locked setups</h3> }
                         { 
                             lockedSetups.map((farmingSetup, setupIndex) => {
                                 return (

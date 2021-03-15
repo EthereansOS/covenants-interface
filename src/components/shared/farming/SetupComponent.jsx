@@ -628,37 +628,21 @@ const SetupComponent = (props) => {
                     <a className="web2ActionBTN" onClick={() => setRemovalAmount(100)} >MAX</a>
                 </div>
                 <div className="row mt-4">
-                    <h6><b>Remove: </b> {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString(), lpTokenInfo.decimals), 2)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span> {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.tokensAmounts[i]) * removalAmount / 100).toString(), token.decimals), 2)} {token.symbol} </span>)}</h6>
-                </div>
-                <div className="row mt-4">
                         <div className="QuestionRegular">
                             <label className="PrestoSelector">
                                 <span>To Pair</span>
                                 <input name="outputType" type="radio" value="to-pair" checked={outputType === "to-pair"} onChange={onOutputTypeChange} />
                             </label>
-                            {
-                                /* 
-                                <label className="PrestoSelector">
-                                    <span>To ETH</span>
-                                    <input name="outputType" type="radio" value="to-eth" checked={outputType === "to-eth"} onChange={onOutputTypeChange} />
-                                </label>
-                                */
-                            }
                             <label className="PrestoSelector">
                                 <span>To LP Token</span>
                                 <input name="outputType" type="radio" value="to-lp" checked={outputType === "to-lp"} onChange={onOutputTypeChange} />
                             </label>
                         </div>
-                        {
-                                /*
-                        <div className="form-check">
-                            <input className="form-check-input" type="checkbox" value={unwrapPair} onChange={(e) => setUnwrapPair(e.target.checked)} id="getLpToken" />
-                            <label className="form-check-label" htmlFor="getLpToken">
-                                Unwrap tokens
-                            </label>
-                        </div>
-                        */
-                        }
+                </div>
+                <div className="row mt-4">
+                    <h6>
+                        <b>Remove: </b>
+                            { outputType === 'to-lp' ? `${window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString(), lpTokenInfo.decimals), 2)} ${lpTokenInfo.symbol}` : `${manageStatus.tokens.map((token, i) => `${window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.tokensAmounts[i]) * removalAmount / 100).toString(), token.decimals), 2)} ${token.symbol}`)}`}</h6>
                 </div>
                 <div className="row justify-content-center mt-4">
                     <a onClick={() => removeLiquidity()} className="Web3ActionBTN">Remove</a>
