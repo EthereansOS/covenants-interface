@@ -607,19 +607,15 @@ const SetupComponent = (props) => {
     const getManageAdvanced = () => {
         if (withdrawOpen && currentPosition && setupInfo.free) {
             return <div className="FarmActions">
-                <div className="row justify-content-center mt-4">
-                    <div className="form-group w-100">
-                        <label htmlFor="formControlRange" className="text-secondary"><b>Amount:</b> {removalAmount}%</label>
                         <input type="range" value={removalAmount} onChange={(e) => setRemovalAmount(e.target.value)} className="form-control-range" id="formControlRange" />
-                    </div>
-                </div>
-                <div className="row mt-2 justify-content-evenly">
-                    <button className="btn btn-outline-secondary mr-2" onClick={() => setRemovalAmount(10)} >10%</button>
-                    <button className="btn btn-outline-secondary mr-2" onClick={() => setRemovalAmount(25)} >25%</button>
-                    <button className="btn btn-outline-secondary mr-2" onClick={() => setRemovalAmount(50)} >50%</button>
-                    <button className="btn btn-outline-secondary mr-2" onClick={() => setRemovalAmount(75)} >75%</button>
-                    <button className="btn btn-outline-secondary mr-2" onClick={() => setRemovalAmount(90)} >90%</button>
-                    <button className="btn btn-outline-secondary" onClick={() => setRemovalAmount(100)} >MAX</button>
+                <div className="Web2ActionsBTNs">
+                <h6><b>Amount:</b> {removalAmount}%</h6>
+                    <a className="web2ActionBTN" onClick={() => setRemovalAmount(10)} >10%</a>
+                    <a className="web2ActionBTN" onClick={() => setRemovalAmount(25)} >25%</a>
+                    <a className="web2ActionBTN" onClick={() => setRemovalAmount(50)} >50%</a>
+                    <a className="web2ActionBTN" onClick={() => setRemovalAmount(75)} >75%</a>
+                    <a className="web2ActionBTN" onClick={() => setRemovalAmount(90)} >90%</a>
+                    <a className="web2ActionBTN" onClick={() => setRemovalAmount(100)} >MAX</a>
                 </div>
                 <div className="row mt-4">
                     <h6><b>Remove: </b> {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString(), lpTokenInfo.decimals), 2)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span> {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.tokensAmounts[i]) * removalAmount / 100).toString(), token.decimals), 2)} {token.symbol} </span>)}</h6>
