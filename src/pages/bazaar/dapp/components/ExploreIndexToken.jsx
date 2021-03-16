@@ -32,28 +32,8 @@ const ExploreIndexToken = (props) => {
     const [mintByEthError, setMintByEthError] = useState(false);
     const [indexPresto, setIndexPresto] = useState(null);
 
-    useEffect(async () => {
+    useEffect(() => {
         getContractMetadata();
-        setIndexPresto(await props.dfoCore.getContract(props.dfoCore.getContextElement("IndexPrestoABI"), props.dfoCore.getContextElement("indexPrestoAddress")));
-        var amms = [];
-        const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
-        var ammAddresses = await ammAggregator.methods.amms().call();
-        for (var address of ammAddresses) {
-            var contract = await props.dfoCore.getContract(props.dfoCore.getContextElement("AMMABI"), address);
-            var amm = {
-                address,
-                contract,
-                info: await contract.methods.info().call(),
-                data: await contract.methods.data().call()
-            }
-            amm.data[2] && amms.push(amm);
-        }
-        setSelectedAmmIndex(0);
-        var uniswap = amms.filter(it => it.info[0] === 'UniswapV2')[0];
-        var index = amms.indexOf(uniswap);
-        amms.splice(index, 1);
-        amms.unshift(uniswap);
-        setAmms(amms);
     }, []);
 
     useEffect(() => {
@@ -139,11 +119,35 @@ const ExploreIndexToken = (props) => {
                 }
             }));
             setMetadata({ name, symbol, symbols, mainInterface, uri, valueLocked, totalSupply, balances, ipfsInfo: res.data, info, objectId, interoperableContract, indexDecimals, percentages, contract, indexContract, decimals, approvals, contracts });
+            await getPrestoData();
         } catch (error) {
             console.error(error);
         } finally {
             setLoading(false);
         }
+    }
+
+    const getPrestoData = async () => {
+        setIndexPresto(await props.dfoCore.getContract(props.dfoCore.getContextElement("IndexPrestoABI"), props.dfoCore.getContextElement("indexPrestoAddress")));
+        var amms = [];
+        const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
+        var ammAddresses = await ammAggregator.methods.amms().call();
+        for (var address of ammAddresses) {
+            var contract = await props.dfoCore.getContract(props.dfoCore.getContextElement("AMMABI"), address);
+            var amm = {
+                address,
+                contract,
+                info: await contract.methods.info().call(),
+                data: await contract.methods.data().call()
+            }
+            amm.data[2] && amms.push(amm);
+        }
+        setSelectedAmmIndex(0);
+        var uniswap = amms.filter(it => it.info[0] === 'UniswapV2')[0];
+        var index = amms.indexOf(uniswap);
+        amms.splice(index, 1);
+        amms.unshift(uniswap);
+        setAmms(amms);
     }
 
     const onTokenApproval = (token) => {
@@ -215,26 +219,26 @@ const ExploreIndexToken = (props) => {
                 var result = await method.send(sendingOptions);
                 props.addTransaction(result);
             }
+            await getContractMetadata();
         } catch (error) {
             console.error(error)
         } finally {
-            await getContractMetadata();
             setMintLoading(false);
         }
     }
 
-    async function onByEth(e) {
+    const onByEth = (e) => {
         setMintByEth(e.target.checked);
         e.target.checked && onMintUpdate(mintValue || 0);
         e.target.checked && calculateByEth(selectedAmmIndex);
     }
 
-    function onAmmChange(e) {
+    const onAmmChange = (e) => {
         setSelectedAmmIndex(parseInt(e.target.value));
         calculateByEth(e.target.value);
     }
 
-    async function calculateByEth(ammIndex) {
+    const calculateByEth = async (ammIndex) => {
         window.inputTimeout && clearTimeout(window.inputTimeout);
         setSwapForEthValues([]);
         setMintByEthError(false);
