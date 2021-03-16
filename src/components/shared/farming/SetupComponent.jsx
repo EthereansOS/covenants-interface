@@ -901,7 +901,7 @@ const SetupComponent = (props) => {
                     {
                         lockedPositions.length > 0 && <>
                             <div className="LockedFarmTokensPosition"> 
-                                <p><b>Your Farm Token Supply</b>: {window.formatMoney(props.dfoCore.toDecimals(farmTokenBalance, 18), 2)} {/* farmTokenSymbol */"fLP"} ({setupTokens.map((setupToken, i) => `${window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(farmTokenRes[i]), setupToken.decimals), 4)} ${setupToken.symbol} ` )})</p>
+                                <p><b>Your Farm Token Supply</b>: {window.formatMoney(props.dfoCore.toDecimals(farmTokenBalance, 18), 2)} {/* farmTokenSymbol */"fLP"} - {setupTokens.map((setupToken, i) => `${window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(farmTokenRes[i]), setupToken.decimals), 4)} ${setupToken.symbol} ` )}</p>
                             </div>
                             {
                                 lockedPositions.map((position, index) => {
