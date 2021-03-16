@@ -61,8 +61,9 @@ const ExploreFarmingContract = (props) => {
 
             const res = [];
             for (let i = 0; i < setups.length; i++) {
-                const setup = setups[i];
-                const setupInfo = await lmContract.methods._setupsInfo(setups[i].infoIndex).call();
+                const [setup, setupInfo] = await lmContract.methods.setup(i).call();
+                // const setup = setups[i];
+                // const setupInfo = await lmContract.methods._setupsInfo(setups[i].infoIndex).call();
                 if (setup.rewardPerBlock !== "0") {
                     setupInfo.free ? totalFreeSetups += 1 : totalLockedSetups += 1;
                     res.push({...setup, setupInfo, rewardTokenAddress, setupIndex: i })

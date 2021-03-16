@@ -46,8 +46,9 @@ const Hosted = (props) => {
                     let valueLocked = 0;
                     */
                     let rewardPerBlock = 0;
-                    await Promise.all(setups.map(async (setup) => {
-                        const setupInfo = await contract.methods._setupsInfo(setup.infoIndex).call();
+                    await Promise.all(setups.map(async (setup, i) => {
+                        const [, setupInfo] = await contract.methods.setup(i).call();
+                        // const setupInfo = await contract.methods._setupsInfo(setup.infoIndex).call();
                         if (setup.active) {
                             setupInfo.free ? freeSetups.push(setup) : lockedSetups.push(setup);
                             rewardPerBlock += parseInt(setup.rewardPerBlock);

@@ -205,10 +205,11 @@ const SetupComponent = (props) => {
             let position = null;
             let lockPositions = [];
             let positionIds = [];
-            const setups = await lmContract.methods.setups().call();
-            const farmSetup = setups[parseInt(setupIndex)];
+            // const setups = await lmContract.methods.setups().call();
+            // const farmSetup = setups[parseInt(setupIndex)];
+            // console.log(farmSetup);
+            const [farmSetup, farmSetupInfo] = await lmContract.methods.setup(setupIndex).call();
             console.log(farmSetup);
-            const farmSetupInfo = await lmContract.methods._setupsInfo(farmSetup.infoIndex).call();
             console.log(farmSetupInfo);
             const farmTokenCollectionAddress = await lmContract.methods._farmTokenCollection().call();
             const farmTokenCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), farmTokenCollectionAddress);
