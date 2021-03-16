@@ -10,6 +10,11 @@ const SetupComponent = (props) => {
     const [setupInfo, setSetupInfo] = useState(null);
     const [blockNumber, setBlockNumber] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [activateLoading, setActivateLoading] = useState(false);
+    const [addLoading, setAddLoading] = useState(false);
+    const [removeLoading, setRemoveLoading] = useState(false);
+    const [claimLoading, setClaimLoading] = useState(false);
+    const [unlockLoading, setUnlockLoading] = useState(false);
     // panel status
     const [open, setOpen] = useState(false);
     const [edit, setEdit] = useState(false);
@@ -362,7 +367,7 @@ const SetupComponent = (props) => {
     }
 
     const activateSetup = async () => {
-        setLoading(true);
+        setActivateLoading(true);
         try {
             const gas = await lmContract.methods.activateSetup(setupIndex).estimateGas({ from: props.dfoCore.address });
             const result = await lmContract.methods.activateSetup(setupIndex).send({ from: props.dfoCore.address, gas });
@@ -370,7 +375,7 @@ const SetupComponent = (props) => {
         } catch (error) {
             console.error(error);
         } finally {
-            setLoading(false);
+            setActivateLoading(false);
         }
     }
 
@@ -423,7 +428,7 @@ const SetupComponent = (props) => {
     }
 
     const addLiquidity = async () => {
-        setLoading(true);
+        setAddLoading(true);
         try {
             const stake = {
                 setupIndex,
@@ -476,13 +481,13 @@ const SetupComponent = (props) => {
         } catch (error) {
             console.error(error);
         } finally {
-            setLoading(false);
+            setAddLoading(false);
         }
     }
 
     const removeLiquidity = async () => {
         if (setupInfo.free && (!removalAmount || removalAmount === 0)) return;
-        setLoading(true);
+        setRemoveLoading(true);
         try {
             if (setupInfo.free) {
                 const removedLiquidity = removalAmount === 100 ? manageStatus.liquidityPoolAmount : props.dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString().split('.')[0];
@@ -496,12 +501,12 @@ const SetupComponent = (props) => {
         } catch (error) {
             console.error(error);
         } finally {
-            setLoading(false);
+            setRemoveLoading(false);
         }
     }
 
     const withdrawReward = async (positionId) => {
-        setLoading(true);
+        setClaimLoading(true);
         try {
             const gasLimit = await lmContract.methods.withdrawReward(positionId || currentPosition.positionId).estimateGas({ from: dfoCore.address });
             const result = await lmContract.methods.withdrawReward(positionId || currentPosition.positionId).send({ from: dfoCore.address, gasLimit });
@@ -509,13 +514,13 @@ const SetupComponent = (props) => {
         } catch (error) {
             console.error(error);
         } finally {
-            setLoading(false);
+            setClaimLoading(false);
         }
     }
 
     const unlockPosition = async (positionId) => {
         if (!positionId) return;
-        setLoading(true);
+        setUnlockLoading(true);
         try {
             !rewardTokenInfo.approval && await rewardTokenInfo.contract.methods.approve(lmContract.options.address, await rewardTokenInfo.contract.methods.totalSupply().call()).send({ from: dfoCore.address });
             const gasLimit = await lmContract.methods.unlock(positionId, false).estimateGas({ from: dfoCore.address });
@@ -524,10 +529,10 @@ const SetupComponent = (props) => {
         } catch (error) {
             console.error(error);
         } finally {
-            setLoading(false);
+            setUnlockLoading(false);
         }
     }
-
+/*
     const updateSetup = async () => {
         setLoading(true);
         try {
@@ -587,6 +592,7 @@ const SetupComponent = (props) => {
             setLoading(false);
         }
     }
+    */
 
     const getApproveButton = (isLp) => {
         if (!isLp) {
@@ -679,17 +685,12 @@ const SetupComponent = (props) => {
                             </label>
                         </div>
                 </div>
-                {
-                    /*
-                    <div className="row mt-4">
-                        <h6>
-                            <b>Remove: </b>
-                                { outputType === 'to-lp' ? `${window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString(), lpTokenInfo.decimals), 2)} ${lpTokenInfo.symbol}` : `${manageStatus.tokens.map((token, i) => `${window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.tokensAmounts[i]) * removalAmount / 100).toString(), token.decimals), 2)} ${token.symbol}`)}`}</h6>
-                    </div>
-                    */
-                }
                 <div className="Web2ActionsBTNs">
-                    <a onClick={() => removeLiquidity()} className="Web3ActionBTN">Remove</a>
+                    {
+                        removeLoading ? <a className="Web3ActionBTN" disabled={removeLoading}>
+                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        </a> : <a onClick={() => removeLiquidity()} className="Web3ActionBTN">Remove</a>
+                    }
                 </div>
             </div>
         }
@@ -747,7 +748,11 @@ const SetupComponent = (props) => {
                             {getApproveButton()}
                         </>
                     }
-                        <a className="Web3ActionBTN" onClick={() => addLiquidity()} disabled={tokensApprovals.some((value) => !value) || tokensAmounts.some((value) => value === 0)}>Add</a>
+                    {
+                        addLoading ? <a className="Web3ActionBTN" disabled={addLoading}>
+                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        </a> : <a className="Web3ActionBTN" onClick={() => addLiquidity()} disabled={tokensApprovals.some((value) => !value) || tokensAmounts.some((value) => value === 0)}>Add</a>
+                    }
                 </div>
             </> : inputType === 'add-lp' ? <>
                         <div className="InputTokenRegular">
@@ -777,7 +782,11 @@ const SetupComponent = (props) => {
                             {getApproveButton(true)}
                         </>
                     }
-                    <a className="Web3ActionBTN" onClick={() => addLiquidity()} disabled={!lpTokenInfo.approval || parseFloat(lpTokenAmount) === 0}>Add</a>
+                    {
+                        addLoading ? <a className="Web3ActionBTN" disabled={addLoading}>
+                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        </a> : <a className="Web3ActionBTN" onClick={() => addLiquidity()} disabled={!lpTokenInfo.approval || parseFloat(lpTokenAmount) === 0}>Add</a>
+                    }
                 </div>
             </> : 
              inputType === 'add-eth' ? <>
@@ -804,7 +813,11 @@ const SetupComponent = (props) => {
                              </div>
              }
              <div className="Web3BTNs">
-                 <a className="Web3ActionBTN" onClick={() => addLiquidity()} disabled={parseFloat(ethAmount) === 0}>Add</a>
+                {
+                    addLoading ? <a className="Web3ActionBTN" disabled={addLoading}>
+                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    </a> :  <a className="Web3ActionBTN" onClick={() => addLiquidity()} disabled={parseFloat(ethAmount) === 0}>Add</a>
+                }
              </div>
          </> : <></>
         }
@@ -864,8 +877,13 @@ const SetupComponent = (props) => {
                             </>
                         }
                         {
-                            canActivateSetup &&
-                            <a className="web2ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
+                            canActivateSetup && <>
+                                {
+                                    activateLoading ? <a className="web2ActionBTN" disabled={activateLoading}>
+                                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    </a> : <a className="web2ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
+                                }
+                            </>
                         }
                         {
                             (hostedBy && extensionContract && !edit && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex) && hostedBy) &&
@@ -894,7 +912,11 @@ const SetupComponent = (props) => {
                         currentPosition && 
                         <div className="Farmed">
                             <p><b>Unclaimed</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(freeAvailableRewards), rewardTokenInfo.decimals), 4)} {rewardTokenInfo.symbol}</p>
-                            <a onClick={() => withdrawReward()} className="web2ActionBTN">Claim</a>
+                            {
+                                claimLoading ? <a className="web2ActionBTN" disabled={claimLoading}>
+                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                </a> : <a onClick={() => withdrawReward()} className="web2ActionBTN">Claim</a>
+                            }
                         </div>
                     }
                     </> : <>
@@ -910,11 +932,19 @@ const SetupComponent = (props) => {
                                             <div className="FarmYou">
                                                 <p><b>Position Weight</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(position.mainTokenAmount), setupTokens[0].decimals), 4)} {rewardTokenInfo.symbol} - {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(position.liquidityPoolTokenAmount), lpTokenInfo.decimals), 2)} {/* farmTokenSymbol */"fLP"}</p>
                                                 { parseInt(blockNumber) < parseInt(setup.endBlock) && <p><b>Give back</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseFloat(parseInt(position.reward) * parseInt(setupInfo.penaltyFee) / 1e18) + parseInt(lockedPositionStatuses[index].partiallyRedeemed)), 18), 4)} {setupTokens[0].symbol}</p> }
-                                                { parseInt(blockNumber) < parseInt(setup.endBlock) && <a onClick={() => unlockPosition(position.positionId)} className="web2ActionBTN">Unlock</a> }
+                                                {
+                                                    unlockLoading ? <a className="web2ActionBTN" disabled={unlockLoading}>
+                                                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                    </a> : parseInt(blockNumber) < parseInt(setup.endBlock) ? <a onClick={() => unlockPosition(position.positionId)} className="web2ActionBTN">Unlock</a> : <></>
+                                                }
                                             </div>
                                             <div className="Farmed">
                                                 <p><b>Unclaimed</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(lockedPositionRewards[index]), rewardTokenInfo.decimals), 4)} {rewardTokenInfo.symbol}</p>
-                                                <a onClick={() => withdrawReward(position.positionId)} className="web2ActionBTN">Claim</a>
+                                                {
+                                                    claimLoading ? <a className="web2ActionBTN" disabled={claimLoading}>
+                                                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                    </a> : <a onClick={() => withdrawReward(position.positionId)} className="web2ActionBTN">Claim</a>
+                                                }
                                             </div>
                                         </div>
                                     )
@@ -924,10 +954,22 @@ const SetupComponent = (props) => {
                     }
                     <div className="FarmYou">
                         {
-                            canActivateSetup &&  <a className="web2ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
+                            canActivateSetup && <>
+                                {
+                                    activateLoading ? <a className="web2ActionBTN" disabled={activateLoading}>
+                                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    </a> : <a className="web2ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
+                                }
+                            </>
                         }                                
                         {
-                            (parseInt(blockNumber) >= parseInt(setup.endBlock) && parseInt(farmTokenBalance) > 0) && <a className="web2ActionBTN" onClick={() => removeLiquidity()}>Withdraw Liquidity</a>
+                            (parseInt(blockNumber) >= parseInt(setup.endBlock) && parseInt(farmTokenBalance) > 0) && <>
+                                {
+                                    removeLoading ? <a className="web2ActionBTN" disabled={removeLoading}>
+                                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    </a> : <a className="web2ActionBTN" onClick={() => removeLiquidity()}>Withdraw Liquidity</a>
+                                }
+                            </>
                         }
                         {
                             (hostedBy && extensionContract && !edit && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex) && hostedBy) &&
