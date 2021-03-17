@@ -86,18 +86,20 @@ const Create = (props) => {
                 const isFree = !setup.maxLiquidity;
                 const result = await ammAggregator.methods.findByLiquidityPool(isFree ? setup.data.address : setup.secondaryToken.address).call();
                 const { amm } = result;
+                const mainTokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), isFree ? result[2][0] : setup.data.address);
+                const mainTokenDecimals = await mainTokenContract.methods.decimals().call();
 
                 const parsedSetup = 
                 [
                     isFree,
                     parseInt(setup.period),
                     props.dfoCore.fromDecimals(setup.rewardPerBlock),
-                    props.dfoCore.fromDecimals(setup.minStakeable),
-                    !isFree ? props.dfoCore.fromDecimals(setup.maxLiquidity) : 0,
+                    props.dfoCore.toFixed(props.dfoCore.fromDecimals(setup.minStakeable, mainTokenDecimals)),
+                    !isFree ? props.dfoCore.toFixed(props.dfoCore.fromDecimals(setup.maxLiquidity, mainTokenDecimals)) : 0,
                     setup.renewTimes,
                     amm,
                     isFree ? setup.data.address : setup.secondaryToken.address,
-                    result[2][0],
+                    isFree ? result[2][0] : setup.data.address,
                     props.dfoCore.voidEthereumAddress,
                     setup.involvingEth,
                     isFree ? 0 : props.dfoCore.fromDecimals(parseFloat(parseFloat(setup.penaltyFee) / 100).toString()),

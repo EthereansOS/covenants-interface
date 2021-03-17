@@ -21,7 +21,7 @@ const FarmingComponent = (props) => {
                 </div>
                 <div className="FarmThings">
                         <p><b>Tot Rewards/Day</b>: {parseInt(metadata.rewardPerBlock.replace(` ${symbol}`, "")) * 6400} {symbol}</p>
-                        <p><b>APY</b>: 20%</p> {/*If 0 (no coingecko Info) insert "Not Available"*/}
+                        {/*<p><b>APY</b>: 20%</p> If 0 (no coingecko Info) insert "Not Available"*/}
                         <p><b>Active Setups</b>: {metadata.freeSetups.length + metadata.lockedSetups.length} </p>
                         {goBack && <>
                             <p><b>Host</b>: <a target="_blank" href={"https://etherscan.io/address/" + metadata.fullhost}>{metadata.host}</a></p>

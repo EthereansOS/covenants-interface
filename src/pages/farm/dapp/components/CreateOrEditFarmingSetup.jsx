@@ -31,11 +31,12 @@ const CreateOrEditFarmingSetup = (props) => {
         setLoading(true);
         try {
             if (address === dfoCore.voidEthereumAddress) {
-                setLockedMainToken({ symbol: 'ETH', address });
+                setLockedMainToken({ symbol: 'ETH', address, decimals: 18 });
             } else {
                 const mainTokenContract = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), address);
                 const symbol = await mainTokenContract.methods.symbol().call();
-                setLockedMainToken({ symbol, address });
+                const decimals = await mainTokenContract.methods.decimals().call();
+                setLockedMainToken({ symbol, address, decimals });
             }
         } catch (error) {
             console.error(error);
@@ -117,10 +118,13 @@ const CreateOrEditFarmingSetup = (props) => {
                 const symbol = await currentToken.methods.symbol().call();
                 tokens.push({ symbol, address: tkAddress, isEth: tkAddress.toLowerCase() === ammData[0].toLowerCase() })
             }));
+            const lpTokenContract = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), address);
+            const decimals = await lpTokenContract.methods.decimals().call();
             setFreeLiquidityPoolToken({ 
                 address, 
                 name,
                 tokens,
+                decimals,
             });
         } catch (error) {
             setFreeLiquidityPoolToken(null);

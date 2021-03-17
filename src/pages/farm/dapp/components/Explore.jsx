@@ -23,61 +23,65 @@ const Explore = (props) => {
             await dfoCore.loadDeployedFarmingContracts();
             const mappedContracts = await Promise.all(
                 dfoCore.deployedFarmingContracts.map(async (c) => { 
-                    const contract = await dfoCore.getContract(dfoCore.getContextElement('FarmMainABI'), c.address)
-                    const rewardTokenAddress = await contract.methods._rewardTokenAddress().call();
-                    const rewardToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), rewardTokenAddress);
-                    const symbol = await rewardToken.methods.symbol().call();
-                    const extensionAddress = await contract.methods._extension().call();
-                    const extensionContract = await dfoCore.getContract(dfoCore.getContextElement('FarmExtensionABI'), extensionAddress);
-                    const { host, byMint } = await extensionContract.methods.data().call();
-                    
-                    const setups = await contract.methods.setups().call();
-                    const freeSetups = [];
-                    const lockedSetups = [];
-                    let totalFreeSetups = 0;
-                    let totalLockedSetups = 0;
-            
-                    /*
-                    const { data } = await axios.get(dfoCore.getContextElement("coingeckoCoinPriceURL") + rewardTokenAddress);
-                    console.log(data);
-                    const rewardTokenPriceUsd = data[rewardTokenAddress.toLowerCase()].usd;
-                    const yearlyBlocks = 36000;
-            
-                    let valueLocked = 0;
-                    */
-                    let rewardPerBlock = 0;
-                    await Promise.all(setups.map(async (setup, i) => {
-                        const [, setupInfo] = await contract.methods.setup(i).call();
-                        // const setupInfo = await contract.methods._setupsInfo(setup.infoIndex).call();
-                        if (setup.active) {
-                            setupInfo.free ? freeSetups.push(setup) : lockedSetups.push(setup);
-                            rewardPerBlock += parseInt(setup.rewardPerBlock);
-                            // valueLocked += parseInt(dfoCore.toDecimals(setup.totalSupply, 18, 18));
-                        }
-                        if (setup.rewardPerBlock !== "0") {
-                            setupInfo.free ? totalFreeSetups += 1 : totalLockedSetups += 1;
-                        }
-                    }))
-            
-                    const metadata = {
-                        name: `Farm ${symbol}`,
-                        contractAddress: contract.options.address,
-                        rewardTokenAddress: rewardToken.options.address,
-                        rewardPerBlock: `${(dfoCore.toDecimals(dfoCore.toFixed(rewardPerBlock).toString()))} ${symbol}`,
-                        byMint,
-                        freeSetups,
-                        lockedSetups,
-                        totalFreeSetups,
-                        totalLockedSetups,
-                        host: `${host.substring(0, 5)}...${host.substring(host.length - 3, host.length)}`,
-                        fullhost: `${host}`,
-                    };
-                    return { contract, metadata, isActive: freeSetups.length + lockedSetups.length > 0 };
+                    try {
+                        const contract = await dfoCore.getContract(dfoCore.getContextElement('FarmMainABI'), c.address)
+                        const rewardTokenAddress = await contract.methods._rewardTokenAddress().call();
+                        const rewardToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), rewardTokenAddress);
+                        const symbol = await rewardToken.methods.symbol().call();
+                        const extensionAddress = await contract.methods._extension().call();
+                        const extensionContract = await dfoCore.getContract(dfoCore.getContextElement('FarmExtensionABI'), extensionAddress);
+                        const { host, byMint } = await extensionContract.methods.data().call();
+                        
+                        const setups = await contract.methods.setups().call();
+                        const freeSetups = [];
+                        const lockedSetups = [];
+                        let totalFreeSetups = 0;
+                        let totalLockedSetups = 0;
+                
+                        /*
+                        const { data } = await axios.get(dfoCore.getContextElement("coingeckoCoinPriceURL") + rewardTokenAddress);
+                        console.log(data);
+                        const rewardTokenPriceUsd = data[rewardTokenAddress.toLowerCase()].usd;
+                        const yearlyBlocks = 36000;
+                
+                        let valueLocked = 0;
+                        */
+                        let rewardPerBlock = 0;
+                        await Promise.all(setups.map(async (setup, i) => {
+                            const {'0': s, '1': setupInfo} = await contract.methods.setup(i).call();
+                            console.log(setupInfo);
+                            // const setupInfo = await contract.methods._setupsInfo(setup.infoIndex).call();
+                            if (setup.active) {
+                                setupInfo.free ? freeSetups.push(setup) : lockedSetups.push(setup);
+                                rewardPerBlock += parseInt(setup.rewardPerBlock);
+                                // valueLocked += parseInt(dfoCore.toDecimals(setup.totalSupply, 18, 18));
+                            }
+                            if (setup.rewardPerBlock !== "0") {
+                                setupInfo.free ? totalFreeSetups += 1 : totalLockedSetups += 1;
+                            }
+                        }))
+                
+                        const metadata = {
+                            name: `Farm ${symbol}`,
+                            contractAddress: contract.options.address,
+                            rewardTokenAddress: rewardToken.options.address,
+                            rewardPerBlock: `${(dfoCore.toDecimals(dfoCore.toFixed(rewardPerBlock).toString()))} ${symbol}`,
+                            byMint,
+                            freeSetups,
+                            lockedSetups,
+                            totalFreeSetups,
+                            totalLockedSetups,
+                            host: `${host.substring(0, 5)}...${host.substring(host.length - 3, host.length)}`,
+                            fullhost: `${host}`,
+                        };
+                        return { contract, metadata, isActive: freeSetups.length + lockedSetups.length > 0 };
+                    } catch (error) {
+                        console.error(error);
+                    }
                 })
             );
-            console.log(mappedContracts);
-            setFarmingContracts(mappedContracts.sort((a, b) => (a.isActive === b.isActive) ? 0 : a.isActive ? -1 : 1));
-            setStartingContracts(mappedContracts.sort((a, b) => (a.isActive === b.isActive) ? 0 : a.isActive ? -1 : 1));
+            setFarmingContracts(mappedContracts.filter((c) => c).sort((a, b) => (a.isActive === b.isActive) ? 0 : a.isActive ? -1 : 1));
+            setStartingContracts(mappedContracts.filter((c) => c).sort((a, b) => (a.isActive === b.isActive) ? 0 : a.isActive ? -1 : 1));
         } catch (error) {
             console.log(error);
             setFarmingContracts([]);

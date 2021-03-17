@@ -61,7 +61,7 @@ const ExploreFarmingContract = (props) => {
 
             const res = [];
             for (let i = 0; i < setups.length; i++) {
-                const [setup, setupInfo] = await lmContract.methods.setup(i).call();
+                const { '0': setup, '1': setupInfo } = await lmContract.methods.setup(i).call();
                 // const setup = setups[i];
                 // const setupInfo = await lmContract.methods._setupsInfo(setups[i].infoIndex).call();
                 if (setup.rewardPerBlock !== "0") {

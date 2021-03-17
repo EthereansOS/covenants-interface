@@ -258,8 +258,8 @@ export default class DFOCore {
                 topics: [
                     this.web3.utils.sha3('FarmMainDeployed(address,address,bytes)')
                 ],
-                fromBlock : '0',
-                toBlock : 'latest'
+                fromBlock: 0,
+                toBlock: 'latest'
             });
             for (let i = 0; i < events.length; i++) {
                 const event = events[i];
@@ -274,6 +274,7 @@ export default class DFOCore {
                     console.error(error);
                 }
             }
+            console.log(this.deployedFarmingContracts);
         } catch (error) {
             console.error(error);
             this.deployedFarmingContracts = [];
@@ -345,24 +346,12 @@ export default class DFOCore {
             }
             await Promise.all(this.deployedFarmingContracts.map(async(c) => {
                 const contract = new this.web3.eth.Contract(this.getContextElement("FarmMainABI"), c.address);
-                /*
-                const events = await contract.getPastEvents('Transfer', { filter: { to: this.address }, fromBlock: 11806961 });
-                await Promise.all(events.map(async(event) => {
-                    const { returnValues } = event;
-                    const { positionId } = returnValues;
-                    const position = await contract.methods.position(positionId).call();
-                    const setup = (await contract.methods.setups().call())[position.setupIndex];
-                    if (this.isValidPosition(position) && !this.positions.includes({...setup, contract, setupIndex: position.setupIndex })) {
-                        this.positions.push({...setup, contract, setupIndex: position.setupIndex });
-                    }
-                }))
-                */
                 const events = await window.getLogs({
                     address : c.address,
                     topics : [
                         window.web3.utils.sha3("Transfer(uint256,address,address)")
                     ],
-                    fromBlock: await window.web3ForLogs.eth.getBlockNumber() - 100000,
+                    fromBlock: this.getContextElement('deploySearchStart'),
                     toBlock: await window.web3ForLogs.eth.getBlockNumber(),
                 });
                 const found = [];
@@ -375,8 +364,9 @@ export default class DFOCore {
                         var positionId = this.web3.eth.abi.decodeParameter("uint256", topics[1]);
                         const pos = await contract.methods.position(positionId).call();
                         if (!found.includes(pos.setupIndex)) {
-                            const setup = (await contract.methods.setups().call())[pos.setupIndex];
-                            const setupInfo = await contract.methods._setupsInfo(setup.infoIndex).call();
+                            const {'0': setup, '1': setupInfo} = await contract.methods.setup(pos.setupIndex).call();
+                            // const setup = (await contract.methods.setups().call())[pos.setupIndex];
+                            // const setupInfo = await contract.methods._setupsInfo(setup.infoIndex).call();
                             if (this.isValidPosition(pos) && !this.positions.includes({...setup, contract, setupInfo, setupIndex: pos.setupIndex })) {
                                 this.positions.push({...setup, contract, setupInfo, setupIndex: pos.setupIndex });
                                 found.push(pos.setupIndex);
