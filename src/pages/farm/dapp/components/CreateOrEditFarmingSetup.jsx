@@ -56,25 +56,30 @@ const CreateOrEditFarmingSetup = (props) => {
             const ammAddress = res['amm'];
             const ammContract = await dfoCore.getContract(dfoCore.getContextElement('AMMABI'), ammAddress);
             const ammData = await ammContract.methods.data().call();
-            if (ammData[0] === dfoCore.voidEthereumAddress) {
-                setEthAddress(dfoCore.voidEthereumAddress);
-                setEthSelectData(null);
-            } else {
-                setEthAddress(ammData[0]);
-                const notEthToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), ammData[0]);
-                const notEthTokenSymbol = await notEthToken.methods.symbol().call();
-                setEthSelectData({ symbol: notEthTokenSymbol })
-            }
             const secondatoryTokenInfo = await ammContract.methods.byLiquidityPool(address).call();
             const tokens = [];
+            let mainTokenFound = false;
             await Promise.all(secondatoryTokenInfo[2].map(async (tkAddress) => {
                 if (tkAddress.toLowerCase() === ammData[0].toLowerCase()) {
                     setInvolvingEth(true);
+                    if (ammData[0] === dfoCore.voidEthereumAddress) {
+                        setEthAddress(dfoCore.voidEthereumAddress);
+                        setEthSelectData(null);
+                    } else {
+                        setEthAddress(ammData[0]);
+                        const notEthToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), ammData[0]);
+                        const notEthTokenSymbol = await notEthToken.methods.symbol().call();
+                        setEthSelectData({ symbol: notEthTokenSymbol })
+                    }
+                }
+                if (tkAddress.toLowerCase() === lockedMainToken.address.toLowerCase()) {
+                    mainTokenFound = true;
                 }
                 const currentToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), tkAddress);
                 const symbol = await currentToken.methods.symbol().call();
                 tokens.push({ symbol, address: tkAddress, isEth: tkAddress.toLowerCase() === ammData[0].toLowerCase() })
             }));
+            if (!mainTokenFound) return;
             setLockedSecondaryToken({ 
                 address, 
                 name,
@@ -99,20 +104,20 @@ const CreateOrEditFarmingSetup = (props) => {
             const ammAddress = res['amm'];
             const ammContract = await dfoCore.getContract(dfoCore.getContextElement('AMMABI'), ammAddress);
             const ammData = await ammContract.methods.data().call();
-            if (ammData[0] === dfoCore.voidEthereumAddress) {
-                setEthAddress(dfoCore.voidEthereumAddress);
-                setEthSelectData(null);
-            } else {
-                setEthAddress(ammData[0]);
-                const notEthToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), ammData[0]);
-                const notEthTokenSymbol = await notEthToken.methods.symbol().call();
-                setEthSelectData({ symbol: notEthTokenSymbol })
-            }
             const lpInfo = await ammContract.methods.byLiquidityPool(address).call();
             const tokens = [];
             await Promise.all(lpInfo[2].map(async (tkAddress) => {
                 if (tkAddress.toLowerCase() === ammData[0].toLowerCase()) {
                     setInvolvingEth(true);
+                    if (ammData[0] === dfoCore.voidEthereumAddress) {
+                        setEthAddress(dfoCore.voidEthereumAddress);
+                        setEthSelectData(null);
+                    } else {
+                        setEthAddress(ammData[0]);
+                        const notEthToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), ammData[0]);
+                        const notEthTokenSymbol = await notEthToken.methods.symbol().call();
+                        setEthSelectData({ symbol: notEthTokenSymbol })
+                    }
                 }
                 const currentToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), tkAddress);
                 const symbol = await currentToken.methods.symbol().call();
