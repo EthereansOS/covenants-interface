@@ -262,6 +262,7 @@ const SetupComponent = (props) => {
             setLockedPositions(lockPositions);
             if (!position) {
                 setOpen(false);
+                setWithdrawOpen(false);
             }
             const extensionAddress = await lmContract.methods._extension().call();
             console.log(`extension address ${extensionAddress}`);
