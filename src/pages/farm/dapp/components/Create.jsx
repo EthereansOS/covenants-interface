@@ -68,10 +68,17 @@ const Create = (props) => {
 
     const onSelectRewardToken = async (address) => {
         setLoading(true);
-        const rewardToken = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), address);
-        const symbol = await rewardToken.methods.symbol().call();
-        setSelectedRewardToken({ symbol, address });
-        setLoading(false);
+        try {
+            const rewardToken = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), address);
+            const symbol = await rewardToken.methods.symbol().call();
+            const decimals = await rewardToken.methods.decimals().call();
+            setSelectedRewardToken({ symbol, address, decimals });
+        } catch (error) {
+            console.error(error);
+            setSelectedRewardToken(null);
+        } finally {
+            setLoading(false);
+        }
     }
 
     const initializeDeployData = async () => {
@@ -86,20 +93,20 @@ const Create = (props) => {
                 const isFree = !setup.maxLiquidity;
                 const result = await ammAggregator.methods.findByLiquidityPool(isFree ? setup.data.address : setup.secondaryToken.address).call();
                 const { amm } = result;
-                const mainTokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), isFree ? result[2][0] : setup.data.address);
+                const mainTokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), isFree ? setup.freeMainToken.address : setup.data.address);
                 const mainTokenDecimals = await mainTokenContract.methods.decimals().call();
 
                 const parsedSetup = 
                 [
                     isFree,
                     parseInt(setup.period),
-                    props.dfoCore.fromDecimals(setup.rewardPerBlock),
+                    props.dfoCore.fromDecimals(setup.rewardPerBlock, selectedRewardToken.decimals),
                     props.dfoCore.toFixed(props.dfoCore.fromDecimals(setup.minStakeable, mainTokenDecimals)),
                     !isFree ? props.dfoCore.toFixed(props.dfoCore.fromDecimals(setup.maxLiquidity, mainTokenDecimals)) : 0,
                     setup.renewTimes,
                     amm,
                     isFree ? setup.data.address : setup.secondaryToken.address,
-                    isFree ? result[2][0] : setup.data.address,
+                    isFree ? setup.freeMainToken.address : setup.data.address,
                     props.dfoCore.voidEthereumAddress,
                     setup.involvingEth,
                     isFree ? 0 : props.dfoCore.fromDecimals(parseFloat(parseFloat(setup.penaltyFee) / 100).toString()),
@@ -284,6 +291,7 @@ const Create = (props) => {
                     <h6><b>Deploy Farming Contract</b></h6>
                 </div>
                 <div className="row">
+                    <a onClick={() => setDeployStep(1)} className="backActionBTN mr-4">Back</a>
                     <a onClick={() => deploy()} className="Web3ActionBTN">Deploy contract</a>
                 </div>
             </div>

@@ -7,7 +7,7 @@ const Explore = (props) => {
     const [tokenFilter, setTokenFilter] = useState("");
     const [farmingContracts, setFarmingContracts] = useState([]);
     const [startingContracts, setStartingContracts] = useState([]);
-    const [activeOnly, setActiveOnly] = useState(true);
+    const [activeOnly, setActiveOnly] = useState(false);
     const [selectFilter, setSelectFilter] = useState("");
     const [loading, setLoading] = useState(true);
 

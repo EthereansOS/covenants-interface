@@ -1,7 +1,8 @@
 import { useState } from "react";
+import ApproveButton from "../buttons/ApproveButton";
 
 const LockedPositionComponent = (props) => {
-    const { position, dfoCore, blockNumber, setup, setupInfo, setupTokens, rewardTokenInfo, lockedPositionReward, lockedPositionStatus, lpTokenInfo, lmContract, onComplete } = props;
+    const { position, dfoCore, blockNumber, setup, setupInfo, mainTokenInfo, onMainTokenApproval, setupTokens, rewardTokenInfo, lockedPositionReward, lockedPositionStatus, lpTokenInfo, lmContract, onComplete } = props;
     // booleans
     const [showTransfer, setShowTransfer] = useState(false);
     const [showUnlock, setShowUnlock] = useState(false);
@@ -63,7 +64,7 @@ const LockedPositionComponent = (props) => {
     return (
         <div className="LockedFarmPositions">
             <div className="FarmYou">
-                <p><b>Position Weight</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(position.mainTokenAmount), setupTokens[mainTokenIndex].decimals), 4)} {setupTokens[mainTokenIndex].symbol}</p>
+                <p><b>Position Weight</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(position.mainTokenAmount), mainTokenInfo.decimals), mainTokenInfo.decimals)} {mainTokenInfo.symbol}</p>
                 {
                     (parseInt(blockNumber) < parseInt(setup.endBlock) && !showUnlock) && <a onClick={() => setShowUnlock(true)} className="web2ActionBTN">Unlock</a>
                 }
@@ -72,19 +73,20 @@ const LockedPositionComponent = (props) => {
                 }
                 {
                     showUnlock && <div>
-                        <p><b>Give back</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseFloat(parseInt(position.reward) * (parseInt(setupInfo.penaltyFee) / 1e18)) + parseInt(lockedPositionStatus.partiallyRedeemed)), rewardTokenInfo.decimals), 4)} {rewardTokenInfo.symbol} - {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(position.liquidityPoolTokenAmount), lpTokenInfo.decimals), 4)} {/* farmTokenSymbol */"fLP"}</p>
-                        <p><b>Balance</b>: {window.formatMoney(dfoCore.toDecimals(rewardTokenInfo.balance, rewardTokenInfo.decimals), 4)} {rewardTokenInfo.symbol}</p>
-                        <p><b>LP tokens unlocked</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(position.liquidityPoolTokenAmount), lpTokenInfo.decimals), 4)} {lpTokenInfo.symbol}</p>
+                        <p><b>Give back</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseFloat(parseInt(position.reward) * (parseInt(setupInfo.penaltyFee) / 1e18)) + parseInt(lockedPositionStatus.partiallyRedeemed)), rewardTokenInfo.decimals), rewardTokenInfo.decimals)} {rewardTokenInfo.symbol} - {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(position.liquidityPoolTokenAmount), lpTokenInfo.decimals), lpTokenInfo.decimals)} {/* farmTokenSymbol */"fLP"}</p>
+                        <p><b>Balance</b>: {window.formatMoney(dfoCore.toDecimals(rewardTokenInfo.balance, rewardTokenInfo.decimals), rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
+                        <p><b>LP tokens unlocked</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(position.liquidityPoolTokenAmount), lpTokenInfo.decimals), lpTokenInfo.decimals)} {lpTokenInfo.symbol}</p>
                         {
-                            unlockLoading ? <a className="Web3ActionBTN" disabled={unlockLoading}>
-                                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            </a> : parseInt(blockNumber) < parseInt(setup.endBlock) ? <a onClick={() => unlockPosition()} className="Web3ActionBTN">Unlock</a> : <></>
+                            !mainTokenInfo.approval ? <ApproveButton contract={mainTokenInfo.contract} from={dfoCore.address} spender={lmContract.options.address} onApproval={() => onMainTokenApproval()} onError={(error) => console.error(error)} text={`Approve ${mainTokenInfo.symbol}`} /> : 
+                                unlockLoading ? <a className="Web3ActionBTN" disabled={unlockLoading}>
+                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                </a> : parseInt(blockNumber) < parseInt(setup.endBlock) ? <a onClick={() => unlockPosition()} className="Web3ActionBTN">Unlock</a> : <></>
                         }
                     </div>
                 }
             </div>
             <div className="Farmed">
-                <p><b>Unclaimed</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(lockedPositionReward), rewardTokenInfo.decimals), 4)} {rewardTokenInfo.symbol}</p>
+                <p><b>Unclaimed</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(lockedPositionReward), rewardTokenInfo.decimals), rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
                 {
                     !showTransfer ? <a onClick={() => setShowTransfer(true)} className="web2ActionBTN">Transfer</a> : <a onClick={() => setShowTransfer(false)} className="web2ActionBTN">Close</a>
                 }

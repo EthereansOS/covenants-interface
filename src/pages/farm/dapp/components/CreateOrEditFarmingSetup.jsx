@@ -16,6 +16,8 @@ const CreateOrEditFarmingSetup = (props) => {
     // free setup state
     const [freeLiquidityPoolToken, setFreeLiquidityPoolToken] = useState((editSetup && editSetup.data) ? editSetup.data : null);
     const [freeRewardPerBlock, setFreeRewardPerBlock] = useState((editSetup && editSetup.rewardPerBlock) ? editSetup.rewardPerBlock : 0);
+    const [freeMainTokenIndex, setFreeMainTokenIndex] = useState((editSetup && editSetup.freeMainTokenIndex) ? editSetup.freeMainTokenIndex : 0);
+    const [freeMainToken, setFreeMainToken] = useState((editSetup && editSetup.freeMainToken) ? editSetup.freeMainToken : null);
     // locked setup state
     const [lockedMainToken, setLockedMainToken] = useState((editSetup && editSetup.data) ? editSetup.data : null);
     const [lockedMaxLiquidity, setLockedMaxLiquidity] = useState((editSetup && editSetup.maxLiquidity) ? editSetup.maxLiquidity : 0);
@@ -34,12 +36,14 @@ const CreateOrEditFarmingSetup = (props) => {
                 setLockedMainToken({ symbol: 'ETH', address, decimals: 18 });
                 setEthSelectData(null);
                 setLockedSecondaryToken(null);
+                setInvolvingEth(false);
             } else {
                 const mainTokenContract = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), address);
                 const symbol = await mainTokenContract.methods.symbol().call();
                 const decimals = await mainTokenContract.methods.decimals().call();
                 setLockedMainToken({ symbol, address, decimals });
                 setEthSelectData(null);
+                setInvolvingEth(false);
                 setLockedSecondaryToken(null);
             }
         } catch (error) {
@@ -62,9 +66,11 @@ const CreateOrEditFarmingSetup = (props) => {
             const ammData = await ammContract.methods.data().call();
             const secondatoryTokenInfo = await ammContract.methods.byLiquidityPool(address).call();
             const tokens = [];
+            let ethTokenFound = false;
             let mainTokenFound = false;
             await Promise.all(secondatoryTokenInfo[2].map(async (tkAddress) => {
                 if (tkAddress.toLowerCase() === ammData[0].toLowerCase()) {
+                    ethTokenFound = true;
                     setInvolvingEth(true);
                     if (ammData[0] === dfoCore.voidEthereumAddress) {
                         setEthAddress(dfoCore.voidEthereumAddress);
@@ -84,6 +90,7 @@ const CreateOrEditFarmingSetup = (props) => {
                 tokens.push({ symbol, address: tkAddress, isEth: tkAddress.toLowerCase() === ammData[0].toLowerCase() })
             }));
             if (!mainTokenFound) return;
+            if (!ethTokenFound) setEthSelectData(null);
             setLockedSecondaryToken({ 
                 address, 
                 name,
@@ -110,9 +117,11 @@ const CreateOrEditFarmingSetup = (props) => {
             const ammData = await ammContract.methods.data().call();
             const lpInfo = await ammContract.methods.byLiquidityPool(address).call();
             const tokens = [];
+            let ethTokenFound = false;
             await Promise.all(lpInfo[2].map(async (tkAddress) => {
                 if (tkAddress.toLowerCase() === ammData[0].toLowerCase()) {
                     setInvolvingEth(true);
+                    ethTokenFound = true;
                     if (ammData[0] === dfoCore.voidEthereumAddress) {
                         setEthAddress(dfoCore.voidEthereumAddress);
                         setEthSelectData(null);
@@ -129,6 +138,7 @@ const CreateOrEditFarmingSetup = (props) => {
             }));
             const lpTokenContract = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), address);
             const decimals = await lpTokenContract.methods.decimals().call();
+            if (!ethTokenFound) setEthSelectData(null);
             setFreeLiquidityPoolToken({ 
                 address, 
                 name,
@@ -155,7 +165,7 @@ const CreateOrEditFarmingSetup = (props) => {
                         <option value={0}>Choose setup duration</option>
                         {
                             Object.keys(props.dfoCore.getContextElement("blockIntervals")).map((key, index) => {
-                                return <option key={index} value={props.dfoCore.getContextElement("blockIntervals")[key]}>{key}</option>
+                                return <option key={key} value={props.dfoCore.getContextElement("blockIntervals")[key]}>{key}</option>
                             })
                         }
                     </select>
@@ -191,20 +201,25 @@ const CreateOrEditFarmingSetup = (props) => {
                                 </div>
                             }
                             <div className="row justify-content-center mb-4">
+                                <select className="SelectRegular" value={freeMainTokenIndex} onChange={(e) => { setFreeMainTokenIndex(e.target.value); setFreeMainToken(freeLiquidityPoolToken.tokens[e.target.value]); }}>
+                                    {
+                                        freeLiquidityPoolToken.tokens.map((tk, index) => {
+                                            return <option key={tk.address} value={index}>{tk.symbol}</option>
+                                        })
+                                    }
+                                </select>
+                            </div>
+                            <div className="row justify-content-center mb-4">
                                 <div className="col-6">
                                     <Input min={0} showCoin={true} address={rewardToken.address} value={freeRewardPerBlock} name={rewardToken.symbol} label={"Reward per block"} onChange={(e) => setFreeRewardPerBlock(e.target.value)} />
                                 </div>
                             </div>
                             <div className="row justify-content-center align-items-center flex-column mb-2">
-                                <p className="text-center"><b>Monthly*: {freeRewardPerBlock * 192000} {rewardToken.symbol}</b></p>
-                                <p className="text-center"><b>Yearly*: {freeRewardPerBlock * 2304000} {rewardToken.symbol}</b></p>
-                            </div>
-                            <div className="row mb-4">
-                                <p className="text-center">*Monthly/yearly reward are calculated in a forecast based on 192000 Blocks/m and 2304000/y.</p>
+                                <p className="text-center"><b>Total reward ({`${blockDuration}`} blocks): {freeRewardPerBlock * blockDuration} {rewardToken.symbol}</b></p>
                             </div>
                             <div className="row justify-content-center mb-4">
                                 <div className="col-6">
-                                    <Input min={0} showCoin={true} address={rewardToken.address} value={minStakeable} name={rewardToken.symbol} label={"Min stakeable"} onChange={(e) => setMinSteakeable(e.target.value)} />
+                                    <Input min={0} showCoin={true} address={freeMainToken?.address || freeLiquidityPoolToken.tokens[freeMainTokenIndex].address} value={minStakeable} name={freeMainToken?.symbol || freeLiquidityPoolToken.tokens[freeMainTokenIndex].symbol} label={"Min stakeable"} onChange={(e) => setMinSteakeable(e.target.value)} />
                                 </div>
                             </div>
                             <div className="row justify-content-center">
@@ -227,7 +242,7 @@ const CreateOrEditFarmingSetup = (props) => {
                     <div className="row justify-content-center mb-4">
                         <a onClick={() => onCancel() } className="backActionBTN mr-4">Back</a>
                         <a 
-                            onClick={() => editSetup ? onEditFarmingSetup({ rewardPerBlock: freeRewardPerBlock, data: freeLiquidityPoolToken, period: blockDuration, minStakeable, renewTimes, involvingEth, ethAddress, ethSelectData }, editSetupIndex) : onAddFarmingSetup({ rewardPerBlock: freeRewardPerBlock, data: freeLiquidityPoolToken, period: blockDuration, minStakeable, renewTimes, involvingEth, ethAddress, ethSelectData }) } 
+                            onClick={() => editSetup ? onEditFarmingSetup({ rewardPerBlock: freeRewardPerBlock, data: freeLiquidityPoolToken, freeMainTokenIndex, freeMainToken: freeMainToken || freeLiquidityPoolToken.tokens[freeMainTokenIndex], period: blockDuration, minStakeable, renewTimes, involvingEth, ethAddress, ethSelectData }, editSetupIndex) : onAddFarmingSetup({ rewardPerBlock: freeRewardPerBlock, freeMainTokenIndex, freeMainToken, data: freeLiquidityPoolToken, period: blockDuration, minStakeable, renewTimes, involvingEth, ethAddress, ethSelectData }) } 
                             disabled={!freeLiquidityPoolToken || freeRewardPerBlock <= 0 || minStakeable <= 0 || !blockDuration} 
                             className="web2ActionBTN ml-4"
                         >
@@ -316,14 +331,14 @@ const CreateOrEditFarmingSetup = (props) => {
                             </div>
                             <div className="row justify-content-center mb-4">
                                 <div className="col-6">
-                                    <Input label={"Reward per block"} min={0} showCoin={true} address={lockedMainToken.address} value={lockedRewardPerBlock} name={lockedMainToken.symbol} onChange={(e) => setLockedRewardPerBlock(e.target.value)} />
+                                    <Input label={"Reward per block"} min={0} showCoin={true} address={rewardToken.address} value={lockedRewardPerBlock} name={rewardToken.symbol} onChange={(e) => setLockedRewardPerBlock(e.target.value)} />
                                 </div>
                             </div>
                             <div className="row mb-4">
                                 <p className="text-center text-small">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Omnis delectus incidunt laudantium distinctio velit reprehenderit quaerat, deserunt sint fugit ex consectetur voluptas suscipit numquam. Officiis maiores quaerat quod necessitatibus perspiciatis!</p>
                             </div>
                             <div className="row justify-content-center align-items-center flex-column mb-2">
-                                <p className="text-center"><b>Reward/block per {lockedMainToken.symbol}: {!lockedMaxLiquidity ? 0 : parseFloat((lockedRewardPerBlock * (1 / lockedMaxLiquidity)).toPrecision(4))} {lockedMainToken.symbol}</b></p>
+                                <p className="text-center"><b>Reward/block per {lockedMainToken.symbol}: {!lockedMaxLiquidity ? 0 : parseFloat((lockedRewardPerBlock * (1 / lockedMaxLiquidity)).toPrecision(4))} {rewardToken.symbol}</b></p>
                             </div>
                         </>
                     }
@@ -343,7 +358,7 @@ const CreateOrEditFarmingSetup = (props) => {
                     <div className="form-check my-4">
                         <input className="form-check-input" type="checkbox" checked={lockedHasPenaltyFee} onChange={(e) => setLockedHasPenaltyFee(e.target.checked)} id="penaltyFee" />
                         <label className="form-check-label" htmlFor="penaltyFee">
-                            Penalty fee
+                            Penalty fee <span><Coin address={rewardToken.address} height={24} /></span>
                         </label>
                     </div>
                 </div>
@@ -391,7 +406,7 @@ const CreateOrEditFarmingSetup = (props) => {
                                 minStakeable,
                                 involvingEth,
                                 ethAddress,
-                                ethSelectData
+                                ethSelectData,
                             }, editSetupIndex) : onAddFarmingSetup({
                                 period: blockDuration,
                                 data: lockedMainToken,
