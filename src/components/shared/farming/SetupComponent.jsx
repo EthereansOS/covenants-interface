@@ -411,7 +411,10 @@ const SetupComponent = (props) => {
             setTokensAmount(tokensAmounts.map((old, i) => i === index ? "0" : old));
             return;
         }
-        const result = await ammContract.methods.byTokenAmount(setupInfo.liquidityPoolTokenAddress, setupTokens[index].address, props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(setupTokens[index].decimals)))).call();
+        var ethereumAddress = (await ammContract.methods.data().call())[0];
+        var tokenAddress = setupTokens[index].address;
+        tokenAddress = tokenAddress === window.voidEthereumAddress ? ethereumAddress : tokenAddress;
+        const result = await ammContract.methods.byTokenAmount(setupInfo.liquidityPoolTokenAddress, tokenAddress, props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(setupTokens[index].decimals)))).call();
         const { liquidityPoolAmount } = result;
         const ams = result.tokensAmounts;
         setLpTokenAmount(props.dfoCore.toDecimals(liquidityPoolAmount, lpTokenInfo.decimals, 8))
