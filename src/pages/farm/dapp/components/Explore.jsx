@@ -156,8 +156,12 @@ const Explore = (props) => {
                         <option value="">Sort by..</option>
                         <option value="1">Higher Rewards per day</option>
                         <option value="2">Lower Rewards per day</option>
-                        <option value="3">Higher APY</option>
-                        <option value="4">Lower APY</option>
+                        {
+                            /*
+                            <option value="3">Higher APY</option>
+                            <option value="4">Lower APY</option>
+                            */
+                        }
                         <option value="5">More Setups</option>
                         <option value="6">Less Setups</option>
                     </select>

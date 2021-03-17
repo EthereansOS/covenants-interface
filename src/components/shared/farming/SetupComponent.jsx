@@ -943,12 +943,12 @@ const SetupComponent = (props) => {
                         <div className="Farmed">
                             <p><b>Unclaimed</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(freeAvailableRewards), rewardTokenInfo.decimals), 4)} {rewardTokenInfo.symbol}</p>
                             {
+                                !showFreeTransfer ? <a onClick={() => setShowFreeTransfer(true)} className="web2ActionBTN">Transfer</a> : <a onClick={() => setShowFreeTransfer(false)} className="web2ActionBTN">Close</a>
+                            }
+                            {
                                 claimLoading ? <a className="web2ActionBTN" disabled={claimLoading}>
                                     <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                 </a> : <a onClick={() => withdrawReward()} className="web2ActionBTN">Claim</a>
-                            }
-                            {
-                                !showFreeTransfer ? <a onClick={() => setShowFreeTransfer(true)} className="web2ActionBTN">Transfer</a> : <a onClick={() => setShowFreeTransfer(false)} className="web2ActionBTN">Close</a>
                             }
                             {
                                 showFreeTransfer && <div>
@@ -963,11 +963,30 @@ const SetupComponent = (props) => {
                         </div>
                     }
                     </> : <>
+                    <div className="LockedFarmTokensPosition"> 
+                        <p><b>Your Farm Token Supply</b>: {window.formatMoney(props.dfoCore.toDecimals(farmTokenBalance, 18), 4)} {"fLP"} - {setupTokens.map((setupToken, i) => `${window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(farmTokenRes[i]), setupToken.decimals), 4)} ${setupToken.symbol} ` )}</p>
+                    </div>                               
+                    {
+                        (parseInt(blockNumber) >= parseInt(setup.endBlock) && parseInt(farmTokenBalance) > 0) && <>
+                            <div className="QuestionRegular">
+                                <label className="PrestoSelector">
+                                    <span>To Pair</span>
+                                    <input name={`outputType-${setupIndex}`} type="radio" value="to-pair" checked={outputType === "to-pair"} onChange={onOutputTypeChange} />
+                                </label>
+                                <label className="PrestoSelector">
+                                    <span>To LP Token</span>
+                                    <input name={`outputType-${setupIndex}`} type="radio" value="to-lp" checked={outputType === "to-lp"} onChange={onOutputTypeChange} />
+                                </label>
+                            </div>
+                            {
+                                removeLoading ? <a className="web2ActionBTN" disabled={removeLoading}>
+                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                </a> : <a className="web2ActionBTN" onClick={() => removeLiquidity()}>Withdraw Liquidity</a>
+                            }
+                        </>
+                    }
                     {
                         lockedPositions.length > 0 && <>
-                            <div className="LockedFarmTokensPosition"> 
-                                <p><b>Your Farm Token Supply</b>: {window.formatMoney(props.dfoCore.toDecimals(farmTokenBalance, 18), 4)} {"fLP"} - {setupTokens.map((setupToken, i) => `${window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(farmTokenRes[i]), setupToken.decimals), 4)} ${setupToken.symbol} ` )}</p>
-                            </div>
                             {
                                 lockedPositions.map((position, index) => {
                                     return (
@@ -1000,26 +1019,7 @@ const SetupComponent = (props) => {
                                     </a> : <a className="web2ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
                                 }
                             </>
-                        }                                
-                        {
-                            (parseInt(blockNumber) >= parseInt(setup.endBlock) && parseInt(farmTokenBalance) > 0) && <>
-                                <div className="QuestionRegular">
-                                    <label className="PrestoSelector">
-                                        <span>To Pair</span>
-                                        <input name={`outputType-${setupIndex}`} type="radio" value="to-pair" checked={outputType === "to-pair"} onChange={onOutputTypeChange} />
-                                    </label>
-                                    <label className="PrestoSelector">
-                                        <span>To LP Token</span>
-                                        <input name={`outputType-${setupIndex}`} type="radio" value="to-lp" checked={outputType === "to-lp"} onChange={onOutputTypeChange} />
-                                    </label>
-                                </div>
-                                {
-                                    removeLoading ? <a className="web2ActionBTN" disabled={removeLoading}>
-                                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                    </a> : <a className="web2ActionBTN" onClick={() => removeLiquidity()}>Withdraw Liquidity</a>
-                                }
-                            </>
-                        }
+                        } 
                         {
                             (hostedBy && extensionContract && !edit && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex) && hostedBy) &&
                             <a className="web2ActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(true) }}>Edit</a>

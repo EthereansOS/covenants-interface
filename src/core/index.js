@@ -364,12 +364,16 @@ export default class DFOCore {
                         var positionId = this.web3.eth.abi.decodeParameter("uint256", topics[1]);
                         const pos = await contract.methods.position(positionId).call();
                         if (!found.includes(pos.setupIndex)) {
-                            const {'0': setup, '1': setupInfo} = await contract.methods.setup(pos.setupIndex).call();
-                            // const setup = (await contract.methods.setups().call())[pos.setupIndex];
-                            // const setupInfo = await contract.methods._setupsInfo(setup.infoIndex).call();
-                            if (this.isValidPosition(pos) && !this.positions.includes({...setup, contract, setupInfo, setupIndex: pos.setupIndex })) {
-                                this.positions.push({...setup, contract, setupInfo, setupIndex: pos.setupIndex });
-                                found.push(pos.setupIndex);
+                            try {
+                                const {'0': setup, '1': setupInfo} = await contract.methods.setup(pos.setupIndex).call();
+                                // const setup = (await contract.methods.setups().call())[pos.setupIndex];
+                                // const setupInfo = await contract.methods._setupsInfo(setup.infoIndex).call();
+                                if (this.isValidPosition(pos) && !this.positions.includes({...setup, contract, setupInfo, setupIndex: pos.setupIndex })) {
+                                    this.positions.push({...setup, contract, setupInfo, setupIndex: pos.setupIndex });
+                                    found.push(pos.setupIndex);
+                                }
+                            } catch (error) {
+                                console.error(error);
                             }
                         }
                     }

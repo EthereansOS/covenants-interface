@@ -10,7 +10,6 @@ const LockedPositionComponent = (props) => {
     const [claimLoading, setClaimLoading] = useState(false);
     const [transferAddress, setTransferAddress] = useState("");
 
-    console.log("position", position);
     let mainTokenIndex = 0;
     
     setupTokens.forEach((token, i) => {
