@@ -952,7 +952,7 @@ const SetupComponent = (props) => {
                             }
                             {
                                 showFreeTransfer && <div>
-                                    <input type="text" className="TextRegular" placeholder="Position receiver" value={freeTransferAddress} onChange={(e) => setFreeTransferAddress(freeTransferAddress)} id={`transferAddress`} />
+                                    <input type="text" className="TextRegular" placeholder="Position receiver" value={freeTransferAddress} onChange={(e) => setFreeTransferAddress(e.target.value)} id={`transferAddress`} />
                                     {
                                         transferLoading ? <a className="Web3ActionBTN" disabled={transferLoading}>
                                             <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
