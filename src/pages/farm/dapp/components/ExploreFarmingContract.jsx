@@ -48,22 +48,15 @@ const ExploreFarmingContract = (props) => {
             const lockedSetups = [];
             let totalFreeSetups = 0;
             let totalLockedSetups = 0;
-
-            /*
-            const { data } = await axios.get(dfoCore.getContextElement("coingeckoCoinPriceURL") + rewardTokenAddress);
-            console.log(data);
-            const rewardTokenPriceUsd = data[rewardTokenAddress.toLowerCase()].usd;
-            const yearlyBlocks = 36000;
-    
-            let valueLocked = 0;
-            */
             let rewardPerBlock = 0;
+            let canActivateSetup = false;
 
             const res = [];
             for (let i = 0; i < setups.length; i++) {
                 const { '0': setup, '1': setupInfo } = await lmContract.methods.setup(i).call();
-                // const setup = setups[i];
-                // const setupInfo = await lmContract.methods._setupsInfo(setups[i].infoIndex).call();
+                if (!canActivateSetup) {
+                    canActivateSetup = parseInt(setupInfo.renewTimes) > 0 && !setup.active && parseInt(setupInfo.lastSetupIndex) === parseInt(i);
+                }
                 if (setup.rewardPerBlock !== "0") {
                     setupInfo.free ? totalFreeSetups += 1 : totalLockedSetups += 1;
                     res.push({...setup, setupInfo, rewardTokenAddress, setupIndex: i })
@@ -71,7 +64,6 @@ const ExploreFarmingContract = (props) => {
                 if (setup.active) {
                     setupInfo.free ? freeSetups.push(setup) : lockedSetups.push(setup);
                     rewardPerBlock += parseInt(setup.rewardPerBlock);
-                    // valueLocked += parseInt(dfoCore.toDecimals(setup.totalSupply, 18, 18));
                 }
             }
             const sortedRes = res.sort((a, b) => b.active - a.active);
@@ -88,10 +80,11 @@ const ExploreFarmingContract = (props) => {
                 lockedSetups,
                 totalFreeSetups,
                 totalLockedSetups,
+                canActivateSetup,
                 host: `${host.substring(0, 5)}...${host.substring(host.length - 3, host.length)}`,
                 fullhost: `${host}`,
             };
-            setMetadata({ contract: lmContract, metadata, isActive: freeSetups + lockedSetups > 0 });
+            setMetadata({ contract: lmContract, metadata, isActive: freeSetups + lockedSetups > 0 || canActivateSetup });
         } catch (error) {
             console.error(error);
         } finally {

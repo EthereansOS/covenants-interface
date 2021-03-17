@@ -12,7 +12,7 @@ const ApproveButton = (props) => {
             try {
                 const approval = await contract.methods.allowance(from, spender).call();
                 if (parseInt(approval) > 0) {
-                    onApproval(approve);
+                    onApproval(true);
                     return;
                 } 
                 const totalSupply = await contract.methods.totalSupply().call();

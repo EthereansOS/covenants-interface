@@ -38,6 +38,7 @@ const SetupComponent = (props) => {
     const [lpTokenAmount, setLpTokenAmount] = useState(0);
     const [lockedEstimatedReward, setLockedEstimatedReward] = useState(0);
     const [lpTokenInfo, setLpTokenInfo] = useState(null);
+    const [mainTokenInfo, setMainTokenInfo] = useState(null);
     const [rewardTokenInfo, setRewardTokenInfo] = useState(null);
     const [removalAmount, setRemovalAmount] = useState(0);
     const [currentPosition, setCurrentPosition] = useState(null);
@@ -56,15 +57,6 @@ const SetupComponent = (props) => {
     const [outputType, setOutputType] = useState("to-pair");
     const [ethAmount, setEthAmount] = useState(0);
     const [ethBalanceOf, setEthBalanceOf] = useState("0");
-
-    var mainTokenSymbol;
-    var mainTokenDecimals;
-    try {
-        var mainToken = setupTokens.filter(t => t.address.toLowerCase() === setupInfo.mainTokenAddress.toLowerCase())[0];
-        mainTokenSymbol = mainToken.symbol;
-        mainTokenDecimals = mainToken.decimals;
-    } catch(e) {
-    }
 
     useEffect(() => {
         getSetupMetadata();
@@ -117,7 +109,6 @@ const SetupComponent = (props) => {
                         setFarmTokenSymbol(ftSymbol);
                         setFarmTokenBalance(ftBalance);
                         const ftRes = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, ftBalance).call();
-                        console.log(ftRes);
                         setFarmTokenRes(ftRes['tokensAmounts']);
                     } else {
                         setFarmTokenBalance("0");
@@ -144,6 +135,7 @@ const SetupComponent = (props) => {
                 const tokens = [];
                 const approvals = [];
                 const contracts = [];
+                
                 for (let i = 0; i < res.liquidityPoolTokens.length; i++) {
                     const address = res.liquidityPoolTokens[i];
                     const token = !isWeth(setupInfo, address) ? await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), address) : null;
@@ -154,6 +146,9 @@ const SetupComponent = (props) => {
                     approvals.push(parseInt(approval) !== 0);
                     tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: res.tokensAmounts[i], decimals, address: token ? address : dfoCore.voidEthereumAddress, symbol });
                     contracts.push(token);
+                    if (address.toLowerCase() === setupInfo.mainTokenAddress.toLowerCase()) {
+                        setMainTokenInfo({ approval, decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol })
+                    }
                 }
                 setSetupTokens(tokens);
                 setTokensContracts(contracts);
@@ -319,11 +314,15 @@ const SetupComponent = (props) => {
                 approvals.push(parseInt(approval) !== 0);
                 tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: res.tokensAmounts[i], decimals, address: token ? address : dfoCore.voidEthereumAddress, symbol });
                 contracts.push(token);
+                if (address.toLowerCase() === farmSetupInfo.mainTokenAddress.toLowerCase()) {
+                    setMainTokenInfo({ approval, decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol })
+                }
             }
             const info = await ammContract.methods.info().call();
             setAMM({ name: info['0'], version: info['1'] });
             setSetupTokens(tokens);
             setTokensContracts(contracts);
+            setLpTokenAmount(0);
             setTokensAmount(new Array(tokens.length).fill(0));
             setTokensApprovals(approvals);
             // retrieve the manage data using the position
@@ -408,7 +407,7 @@ const SetupComponent = (props) => {
     const onUpdateTokenAmount = async (value, index) => {
         if (!value) {
             setLockedEstimatedReward(0);
-            setTokensAmount(tokensAmounts.map((old, i) => i === index ? "0" : old));
+            setTokensAmount(tokensAmounts.map((old, i) => "0"));
             return;
         }
         var ethereumAddress = (await ammContract.methods.data().call())[0];
@@ -438,7 +437,7 @@ const SetupComponent = (props) => {
     const onUpdateLpTokenAmount = async (value, index) => {
         if (!value || value === 'NaN') {
             setLockedEstimatedReward(0);
-            setLpTokenAmount("0");
+            // setLpTokenAmount("0");
             return;
         }
         const result = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(lpTokenInfo.decimals)))).call();
@@ -681,6 +680,15 @@ const SetupComponent = (props) => {
         }
     }
 
+    const calculateLockedFixedValue = () => {
+        const { rewardPerBlock } = setup;
+        const { maxStakeable } = setupInfo;
+        const normalizedRewardPerBlock = parseInt(rewardPerBlock) * 10**(18 - rewardTokenInfo.decimals);
+        const normalizedMaxStakeable = parseInt(maxStakeable) * 10**(18 - mainTokenInfo.decimals);
+        const amount = normalizedRewardPerBlock * (1 / normalizedMaxStakeable);
+        return window.formatMoney(amount * parseInt(setupInfo.blockDuration), rewardTokenInfo.decimals);
+    }
+
     const getAdvanced = () => {
         return !edit ? getManageAdvanced() : getEdit();
     }
@@ -711,37 +719,39 @@ const SetupComponent = (props) => {
 
     const getManageAdvanced = () => {
         if (withdrawOpen && currentPosition && setupInfo.free) {
-            return <div className="FarmActions">
-                        <input type="range" value={removalAmount} onChange={(e) => setRemovalAmount(e.target.value)} className="form-control-range" id="formControlRange" />
-                <div className="Web2ActionsBTNs">
-                <p><b>Amount:</b> {removalAmount}% ({window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString(), lpTokenInfo.decimals), 4)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span> {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.tokensAmounts[i]) * removalAmount / 100).toString(), token.decimals), 4)} {token.symbol} </span>)})</p>
-                    <a className="web2ActionBTN" onClick={() => setRemovalAmount(10)} >10%</a>
-                    <a className="web2ActionBTN" onClick={() => setRemovalAmount(25)} >25%</a>
-                    <a className="web2ActionBTN" onClick={() => setRemovalAmount(50)} >50%</a>
-                    <a className="web2ActionBTN" onClick={() => setRemovalAmount(75)} >75%</a>
-                    <a className="web2ActionBTN" onClick={() => setRemovalAmount(90)} >90%</a>
-                    <a className="web2ActionBTN" onClick={() => setRemovalAmount(100)} >MAX</a>
-                </div>
-                <div className="row">
-                    <div className="QuestionRegular">
-                        <label className="PrestoSelector">
-                            <span>To Pair</span>
-                            <input name="outputType" type="radio" value="to-pair" checked={outputType === "to-pair"} onChange={onOutputTypeChange} />
-                        </label>
-                        <label className="PrestoSelector">
-                            <span>To LP Token</span>
-                            <input name="outputType" type="radio" value="to-lp" checked={outputType === "to-lp"} onChange={onOutputTypeChange} />
-                        </label>
+            return (
+                <div className="FarmActions">
+                    <input type="range" value={removalAmount} onChange={(e) => setRemovalAmount(parseInt(e.target.value))} className="form-control-range" id="formControlRange" />
+                    <div className="Web2ActionsBTNs">
+                    <p><b>Amount:</b> {removalAmount}% ({window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString(), lpTokenInfo.decimals), lpTokenInfo.decimals)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span> {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.tokensAmounts[i]) * removalAmount / 100).toString(), token.decimals), token.decimals)} {token.symbol} </span>)})</p>
+                        <a className="web2ActionBTN" onClick={() => setRemovalAmount(10)} >10%</a>
+                        <a className="web2ActionBTN" onClick={() => setRemovalAmount(25)} >25%</a>
+                        <a className="web2ActionBTN" onClick={() => setRemovalAmount(50)} >50%</a>
+                        <a className="web2ActionBTN" onClick={() => setRemovalAmount(75)} >75%</a>
+                        <a className="web2ActionBTN" onClick={() => setRemovalAmount(90)} >90%</a>
+                        <a className="web2ActionBTN" onClick={() => setRemovalAmount(100)} >MAX</a>
+                    </div>
+                    <div className="row">
+                        <div className="QuestionRegular">
+                            <label className="PrestoSelector">
+                                <span>To Pair</span>
+                                <input name="outputType" type="radio" value="to-pair" checked={outputType === "to-pair"} onChange={onOutputTypeChange} />
+                            </label>
+                            <label className="PrestoSelector">
+                                <span>To LP Token</span>
+                                <input name="outputType" type="radio" value="to-lp" checked={outputType === "to-lp"} onChange={onOutputTypeChange} />
+                            </label>
+                        </div>
+                    </div>
+                    <div className="Web2ActionsBTNs">
+                        {
+                            removeLoading ? <a className="Web3ActionBTN" disabled={removeLoading}>
+                                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            </a> : <a onClick={() => removeLiquidity()} className="Web3ActionBTN">Remove</a>
+                        }
                     </div>
                 </div>
-                <div className="Web2ActionsBTNs">
-                    {
-                        removeLoading ? <a className="Web3ActionBTN" disabled={removeLoading}>
-                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        </a> : <a onClick={() => removeLiquidity()} className="Web3ActionBTN">Remove</a>
-                    }
-                </div>
-            </div>
+            )
         }
 
         return <div className="FarmActions">
@@ -789,7 +799,7 @@ const SetupComponent = (props) => {
                 }
                 {
                     (!setupInfo.free && rewardTokenInfo) && <div className="row justify-content-center mt-4">
-                            <p><b>Estimated earnings until end block</b>: {window.formatMoney(lockedEstimatedReward, 4)} {rewardTokenInfo.symbol}</p>
+                            <p><b>Estimated earnings until end block</b>: {window.formatMoney(lockedEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
                     </div>
                 }
                 <div className="Web3BTNs">
@@ -809,6 +819,15 @@ const SetupComponent = (props) => {
                             <Input showMax={true} address={lpTokenInfo.contract.options.address} value={lpTokenAmount} balance={window.fromDecimals(lpTokenInfo.balance, lpTokenInfo.decimals, true)} min={0} onChange={(e) => onUpdateLpTokenAmount(e.target.value)} showCoin={true} showBalance={true} name={lpTokenInfo.symbol} />
                         </div>
                 {
+                    parseFloat(lpTokenAmount) > 0 && <div className="row justify-content-center mt-2">
+                        <p><b>Pair</b>: 
+                            {
+                                setupTokens.map((setupToken, i) => <span> {window.formatMoney(dfoCore.toDecimals(tokensAmounts[i], setupToken.decimals), setupToken.decimals)} {setupToken.symbol}</span>)
+                            }
+                        </p>
+                    </div>
+                }
+                {
                     (!setupInfo.free || !currentPosition) && <label className="OptionalThingsFarmers" htmlFor="openPosition2">
                         <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => setOpenPositionForAnotherWallet(e.target.checked)} id="openPosition2" />
                          <p>External Owner</p>
@@ -823,7 +842,7 @@ const SetupComponent = (props) => {
                 }
                 {
                     (!setupInfo.free && rewardTokenInfo) && <div className="row justify-content-center mt-4">
-                        <p><b>Estimated earnings until end block</b>: {window.formatMoney(lockedEstimatedReward, 4)} {rewardTokenInfo.symbol}</p>
+                        <p><b>Estimated earnings until end block</b>: {window.formatMoney(lockedEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
                     </div>
                 }
                 <div className="Web3BTNs">
@@ -859,7 +878,7 @@ const SetupComponent = (props) => {
              }
              {
                 (!setupInfo.free && rewardTokenInfo) && <div className="row justify-content-center mt-4">
-                    <p><b>Estimated earnings until end block</b>: {window.formatMoney(lockedEstimatedReward, 4)} {rewardTokenInfo.symbol}</p>
+                    <p><b>Estimated earnings until end block</b>: {window.formatMoney(lockedEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
                 </div>
              }
              <div className="Web3BTNs">
@@ -888,14 +907,15 @@ const SetupComponent = (props) => {
         );
     }
 
+
     return (
         <div className={className}>
             <div className="FarmSetupMain">
                 <h5><b>{setupInfo.free ? "Free Farming" : "Locked Farming"} {(!setup.active && canActivateSetup) ? <span className="text-secondary">(new)</span> : (!setup.active) ? <span className="text-danger">(inactive)</span> : <></> } {(parseInt(setup.endBlock) <= blockNumber && parseInt(setup.endBlock) !== 0) && <span>(ended)</span>}</b> <a>{AMM.name}</a></h5>
                 <aside>
-                    <p><b>block end</b>: <a target="_blank" href={"https://etherscan.io/block/" + setup.endBlock}>{setup.endBlock}</a></p>
-                    <p><b>Min to Stake</b>: {window.fromDecimals(setupInfo.minStakeable, mainTokenDecimals)} {mainTokenSymbol}</p>
-                    {!setupInfo.free && <p><b>Penalty fee</b>: {parseInt(setupInfo.penaltyFee) === 0 ? `0` : props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(setupInfo.penaltyFee), rewardTokenInfo.decimals) * 100, 4)}%</p>}
+                    { parseInt(setup.endBlock) > 0 ? <p><b>block end</b>: <a target="_blank" href={"https://etherscan.io/block/" + setup.endBlock}>{setup.endBlock}</a></p> : <p><b>Duration</b>: {setupInfo.blockDuration} blocks</p> }
+                    <p><b>Min to Stake</b>: {window.fromDecimals(setupInfo.minStakeable, mainTokenInfo.decimals)} {mainTokenInfo.symbol}</p>
+                    {!setupInfo.free && <p><b>Penalty fee</b>: {parseInt(setupInfo.penaltyFee) === 0 ? `0` : props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(setupInfo.penaltyFee), rewardTokenInfo.decimals) * 100, rewardTokenInfo.decimals)}%</p>}
                 </aside>
                 <div className="SetupFarmingInstructions">
                     <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}<Coin address={token.address} /> </figure>)} = <b>APY</b>: {window.formatMoney(apy, 0)}%</p>
@@ -903,11 +923,11 @@ const SetupComponent = (props) => {
                 <div className="SetupFarmingOthers">
                     {
                         setupInfo.free ? <>
-                            <p><b>Reward/day</b>: {window.formatMoney(props.dfoCore.toDecimals(parseInt(setup.rewardPerBlock) * 6400), 4)} {rewardTokenInfo.symbol} <span>(Shared)</span></p>
-                            <p><b>Deposits</b>: {window.formatMoney(props.dfoCore.toDecimals(parseInt(setup.totalSupply), lpTokenInfo.decimals), 4)} {lpTokenInfo.symbol} ({setupTokens.map((token, index) => <span>{window.formatMoney(props.dfoCore.toDecimals(token.liquidity, token.decimals), 4)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span> )})</p>
+                            <p><b>Reward/day</b>: {window.formatMoney(props.dfoCore.toDecimals(parseInt(setup.rewardPerBlock) * 6400), rewardTokenInfo.decimals)} {rewardTokenInfo.symbol} <span>(Shared)</span></p>
+                            <p><b>Deposits</b>: {window.formatMoney(props.dfoCore.toDecimals(parseInt(setup.totalSupply), lpTokenInfo.decimals), lpTokenInfo.decimals)} {lpTokenInfo.symbol} ({setupTokens.map((token, index) => <span>{window.formatMoney(props.dfoCore.toDecimals(token.liquidity, token.decimals), token.decimals)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span> )})</p>
                         </> : <>
-                                <p><b>Max Stakeable</b>: {window.fromDecimals(setupInfo.maxStakeable, mainTokenDecimals)} {mainTokenSymbol} (Available: {window.fromDecimals(parseInt(setupInfo.maxStakeable) - parseInt(setup.totalSupply), mainTokenDecimals)} {mainTokenSymbol})</p>
-                                <p><b>{parseFloat((setup.rewardPerBlock * (1 / (parseInt(setupInfo.maxStakeable)))).toPrecision(4))} {rewardTokenInfo.symbol}</b> (fixed) for every {mainTokenSymbol} locked until the end block</p>
+                                <p><b>Max Stakeable</b>: {window.fromDecimals(setupInfo.maxStakeable, mainTokenInfo.decimals)} {mainTokenInfo.symbol} (Available: {window.fromDecimals(parseInt(setupInfo.maxStakeable) - parseInt(setup.totalSupply), mainTokenInfo.decimals)} {mainTokenInfo.symbol})</p>
+                                <p><b>{calculateLockedFixedValue()} {rewardTokenInfo.symbol}</b> (fixed) for every {mainTokenInfo.symbol} locked until the end block</p>
                         </>
                     }
                 </div>
@@ -919,9 +939,9 @@ const SetupComponent = (props) => {
                         {
                             currentPosition && <>
                                 <p>
-                                    <b>Your Deposit</b>: {window.formatMoney(dfoCore.toDecimals(manageStatus.liquidityPoolAmount, lpTokenInfo.decimals), 4)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span> {window.formatMoney(dfoCore.toDecimals(manageStatus.tokensAmounts[i], token.decimals), 4)} {token.symbol} </span>)}
+                                    <b>Your Deposit</b>: {window.formatMoney(dfoCore.toDecimals(manageStatus.liquidityPoolAmount, lpTokenInfo.decimals), lpTokenInfo.decimals)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span> {window.formatMoney(dfoCore.toDecimals(manageStatus.tokensAmounts[i], token.decimals), token.decimals)} {token.symbol} </span>)}
                                 </p>
-                                <p><b>Earnings per Day</b>: {window.formatMoney(dfoCore.toDecimals((parseInt(setup.rewardPerBlock) * 6400) * (parseInt(manageStatus.liquidityPoolAmount)/parseInt(setup.totalSupply)), rewardTokenInfo.decimals), 4)} {rewardTokenInfo.symbol}</p>
+                                <p><b>Earnings per Day</b>: {window.formatMoney(dfoCore.toDecimals((parseInt(setup.rewardPerBlock) * 6400) * (parseInt(manageStatus.liquidityPoolAmount)/parseInt(setup.totalSupply)), rewardTokenInfo.decimals), rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
                             </>
                         }
                         {
@@ -959,7 +979,7 @@ const SetupComponent = (props) => {
                     {
                         currentPosition && 
                         <div className="Farmed">
-                            <p><b>Unclaimed</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(freeAvailableRewards), rewardTokenInfo.decimals), 4)} {rewardTokenInfo.symbol}</p>
+                            <p><b>Unclaimed</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(freeAvailableRewards), rewardTokenInfo.decimals), rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
                             {
                                 !showFreeTransfer ? <a onClick={() => setShowFreeTransfer(true)} className="web2ActionBTN">Transfer</a> : <a onClick={() => setShowFreeTransfer(false)} className="web2ActionBTN">Close</a>
                             }
@@ -982,7 +1002,7 @@ const SetupComponent = (props) => {
                     }
                     </> : <>
                     <div className="LockedFarmTokensPosition"> 
-                        <p><b>Your Farm Token Supply</b>: {window.formatMoney(props.dfoCore.toDecimals(farmTokenBalance, 18), 4)} {"fLP"} - {setupTokens.map((setupToken, i) => `${parseInt(farmTokenBalance) === 0 ? 0 : window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(farmTokenRes[i]), setupToken.decimals), 4)} ${setupToken.symbol} ` )}</p>
+                        <p><b>Your Farm Token Supply</b>: {window.formatMoney(props.dfoCore.toDecimals(farmTokenBalance, 18), 18)} {"fLP"} - {setupTokens.map((setupToken, i) => `${parseInt(farmTokenBalance) === 0 ? 0 : window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(farmTokenRes[i]), setupToken.decimals), setupToken.decimals)} ${setupToken.symbol} ` )}</p>
                     </div>                               
                     {
                         (parseInt(blockNumber) >= parseInt(setup.endBlock) && parseInt(farmTokenBalance) > 0) && <>
@@ -1022,6 +1042,8 @@ const SetupComponent = (props) => {
                                             lpTokenInfo={lpTokenInfo} 
                                             lockedPositionStatus={lockedPositionStatuses[index]}
                                             lockedPositionReward={lockedPositionRewards[index]}
+                                            mainTokenInfo={mainTokenInfo}
+                                            onMainTokenApproval={() => setMainTokenInfo({ ...mainTokenInfo, approval: true })}
                                         />
                                     )
                                 })
