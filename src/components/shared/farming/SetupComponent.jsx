@@ -57,6 +57,15 @@ const SetupComponent = (props) => {
     const [ethAmount, setEthAmount] = useState(0);
     const [ethBalanceOf, setEthBalanceOf] = useState("0");
 
+    var mainTokenSymbol;
+    var mainTokenDecimals;
+    try {
+        var mainToken = setupTokens.filter(t => t.address.toLowerCase() === setupInfo.mainTokenAddress.toLowerCase())[0];
+        mainTokenSymbol = mainToken.symbol;
+        mainTokenDecimals = mainToken.decimals;
+    } catch(e) {
+    }
+
     useEffect(() => {
         getSetupMetadata();
         return () => {
@@ -397,16 +406,21 @@ const SetupComponent = (props) => {
     }
 
     const onUpdateTokenAmount = async (value, index) => {
-        if (!value) {                
+        if (!value) {
             setLockedEstimatedReward(0);
             setTokensAmount(tokensAmounts.map((old, i) => i === index ? "0" : old));
             return;
         }
-        const result = await ammContract.methods.byTokenAmount(setupInfo.liquidityPoolTokenAddress, setupTokens[index].address, props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(setupTokens[index].decimals)))).call();
-        const { liquidityPoolAmount } = result;
-        const ams = result.tokensAmounts;
-        setLpTokenAmount(props.dfoCore.toDecimals(liquidityPoolAmount, lpTokenInfo.decimals, 8))
-        setTokensAmount(tokensAmounts.map((old, i) => props.dfoCore.toDecimals(ams[i], setupTokens[i].decimals)));
+        var ethereumAddress = (await ammContract.methods.data().call())[0];
+        var tokenAddress = setupTokens[index].address;
+        tokenAddress = tokenAddress === window.voidEthereumAddress ? ethereumAddress : tokenAddress;
+        var result = await ammContract.methods.byTokenAmount(setupInfo.liquidityPoolTokenAddress, tokenAddress, props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(setupTokens[index].decimals)))).call();
+        var { liquidityPoolAmount } = result;
+        //result = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, liquidityPoolAmount).call();
+        var ams = result.tokensAmounts;
+        console.log(ams);
+        setLpTokenAmount(props.dfoCore.toDecimals(liquidityPoolAmount, lpTokenInfo.decimals))
+        setTokensAmount(ams.map((old, i) => ams[i]));
         if (!setupInfo.free) {
             let mainTokenIndex = 0;
             setupTokens.forEach((t, i) => {
@@ -430,7 +444,7 @@ const SetupComponent = (props) => {
         const result = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(lpTokenInfo.decimals)))).call();
         const ams = result.tokensAmounts;
         setLpTokenAmount(value)
-        setTokensAmount(tokensAmounts.map((old, i) => props.dfoCore.toDecimals(ams[i], setupTokens[i].decimals)));
+        setTokensAmount(tokensAmounts.map((old, i) => ams[i]));
         if (!setupInfo.free) {
             let mainTokenIndex = 0;
             setupTokens.forEach((t, i) => {
@@ -468,28 +482,32 @@ const SetupComponent = (props) => {
             console.log(ethTokenIndex);
             let lpAmount = dfoCore.toFixed(dfoCore.fromDecimals(lpTokenAmount.toString()));
             const res = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, lpAmount).call();
+            var localTokensAmounts = stake.amountIsLiquidityPool ? res.tokensAmounts : tokensAmounts;
             // const res = await ammContract.methods.byTokensAmount(setupInfo.liquidityPoolTokenAddress,  , stake.amount).call();
-            stake.amount = stake.amountIsLiquidityPool ? lpAmount : res.tokensAmounts[mainTokenIndex];
-            ethTokenValue = res.tokensAmounts[ethTokenIndex];
+            stake.amount = stake.amountIsLiquidityPool ? lpAmount : localTokensAmounts[mainTokenIndex];
+            ethTokenValue = localTokensAmounts[ethTokenIndex];
+            console.log(ethTokenValue);
+            var value = setupInfo.involvingETH && !stake.amountIsLiquidityPool ? ethTokenValue : 0;
+            console.log(value);
             console.log(stake);
             if ((currentPosition && isValidPosition(currentPosition)) || setupInfo.free) {
                 // adding liquidity to the setup
                 if (!currentPosition) {
-                    const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value: (setupInfo.involvingETH && !stake.amountIsLiquidityPool) ? ethTokenValue : 0 });
+                    const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value});
                     console.log(gasLimit);
-                    const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit, value: (setupInfo.involvingETH && !stake.amountIsLiquidityPool) ? ethTokenValue : 0 });
+                    const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit, value});
 
                 } else {
-                    const gasLimit = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).estimateGas({ from: dfoCore.address, value: setupInfo.involvingETH && !stake.amountIsLiquidityPool ? ethTokenValue : 0 });
-                    const result = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).send({ from: dfoCore.address, gasLimit, value: setupInfo.involvingETH && !stake.amountIsLiquidityPool ? ethTokenValue : 0 });
+                    const gasLimit = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).estimateGas({ from: dfoCore.address, value});
+                    const result = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).send({ from: dfoCore.address, gasLimit, value});
                 }
 
             } else if (!setupInfo.free) {
 
                 // opening position
-                const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value: setupInfo.involvingETH && !stake.amountIsLiquidityPool ? ethTokenValue : 0 });
+                const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value});
                 console.log(gasLimit);
-                const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit, value: setupInfo.involvingETH && !stake.amountIsLiquidityPool ? ethTokenValue : 0 });
+                const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit, value});
             }
             await getSetupMetadata();
         } catch (error) {
@@ -750,8 +768,8 @@ const SetupComponent = (props) => {
             {inputType === 'add-pair' ? <>
                 {
                     setupTokens.map((setupToken, i) => {
-                        return <div className="InputTokenRegular">
-                            <Input showMax={true} address={setupToken.address} value={tokensAmounts[i]} balance={setupToken.balance} min={0} onChange={(e) => onUpdateTokenAmount(e.target.value, i)} showCoin={true} showBalance={true} name={setupToken.symbol} />
+                        return <div key={setupToken.address} className="InputTokenRegular">
+                            <Input showMax={true} address={setupToken.address} value={window.fromDecimals(tokensAmounts[i], setupToken.decimals, true)} balance={setupToken.balance} min={0} onChange={(e) => onUpdateTokenAmount(e.target.value, i)} showCoin={true} showBalance={true} name={setupToken.symbol} />
                         </div>
                     })
                 }
@@ -788,7 +806,7 @@ const SetupComponent = (props) => {
                 </div>
             </> : inputType === 'add-lp' ? <>
                         <div className="InputTokenRegular">
-                            <Input showMax={true} address={lpTokenInfo.contract.options.address} value={lpTokenAmount} balance={dfoCore.toDecimals(lpTokenInfo.balance, lpTokenInfo.decimals)} min={0} onChange={(e) => onUpdateLpTokenAmount(e.target.value)} showCoin={true} showBalance={true} name={lpTokenInfo.symbol} />
+                            <Input showMax={true} address={lpTokenInfo.contract.options.address} value={lpTokenAmount} balance={window.fromDecimals(lpTokenInfo.balance, lpTokenInfo.decimals, true)} min={0} onChange={(e) => onUpdateLpTokenAmount(e.target.value)} showCoin={true} showBalance={true} name={lpTokenInfo.symbol} />
                         </div>
                 {
                     (!setupInfo.free || !currentPosition) && <label className="OptionalThingsFarmers" htmlFor="openPosition2">
@@ -876,7 +894,7 @@ const SetupComponent = (props) => {
                 <h5><b>{setupInfo.free ? "Free Farming" : "Locked Farming"} {(!setup.active && canActivateSetup) ? <span className="text-secondary">(new)</span> : (!setup.active) ? <span className="text-danger">(inactive)</span> : <></> } {(parseInt(setup.endBlock) <= blockNumber && parseInt(setup.endBlock) !== 0) && <span>(ended)</span>}</b> <a>{AMM.name}</a></h5>
                 <aside>
                     <p><b>block end</b>: <a target="_blank" href={"https://etherscan.io/block/" + setup.endBlock}>{setup.endBlock}</a></p>
-                    <p><b>Min to Stake</b>: {props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(setupInfo.minStakeable).toString(), setupTokens.filter((t) => t.address.toLowerCase() === setupInfo.mainTokenAddress.toLowerCase())[0].decimals), 4)} {setupTokens.filter((t) => t.address.toLowerCase() === setupInfo.mainTokenAddress.toLowerCase())[0].symbol}</p>
+                    <p><b>Min to Stake</b>: {window.fromDecimals(setupInfo.minStakeable, mainTokenDecimals)} {mainTokenSymbol}</p>
                     {!setupInfo.free && <p><b>Penalty fee</b>: {parseInt(setupInfo.penaltyFee) === 0 ? `0` : props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(setupInfo.penaltyFee), rewardTokenInfo.decimals) * 100, 4)}%</p>}
                 </aside>
                 <div className="SetupFarmingInstructions">
@@ -888,8 +906,8 @@ const SetupComponent = (props) => {
                             <p><b>Reward/day</b>: {window.formatMoney(props.dfoCore.toDecimals(parseInt(setup.rewardPerBlock) * 6400), 4)} {rewardTokenInfo.symbol} <span>(Shared)</span></p>
                             <p><b>Deposits</b>: {window.formatMoney(props.dfoCore.toDecimals(parseInt(setup.totalSupply), lpTokenInfo.decimals), 4)} {lpTokenInfo.symbol} ({setupTokens.map((token, index) => <span>{window.formatMoney(props.dfoCore.toDecimals(token.liquidity, token.decimals), 4)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span> )})</p>
                         </> : <>
-                                <p><b>Max Stakeable</b>: {window.formatMoney(dfoCore.toDecimals(setupInfo.maxStakeable), 4)} {rewardTokenInfo.symbol} (Available: {window.formatMoney(dfoCore.toDecimals(parseInt(setupInfo.maxStakeable) - parseInt(setup.totalSupply)), 4)} {rewardTokenInfo.symbol})</p>
-                                <p><b>{parseFloat((setup.rewardPerBlock * (1 / (parseInt(setupInfo.maxStakeable)))).toPrecision(4))} {rewardTokenInfo.symbol}</b> (fixed) for every {setupTokens.filter((t) => t.address.toLowerCase() === setupInfo.mainTokenAddress.toLowerCase())[0].symbol} locked until the end block</p>
+                                <p><b>Max Stakeable</b>: {window.fromDecimals(setupInfo.maxStakeable, mainTokenDecimals)} {mainTokenSymbol} (Available: {window.fromDecimals(parseInt(setupInfo.maxStakeable) - parseInt(setup.totalSupply), mainTokenDecimals)} {mainTokenSymbol})</p>
+                                <p><b>{parseFloat((setup.rewardPerBlock * (1 / (parseInt(setupInfo.maxStakeable)))).toPrecision(4))} {rewardTokenInfo.symbol}</b> (fixed) for every {mainTokenSymbol} locked until the end block</p>
                         </>
                     }
                 </div>
@@ -952,7 +970,7 @@ const SetupComponent = (props) => {
                             }
                             {
                                 showFreeTransfer && <div>
-                                    <input type="text" className="TextRegular" placeholder="Position receiver" value={freeTransferAddress} onChange={(e) => setFreeTransferAddress(freeTransferAddress)} id={`transferAddress`} />
+                                    <input type="text" className="TextRegular" placeholder="Position receiver" value={freeTransferAddress} onChange={(e) => setFreeTransferAddress(e.target.value)} id={`transferAddress`} />
                                     {
                                         transferLoading ? <a className="Web3ActionBTN" disabled={transferLoading}>
                                             <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>

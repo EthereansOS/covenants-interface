@@ -63,7 +63,7 @@ const LockedPositionComponent = (props) => {
     return (
         <div className="LockedFarmPositions">
             <div className="FarmYou">
-                <p><b>Position Weight</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(position.mainTokenAmount), setupTokens[mainTokenIndex].decimals), 4)} {rewardTokenInfo.symbol}</p>
+                <p><b>Position Weight</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(position.mainTokenAmount), setupTokens[mainTokenIndex].decimals), 4)} {setupTokens[mainTokenIndex].symbol}</p>
                 {
                     (parseInt(blockNumber) < parseInt(setup.endBlock) && !showUnlock) && <a onClick={() => setShowUnlock(true)} className="web2ActionBTN">Unlock</a>
                 }
@@ -72,7 +72,7 @@ const LockedPositionComponent = (props) => {
                 }
                 {
                     showUnlock && <div>
-                        <p><b>Give back</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseFloat(parseInt(position.reward) * (parseInt(setupInfo.penaltyFee) / 1e18)) + parseInt(lockedPositionStatus.partiallyRedeemed)), rewardTokenInfo.decimals), 4)} {setupTokens[mainTokenIndex].symbol} - {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(position.liquidityPoolTokenAmount), lpTokenInfo.decimals), 4)} {/* farmTokenSymbol */"fLP"}</p>
+                        <p><b>Give back</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseFloat(parseInt(position.reward) * (parseInt(setupInfo.penaltyFee) / 1e18)) + parseInt(lockedPositionStatus.partiallyRedeemed)), rewardTokenInfo.decimals), 4)} {rewardTokenInfo.symbol} - {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(position.liquidityPoolTokenAmount), lpTokenInfo.decimals), 4)} {/* farmTokenSymbol */"fLP"}</p>
                         <p><b>Balance</b>: {window.formatMoney(dfoCore.toDecimals(rewardTokenInfo.balance, rewardTokenInfo.decimals), 4)} {rewardTokenInfo.symbol}</p>
                         <p><b>LP tokens unlocked</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(position.liquidityPoolTokenAmount), lpTokenInfo.decimals), 4)} {lpTokenInfo.symbol}</p>
                         {
