@@ -22,8 +22,8 @@ const LockedPositionComponent = (props) => {
         if (!transferAddress) return;
         setTransferLoading(false);
         try {
-            const gasLimit = await lmContract.methods.transfer(transferAddress, position.positionId).estimateGas({ from: dfoCore.address });
-            const result = await lmContract.methods.transfer(transferAddress, position.positionId).send({ from: dfoCore.address, gasLimit });
+            const gasLimit = await lmContract.methods.transferPosition(transferAddress, position.positionId).estimateGas({ from: dfoCore.address });
+            const result = await lmContract.methods.transferPosition(transferAddress, position.positionId).send({ from: dfoCore.address, gasLimit });
             onComplete();
         } catch (error) {
             console.error(error);

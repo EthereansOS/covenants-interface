@@ -31,18 +31,18 @@ const CreateOrEditFarmingSetups = (props) => {
                     <h6><b>Select farming type</b></h6>
                 </div>
                 <div className="row justify-content-center mb-4">
-                    <button onClick={() => setSelectedFarmingType(selectedFarmingType !== 'free' ? 'free' : null)} className={`btn ${selectedFarmingType === 'free' ? "btn-secondary" : "btn-outline-secondary"} mr-4`}>Free Farming</button>
-                    <button onClick={() => setSelectedFarmingType(selectedFarmingType !== 'locked' ? 'locked' : null)} className={`btn ${selectedFarmingType === 'locked' ? "btn-secondary" : "btn-outline-secondary"}`}>Locked</button>
+                    <a onClick={() => setSelectedFarmingType(selectedFarmingType !== 'free' ? 'free' : null)} className={`${selectedFarmingType === 'free' ? "web2ActionBTN" : "backActionBTN"} mr-4`}>Free Farming</a>
+                    <a onClick={() => setSelectedFarmingType(selectedFarmingType !== 'locked' ? 'locked' : null)} className={`${selectedFarmingType === 'locked' ? "web2ActionBTN" : "backActionBTN"}`}>Locked</a>
                 </div>
                 <div className="row mb-4">
                     <p style={{fontSize: 14}}>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quaerat animi ipsam nemo at nobis odit temporibus autem possimus quae vel, ratione numquam modi rem accusamus, veniam neque voluptates necessitatibus enim!</p>
                 </div>
                 <div className="row justify-content-center">
-                    <button onClick={() => {
+                    <a className="backActionBTN mr-2" onClick={() => {
                         farmingSetups.forEach((_, index) => onRemoveFarmingSetup(index));
                         onCancel();
-                    }} className="btn btn-light mr-4">Back</button>
-                    <button onClick={() => setCurrentStep(1)} disabled={!selectedFarmingType} className="btn btn-primary">Next</button>
+                    }}>Back</a>
+                    <a onClick={() => selectedFarmingType && setCurrentStep(1)} disabled={!selectedFarmingType} className="web2ActionBTN ml-2">Next</a>
                 </div>
             </div>
         );
@@ -58,7 +58,7 @@ const CreateOrEditFarmingSetups = (props) => {
                                 <b style={{fontSize: 14}}>{ !setup.maxLiquidity ? "Free setup" : "Locked setup" } { setup.data.name }{ setup.maxLiquidity ? `${setup.data.symbol}` : ` | ${setup.data.tokens.map((token) => `${(setup.involvingEth && token.address.toLowerCase() === setup.ethAddress.toLowerCase()) ? 'ETH' : token.symbol}` )}` } - Reward: {setup.rewardPerBlock} {rewardToken.symbol}/block</b>
                             </div>
                             <div className="col-md-3 col-12 flex">
-                                <button className="btn btn-sm btn-outline-danger mr-1" onClick={() => onRemoveFarmingSetup(i)}><b>X</b></button> <button onClick={() => { setEditSetup(setup); setEditSetupIndex(i); }} className="btn btn-sm btn-danger ml-1"><b>EDIT</b></button>
+                                <button className="btn btn-sm btn-outline-danger mr-1" onClick={() => onRemoveFarmingSetup(i)}><b>X</b></button> <a onClick={() => { setEditSetup(setup); setEditSetupIndex(i); }} className="web2ActionBTN ml-1"><b>EDIT</b></a>
                             </div>
                         </div>
                     )
@@ -66,13 +66,13 @@ const CreateOrEditFarmingSetups = (props) => {
             }
             <div className="row justify-content-between mt-4">
                 <div className="col-12 flex justify-content-start mb-4">
-                    <button onClick={() => setIsAdd(true)} className="btn btn-light">Add setup</button>
+                    <a onClick={() => setIsAdd(true)} className="web2ActionBTN">Add setup</a>
                 </div>
                 <div className="col-12 mt-4">
-                    <button onClick={() => {
+                    <a onClick={() => {
                         farmingSetups.forEach((_, index) => onRemoveFarmingSetup(index));
                         onCancel();
-                    }} className="btn btn-light mr-4">Back</button> <button onClick={() => onFinish()} className="btn btn-secondary ml-4">Next</button>
+                    }} className="backActionBTN mr-4">Back</a> <a onClick={() => onFinish()} className="web2ActionBTN ml-4">Next</a>
                 </div>
             </div>
         </div>

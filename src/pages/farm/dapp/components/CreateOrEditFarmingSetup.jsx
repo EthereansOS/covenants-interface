@@ -32,11 +32,15 @@ const CreateOrEditFarmingSetup = (props) => {
         try {
             if (address === dfoCore.voidEthereumAddress) {
                 setLockedMainToken({ symbol: 'ETH', address, decimals: 18 });
+                setEthSelectData(null);
+                setLockedSecondaryToken(null);
             } else {
                 const mainTokenContract = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), address);
                 const symbol = await mainTokenContract.methods.symbol().call();
                 const decimals = await mainTokenContract.methods.decimals().call();
                 setLockedMainToken({ symbol, address, decimals });
+                setEthSelectData(null);
+                setLockedSecondaryToken(null);
             }
         } catch (error) {
             console.error(error);
@@ -147,7 +151,7 @@ const CreateOrEditFarmingSetup = (props) => {
         return <div className="col-12">
             <div className="row mb-4">
                 <div className="col-12">
-                    <select className="custom-select wusd-pair-select" value={blockDuration} onChange={(e) => setBlockDuration(e.target.value)}>
+                    <select className="SelectRegular" value={blockDuration} onChange={(e) => setBlockDuration(e.target.value)}>
                         <option value={0}>Choose setup duration</option>
                         {
                             Object.keys(props.dfoCore.getContextElement("blockIntervals")).map((key, index) => {
@@ -221,14 +225,14 @@ const CreateOrEditFarmingSetup = (props) => {
                         </>
                     }
                     <div className="row justify-content-center mb-4">
-                        <button onClick={() => onCancel() } className="btn btn-light mr-4">Back</button>
-                        <button 
+                        <a onClick={() => onCancel() } className="backActionBTN mr-4">Back</a>
+                        <a 
                             onClick={() => editSetup ? onEditFarmingSetup({ rewardPerBlock: freeRewardPerBlock, data: freeLiquidityPoolToken, period: blockDuration, minStakeable, renewTimes, involvingEth, ethAddress, ethSelectData }, editSetupIndex) : onAddFarmingSetup({ rewardPerBlock: freeRewardPerBlock, data: freeLiquidityPoolToken, period: blockDuration, minStakeable, renewTimes, involvingEth, ethAddress, ethSelectData }) } 
                             disabled={!freeLiquidityPoolToken || freeRewardPerBlock <= 0 || minStakeable <= 0 || !blockDuration} 
-                            className="btn btn-secondary ml-4"
+                            className="web2ActionBTN ml-4"
                         >
                             {editSetup ? 'Edit' : 'Add'}
-                        </button>
+                        </a>
                     </div>
                 </>
             }
@@ -239,7 +243,7 @@ const CreateOrEditFarmingSetup = (props) => {
         return <div className="col-12">
             <div className="row mb-4">
                 <div className="col-12">
-                    <select className="custom-select wusd-pair-select" value={blockDuration} onChange={(e) => setBlockDuration(e.target.value)}>
+                    <select className="SelectRegular" value={blockDuration} onChange={(e) => setBlockDuration(e.target.value)}>
                         <option value={0}>Choose setup duration</option>
                         {
                             Object.keys(props.dfoCore.getContextElement("blockIntervals")).map((key, index) => {
@@ -324,8 +328,8 @@ const CreateOrEditFarmingSetup = (props) => {
                         </>
                     }
                     <div className="row justify-content-center mb-4">
-                        <button onClick={() => onCancel() } className="btn btn-light mr-4">Back</button>
-                        <button onClick={() => setCurrentStep(1) } disabled={!lockedMainToken || lockedRewardPerBlock <= 0 || !lockedMaxLiquidity || !lockedSecondaryToken || !blockDuration} className="btn btn-secondary ml-4">Next</button>
+                        <a onClick={() => onCancel() } className="backActionBTN mr-4">Back</a>
+                        <a onClick={() => setCurrentStep((!lockedMainToken || lockedRewardPerBlock <= 0 || !lockedMaxLiquidity || !lockedSecondaryToken || !blockDuration) ? currentStep : 1) } disabled={!lockedMainToken || lockedRewardPerBlock <= 0 || !lockedMaxLiquidity || !lockedSecondaryToken || !blockDuration} className="web2ActionBTN ml-4">Next</a>
                     </div>
                 </>
             }
@@ -372,34 +376,39 @@ const CreateOrEditFarmingSetup = (props) => {
                     <p className="text-center text-small">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Omnis delectus incidunt laudantium distinctio velit reprehenderit quaerat, deserunt sint fugit ex consectetur voluptas suscipit numquam. Officiis maiores quaerat quod necessitatibus perspiciatis!</p>
                 </div>
                 <div className="row justify-content-center mb-4">
-                    <button onClick={() => setCurrentStep(0) } className="btn btn-light mr-4">Back</button>
-                    <button onClick={() => editSetup ? onEditFarmingSetup({
-                        period: blockDuration,
-                        data: lockedMainToken,
-                        maxLiquidity: lockedMaxLiquidity,
-                        rewardPerBlock: lockedRewardPerBlock,
-                        penaltyFee: lockedPenaltyFee,
-                        renewTimes,
-                        secondaryToken: lockedSecondaryToken,
-                        minStakeable,
-                        involvingEth,
-                        ethAddress,
-                        ethSelectData
-                    }, editSetupIndex) : onAddFarmingSetup({
-                        period: blockDuration,
-                        data: lockedMainToken,
-                        maxLiquidity: lockedMaxLiquidity,
-                        rewardPerBlock: lockedRewardPerBlock,
-                        penaltyFee: lockedPenaltyFee,
-                        renewTimes,
-                        secondaryToken: lockedSecondaryToken,
-                        minStakeable,
-                        involvingEth,
-                        ethAddress,
-                        ethSelectData
-                    })} disabled={(isRenewable && renewTimes === 0) || (lockedHasPenaltyFee && lockedPenaltyFee === 0)} className="btn btn-secondary ml-4">
+                    <a onClick={() => setCurrentStep(0) } className="backActionBTN mr-4">Back</a>
+                    <a onClick={() => {
+                            if ((isRenewable && renewTimes === 0) || (lockedHasPenaltyFee && lockedPenaltyFee === 0)) return;
+                            editSetup ? 
+                            onEditFarmingSetup({
+                                period: blockDuration,
+                                data: lockedMainToken,
+                                maxLiquidity: lockedMaxLiquidity,
+                                rewardPerBlock: lockedRewardPerBlock,
+                                penaltyFee: lockedPenaltyFee,
+                                renewTimes,
+                                secondaryToken: lockedSecondaryToken,
+                                minStakeable,
+                                involvingEth,
+                                ethAddress,
+                                ethSelectData
+                            }, editSetupIndex) : onAddFarmingSetup({
+                                period: blockDuration,
+                                data: lockedMainToken,
+                                maxLiquidity: lockedMaxLiquidity,
+                                rewardPerBlock: lockedRewardPerBlock,
+                                penaltyFee: lockedPenaltyFee,
+                                renewTimes,
+                                secondaryToken: lockedSecondaryToken,
+                                minStakeable,
+                                involvingEth,
+                                ethAddress,
+                                ethSelectData
+                            }
+                        )}
+                    } disabled={(isRenewable && renewTimes === 0) || (lockedHasPenaltyFee && lockedPenaltyFee === 0)} className="web2ActionBTN ml-4">
                         {editSetup ? 'Edit' : 'Add'}
-                    </button>
+                    </a>
                 </div>
             </div>
         )

@@ -244,10 +244,10 @@ const Create = (props) => {
                 }
                 {
                     selectedRewardToken && <div className="col-12">
-                        <button className="btn btn-secondary" onClick={() => {
+                        <a className="web2ActionBTN" onClick={() => {
                             props.updateFarmingContract({ rewardToken: { ...selectedRewardToken, byMint } });
                             setDeployStep(0);
-                        }}>Start</button>
+                        }}>Start</a>
                     </div>
                 }
                 </>
@@ -274,8 +274,8 @@ const Create = (props) => {
                     <h6><b>Deploy extension</b></h6>
                 </div>
                 <div className="row">
-                    <button onClick={() => setDeployStep(0)} className="btn btn-light mr-4">Back</button>
-                    <button onClick={() => deployExtension()} className="btn btn-secondary ml-4">Deploy extension</button>
+                    <a onClick={() => setDeployStep(0)} className="backActionBTN mr-4">Back</a>
+                    <a onClick={() => deployExtension()} className="Web3ActionBTN">Deploy extension</a>
                 </div>
             </div>
         } else if (deployStep === 2) {
@@ -284,7 +284,7 @@ const Create = (props) => {
                     <h6><b>Deploy Farming Contract</b></h6>
                 </div>
                 <div className="row">
-                    <button onClick={() => deploy()} className="btn btn-secondary">Deploy contract</button>
+                    <a onClick={() => deploy()} className="Web3ActionBTN">Deploy contract</a>
                 </div>
             </div>
         } else if (deployStep === 3) {
@@ -305,7 +305,7 @@ const Create = (props) => {
                 </div>
                 <div className="row mb-4">
                     <div className="col-12 p-0">
-                        <select className="custom-select wusd-pair-select" value={selectedHost} onChange={(e) => setSelectedHost(e.target.value)}>
+                        <select className="SelectRegular" value={selectedHost} onChange={(e) => setSelectedHost(e.target.value)}>
                             <option value="">Choose an host..</option>
                             <option value="deployed-contract">Contract</option>
                             <option value="wallet">Wallet</option>
@@ -314,15 +314,14 @@ const Create = (props) => {
                 </div>
                 {
                     selectedHost === 'wallet' ? <>
-                        <div className="row mb-2">
-                            <input type="text" className="form-control" value={hostWalletAddress || ""} onChange={(e) => setHostWalletAddress(e.target.value.toString())} placeholder={"Wallet address"} aria-label={"Wallet address"}/>
+                        <div className="row mb-2 justify-content-center">
+                            <input type="text" className="TextRegular"  value={hostWalletAddress || ""} onChange={(e) => setHostWalletAddress(e.target.value.toString())} placeholder={"Wallet address"} aria-label={"Wallet address"}/>
                         </div>
                         <div className="row mb-4">
                             <p className="text-left text-small">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Omnis delectus incidunt laudantium distinctio velit reprehenderit quaerat, deserunt sint fugit ex consectetur voluptas suscipit numquam. Officiis maiores quaerat quod necessitatibus perspiciatis!</p>
                         </div>
-                        <div className="row mb-4">
-                            <h6><b>Treasury address</b></h6>
-                            <input type="text" className="form-control" value={treasuryAddress || ""} onChange={(e) => setTreasuryAddress(e.target.value.toString())} placeholder={"Treasury address"} aria-label={"Treasury address"}/>
+                        <div className="row mb-4 justify-content-center">
+                            <input type="text" className="TextRegular"  value={treasuryAddress || ""} onChange={(e) => setTreasuryAddress(e.target.value.toString())} placeholder={"Treasury address"} aria-label={"Treasury address"}/>
                         </div>
                     </> : selectedHost === 'deployed-contract' ? <>
                         <div className="form-check my-4">
@@ -334,7 +333,7 @@ const Create = (props) => {
                         {
                             !useDeployedContract ? <ContractEditor filterDeployedContract={filterDeployedContract} dfoCore={props.dfoCore} onContract={setDeployContract} templateCode={farmingExtensionTemplateCode} /> : <>
                                 <div className="row mb-2">
-                                    <input type="text" className="form-control" value={hostDeployedContract} onChange={(e) => setHostDeployedContract(e.target.value.toString())} placeholder={"Deployed contract address"} aria-label={"Deployed contract address"}/>
+                                    <input type="text" className="TextRegular"  value={hostDeployedContract} onChange={(e) => setHostDeployedContract(e.target.value.toString())} placeholder={"Deployed contract address"} aria-label={"Deployed contract address"}/>
                                 </div>
                             </>
                         }
@@ -342,17 +341,17 @@ const Create = (props) => {
                 }
                 <div>
                     <h6><b>Extension payload</b></h6>
-                    <input type="text" className="form-control" value={extensionPayload || ""} onChange={(e) => setExtensionPayload(e.target.value.toString())} placeholder={"Payload"} aria-label={"Payload"}/>
+                    <input type="text" className="TextRegular"  value={extensionPayload || ""} onChange={(e) => setExtensionPayload(e.target.value.toString())} placeholder={"Payload"} aria-label={"Payload"}/>
                 </div>
                 <div className="row justify-content-center my-4">
-                    <button onClick={() => {
+                    <a onClick={() => {
                         setSelectedHost(null);
                         setIsDeploy(false);
-                    } } className="btn btn-light mr-4">Back</button>
-                    <button onClick={() => {
+                    } } className="backActionBTN mr-4">Back</a>
+                    <a onClick={() => {
                         initializeDeployData();
                         setDeployStep((selectedHost === 'deployed-contract' && hostDeployedContract && !deployContract) ? 2 : 1);
-                    }} className="btn btn-secondary ml-4" /*disabled={!selectedHost || (selectedHost === 'wallet' && (!hostWalletAddress || !isValidAddress(hostWalletAddress))) || (selectedHost === 'deployed-contract' && ((!useDeployedContract && (!deployContract || !deployContract.contract)) || (useDeployedContract && !hostDeployedContract)))}*/>Deploy</button>
+                    }} className="web2ActionBTN ml-4" disabled={!selectedHost || (selectedHost === 'wallet' && !hostWalletAddress) || (selectedHost === 'deployed-contract' && ((!useDeployedContract && (!deployContract || !deployContract.contract)) || (useDeployedContract && !hostDeployedContract)))}>Deploy</a>
                 </div>
             </div>
         )
@@ -373,6 +372,11 @@ const Create = (props) => {
                     onCancel={() => { setFarmingSetups([]); props.updateFarmingContract(null);}} 
                     onFinish={() => setIsDeploy(true)} 
                 />
+                {
+                    (farmingSetups.length === 0) && <div className="row mt-4 justify-content-center">
+                        <a className="web2ActionBTN" onClick={() => setIsDeploy(true)}>Deploy without setups</a>
+                    </div>
+                }
             </div>
         )
     }

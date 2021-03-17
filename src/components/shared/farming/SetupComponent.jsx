@@ -534,8 +534,8 @@ const SetupComponent = (props) => {
         if (setupInfo.free) {
             setTransferLoading(true);
             try {
-                const gasLimit = await lmContract.methods.transfer(freeTransferAddress, positionId).estimateGas({ from: dfoCore.address });
-                const result = await lmContract.methods.transfer(freeTransferAddress, positionId).send({ from: dfoCore.address, gasLimit });
+                const gasLimit = await lmContract.methods.transferPosition(freeTransferAddress, positionId).estimateGas({ from: dfoCore.address });
+                const result = await lmContract.methods.transferPosition(freeTransferAddress, positionId).send({ from: dfoCore.address, gasLimit });
                 await getSetupMetadata();
             } catch (error) {
                 console.error(error);
@@ -548,8 +548,8 @@ const SetupComponent = (props) => {
             if ((!index && index !== 0) || !transferAddress[index]) return;
             setLockedTransferLoading(lockedTransferLoading.map((v, i) => i === index ? true : v));
             try {
-                const gasLimit = await lmContract.methods.transfer(transferAddress[index], positionId).estimateGas({ from: dfoCore.address });
-                const result = await lmContract.methods.transfer(transferAddress[index], positionId).send({ from: dfoCore.address, gasLimit });
+                const gasLimit = await lmContract.methods.transferPosition(transferAddress[index], positionId).estimateGas({ from: dfoCore.address });
+                const result = await lmContract.methods.transferPosition(transferAddress[index], positionId).send({ from: dfoCore.address, gasLimit });
                 await getSetupMetadata();
             } catch (error) {
                 console.error(error);
