@@ -873,7 +873,7 @@ const SetupComponent = (props) => {
     return (
         <div className={className}>
             <div className="FarmSetupMain">
-                <h5><b>{setupInfo.free ? "Free Farming" : "Locked Farming"} {!setup.active && <span className="text-danger">(inactive)</span>} {(parseInt(setup.endBlock) <= blockNumber && parseInt(setup.endBlock) !== 0) && <span>(ended)</span>}</b> <a>{AMM.name}</a></h5>
+                <h5><b>{setupInfo.free ? "Free Farming" : "Locked Farming"} {(!setup.active && canActivateSetup) ? <span className="text-secondary">(new)</span> : (!setup.active) ? <span className="text-danger">(inactive)</span> : <></> } {(parseInt(setup.endBlock) <= blockNumber && parseInt(setup.endBlock) !== 0) && <span>(ended)</span>}</b> <a>{AMM.name}</a></h5>
                 <aside>
                     <p><b>block end</b>: <a target="_blank" href={"https://etherscan.io/block/" + setup.endBlock}>{setup.endBlock}</a></p>
                     <p><b>Min to Stake</b>: {props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(setupInfo.minStakeable).toString(), setupTokens.filter((t) => t.address.toLowerCase() === setupInfo.mainTokenAddress.toLowerCase())[0].decimals), 4)} {setupTokens.filter((t) => t.address.toLowerCase() === setupInfo.mainTokenAddress.toLowerCase())[0].symbol}</p>
@@ -888,11 +888,8 @@ const SetupComponent = (props) => {
                             <p><b>Reward/day</b>: {window.formatMoney(props.dfoCore.toDecimals(parseInt(setup.rewardPerBlock) * 6400), 4)} {rewardTokenInfo.symbol} <span>(Shared)</span></p>
                             <p><b>Deposits</b>: {window.formatMoney(props.dfoCore.toDecimals(parseInt(setup.totalSupply), lpTokenInfo.decimals), 4)} {lpTokenInfo.symbol} ({setupTokens.map((token, index) => <span>{window.formatMoney(props.dfoCore.toDecimals(token.liquidity, token.decimals), 4)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span> )})</p>
                         </> : <>
-                            {parseInt(setup.endBlock) > blockNumber && <div>
-                                    <p><b>Max Stakeable</b>: {window.formatMoney(dfoCore.toDecimals(setupInfo.maxStakeable), 4)} {rewardTokenInfo.symbol} (Available: {window.formatMoney(dfoCore.toDecimals(parseInt(setupInfo.maxStakeable) - parseInt(setup.totalSupply)), 4)} {rewardTokenInfo.symbol})</p>
-                                    <p><b>{parseFloat((setup.rewardPerBlock * (1 / (parseInt(setupInfo.maxStakeable)))).toPrecision(4))} {rewardTokenInfo.symbol}</b> (fixed) for every {setupTokens.filter((t) => t.address.toLowerCase() === setupInfo.mainTokenAddress.toLowerCase())[0].symbol} locked until the end block</p>
-                                </div>
-                            }
+                                <p><b>Max Stakeable</b>: {window.formatMoney(dfoCore.toDecimals(setupInfo.maxStakeable), 4)} {rewardTokenInfo.symbol} (Available: {window.formatMoney(dfoCore.toDecimals(parseInt(setupInfo.maxStakeable) - parseInt(setup.totalSupply)), 4)} {rewardTokenInfo.symbol})</p>
+                                <p><b>{parseFloat((setup.rewardPerBlock * (1 / (parseInt(setupInfo.maxStakeable)))).toPrecision(4))} {rewardTokenInfo.symbol}</b> (fixed) for every {setupTokens.filter((t) => t.address.toLowerCase() === setupInfo.mainTokenAddress.toLowerCase())[0].symbol} locked until the end block</p>
                         </>
                     }
                 </div>
