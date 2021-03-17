@@ -28,8 +28,8 @@ const SetupComponent = (props) => {
     const [freeTransferAddress, setFreeTransferAddress] = useState("");
     const [extensionContract, setExtensionContract] = useState(null);
     const [farmTokenSymbol, setFarmTokenSymbol] = useState("");
-    const [farmTokenBalance, setFarmTokenBalance] = useState(0);
-    const [farmTokenRes, setFarmTokenRes] = useState(null);
+    const [farmTokenBalance, setFarmTokenBalance] = useState("0");
+    const [farmTokenRes, setFarmTokenRes] = useState([]);
     const [canActivateSetup, setCanActivateSetup] = useState(false);
     const [setupTokens, setSetupTokens] = useState([]);
     const [tokensAmounts, setTokensAmount] = useState([]);
@@ -108,9 +108,10 @@ const SetupComponent = (props) => {
                         setFarmTokenSymbol(ftSymbol);
                         setFarmTokenBalance(ftBalance);
                         const ftRes = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, ftBalance).call();
+                        console.log(ftRes);
                         setFarmTokenRes(ftRes['tokensAmounts']);
                     } else {
-                        setFarmTokenBalance(0);
+                        setFarmTokenBalance("0");
                     }
                 }
 
@@ -224,9 +225,10 @@ const SetupComponent = (props) => {
                     setFarmTokenSymbol(ftSymbol);
                     setFarmTokenBalance(ftBalance);
                     const ftRes = await ammContract.methods.byLiquidityPoolAmount(farmSetupInfo.liquidityPoolTokenAddress, ftBalance).call();
+                    console.log(ftRes);
                     setFarmTokenRes(ftRes['tokensAmounts']);
                 } else {
-                    setFarmTokenBalance(0);
+                    setFarmTokenBalance("0");
                 }
             }
             setLockedEstimatedReward(0);
@@ -964,7 +966,7 @@ const SetupComponent = (props) => {
                     }
                     </> : <>
                     <div className="LockedFarmTokensPosition"> 
-                        <p><b>Your Farm Token Supply</b>: {window.formatMoney(props.dfoCore.toDecimals(farmTokenBalance, 18), 4)} {"fLP"} - {setupTokens.map((setupToken, i) => `${window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(farmTokenRes[i]), setupToken.decimals), 4)} ${setupToken.symbol} ` )}</p>
+                        <p><b>Your Farm Token Supply</b>: {window.formatMoney(props.dfoCore.toDecimals(farmTokenBalance, 18), 4)} {"fLP"} - {setupTokens.map((setupToken, i) => `${parseInt(farmTokenBalance) === 0 ? 0 : window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(farmTokenRes[i]), setupToken.decimals), 4)} ${setupToken.symbol} ` )}</p>
                     </div>                               
                     {
                         (parseInt(blockNumber) >= parseInt(setup.endBlock) && parseInt(farmTokenBalance) > 0) && <>
