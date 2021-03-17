@@ -406,7 +406,7 @@ const SetupComponent = (props) => {
     }
 
     const onUpdateTokenAmount = async (value, index) => {
-        if (!value) {                
+        if (!value) {
             setLockedEstimatedReward(0);
             setTokensAmount(tokensAmounts.map((old, i) => i === index ? "0" : old));
             return;
@@ -414,11 +414,13 @@ const SetupComponent = (props) => {
         var ethereumAddress = (await ammContract.methods.data().call())[0];
         var tokenAddress = setupTokens[index].address;
         tokenAddress = tokenAddress === window.voidEthereumAddress ? ethereumAddress : tokenAddress;
-        const result = await ammContract.methods.byTokenAmount(setupInfo.liquidityPoolTokenAddress, tokenAddress, props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(setupTokens[index].decimals)))).call();
-        const { liquidityPoolAmount } = result;
-        const ams = result.tokensAmounts;
-        setLpTokenAmount(props.dfoCore.toDecimals(liquidityPoolAmount, lpTokenInfo.decimals, 8))
-        setTokensAmount(tokensAmounts.map((old, i) => props.dfoCore.toDecimals(ams[i], setupTokens[i].decimals)));
+        var result = await ammContract.methods.byTokenAmount(setupInfo.liquidityPoolTokenAddress, tokenAddress, props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(setupTokens[index].decimals)))).call();
+        var { liquidityPoolAmount } = result;
+        //result = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, liquidityPoolAmount).call();
+        var ams = result.tokensAmounts;
+        console.log(ams);
+        setLpTokenAmount(props.dfoCore.toDecimals(liquidityPoolAmount, lpTokenInfo.decimals))
+        setTokensAmount(ams.map((old, i) => ams[i]));
         if (!setupInfo.free) {
             let mainTokenIndex = 0;
             setupTokens.forEach((t, i) => {
@@ -442,7 +444,7 @@ const SetupComponent = (props) => {
         const result = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(lpTokenInfo.decimals)))).call();
         const ams = result.tokensAmounts;
         setLpTokenAmount(value)
-        setTokensAmount(tokensAmounts.map((old, i) => props.dfoCore.toDecimals(ams[i], setupTokens[i].decimals)));
+        setTokensAmount(tokensAmounts.map((old, i) => ams[i]));
         if (!setupInfo.free) {
             let mainTokenIndex = 0;
             setupTokens.forEach((t, i) => {
@@ -480,28 +482,32 @@ const SetupComponent = (props) => {
             console.log(ethTokenIndex);
             let lpAmount = dfoCore.toFixed(dfoCore.fromDecimals(lpTokenAmount.toString()));
             const res = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, lpAmount).call();
+            var localTokensAmounts = stake.amountIsLiquidityPool ? res.tokensAmounts : tokensAmounts;
             // const res = await ammContract.methods.byTokensAmount(setupInfo.liquidityPoolTokenAddress,  , stake.amount).call();
-            stake.amount = stake.amountIsLiquidityPool ? lpAmount : res.tokensAmounts[mainTokenIndex];
-            ethTokenValue = res.tokensAmounts[ethTokenIndex];
+            stake.amount = stake.amountIsLiquidityPool ? lpAmount : localTokensAmounts[mainTokenIndex];
+            ethTokenValue = localTokensAmounts[ethTokenIndex];
+            console.log(ethTokenValue);
+            var value = setupInfo.involvingETH && !stake.amountIsLiquidityPool ? ethTokenValue : 0;
+            console.log(value);
             console.log(stake);
             if ((currentPosition && isValidPosition(currentPosition)) || setupInfo.free) {
                 // adding liquidity to the setup
                 if (!currentPosition) {
-                    const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value: (setupInfo.involvingETH && !stake.amountIsLiquidityPool) ? ethTokenValue : 0 });
+                    const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value});
                     console.log(gasLimit);
-                    const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit, value: (setupInfo.involvingETH && !stake.amountIsLiquidityPool) ? ethTokenValue : 0 });
+                    const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit, value});
 
                 } else {
-                    const gasLimit = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).estimateGas({ from: dfoCore.address, value: setupInfo.involvingETH && !stake.amountIsLiquidityPool ? ethTokenValue : 0 });
-                    const result = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).send({ from: dfoCore.address, gasLimit, value: setupInfo.involvingETH && !stake.amountIsLiquidityPool ? ethTokenValue : 0 });
+                    const gasLimit = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).estimateGas({ from: dfoCore.address, value});
+                    const result = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).send({ from: dfoCore.address, gasLimit, value});
                 }
 
             } else if (!setupInfo.free) {
 
                 // opening position
-                const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value: setupInfo.involvingETH && !stake.amountIsLiquidityPool ? ethTokenValue : 0 });
+                const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value});
                 console.log(gasLimit);
-                const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit, value: setupInfo.involvingETH && !stake.amountIsLiquidityPool ? ethTokenValue : 0 });
+                const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit, value});
             }
             await getSetupMetadata();
         } catch (error) {
@@ -762,8 +768,8 @@ const SetupComponent = (props) => {
             {inputType === 'add-pair' ? <>
                 {
                     setupTokens.map((setupToken, i) => {
-                        return <div className="InputTokenRegular">
-                            <Input showMax={true} address={setupToken.address} value={tokensAmounts[i]} balance={setupToken.balance} min={0} onChange={(e) => onUpdateTokenAmount(e.target.value, i)} showCoin={true} showBalance={true} name={setupToken.symbol} />
+                        return <div key={setupToken.address} className="InputTokenRegular">
+                            <Input showMax={true} address={setupToken.address} value={window.fromDecimals(tokensAmounts[i], setupToken.decimals, true)} balance={setupToken.balance} min={0} onChange={(e) => onUpdateTokenAmount(e.target.value, i)} showCoin={true} showBalance={true} name={setupToken.symbol} />
                         </div>
                     })
                 }
@@ -800,7 +806,7 @@ const SetupComponent = (props) => {
                 </div>
             </> : inputType === 'add-lp' ? <>
                         <div className="InputTokenRegular">
-                            <Input showMax={true} address={lpTokenInfo.contract.options.address} value={lpTokenAmount} balance={dfoCore.toDecimals(lpTokenInfo.balance, lpTokenInfo.decimals)} min={0} onChange={(e) => onUpdateLpTokenAmount(e.target.value)} showCoin={true} showBalance={true} name={lpTokenInfo.symbol} />
+                            <Input showMax={true} address={lpTokenInfo.contract.options.address} value={lpTokenAmount} balance={window.fromDecimals(lpTokenInfo.balance, lpTokenInfo.decimals, true)} min={0} onChange={(e) => onUpdateLpTokenAmount(e.target.value)} showCoin={true} showBalance={true} name={lpTokenInfo.symbol} />
                         </div>
                 {
                     (!setupInfo.free || !currentPosition) && <label className="OptionalThingsFarmers" htmlFor="openPosition2">
