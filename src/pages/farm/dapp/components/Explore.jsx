@@ -38,23 +38,16 @@ const Explore = (props) => {
                         let totalFreeSetups = 0;
                         let totalLockedSetups = 0;
                 
-                        /*
-                        const { data } = await axios.get(dfoCore.getContextElement("coingeckoCoinPriceURL") + rewardTokenAddress);
-                        console.log(data);
-                        const rewardTokenPriceUsd = data[rewardTokenAddress.toLowerCase()].usd;
-                        const yearlyBlocks = 36000;
-                
-                        let valueLocked = 0;
-                        */
                         let rewardPerBlock = 0;
+                        let canActivateSetup = false;
                         await Promise.all(setups.map(async (setup, i) => {
                             const {'0': s, '1': setupInfo} = await contract.methods.setup(i).call();
-                            console.log(setupInfo);
-                            // const setupInfo = await contract.methods._setupsInfo(setup.infoIndex).call();
+                            if (!canActivateSetup) {
+                                canActivateSetup = parseInt(setupInfo.renewTimes) > 0 && !setup.active && parseInt(setupInfo.lastSetupIndex) === parseInt(i);
+                            }
                             if (setup.active) {
                                 setupInfo.free ? freeSetups.push(setup) : lockedSetups.push(setup);
                                 rewardPerBlock += parseInt(setup.rewardPerBlock);
-                                // valueLocked += parseInt(dfoCore.toDecimals(setup.totalSupply, 18, 18));
                             }
                             if (setup.rewardPerBlock !== "0") {
                                 setupInfo.free ? totalFreeSetups += 1 : totalLockedSetups += 1;
@@ -71,10 +64,11 @@ const Explore = (props) => {
                             lockedSetups,
                             totalFreeSetups,
                             totalLockedSetups,
+                            canActivateSetup,
                             host: `${host.substring(0, 5)}...${host.substring(host.length - 3, host.length)}`,
                             fullhost: `${host}`,
                         };
-                        return { contract, metadata, isActive: freeSetups.length + lockedSetups.length > 0 };
+                        return { contract, metadata, isActive: freeSetups.length + lockedSetups.length > 0 || canActivateSetup };
                     } catch (error) {
                         console.error(error);
                     }
@@ -187,7 +181,7 @@ const Explore = (props) => {
                     }
                     {
                         farmingContracts.length > 0 && farmingContracts.map((farmingContract) => {
-                            if ((activeOnly && (farmingContract.metadata.freeSetups.length > 0 || farmingContract.metadata.lockedSetups.length > 0)) || !activeOnly) {
+                            if ((activeOnly && (farmingContract.metadata.freeSetups.length > 0 || farmingContract.metadata.lockedSetups.length > 0) || farmingContract.metadata.canActivateSetup) || !activeOnly) {
                                 return (
                                     <FarmingComponent className="FarmContract" dfoCore={props.dfoCore} contract={farmingContract.contract} metadata={farmingContract.metadata} hasBorder />
                                 )
