@@ -15,7 +15,7 @@ const FarmingComponent = (props) => {
                         <Coin height={45} address={metadata.rewardTokenAddress} />
                     </figure>
                     <aside>
-                        <h6><b>{metadata.name}</b> {metadata.freeSetups.length + metadata.lockedSetups.length === 0 && <span className="text-danger"><b>(inactive)</b></span> }</h6>
+                        <h6><b>{metadata.name}</b> {(metadata.freeSetups.length + metadata.lockedSetups.length === 0 && !metadata.canActivateSetup) ? <span className="text-danger"><b>(inactive)</b></span> : (metadata.canActivateSetup) ? <span className="text-secondary"><b>(new)</b></span> : <></> }</h6>
                         <Link to={ goBack ? `/farm/dapp/` : `/farm/dapp/${metadata.contractAddress}`} className={ goBack ? "backActionBTN" : "web2ActionBTN" }>{ goBack ? "Back" : "Open" }</Link>
                     </aside>
                 </div>
