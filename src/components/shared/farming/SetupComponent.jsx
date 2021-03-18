@@ -830,13 +830,8 @@ const SetupComponent = (props) => {
                     </div>
                 }
                 {
-                    (!setupInfo.free && rewardTokenInfo) && <div className="row justify-content-center mt-4">
-                            <p><b>Estimated earnings until end block</b>: {window.formatMoney(estimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
-                    </div>
-                }
-                {
-                    (setupInfo.free && rewardTokenInfo) && <div className="row justify-content-center mt-4">
-                            <p><b>Estimated earnings per day</b>: {window.formatMoney(estimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
+                    rewardTokenInfo && <div className="row justify-content-center mt-4">
+                            <p><b>{!setupInfo.free ? "Estimated earnings until end block" : "Estimated earnings per day"}</b>: {window.formatMoney(estimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
                     </div>
                 }
                 <div className="Web3BTNs">
