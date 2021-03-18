@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 
 const FarmingComponent = (props) => {
     const { className, goBack, metadata } = props;
-    console.log("metadata", metadata);
     const symbol = metadata.name.replace("Farm ", "");
 
     return (
@@ -12,7 +11,7 @@ const FarmingComponent = (props) => {
                 metadata ? <>
                 <div className="FarmTitle">
                     <figure>
-                        <Coin height={45} address={metadata.rewardTokenAddress} />
+                        <a target="_blank" href={`https://etherscan.io/address/${metadata.rewardTokenAddress}`} ><Coin height={45} address={metadata.rewardTokenAddress} /></a>
                     </figure>
                     <aside>
                         <h6><b>{metadata.name}</b> {(metadata.freeSetups.length + metadata.lockedSetups.length === 0 && !metadata.canActivateSetup) ? <span className="text-danger"><b>(inactive)</b></span> : <></> }</h6>
@@ -24,9 +23,9 @@ const FarmingComponent = (props) => {
                         {/*<p><b>APY</b>: 20%</p> If 0 (no coingecko Info) insert "Not Available"*/}
                         <p><b>Active Setups</b>: {metadata.freeSetups.length + metadata.lockedSetups.length} </p>
                         {goBack && <>
-                            <p><b>Contract</b>: <a target="_blank" href={"https://etherscan.io/address/" + metadata.contractAddress}>{metadata.farmAddress}</a></p>
-                            <p><b>Host</b>: <a target="_blank" href={"https://etherscan.io/address/" + metadata.fullhost}>{metadata.host}</a></p>
-                            <p><b>Extension</b>: <a target="_blank" href={"https://etherscan.io/address/" + metadata.fullExtension}>{metadata.extension}</a></p>
+                            <p><b>Contract</b>: <a target="_blank" href={`https://etherscan.io/address/${metadata.contractAddress}`}>{metadata.farmAddress}</a></p>
+                            <p><b>Host</b>: <a target="_blank" href={`https://etherscan.io/address/${metadata.fullhost}`}>{metadata.host}</a></p>
+                            <p><b>Extension</b>: <a target="_blank" href={`https://etherscan.io/address/${metadata.fullExtension}`}>{metadata.extension}</a></p>
                         </>}
                         {/*(Deprecated)<p><b>Setups</b>: {metadata.totalFreeSetups} free | {metadata.totalLockedSetups} locked</p>*/}
                         {/*<p><b>Host</b>: <a target="_blank" href={"https://etherscan.io/address/" + metadata.fullhost}>{metadata.host}</a></p>*/}

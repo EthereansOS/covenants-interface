@@ -138,6 +138,44 @@ export default class DFOCore {
             !localContext && console.clear();
         }
     }
+    
+    addTokenToMetamask = (address, symbol, decimals, image) => {
+        if (this.web3.currentProvider.isMetaMask) {
+            this.web3.currentProvider.sendAsync({
+                    method: 'metamask_watchAsset',
+                    params: {
+                        type: "ERC20",
+                        options: {
+                            address,
+                            symbol,
+                            decimals,
+                            image,
+                        },
+                    },
+                    id: Math.round(Math.random() * 100000),
+                }, (err, added) => {
+                    console.log('provider returned', err, added)
+                }
+            )
+        } else if (window.web3.currentProvider.isMetaMask) {
+            window.web3.currentProvider.sendAsync({
+                    method: 'metamask_watchAsset',
+                    params: {
+                        type: "ERC20",
+                        options: {
+                            address,
+                            symbol,
+                            decimals,
+                            image,
+                        },
+                    },
+                    id: Math.round(Math.random() * 100000),
+                }, (err, added) => {
+                    console.log('provider returned', err, added)
+                }
+            )
+        }
+    }
 
     /**
      * returns the contract with the given abi and address if it's already stored

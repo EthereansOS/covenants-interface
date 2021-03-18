@@ -187,7 +187,7 @@ const Explore = (props) => {
                         farmingContracts.length > 0 && farmingContracts.map((farmingContract) => {
                             if ((activeOnly && (farmingContract.metadata.freeSetups.length > 0 || farmingContract.metadata.lockedSetups.length > 0) || farmingContract.metadata.canActivateSetup) || !activeOnly) {
                                 return (
-                                    <FarmingComponent className="FarmContract" dfoCore={props.dfoCore} contract={farmingContract.contract} metadata={farmingContract.metadata} hasBorder />
+                                    <FarmingComponent key={farmingContract.contract.options.address} className="FarmContract" dfoCore={props.dfoCore} metadata={farmingContract.metadata} hasBorder />
                                 )
                             }
                             return <div/>

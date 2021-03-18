@@ -2,7 +2,24 @@ import { useState } from "react";
 import ApproveButton from "../buttons/ApproveButton";
 
 const LockedPositionComponent = (props) => {
-    const { position, dfoCore, blockNumber, setup, setupInfo, mainTokenInfo, onRewardTokenApproval, setupTokens, rewardTokenInfo, lockedPositionReward, lockedPositionStatus, lpTokenInfo, lmContract, onComplete } = props;
+    const { 
+        position, 
+        dfoCore, 
+        blockNumber, 
+        setup, 
+        setupInfo, 
+        mainTokenInfo, 
+        onRewardTokenApproval, 
+        setupTokens, 
+        rewardTokenInfo, 
+        lockedPositionReward, 
+        lockedPositionStatus, 
+        lpTokenInfo, 
+        lmContract, 
+        onComplete,
+        farmTokenSymbol,
+        farmTokenDecimals,
+    } = props;
     // booleans
     const [showTransfer, setShowTransfer] = useState(false);
     const [showUnlock, setShowUnlock] = useState(false);

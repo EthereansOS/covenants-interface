@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import { addTransaction } from '../../../store/actions';
 import axios from 'axios';
 import LockedPositionComponent from './LockedPositionComponent';
+import metamaskLogo from "../../../assets/images/metamask-fox.svg";
 
 const SetupComponent = (props) => {
     let { className, dfoCore, setupIndex, lmContract, hostedBy } = props;
@@ -29,6 +30,8 @@ const SetupComponent = (props) => {
 
     const [freeTransferAddress, setFreeTransferAddress] = useState("");
     const [extensionContract, setExtensionContract] = useState(null);
+    const [farmTokenDecimals, setFarmTokenDecimals] = useState(18);
+    const [farmTokenERC20Address, setFarmTokenERC20Address] = useState("");
     const [farmTokenSymbol, setFarmTokenSymbol] = useState("");
     const [farmTokenBalance, setFarmTokenBalance] = useState("0");
     const [farmTokenRes, setFarmTokenRes] = useState([]);
@@ -108,8 +111,12 @@ const SetupComponent = (props) => {
                     if (objectId !== "0") {
                         const ftBalance = await farmTokenCollection.methods.balanceOf(props.dfoCore.address, objectId).call();
                         const ftSymbol = await farmTokenCollection.methods.symbol(objectId).call();
+                        const ftDecimals = await farmTokenCollection.methods.decimals(objectId).call();
+                        const ftERC20Address = await farmTokenCollection.methods.asInteroperable(objectId).call();
+                        setFarmTokenERC20Address(ftERC20Address);
                         setFarmTokenSymbol(ftSymbol);
                         setFarmTokenBalance(ftBalance);
+                        setFarmTokenDecimals(ftDecimals);
                         const ftRes = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, ftBalance).call();
                         setFarmTokenRes(ftRes['tokensAmounts']);
                     } else {
@@ -216,8 +223,6 @@ const SetupComponent = (props) => {
             let lockPositions = [];
             let positionIds = [];
             const { '0': farmSetup, '1': farmSetupInfo } = await lmContract.methods.setup(setupIndex).call();
-            console.log(farmSetup);
-            console.log(farmSetupInfo);
             const farmTokenCollectionAddress = await lmContract.methods._farmTokenCollection().call();
             const farmTokenCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), farmTokenCollectionAddress);
             const ammContract = await dfoCore.getContract(dfoCore.getContextElement('AMMABI'), farmSetupInfo.ammPlugin);
@@ -228,10 +233,13 @@ const SetupComponent = (props) => {
                 if (objectId !== "0") {
                     const ftBalance = await farmTokenCollection.methods.balanceOf(props.dfoCore.address, objectId).call();
                     const ftSymbol = await farmTokenCollection.methods.symbol(objectId).call();
+                    const ftDecimals = await farmTokenCollection.methods.decimals(objectId).call();
+                    const ftERC20Address = await farmTokenCollection.methods.asInteroperable(objectId).call();
+                    setFarmTokenERC20Address(ftERC20Address);
                     setFarmTokenSymbol(ftSymbol);
                     setFarmTokenBalance(ftBalance);
+                    setFarmTokenDecimals(ftDecimals);
                     const ftRes = await ammContract.methods.byLiquidityPoolAmount(farmSetupInfo.liquidityPoolTokenAddress, ftBalance).call();
-                    console.log(ftRes);
                     setFarmTokenRes(ftRes['tokensAmounts']);
                 } else {
                     setFarmTokenBalance("0");
@@ -733,7 +741,7 @@ const SetupComponent = (props) => {
                 <div className="FarmActions">
                     <input type="range" value={removalAmount} onChange={(e) => setRemovalAmount(parseInt(e.target.value))} className="form-control-range" id="formControlRange" />
                     <div className="Web2ActionsBTNs">
-                    <p><b>Amount:</b> {removalAmount}% ({window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString(), lpTokenInfo.decimals), lpTokenInfo.decimals)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span> {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.tokensAmounts[i]) * removalAmount / 100).toString(), token.decimals), token.decimals)} {token.symbol} </span>)})</p>
+                    <p><b>Amount:</b> {removalAmount}% ({window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString(), lpTokenInfo.decimals), lpTokenInfo.decimals)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.tokensAmounts[i]) * removalAmount / 100).toString(), token.decimals), token.decimals)} {token.symbol} </span>)})</p>
                         <a className="web2ActionBTN" onClick={() => setRemovalAmount(10)} >10%</a>
                         <a className="web2ActionBTN" onClick={() => setRemovalAmount(25)} >25%</a>
                         <a className="web2ActionBTN" onClick={() => setRemovalAmount(50)} >50%</a>
@@ -832,7 +840,7 @@ const SetupComponent = (props) => {
                     parseFloat(lpTokenAmount) > 0 && <div className="row justify-content-center mt-2">
                         <p><b>Pair</b>: 
                             {
-                                setupTokens.map((setupToken, i) => <span> {window.formatMoney(dfoCore.toDecimals(tokensAmounts[i], setupToken.decimals), setupToken.decimals)} {setupToken.symbol}</span>)
+                                setupTokens.map((setupToken, i) => <span key={setupToken.address}> {window.formatMoney(dfoCore.toDecimals(tokensAmounts[i], setupToken.decimals), setupToken.decimals)} {setupToken.symbol}</span>)
                             }
                         </p>
                     </div>
@@ -923,18 +931,18 @@ const SetupComponent = (props) => {
             <div className="FarmSetupMain">
                 <h5><b>{setupInfo.free ? "Free Farming" : "Locked Farming"} {(!setup.active && canActivateSetup) ? <span className="text-secondary">(new)</span> : (!setup.active) ? <span className="text-danger">(inactive)</span> : <></> } {(parseInt(setup.endBlock) <= blockNumber && parseInt(setup.endBlock) !== 0) && <span>(ended)</span>}</b> <a>{AMM.name}</a></h5>
                 <aside>
-                    { parseInt(setup.endBlock) > 0 ? <p><b>block end</b>: <a target="_blank" href={"https://etherscan.io/block/" + setup.endBlock}>{setup.endBlock}</a></p> : <p><b>Duration</b>: {setupInfo.blockDuration} blocks</p> }
+                    { parseInt(setup.endBlock) > 0 ? <p><b>block end</b>: <a target="_blank" href={`https://etherscan.io/block/${setup.endBlock}`}>{setup.endBlock}</a></p> : <p><b>Duration</b>: {setupInfo.blockDuration} blocks</p> }
                     <p><b>Min to Stake</b>: {props.dfoCore.toDecimals(setupInfo.minStakeable, mainTokenInfo.decimals)} {mainTokenInfo.symbol}</p>
                     {!setupInfo.free && <p><b>Penalty fee</b>: {parseInt(setupInfo.penaltyFee) === 0 ? `0` : props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(setupInfo.penaltyFee), 18) * 100, 18)}%</p>}
                 </aside>
                 <div className="SetupFarmingInstructions">
-                    <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}<Coin address={token.address} /> </figure>)} = <b>APY</b>: {window.formatMoney(apy, 0)}%</p>
+                    <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}<a target="_blank" href={`https://etherscan.io/address/${token.address}`}><Coin address={token.address} /></a> </figure>)} = <b>APY</b>: {window.formatMoney(apy, 0)}%</p>
                 </div>
                 <div className="SetupFarmingOthers">
                     {
                         setupInfo.free ? <>
                             <p><b>Reward/day</b>: {window.formatMoney(props.dfoCore.toDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals), rewardTokenInfo.decimals)} {rewardTokenInfo.symbol} <span>(Shared)</span></p>
-                            <p><b>Deposits</b>: {window.formatMoney(props.dfoCore.toDecimals(parseInt(setup.totalSupply), lpTokenInfo.decimals), lpTokenInfo.decimals)} {lpTokenInfo.symbol} ({setupTokens.map((token, index) => <span>{window.formatMoney(props.dfoCore.toDecimals(token.liquidity, token.decimals), token.decimals)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span> )})</p>
+                            <p><b>Deposits</b>: {window.formatMoney(props.dfoCore.toDecimals(parseInt(setup.totalSupply), lpTokenInfo.decimals), lpTokenInfo.decimals)} {lpTokenInfo.symbol} ({setupTokens.map((token, index) => <span key={token.address}>{window.formatMoney(props.dfoCore.toDecimals(token.liquidity, token.decimals), token.decimals)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span> )})</p>
                         </> : <>
                                 <p><b>Max Stakeable</b>: {props.dfoCore.toDecimals(setupInfo.maxStakeable, mainTokenInfo.decimals)} {mainTokenInfo.symbol} (Available: {props.dfoCore.toDecimals(parseInt(setupInfo.maxStakeable) - parseInt(setup.totalSupply), mainTokenInfo.decimals)} {mainTokenInfo.symbol})</p>
                                 <p><b>{calculateLockedFixedValue()} {rewardTokenInfo.symbol}</b> (fixed) for every {mainTokenInfo.symbol} locked until the end block</p>
@@ -949,7 +957,7 @@ const SetupComponent = (props) => {
                         {
                             currentPosition && <>
                                 <p>
-                                    <b>Your Deposit</b>: {window.formatMoney(dfoCore.toDecimals(manageStatus.liquidityPoolAmount, lpTokenInfo.decimals), lpTokenInfo.decimals)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span> {window.formatMoney(dfoCore.toDecimals(manageStatus.tokensAmounts[i], token.decimals), token.decimals)} {token.symbol} </span>)}
+                                    <b>Your Deposit</b>: {window.formatMoney(dfoCore.toDecimals(manageStatus.liquidityPoolAmount, lpTokenInfo.decimals), lpTokenInfo.decimals)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(dfoCore.toDecimals(manageStatus.tokensAmounts[i], token.decimals), token.decimals)} {token.symbol} </span>)}
                                 </p>
                                 <p><b>Earnings per Day</b>: {window.formatMoney(dfoCore.toDecimals((parseInt(setup.rewardPerBlock) * 6400) * (parseInt(manageStatus.liquidityPoolAmount)/parseInt(setup.totalSupply)), rewardTokenInfo.decimals), rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
                             </>
@@ -1012,8 +1020,15 @@ const SetupComponent = (props) => {
                     }
                     </> : <>
                     <div className="LockedFarmTokensPosition"> 
-                        <p><b>Your Farm Token Supply</b>: {window.formatMoney(props.dfoCore.toDecimals(farmTokenBalance, 18), 18)} {"fLP"} - {setupTokens.map((setupToken, i) => `${parseInt(farmTokenBalance) === 0 ? 0 : window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(farmTokenRes[i]), setupToken.decimals), setupToken.decimals)} ${setupToken.symbol} ` )}</p>
-                    </div>                               
+                        <p><b>Your Farm Token Supply</b>: {window.formatMoney(props.dfoCore.toDecimals(farmTokenBalance, farmTokenDecimals), farmTokenDecimals)} {/* farmTokenSymbol */"fLP"} - {setupTokens.map((setupToken, i) => `${parseInt(farmTokenBalance) === 0 ? 0 : window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(farmTokenRes[i]), setupToken.decimals), setupToken.decimals)} ${setupToken.symbol} ` )}</p>
+                    </div>    
+                    {
+                        parseInt(farmTokenBalance) > 0 && <>
+                            <a className="web2ActionBTN" onClick={() => props.dfoCore.addTokenToMetamask(farmTokenERC20Address, /* farmTokenSymbol */"fLP", farmTokenDecimals)}>
+                            <img height={14} src={metamaskLogo} alt="Metamask" className="mb-1" /> Add {/* farmTokenSymbol */ "fLP"}
+                            </a>
+                        </>
+                    }                           
                     {
                         (parseInt(blockNumber) >= parseInt(setup.endBlock) && parseInt(farmTokenBalance) > 0) && <>
                             <div className="QuestionRegular">
@@ -1027,9 +1042,9 @@ const SetupComponent = (props) => {
                                 </label>
                             </div>
                             {
-                                removeLoading ? <a className="web2ActionBTN" disabled={removeLoading}>
+                            removeLoading ? <a className="web2ActionBTN" disabled={removeLoading}>
                                     <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                </a> : <a className="web2ActionBTN" onClick={() => removeLiquidity()}>Withdraw Liquidity</a>
+                                </a> : (parseInt(blockNumber) >= parseInt(setup.endBlock)) ? <a className="web2ActionBTN" onClick={() => removeLiquidity()}>Withdraw Liquidity</a> : <></>
                             }
                         </>
                     }
@@ -1039,7 +1054,10 @@ const SetupComponent = (props) => {
                                 lockedPositions.map((position, index) => {
                                     return (
                                         <LockedPositionComponent 
+                                            key={index}
                                             farmTokenBalance={farmTokenBalance} 
+                                            farmTokenSymbol={farmTokenSymbol}
+                                            farmTokenDecimals={farmTokenDecimals}
                                             onComplete={(result) => { 
                                                 props.addTransaction(result); getSetupMetadata(); }
                                             } 
