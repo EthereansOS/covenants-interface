@@ -196,7 +196,7 @@ const SetupComponent = (props) => {
                             const mainTokenAmount = lockedPosition['mainTokenAmount'];
                             const amounts = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, liquidityPoolTokenAmount).call();
                             const availableReward = await lmContract.methods.calculateLockedFarmingReward(0, 0, true, positionId).call();
-                            const lockedReward = parseInt(availableReward.reward) + parseInt(lockedPosition.lockedRewardPerBlock);
+                            const lockedReward = parseInt(availableReward.reward) + (parseInt(setup.endBlock) <= parseInt(blockNumber) ? 0 : parseInt(lockedPosition.lockedRewardPerBlock));
                             const partiallyRedeemed = await lmContract.methods._partiallyRedeemed(positionId).call();
                             lockRewards.push(lockedReward);
                             lockStatuses.push({ free, creationBlock, positionSetupIndex, partiallyRedeemed, liquidityPoolAmount: liquidityPoolTokenAmount, mainTokenAmount, tokensAmounts: amounts['tokensAmounts'], tokens })    
@@ -372,7 +372,7 @@ const SetupComponent = (props) => {
                     const mainTokenAmount = lockedPosition['mainTokenAmount'];
                     const amounts = await ammContract.methods.byLiquidityPoolAmount(farmSetupInfo.liquidityPoolTokenAddress, liquidityPoolTokenAmount).call();
                     const availableReward = await lmContract.methods.calculateLockedFarmingReward(0, 0, true, lockedPosition.positionId).call();
-                    const lockedReward = parseInt(availableReward.reward) + parseInt(lockedPosition.lockedRewardPerBlock);
+                    const lockedReward = parseInt(availableReward.reward) + (parseInt(setup.endBlock) <= parseInt(blockNumber) ? 0 : parseInt(lockedPosition.lockedRewardPerBlock));
                     const partiallyRedeemed = await lmContract.methods._partiallyRedeemed(lockedPosition.positionId).call();
                     lockRewards.push(lockedReward);
                     lockStatuses.push({ free, creationBlock, positionSetupIndex, partiallyRedeemed, liquidityPoolAmount: liquidityPoolTokenAmount, mainTokenAmount, tokensAmounts: amounts['tokensAmounts'], tokens })    
