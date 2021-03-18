@@ -828,7 +828,8 @@ const SetupComponent = (props) => {
                 }
                 {
                     (!setupInfo.free && rewardTokenInfo) && <div className="row justify-content-center mt-4">
-                            <p><b>Estimated earnings until end block</b>: {window.formatMoney(lockedEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
+                            <p><b>Total Rewards until end block</b>: {window.formatMoney(lockedEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
+                            <p className="BreefExpl">Once you lock this liquidity you'll be able to withdraw it at the Setup End Block. If you want to Unlock this position earlier, you'll need to pay a Penalty Fee (in Reward Tokens) + all of the Reward Tokens you Claimed from this position + All of the Farm Token you're minting (representing your LP tokens locked).</p>
                     </div>
                 }
                 <div className="Web3BTNs">
@@ -1006,7 +1007,7 @@ const SetupComponent = (props) => {
                         currentPosition && 
                         <div className="Farmed">
                             <p><b>{rewardTokenInfo.symbol}/Day</b>: {window.formatMoney(window.fromDecimals((parseInt(setup.rewardPerBlock) * 6400) * (parseInt(manageStatus.liquidityPoolAmount)/parseInt(setup.totalSupply)), rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>
-                            <p><b>Unclaimed</b>: {window.formatMoney(window.fromDecimals(freeAvailableRewards, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>
+                            <p><b>Available</b>: {window.formatMoney(window.fromDecimals(freeAvailableRewards, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>
                             {
                                 !showFreeTransfer ? <a onClick={() => setShowFreeTransfer(true)} className="web2ActionBTN">Transfer</a> : <a onClick={() => setShowFreeTransfer(false)} className="backActionBTN">Close</a>
                             }
