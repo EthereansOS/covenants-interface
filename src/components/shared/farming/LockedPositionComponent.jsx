@@ -77,6 +77,8 @@ const LockedPositionComponent = (props) => {
         }
     }
 
+    const giveBackRewardTokenValue = parseInt(parseInt(position.reward) * (parseInt(setupInfo.penaltyFee) / 1e18));
+
     return (
         <div className="LockedFarmPositions">
             <div className="FarmYou">
@@ -89,7 +91,7 @@ const LockedPositionComponent = (props) => {
                 }
                 {
                     showUnlock && <div>
-                        <p><b>Give back</b>: {window.formatMoney(window.fromDecimals((parseFloat(parseInt(position.reward) * (parseInt(setupInfo.penaltyFee) / 1e18)) + parseInt(lockedPositionStatus.partiallyRedeemed)), rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol} - {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(position.liquidityPoolTokenAmount), lpTokenInfo.decimals), lpTokenInfo.decimals)} {/* farmTokenSymbol */"fLP"}</p>
+                        <p><b>Give back</b>: {window.formatMoney(window.fromDecimals(giveBackRewardTokenValue + parseInt(lockedPositionStatus.partiallyRedeemed), rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol} - {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(position.liquidityPoolTokenAmount), lpTokenInfo.decimals), lpTokenInfo.decimals)} {/* farmTokenSymbol */"fLP"}</p>
                         <p><b>Balance</b>: {window.formatMoney(window.fromDecimals(rewardTokenInfo.balance, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>
                         <p><b>LP tokens unlocked</b>: {window.formatMoney(window.fromDecimals(position.liquidityPoolTokenAmount, lpTokenInfo.decimals, true), 6)} {lpTokenInfo.symbol}</p>
                         {

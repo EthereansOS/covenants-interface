@@ -45,7 +45,7 @@ const ExploreFarmingContract = (props) => {
             const isHost = host.toLowerCase() === dfoCore.address.toLowerCase();
             setIsHost(isHost);
             const setups = await lmContract.methods.setups().call();
-            console.log('setups', setups);
+            const blockNumber = await dfoCore.getBlockNumber();
             const freeSetups = [];
             const lockedSetups = [];
             let totalFreeSetups = 0;
@@ -63,7 +63,7 @@ const ExploreFarmingContract = (props) => {
                     setupInfo.free ? totalFreeSetups += 1 : totalLockedSetups += 1;
                     res.push({...setup, setupInfo, rewardTokenAddress, setupIndex: i })
                 }
-                if (setup.active) {
+                if (setup.active && (parseInt(setup.endBlock) > blockNumber)) {
                     setupInfo.free ? freeSetups.push(setup) : lockedSetups.push(setup);
                     rewardPerBlock += parseInt(setup.rewardPerBlock);
                 }

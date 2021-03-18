@@ -32,7 +32,7 @@ const Explore = (props) => {
                         const extensionAddress = await contract.methods._extension().call();
                         const extensionContract = await dfoCore.getContract(dfoCore.getContextElement('FarmExtensionABI'), extensionAddress);
                         const { host, byMint } = await extensionContract.methods.data().call();
-                        
+                        const blockNumber = await dfoCore.getBlockNumber();
                         const setups = await contract.methods.setups().call();
                         const freeSetups = [];
                         const lockedSetups = [];
@@ -46,7 +46,7 @@ const Explore = (props) => {
                             if (!canActivateSetup) {
                                 canActivateSetup = parseInt(setupInfo.renewTimes) > 0 && !setup.active && parseInt(setupInfo.lastSetupIndex) === parseInt(i);
                             }
-                            if (setup.active) {
+                            if (setup.active && (parseInt(setup.endBlock) > blockNumber)) {
                                 setupInfo.free ? freeSetups.push(setup) : lockedSetups.push(setup);
                                 rewardPerBlock += parseInt(setup.rewardPerBlock);
                             }
