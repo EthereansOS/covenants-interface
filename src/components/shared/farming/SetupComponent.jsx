@@ -966,7 +966,6 @@ const SetupComponent = (props) => {
                                 <p>
                                     <b>Your Deposit</b>: {window.formatMoney(window.fromDecimals(manageStatus.liquidityPoolAmount, lpTokenInfo.decimals, true), 6)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(window.fromDecimals(manageStatus.tokensAmounts[i], token.decimals, true), 6)} {token.symbol} </span>)}
                                 </p>
-                                <p><b>Earnings per Day</b>: {window.formatMoney(window.fromDecimals((parseInt(setup.rewardPerBlock) * 6400) * (parseInt(manageStatus.liquidityPoolAmount)/parseInt(setup.totalSupply)), rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>
                             </>
                         }
                         {
@@ -1004,6 +1003,7 @@ const SetupComponent = (props) => {
                     {
                         currentPosition && 
                         <div className="Farmed">
+                            <p><b>{rewardTokenInfo.symbol}/Day</b>: {window.formatMoney(window.fromDecimals((parseInt(setup.rewardPerBlock) * 6400) * (parseInt(manageStatus.liquidityPoolAmount)/parseInt(setup.totalSupply)), rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>
                             <p><b>Unclaimed</b>: {window.formatMoney(window.fromDecimals(freeAvailableRewards, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>
                             {
                                 !showFreeTransfer ? <a onClick={() => setShowFreeTransfer(true)} className="web2ActionBTN">Transfer</a> : <a onClick={() => setShowFreeTransfer(false)} className="backActionBTN">Close</a>
