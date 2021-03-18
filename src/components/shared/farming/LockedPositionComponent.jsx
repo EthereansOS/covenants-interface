@@ -102,7 +102,8 @@ const LockedPositionComponent = (props) => {
                 }
             </div>
             <div className="Farmed">
-                <p><b>Unclaimed</b>: {window.formatMoney(window.fromDecimals(lockedPositionReward, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>
+                <p><b>Reward</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(position.reward), rewardTokenInfo.decimals), rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
+                <p><b>Unclaimed</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(lockedPositionReward), rewardTokenInfo.decimals), rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
                 {
                     !showTransfer ? <a onClick={() => setShowTransfer(true)} className="web2ActionBTN">Transfer</a> : <a onClick={() => setShowTransfer(false)} className="backActionBTN">Close</a>
                 }
