@@ -1027,15 +1027,18 @@ const SetupComponent = (props) => {
                     }
                     </> : <>
                     <div className="LockedFarmTokensPosition"> 
-                        <p><b>Your Farm Token (fLP) Supply</b>: {window.formatMoney(window.fromDecimals(farmTokenBalance, farmTokenDecimals, true), 5)} {/* farmTokenSymbol */"fLP"} - {setupTokens.map((setupToken, i) => `${parseInt(farmTokenBalance) === 0 ? 0 : window.formatMoney(window.fromDecimals(farmTokenRes[i], setupToken.decimals, true), 4)} ${setupToken.symbol}`)}</p>
-                    </div>
                     {
                         parseInt(farmTokenBalance) > 0 && <>
-                            <a className="web2ActionBTN" onClick={() => props.dfoCore.addTokenToMetamask(farmTokenERC20Address, /* farmTokenSymbol */"fLP", farmTokenDecimals)}>
-                            <img height={14} src={metamaskLogo} alt="Metamask" className="mb-1" /> Add {/* farmTokenSymbol */ "fLP"}
-                            </a>
+                            <p><b>Your Farm ITEM (fLP) Balance</b>:</p>
+                            <p>{window.formatMoney(window.fromDecimals(farmTokenBalance, farmTokenDecimals, true), 9)} ({setupTokens.map((setupToken, i) => `${parseInt(farmTokenBalance) === 0 ? 0 : window.formatMoney(window.fromDecimals(farmTokenRes[i], setupToken.decimals, true), 3)} ${setupToken.symbol}`)}) 
+                            <a className="MetamaskAddButton" onClick={() => props.dfoCore.addTokenToMetamask(farmTokenERC20Address, /* farmTokenSymbol */"fLP", farmTokenDecimals)}>
+                                    <img height={14} src={metamaskLogo} alt="Metamask" className="mb-1" /> Add {/* farmTokenSymbol */ "fLP"}
+                                </a>
+                            </p>
                         </>
                     }
+                        
+                    </div>
                     {
                         (parseInt(blockNumber) >= parseInt(setup.endBlock) && parseInt(farmTokenBalance) > 0) && <>
                             <div className="QuestionRegular">

@@ -339,7 +339,8 @@ input[type=range] {height: 39px;-webkit-appearance: none;margin: 10px 0;width: 1
  .Tranferpos {display: inline-block; width: 80%; margin: 5px auto; text-align: center;}
  .Tranferpos input {margin: 5px auto;}
  .DiffWallet {width: 390px; display: block; margin: 10px auto;}
-
+ .MetamaskAddButton {color: #7474f7; border-radius: 8px; border: 1px solid #7474f7;padding: 2px 8px;font-size: 12px; margin-left: 5px; text-decoration: none !important;}
+ .MetamaskAddButton:hover {color: #7474f7; border-radius: 8px; border: 1px solid #7474f7;padding: 2px 8px;font-size: 12px; margin-left: 5px; text-decoration: none !important;}
 .fantasy {background-color: #4d4c4a !important;}
 .fantasy .LogoM {background-position: 0 -50px;}
 .fantasy .page-container {background-image: url(./assets/images/index.jpg) !important;box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px, rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px;}
