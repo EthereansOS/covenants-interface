@@ -91,8 +91,8 @@ const LockedPositionComponent = (props) => {
                 }
                 {
                     showUnlock && <div className="UnlockDiv">
-                        <p className="UnlockInfo">{window.formatMoney(window.fromDecimals(giveBackRewardTokenValue + parseInt(lockedPositionStatus.partiallyRedeemed), rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol} - {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(position.liquidityPoolTokenAmount), lpTokenInfo.decimals), lpTokenInfo.decimals)} {/* farmTokenSymbol */"fLP"} needed to Unlock this position</p>
-                        <p className="UnlockInfoBal">Balance: {window.formatMoney(window.fromDecimals(rewardTokenInfo.balance, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol} - {window.formatMoney(window.fromDecimals(position.liquidityPoolTokenAmount, lpTokenInfo.decimals, true), 9)} fLP</p>
+                        <p className="UnlockInfo">{window.formatMoney(window.fromDecimals(giveBackRewardTokenValue + parseInt(lockedPositionStatus.partiallyRedeemed), rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol} - {window.formatMoney(dfoCore.toDecimals(position.liquidityPoolTokenAmount, parseInt(lpTokenInfo.decimals)), parseInt(lpTokenInfo.decimals))} {/* farmTokenSymbol */"fLP"} needed to Unlock this position</p>
+                        <p className="UnlockInfoBal">Balance: {window.formatMoney(window.fromDecimals(rewardTokenInfo.balance, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol} - {window.formatMoney(window.fromDecimals(position.liquidityPoolTokenAmount, parseInt(lpTokenInfo.decimals), true), 9)} fLP</p>
                         {
                             !rewardTokenInfo.approval ? <ApproveButton contract={rewardTokenInfo.contract} from={dfoCore.address} spender={lmContract.options.address} onApproval={() => onRewardTokenApproval()} onError={(error) => console.error(error)} text={`Approve ${rewardTokenInfo.symbol}`} /> : 
                                 unlockLoading ? <a className="Web3ActionBTN" disabled={unlockLoading}>
