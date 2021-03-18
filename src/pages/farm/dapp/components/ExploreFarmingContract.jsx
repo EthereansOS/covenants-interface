@@ -36,7 +36,8 @@ const ExploreFarmingContract = (props) => {
             const rewardTokenAddress = await lmContract.methods._rewardTokenAddress().call();
             const rewardToken = await dfoCore.getContract(dfoCore.getContextElement("ERC20ABI"), rewardTokenAddress);
             const rewardTokenSymbol = await rewardToken.methods.symbol().call();
-            setToken({ symbol: rewardTokenSymbol, address: rewardTokenAddress });
+            const rewardTokenDecimals = await rewardToken.methods.decimals().call();
+            setToken({ symbol: rewardTokenSymbol, address: rewardTokenAddress, decimals: rewardTokenDecimals });
             const extensionAddress = await lmContract.methods._extension().call();
             const extensionContract = await dfoCore.getContract(dfoCore.getContextElement('FarmExtensionABI'), extensionAddress);
             setExtension(extensionContract);
@@ -44,6 +45,7 @@ const ExploreFarmingContract = (props) => {
             const isHost = host.toLowerCase() === dfoCore.address.toLowerCase();
             setIsHost(isHost);
             const setups = await lmContract.methods.setups().call();
+            console.log('setups', setups);
             const freeSetups = [];
             const lockedSetups = [];
             let totalFreeSetups = 0;
@@ -74,13 +76,16 @@ const ExploreFarmingContract = (props) => {
                 name: `Farm ${rewardTokenSymbol}`,
                 contractAddress: lmContract.options.address,
                 rewardTokenAddress: rewardToken.options.address,
-                rewardPerBlock: `${(dfoCore.toDecimals(dfoCore.toFixed(rewardPerBlock).toString()))} ${rewardTokenSymbol}`,
+                rewardPerBlock: dfoCore.toDecimals(dfoCore.toFixed(rewardPerBlock).toString(), rewardTokenDecimals),
                 byMint,
                 freeSetups,
                 lockedSetups,
                 totalFreeSetups,
                 totalLockedSetups,
                 canActivateSetup,
+                extension: `${extensionAddress.substring(0, 5)}...${extensionAddress.substring(extensionAddress.length - 3, extensionAddress.length)}`,
+                fullExtension: `${extensionAddress}`,
+                farmAddress: `${lmContract.options.address.substring(0, 5)}...${lmContract.options.address.substring(lmContract.options.address.length - 3, lmContract.options.address.length)}`,
                 host: `${host.substring(0, 5)}...${host.substring(host.length - 3, host.length)}`,
                 fullhost: `${host}`,
             };

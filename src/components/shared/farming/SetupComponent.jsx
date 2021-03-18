@@ -1,6 +1,8 @@
 import Coin from '../coin/Coin';
 import { useEffect, useState } from 'react';
 import { Input, ApproveButton } from '..';
+import { connect } from 'react-redux';
+import { addTransaction } from '../../../store/actions';
 import axios from 'axios';
 import LockedPositionComponent from './LockedPositionComponent';
 
@@ -147,7 +149,7 @@ const SetupComponent = (props) => {
                     tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: res.tokensAmounts[i], decimals, address: token ? address : dfoCore.voidEthereumAddress, symbol });
                     contracts.push(token);
                     if (address.toLowerCase() === setupInfo.mainTokenAddress.toLowerCase()) {
-                        setMainTokenInfo({ approval, decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol })
+                        setMainTokenInfo({ approval: parseInt(approval) !== 0, decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol })
                     }
                 }
                 setSetupTokens(tokens);
@@ -315,7 +317,7 @@ const SetupComponent = (props) => {
                 tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: res.tokensAmounts[i], decimals, address: token ? address : dfoCore.voidEthereumAddress, symbol });
                 contracts.push(token);
                 if (address.toLowerCase() === farmSetupInfo.mainTokenAddress.toLowerCase()) {
-                    setMainTokenInfo({ approval, decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol })
+                    setMainTokenInfo({ approval: parseInt(approval) !== 0, decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol })
                 }
             }
             const info = await ammContract.methods.info().call();
@@ -384,6 +386,7 @@ const SetupComponent = (props) => {
         try {
             const gas = await lmContract.methods.activateSetup(setupIndex).estimateGas({ from: props.dfoCore.address });
             const result = await lmContract.methods.activateSetup(setupIndex).send({ from: props.dfoCore.address, gas });
+            props.addTransaction(result);
             await getSetupMetadata();
         } catch (error) {
             console.error(error);
@@ -495,10 +498,12 @@ const SetupComponent = (props) => {
                     const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value});
                     console.log(gasLimit);
                     const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit, value});
+                    props.addTransaction(result);
 
                 } else {
                     const gasLimit = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).estimateGas({ from: dfoCore.address, value});
                     const result = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).send({ from: dfoCore.address, gasLimit, value});
+                    props.addTransaction(result);
                 }
 
             } else if (!setupInfo.free) {
@@ -507,6 +512,7 @@ const SetupComponent = (props) => {
                 const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value});
                 console.log(gasLimit);
                 const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit, value});
+                props.addTransaction(result);
             }
             await getSetupMetadata();
         } catch (error) {
@@ -524,9 +530,11 @@ const SetupComponent = (props) => {
                 const removedLiquidity = removalAmount === 100 ? manageStatus.liquidityPoolAmount : props.dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString().split('.')[0];
                 const gasLimit = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, 0, outputType === 'to-pair', removedLiquidity).estimateGas({ from: dfoCore.address });
                 const result = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, 0, outputType === 'to-pair', removedLiquidity).send({ from: dfoCore.address, gasLimit });
+                props.addTransaction(result);
             } else {
                 const gasLimit = await lmContract.methods.withdrawLiquidity(0, setup.objectId, outputType === 'to-pair', farmTokenBalance).estimateGas({ from: dfoCore.address });
                 const result = await lmContract.methods.withdrawLiquidity(0, setup.objectId, outputType === 'to-pair', farmTokenBalance).send({ from: dfoCore.address, gasLimit });
+                props.addTransaction(result);
             }
             await getSetupMetadata();
         } catch (error) {
@@ -541,6 +549,7 @@ const SetupComponent = (props) => {
         try {
             const gasLimit = await lmContract.methods.withdrawReward(currentPosition.positionId).estimateGas({ from: dfoCore.address });
             const result = await lmContract.methods.withdrawReward(currentPosition.positionId).send({ from: dfoCore.address, gasLimit });
+            props.addTransaction(result);
             await getSetupMetadata();
         } catch (error) {
             console.error(error);
@@ -556,6 +565,7 @@ const SetupComponent = (props) => {
             try {
                 const gasLimit = await lmContract.methods.transferPosition(freeTransferAddress, positionId).estimateGas({ from: dfoCore.address });
                 const result = await lmContract.methods.transferPosition(freeTransferAddress, positionId).send({ from: dfoCore.address, gasLimit });
+                props.addTransaction(result);
                 await getSetupMetadata();
             } catch (error) {
                 console.error(error);
@@ -686,7 +696,7 @@ const SetupComponent = (props) => {
         const normalizedRewardPerBlock = parseInt(rewardPerBlock) * 10**(18 - rewardTokenInfo.decimals);
         const normalizedMaxStakeable = parseInt(maxStakeable) * 10**(18 - mainTokenInfo.decimals);
         const amount = normalizedRewardPerBlock * (1 / normalizedMaxStakeable);
-        return window.formatMoney(amount * parseInt(setupInfo.blockDuration), rewardTokenInfo.decimals);
+        return (canActivateSetup) ? window.formatMoney(amount * parseInt(setupInfo.blockDuration), rewardTokenInfo.decimals) : parseInt(blockNumber) >= parseInt(setup.endBlock) ? 0 : window.formatMoney(amount * (parseInt(setup.endBlock) - parseInt(blockNumber)), rewardTokenInfo.decimals);
     }
 
     const getAdvanced = () => {
@@ -914,8 +924,8 @@ const SetupComponent = (props) => {
                 <h5><b>{setupInfo.free ? "Free Farming" : "Locked Farming"} {(!setup.active && canActivateSetup) ? <span className="text-secondary">(new)</span> : (!setup.active) ? <span className="text-danger">(inactive)</span> : <></> } {(parseInt(setup.endBlock) <= blockNumber && parseInt(setup.endBlock) !== 0) && <span>(ended)</span>}</b> <a>{AMM.name}</a></h5>
                 <aside>
                     { parseInt(setup.endBlock) > 0 ? <p><b>block end</b>: <a target="_blank" href={"https://etherscan.io/block/" + setup.endBlock}>{setup.endBlock}</a></p> : <p><b>Duration</b>: {setupInfo.blockDuration} blocks</p> }
-                    <p><b>Min to Stake</b>: {window.fromDecimals(setupInfo.minStakeable, mainTokenInfo.decimals)} {mainTokenInfo.symbol}</p>
-                    {!setupInfo.free && <p><b>Penalty fee</b>: {parseInt(setupInfo.penaltyFee) === 0 ? `0` : props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(setupInfo.penaltyFee), rewardTokenInfo.decimals) * 100, rewardTokenInfo.decimals)}%</p>}
+                    <p><b>Min to Stake</b>: {props.dfoCore.toDecimals(setupInfo.minStakeable, mainTokenInfo.decimals)} {mainTokenInfo.symbol}</p>
+                    {!setupInfo.free && <p><b>Penalty fee</b>: {parseInt(setupInfo.penaltyFee) === 0 ? `0` : props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(setupInfo.penaltyFee), 18) * 100, 18)}%</p>}
                 </aside>
                 <div className="SetupFarmingInstructions">
                     <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}<Coin address={token.address} /> </figure>)} = <b>APY</b>: {window.formatMoney(apy, 0)}%</p>
@@ -923,10 +933,10 @@ const SetupComponent = (props) => {
                 <div className="SetupFarmingOthers">
                     {
                         setupInfo.free ? <>
-                            <p><b>Reward/day</b>: {window.formatMoney(props.dfoCore.toDecimals(parseInt(setup.rewardPerBlock) * 6400), rewardTokenInfo.decimals)} {rewardTokenInfo.symbol} <span>(Shared)</span></p>
+                            <p><b>Reward/day</b>: {window.formatMoney(props.dfoCore.toDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals), rewardTokenInfo.decimals)} {rewardTokenInfo.symbol} <span>(Shared)</span></p>
                             <p><b>Deposits</b>: {window.formatMoney(props.dfoCore.toDecimals(parseInt(setup.totalSupply), lpTokenInfo.decimals), lpTokenInfo.decimals)} {lpTokenInfo.symbol} ({setupTokens.map((token, index) => <span>{window.formatMoney(props.dfoCore.toDecimals(token.liquidity, token.decimals), token.decimals)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span> )})</p>
                         </> : <>
-                                <p><b>Max Stakeable</b>: {window.fromDecimals(setupInfo.maxStakeable, mainTokenInfo.decimals)} {mainTokenInfo.symbol} (Available: {window.fromDecimals(parseInt(setupInfo.maxStakeable) - parseInt(setup.totalSupply), mainTokenInfo.decimals)} {mainTokenInfo.symbol})</p>
+                                <p><b>Max Stakeable</b>: {props.dfoCore.toDecimals(setupInfo.maxStakeable, mainTokenInfo.decimals)} {mainTokenInfo.symbol} (Available: {props.dfoCore.toDecimals(parseInt(setupInfo.maxStakeable) - parseInt(setup.totalSupply), mainTokenInfo.decimals)} {mainTokenInfo.symbol})</p>
                                 <p><b>{calculateLockedFixedValue()} {rewardTokenInfo.symbol}</b> (fixed) for every {mainTokenInfo.symbol} locked until the end block</p>
                         </>
                     }
@@ -1030,7 +1040,9 @@ const SetupComponent = (props) => {
                                     return (
                                         <LockedPositionComponent 
                                             farmTokenBalance={farmTokenBalance} 
-                                            onComplete={() => getSetupMetadata()} 
+                                            onComplete={(result) => { 
+                                                props.addTransaction(result); getSetupMetadata(); }
+                                            } 
                                             lmContract={lmContract} 
                                             position={position} 
                                             blockNumber={blockNumber} 
@@ -1043,7 +1055,7 @@ const SetupComponent = (props) => {
                                             lockedPositionStatus={lockedPositionStatuses[index]}
                                             lockedPositionReward={lockedPositionRewards[index]}
                                             mainTokenInfo={mainTokenInfo}
-                                            onMainTokenApproval={() => setMainTokenInfo({ ...mainTokenInfo, approval: true })}
+                                            onRewardTokenApproval={() => setRewardTokenInfo({ ...rewardTokenInfo, approval: true })}
                                         />
                                     )
                                 })
@@ -1089,4 +1101,14 @@ const SetupComponent = (props) => {
     )
 }
 
-export default SetupComponent;
+const mapStateToProps = (state) => {
+    return {};
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        addTransaction: (index) => dispatch(addTransaction(index))
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(SetupComponent);

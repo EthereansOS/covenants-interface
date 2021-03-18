@@ -20,7 +20,7 @@ const Hosted = (props) => {
     const getContracts = async () => {
         setLoading(true);
         try {
-            const hostedContracts = dfoCore.getHostedFarmingContracts();
+            const hostedContracts = await dfoCore.getHostedFarmingContracts();
             const mappedContracts = await Promise.all(
                 hostedContracts.map(async (c) => { 
                     try {
@@ -28,6 +28,7 @@ const Hosted = (props) => {
                         const rewardTokenAddress = await contract.methods._rewardTokenAddress().call();
                         const rewardToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), rewardTokenAddress);
                         const symbol = await rewardToken.methods.symbol().call();
+                        const decimals = await rewardToken.methods.decimals().call();
                         const extensionAddress = await contract.methods._extension().call();
                         const extensionContract = await dfoCore.getContract(dfoCore.getContextElement('FarmExtensionABI'), extensionAddress);
                         const { host, byMint } = await extensionContract.methods.data().call();
@@ -58,24 +59,27 @@ const Hosted = (props) => {
                             name: `Farm ${symbol}`,
                             contractAddress: contract.options.address,
                             rewardTokenAddress: rewardToken.options.address,
-                            rewardPerBlock: `${(dfoCore.toDecimals(dfoCore.toFixed(rewardPerBlock).toString()))} ${symbol}`,
+                            rewardPerBlock: dfoCore.toDecimals(dfoCore.toFixed(rewardPerBlock).toString(), decimals),
                             byMint,
                             freeSetups,
                             lockedSetups,
                             totalFreeSetups,
                             totalLockedSetups,
                             canActivateSetup,
+                            extension: `${extensionAddress.substring(0, 5)}...${extensionAddress.substring(extensionAddress.length - 3, extensionAddress.length)}`,
+                            fullExtension: `${extensionAddress}`,
+                            farmAddress: `${contract.options.address.substring(0, 5)}...${contract.options.address.substring(contract.options.address.length - 3, contract.options.address.length)}`,
                             host: `${host.substring(0, 5)}...${host.substring(host.length - 3, host.length)}`,
                             fullhost: `${host}`,
                         };
-                        return { contract, metadata };
+                        return { contract, metadata, isActive: freeSetups.length + lockedSetups.length > 0 || canActivateSetup };
                     } catch (error) {
                         console.error(error);
                     }
                 })
             );
-            setFarmingContracts(mappedContracts.filter((c) => c));
-            setStartingContracts(mappedContracts.filter((c) => c));
+            setFarmingContracts(mappedContracts.filter((c) => c).sort((a, b) => (a.isActive === b.isActive) ? 0 : a.isActive ? -1 : 1));
+            setStartingContracts(mappedContracts.filter((c) => c).sort((a, b) => (a.isActive === b.isActive) ? 0 : a.isActive ? -1 : 1));
         } catch (error) {
             console.error(error);
             setFarmingContracts([]);

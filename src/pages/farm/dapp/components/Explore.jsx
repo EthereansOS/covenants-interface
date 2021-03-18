@@ -28,6 +28,7 @@ const Explore = (props) => {
                         const rewardTokenAddress = await contract.methods._rewardTokenAddress().call();
                         const rewardToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), rewardTokenAddress);
                         const symbol = await rewardToken.methods.symbol().call();
+                        const decimals = await rewardToken.methods.decimals().call();
                         const extensionAddress = await contract.methods._extension().call();
                         const extensionContract = await dfoCore.getContract(dfoCore.getContextElement('FarmExtensionABI'), extensionAddress);
                         const { host, byMint } = await extensionContract.methods.data().call();
@@ -58,8 +59,11 @@ const Explore = (props) => {
                             name: `Farm ${symbol}`,
                             contractAddress: contract.options.address,
                             rewardTokenAddress: rewardToken.options.address,
-                            rewardPerBlock: `${(dfoCore.toDecimals(dfoCore.toFixed(rewardPerBlock).toString()))} ${symbol}`,
+                            rewardPerBlock: dfoCore.toDecimals(dfoCore.toFixed(rewardPerBlock).toString(), decimals),
                             byMint,
+                            extension: `${extensionAddress.substring(0, 5)}...${extensionAddress.substring(extensionAddress.length - 3, extensionAddress.length)}`,
+                            fullExtension: `${extensionAddress}`,
+                            farmAddress: `${contract.options.address.substring(0, 5)}...${contract.options.address.substring(contract.options.address.length - 3, contract.options.address.length)}`,
                             freeSetups,
                             lockedSetups,
                             totalFreeSetups,

@@ -2,7 +2,7 @@ import { useState } from "react";
 import ApproveButton from "../buttons/ApproveButton";
 
 const LockedPositionComponent = (props) => {
-    const { position, dfoCore, blockNumber, setup, setupInfo, mainTokenInfo, onMainTokenApproval, setupTokens, rewardTokenInfo, lockedPositionReward, lockedPositionStatus, lpTokenInfo, lmContract, onComplete } = props;
+    const { position, dfoCore, blockNumber, setup, setupInfo, mainTokenInfo, onRewardTokenApproval, setupTokens, rewardTokenInfo, lockedPositionReward, lockedPositionStatus, lpTokenInfo, lmContract, onComplete } = props;
     // booleans
     const [showTransfer, setShowTransfer] = useState(false);
     const [showUnlock, setShowUnlock] = useState(false);
@@ -25,7 +25,7 @@ const LockedPositionComponent = (props) => {
         try {
             const gasLimit = await lmContract.methods.transferPosition(transferAddress, position.positionId).estimateGas({ from: dfoCore.address });
             const result = await lmContract.methods.transferPosition(transferAddress, position.positionId).send({ from: dfoCore.address, gasLimit });
-            onComplete();
+            onComplete(result);
         } catch (error) {
             console.error(error);
         } finally {
@@ -37,10 +37,9 @@ const LockedPositionComponent = (props) => {
     const unlockPosition = async () => {
         setUnlockLoading(true);
         try {
-            !rewardTokenInfo.approval && await rewardTokenInfo.contract.methods.approve(lmContract.options.address, await rewardTokenInfo.contract.methods.totalSupply().call()).send({ from: dfoCore.address });
             const gasLimit = await lmContract.methods.unlock(position.positionId, false).estimateGas({ from: dfoCore.address });
             const result = await lmContract.methods.unlock(position.positionId, false).send({ from: dfoCore.address, gasLimit });
-            onComplete();
+            onComplete(result);
         } catch (error) {
             console.error(error);
         } finally {
@@ -53,7 +52,7 @@ const LockedPositionComponent = (props) => {
         try {
             const gasLimit = await lmContract.methods.withdrawReward(position.positionId).estimateGas({ from: dfoCore.address });
             const result = await lmContract.methods.withdrawReward(position.positionId).send({ from: dfoCore.address, gasLimit });
-            onComplete();
+            onComplete(result);
         } catch (error) {
             console.error(error);
         } finally {
@@ -77,7 +76,7 @@ const LockedPositionComponent = (props) => {
                         <p><b>Balance</b>: {window.formatMoney(dfoCore.toDecimals(rewardTokenInfo.balance, rewardTokenInfo.decimals), rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
                         <p><b>LP tokens unlocked</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(position.liquidityPoolTokenAmount), lpTokenInfo.decimals), lpTokenInfo.decimals)} {lpTokenInfo.symbol}</p>
                         {
-                            !mainTokenInfo.approval ? <ApproveButton contract={mainTokenInfo.contract} from={dfoCore.address} spender={lmContract.options.address} onApproval={() => onMainTokenApproval()} onError={(error) => console.error(error)} text={`Approve ${mainTokenInfo.symbol}`} /> : 
+                            !rewardTokenInfo.approval ? <ApproveButton contract={rewardTokenInfo.contract} from={dfoCore.address} spender={lmContract.options.address} onApproval={() => onRewardTokenApproval()} onError={(error) => console.error(error)} text={`Approve ${rewardTokenInfo.symbol}`} /> : 
                                 unlockLoading ? <a className="Web3ActionBTN" disabled={unlockLoading}>
                                     <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                 </a> : parseInt(blockNumber) < parseInt(setup.endBlock) ? <a onClick={() => unlockPosition()} className="Web3ActionBTN">Unlock</a> : <></>

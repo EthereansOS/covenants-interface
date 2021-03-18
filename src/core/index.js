@@ -324,8 +324,36 @@ export default class DFOCore {
         }
     }
 
-    getHostedFarmingContracts = () => {
-        return this.deployedFarmingContracts.filter((item) => item.sender.toLowerCase() === this.address.toLowerCase());
+    getHostedFarmingContracts = async (factoryAddress) => {
+        try {
+            if (!factoryAddress) factoryAddress = this.getContextElement("farmFactoryAddress");
+            const deployedFarmingContracts = [];
+            const events = await this.web3.eth.getPastLogs({
+                address: factoryAddress,
+                topics: [
+                    this.web3.utils.sha3('FarmMainDeployed(address,address,bytes)')
+                ],
+                fromBlock: 0,
+                toBlock: 'latest'
+            });
+            for (let i = 0; i < events.length; i++) {
+                const event = events[i];
+                const farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
+                try {
+                    const contract = new this.web3.eth.Contract(this.getContextElement("FarmMainABI"), farmMainAddress);
+                    const extensionAddress = await contract.methods._extension().call();
+                    const extensionContract = new this.web3.eth.Contract(this.getContextElement("FarmExtensionABI"), extensionAddress);
+                    const { host } = await extensionContract.methods.data().call();
+                    deployedFarmingContracts.push({ address: farmMainAddress, sender: host });
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+            return deployedFarmingContracts.filter((item) => item.sender.toLowerCase() === this.address.toLowerCase());
+        } catch (error) {
+            console.error(error);
+            return [];
+        }
     }
 
     isValidPosition = (position) => {

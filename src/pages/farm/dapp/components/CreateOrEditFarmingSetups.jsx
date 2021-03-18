@@ -55,7 +55,7 @@ const CreateOrEditFarmingSetups = (props) => {
                     return (
                         <div key={i} className="row align-items-center text-left mb-md-2 mb-4">
                             <div className="col-md-9 col-12">
-                                <b style={{fontSize: 14}}>{ !setup.maxLiquidity ? "Free setup" : "Locked setup" } { setup.data.name }{ setup.maxLiquidity ? `${setup.data.symbol}` : ` | ${setup.data.tokens.map((token) => `${(setup.involvingEth && token.address.toLowerCase() === setup.ethAddress.toLowerCase()) ? 'ETH' : token.symbol}` )}` } - Reward: {setup.rewardPerBlock} {rewardToken.symbol}/block</b>
+                                <b style={{fontSize: 14}}>{ !setup.maxLiquidity ? "Free setup" : "Locked setup" } { setup.data.name }{ setup.maxLiquidity ? `${(setup.lockedMainTokenIsEth && setup.involvingEth) ? 'ETH' : setup.data.symbol}` : ` | ${setup.data.tokens.map((token) => `${(setup.involvingEth && token.address.toLowerCase() === setup.ethAddress.toLowerCase()) ? 'ETH' : token.symbol}` )}` } - Reward: {setup.rewardPerBlock} {rewardToken.symbol}/block</b>
                             </div>
                             <div className="col-md-3 col-12 flex">
                                 <button className="btn btn-sm btn-outline-danger mr-1" onClick={() => onRemoveFarmingSetup(i)}><b>X</b></button> <a onClick={() => { setEditSetup(setup); setEditSetupIndex(i); }} className="web2ActionBTN ml-1"><b>EDIT</b></a>

@@ -25,6 +25,7 @@ const CreateOrEditFarmingSetup = (props) => {
     const [lockedSecondaryToken, setLockedSecondaryToken] = useState((editSetup && editSetup.secondaryToken) ? editSetup.secondaryToken : null);
     const [lockedHasPenaltyFee, setLockedHasPenaltyFee] = useState((editSetup && editSetup.penaltyFee) ? editSetup.penaltyFee > 0 : false);
     const [lockedPenaltyFee, setLockedPenaltyFee] = useState((editSetup && editSetup.penaltyFee) ? editSetup.penaltyFee : 0);
+    const [lockedMainTokenIsEth, setLockedMainTokenIsEth] = useState((editSetup && editSetup.lockedMainTokenIsEth) ? editSetup.lockedMainTokenIsEth : false);
     // current step
     const [currentStep, setCurrentStep] = useState(0);
 
@@ -34,22 +35,19 @@ const CreateOrEditFarmingSetup = (props) => {
         try {
             if (address === dfoCore.voidEthereumAddress) {
                 setLockedMainToken({ symbol: 'ETH', address, decimals: 18 });
-                setEthSelectData(null);
-                setLockedSecondaryToken(null);
-                setInvolvingEth(false);
             } else {
                 const mainTokenContract = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), address);
                 const symbol = await mainTokenContract.methods.symbol().call();
                 const decimals = await mainTokenContract.methods.decimals().call();
                 setLockedMainToken({ symbol, address, decimals });
-                setEthSelectData(null);
-                setInvolvingEth(false);
-                setLockedSecondaryToken(null);
             }
         } catch (error) {
             console.error(error);
-            setLockedMainToken(null);
         } finally {
+            setEthSelectData(null);
+            setInvolvingEth(false);
+            setLockedSecondaryToken(null);
+            setLockedMainTokenIsEth(false);
             setLoading(false);
         }
     }
@@ -68,9 +66,14 @@ const CreateOrEditFarmingSetup = (props) => {
             const tokens = [];
             let ethTokenFound = false;
             let mainTokenFound = false;
+            let mainTokenIsEth = false;
             await Promise.all(secondatoryTokenInfo[2].map(async (tkAddress) => {
                 if (tkAddress.toLowerCase() === ammData[0].toLowerCase()) {
                     ethTokenFound = true;
+                    if (tkAddress.toLowerCase() === lockedMainToken.address.toLowerCase()) {
+                        mainTokenFound = true;
+                        mainTokenIsEth = true;
+                    }
                     setInvolvingEth(true);
                     if (ammData[0] === dfoCore.voidEthereumAddress) {
                         setEthAddress(dfoCore.voidEthereumAddress);
@@ -81,8 +84,7 @@ const CreateOrEditFarmingSetup = (props) => {
                         const notEthTokenSymbol = await notEthToken.methods.symbol().call();
                         setEthSelectData({ symbol: notEthTokenSymbol })
                     }
-                }
-                if (tkAddress.toLowerCase() === lockedMainToken.address.toLowerCase()) {
+                } else if (tkAddress.toLowerCase() === lockedMainToken.address.toLowerCase()) {
                     mainTokenFound = true;
                 }
                 const currentToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), tkAddress);
@@ -91,6 +93,7 @@ const CreateOrEditFarmingSetup = (props) => {
             }));
             if (!mainTokenFound) return;
             if (!ethTokenFound) setEthSelectData(null);
+            setLockedMainTokenIsEth(mainTokenIsEth);
             setLockedSecondaryToken({ 
                 address, 
                 name,
@@ -157,6 +160,49 @@ const CreateOrEditFarmingSetup = (props) => {
         setLockedPenaltyFee(value > 100 ? 100 : value);
     }
 
+    const onFreeRewardPerBlockUpdate = (value) => {
+        const parsedValue = dfoCore.fromDecimals(value, rewardToken.decimals);
+        console.log("parsed value", parsedValue < 1);
+        console.log(value);
+        setFreeRewardPerBlock(parsedValue < 1 ? 0 : value);
+    }
+
+    const addFreeSetup = () => {
+            if (!freeLiquidityPoolToken || freeRewardPerBlock <= 0 || minStakeable <= 0 || !blockDuration) return;
+            if (editSetup) {
+                onEditFarmingSetup(
+                    { 
+                        rewardPerBlock: freeRewardPerBlock, 
+                        data: freeLiquidityPoolToken, 
+                        freeMainTokenIndex, 
+                        freeMainToken: freeMainToken || freeLiquidityPoolToken.tokens[freeMainTokenIndex], 
+                        period: blockDuration, 
+                        minStakeable, 
+                        renewTimes, 
+                        involvingEth, 
+                        ethAddress, 
+                        ethSelectData
+                    }, 
+                    editSetupIndex
+                );
+            } else {
+                onAddFarmingSetup(
+                    { 
+                        rewardPerBlock: freeRewardPerBlock, 
+                        freeMainTokenIndex, 
+                        freeMainToken: freeMainToken || freeLiquidityPoolToken.tokens[freeMainTokenIndex], 
+                        data: freeLiquidityPoolToken, 
+                        period: blockDuration, 
+                        minStakeable, 
+                        renewTimes, 
+                        involvingEth, 
+                        ethAddress, 
+                        ethSelectData 
+                    }
+                );
+            }
+    }
+
     const getFreeFirstStep = () => {
         return <div className="col-12">
             <div className="row mb-4">
@@ -184,7 +230,7 @@ const CreateOrEditFarmingSetup = (props) => {
                 </div> :  <>
                     <div className="row mb-4">
                         { (freeLiquidityPoolToken && freeLiquidityPoolToken.tokens.length > 0) && <div className="col-12">
-                                <b>{freeLiquidityPoolToken.name} | {freeLiquidityPoolToken.tokens.map((token) => <>{!token.isEth ? token.symbol : involvingEth ? 'ETH' : token.symbol} </>)}</b> {freeLiquidityPoolToken.tokens.map((token) => <Coin address={token.address} className="mr-2" /> )}
+                                <b>{freeLiquidityPoolToken.name} | {freeLiquidityPoolToken.tokens.map((token) => <>{!token.isEth ? token.symbol : involvingEth ? 'ETH' : token.symbol} </>)}</b> {freeLiquidityPoolToken.tokens.map((token) => <Coin address={!token.isEth ? token.address : involvingEth ? props.dfoCore.voidEthereumAddress : token.address} className="mr-2" /> )}
                             </div>
                         }
                     </div>
@@ -204,14 +250,14 @@ const CreateOrEditFarmingSetup = (props) => {
                                 <select className="SelectRegular" value={freeMainTokenIndex} onChange={(e) => { setFreeMainTokenIndex(e.target.value); setFreeMainToken(freeLiquidityPoolToken.tokens[e.target.value]); }}>
                                     {
                                         freeLiquidityPoolToken.tokens.map((tk, index) => {
-                                            return <option key={tk.address} value={index}>{tk.symbol}</option>
+                                            return <option key={tk.address} value={index}>{!tk.isEth ? tk.symbol : involvingEth ? 'ETH' : tk.symbol}</option>
                                         })
                                     }
                                 </select>
                             </div>
                             <div className="row justify-content-center mb-4">
                                 <div className="col-6">
-                                    <Input min={0} showCoin={true} address={rewardToken.address} value={freeRewardPerBlock} name={rewardToken.symbol} label={"Reward per block"} onChange={(e) => setFreeRewardPerBlock(e.target.value)} />
+                                    <Input min={dfoCore.fromDecimals(rewardToken, rewardToken.decimals)} showCoin={true} address={rewardToken.address} value={freeRewardPerBlock} name={rewardToken.symbol} label={"Reward per block"} onChange={(e) => onFreeRewardPerBlockUpdate(e.target.value)} />
                                 </div>
                             </div>
                             <div className="row justify-content-center align-items-center flex-column mb-2">
@@ -219,7 +265,7 @@ const CreateOrEditFarmingSetup = (props) => {
                             </div>
                             <div className="row justify-content-center mb-4">
                                 <div className="col-6">
-                                    <Input min={0} showCoin={true} address={freeMainToken?.address || freeLiquidityPoolToken.tokens[freeMainTokenIndex].address} value={minStakeable} name={freeMainToken?.symbol || freeLiquidityPoolToken.tokens[freeMainTokenIndex].symbol} label={"Min stakeable"} onChange={(e) => setMinSteakeable(e.target.value)} />
+                                    <Input min={0} showCoin={true} address={(!freeMainToken?.isEth && !freeLiquidityPoolToken.tokens[freeMainTokenIndex].isEth) ? `${freeMainToken?.address || freeLiquidityPoolToken.tokens[freeMainTokenIndex].address}` : involvingEth ? props.dfoCore.voidEthereumAddress : `${freeMainToken?.address || freeLiquidityPoolToken.tokens[freeMainTokenIndex].address}`} value={minStakeable} name={(!freeMainToken?.isEth && !freeLiquidityPoolToken.tokens[freeMainTokenIndex].isEth) ? `${freeMainToken?.symbol || freeLiquidityPoolToken.tokens[freeMainTokenIndex].symbol}` : involvingEth ? 'ETH' : `${freeMainToken?.symbol || freeLiquidityPoolToken.tokens[freeMainTokenIndex].symbol}`} label={"Min stakeable"} onChange={(e) => setMinSteakeable(e.target.value)} />
                                 </div>
                             </div>
                             <div className="row justify-content-center">
@@ -242,7 +288,7 @@ const CreateOrEditFarmingSetup = (props) => {
                     <div className="row justify-content-center mb-4">
                         <a onClick={() => onCancel() } className="backActionBTN mr-4">Back</a>
                         <a 
-                            onClick={() => editSetup ? onEditFarmingSetup({ rewardPerBlock: freeRewardPerBlock, data: freeLiquidityPoolToken, freeMainTokenIndex, freeMainToken: freeMainToken || freeLiquidityPoolToken.tokens[freeMainTokenIndex], period: blockDuration, minStakeable, renewTimes, involvingEth, ethAddress, ethSelectData }, editSetupIndex) : onAddFarmingSetup({ rewardPerBlock: freeRewardPerBlock, freeMainTokenIndex, freeMainToken, data: freeLiquidityPoolToken, period: blockDuration, minStakeable, renewTimes, involvingEth, ethAddress, ethSelectData }) } 
+                            onClick={() => addFreeSetup()} 
                             disabled={!freeLiquidityPoolToken || freeRewardPerBlock <= 0 || minStakeable <= 0 || !blockDuration} 
                             className="web2ActionBTN ml-4"
                         >
@@ -284,7 +330,7 @@ const CreateOrEditFarmingSetup = (props) => {
                 </div> :  <>
                     <div className="row mb-4">
                         { lockedMainToken && <div className="col-12">
-                                <b>{lockedMainToken.symbol}</b> <Coin address={lockedMainToken.address} className="ml-2" />
+                                <b>{(lockedMainTokenIsEth && involvingEth) ? 'ETH' : lockedMainToken.symbol}</b> <Coin address={(lockedMainTokenIsEth && involvingEth) ? props.dfoCore.voidEthereumAddress : lockedMainToken.address} className="ml-2" />
                             </div>
                         }
                     </div>
@@ -299,7 +345,7 @@ const CreateOrEditFarmingSetup = (props) => {
                             {
                                 (lockedSecondaryToken && lockedSecondaryToken.tokens.length > 0) && <div key={lockedSecondaryToken.address} className="row align-items-center mb-4">
                                     <div className="col-md-9 col-12">
-                                        <b>{lockedSecondaryToken.name} | {lockedSecondaryToken.tokens.map((token) => <>{!token.isEth ? token.symbol : involvingEth ? 'ETH' : token.symbol} </>)}</b> {lockedSecondaryToken.tokens.map((token) => <Coin address={token.address} className="mr-2" /> )}
+                                        <b>{lockedSecondaryToken.name} | {lockedSecondaryToken.tokens.map((token) => <>{!token.isEth ? token.symbol : involvingEth ? 'ETH' : token.symbol} </>)}</b> {lockedSecondaryToken.tokens.map((token) => <Coin address={!token.isEth ? token.address : involvingEth ? props.dfoCore.voidEthereumAddress : token.address} className="mr-2" /> )}
                                     </div>
                                     <div className="col-md-3 col-12">
                                         <button className="btn btn-outline-danger btn-sm" onClick={() => setLockedSecondaryToken(null)}>Remove</button>
@@ -318,12 +364,12 @@ const CreateOrEditFarmingSetup = (props) => {
                             }
                             <div className="row justify-content-center mb-4">
                                 <div className="col-6">
-                                    <Input min={0} showCoin={true} address={lockedMainToken.address} value={minStakeable} name={lockedMainToken.symbol} label={"Min stakeable"} onChange={(e) => setMinSteakeable(e.target.value)} />
+                                    <Input min={0} showCoin={true} address={(lockedMainTokenIsEth && involvingEth) ? props.dfoCore.voidEthereumAddress : lockedMainToken.address} value={minStakeable} name={(lockedMainTokenIsEth && involvingEth) ? 'ETH' : lockedMainToken.symbol} label={"Min stakeable"} onChange={(e) => setMinSteakeable(e.target.value)} />
                                 </div>
                             </div>
                             <div className="row justify-content-center mt-4 mb-4">
                                 <div className="col-6">
-                                    <Input label={"Max stakeable"} min={0} showCoin={true} address={lockedMainToken.address} value={lockedMaxLiquidity} name={lockedMainToken.symbol} onChange={(e) => setLockedMaxLiquidity(e.target.value)} />
+                                    <Input label={"Max stakeable"} min={0} showCoin={true} address={(lockedMainTokenIsEth && involvingEth) ? props.dfoCore.voidEthereumAddress : lockedMainToken.address} value={lockedMaxLiquidity} name={(lockedMainTokenIsEth && involvingEth) ? 'ETH' : lockedMainToken.symbol} onChange={(e) => setLockedMaxLiquidity(e.target.value)} />
                                 </div>
                             </div>
                             <div className="row mb-4">
@@ -338,7 +384,7 @@ const CreateOrEditFarmingSetup = (props) => {
                                 <p className="text-center text-small">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Omnis delectus incidunt laudantium distinctio velit reprehenderit quaerat, deserunt sint fugit ex consectetur voluptas suscipit numquam. Officiis maiores quaerat quod necessitatibus perspiciatis!</p>
                             </div>
                             <div className="row justify-content-center align-items-center flex-column mb-2">
-                                <p className="text-center"><b>Reward/block per {lockedMainToken.symbol}: {!lockedMaxLiquidity ? 0 : parseFloat((lockedRewardPerBlock * (1 / lockedMaxLiquidity)).toPrecision(4))} {rewardToken.symbol}</b></p>
+                                <p className="text-center"><b>Reward/block per {(lockedMainTokenIsEth && involvingEth) ? 'ETH': lockedMainToken.symbol}: {!lockedMaxLiquidity ? 0 : parseFloat((lockedRewardPerBlock * (1 / lockedMaxLiquidity)).toPrecision(4))} {rewardToken.symbol}</b></p>
                             </div>
                         </>
                     }
@@ -407,6 +453,7 @@ const CreateOrEditFarmingSetup = (props) => {
                                 involvingEth,
                                 ethAddress,
                                 ethSelectData,
+                                lockedMainTokenIsEth,
                             }, editSetupIndex) : onAddFarmingSetup({
                                 period: blockDuration,
                                 data: lockedMainToken,
@@ -418,7 +465,8 @@ const CreateOrEditFarmingSetup = (props) => {
                                 minStakeable,
                                 involvingEth,
                                 ethAddress,
-                                ethSelectData
+                                ethSelectData,
+                                lockedMainTokenIsEth
                             }
                         )}
                     } disabled={(isRenewable && renewTimes === 0) || (lockedHasPenaltyFee && lockedPenaltyFee === 0)} className="web2ActionBTN ml-4">

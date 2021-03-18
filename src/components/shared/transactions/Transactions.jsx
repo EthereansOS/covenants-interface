@@ -7,7 +7,6 @@ const Transactions = (props) => {
     return <div>
         {
             props.transactions.map((transaction, index) => {
-                console.log(transaction);
                 setTimeout(() => {
                     props.removeTransaction(index);
                 }, 8000);

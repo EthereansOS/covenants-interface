@@ -88,6 +88,7 @@ const Create = (props) => {
             const hasExtension = (selectedHost === "deployed-contract" && hostDeployedContract && !deployContract);
             const data = { setups: [], rewardTokenAddress: selectedRewardToken.address, byMint, deployContract, host, hasExtension, extensionInitData: extensionPayload || '' };
             const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
+            console.log(farmingSetups);
             for (let i = 0; i < farmingSetups.length; i++) {
                 const setup = farmingSetups[i];
                 const isFree = !setup.maxLiquidity;
@@ -100,7 +101,7 @@ const Create = (props) => {
                 [
                     isFree,
                     parseInt(setup.period),
-                    props.dfoCore.fromDecimals(setup.rewardPerBlock, selectedRewardToken.decimals),
+                    props.dfoCore.toFixed(props.dfoCore.fromDecimals(setup.rewardPerBlock, selectedRewardToken.decimals)),
                     props.dfoCore.toFixed(props.dfoCore.fromDecimals(setup.minStakeable, mainTokenDecimals)),
                     !isFree ? props.dfoCore.toFixed(props.dfoCore.fromDecimals(setup.maxLiquidity, mainTokenDecimals)) : 0,
                     setup.renewTimes,
