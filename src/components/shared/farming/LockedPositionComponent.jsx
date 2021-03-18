@@ -80,7 +80,7 @@ const LockedPositionComponent = (props) => {
     return (
         <div className="LockedFarmPositions">
             <div className="FarmYou">
-                <p><b>Position Weight</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(position.mainTokenAmount), mainTokenInfo.decimals), mainTokenInfo.decimals)} {mainTokenInfo.symbol}</p>
+                <p><b>Position Weight</b>: {window.formatMoney(window.fromDecimals(position.mainTokenAmount, mainTokenInfo.decimals, true), 6)} {mainTokenInfo.symbol}</p>
                 {
                     (parseInt(blockNumber) < parseInt(setup.endBlock) && !showUnlock) && <a onClick={() => setShowUnlock(true)} className="web2ActionBTN">Unlock</a>
                 }
@@ -89,9 +89,9 @@ const LockedPositionComponent = (props) => {
                 }
                 {
                     showUnlock && <div>
-                        <p><b>Give back</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseFloat(parseInt(position.reward) * (parseInt(setupInfo.penaltyFee) / 1e18)) + parseInt(lockedPositionStatus.partiallyRedeemed)), rewardTokenInfo.decimals), rewardTokenInfo.decimals)} {rewardTokenInfo.symbol} - {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(position.liquidityPoolTokenAmount), lpTokenInfo.decimals), lpTokenInfo.decimals)} {/* farmTokenSymbol */"fLP"}</p>
-                        <p><b>Balance</b>: {window.formatMoney(dfoCore.toDecimals(rewardTokenInfo.balance, rewardTokenInfo.decimals), rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
-                        <p><b>LP tokens unlocked</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(position.liquidityPoolTokenAmount), lpTokenInfo.decimals), lpTokenInfo.decimals)} {lpTokenInfo.symbol}</p>
+                        <p><b>Give back</b>: {window.formatMoney(window.fromDecimals((parseFloat(parseInt(position.reward) * (parseInt(setupInfo.penaltyFee) / 1e18)) + parseInt(lockedPositionStatus.partiallyRedeemed)), rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol} - {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(position.liquidityPoolTokenAmount), lpTokenInfo.decimals), lpTokenInfo.decimals)} {/* farmTokenSymbol */"fLP"}</p>
+                        <p><b>Balance</b>: {window.formatMoney(window.fromDecimals(rewardTokenInfo.balance, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>
+                        <p><b>LP tokens unlocked</b>: {window.formatMoney(window.fromDecimals(position.liquidityPoolTokenAmount, lpTokenInfo.decimals, true), 6)} {lpTokenInfo.symbol}</p>
                         {
                             !rewardTokenInfo.approval ? <ApproveButton contract={rewardTokenInfo.contract} from={dfoCore.address} spender={lmContract.options.address} onApproval={() => onRewardTokenApproval()} onError={(error) => console.error(error)} text={`Approve ${rewardTokenInfo.symbol}`} /> : 
                                 unlockLoading ? <a className="Web3ActionBTN" disabled={unlockLoading}>
@@ -102,7 +102,7 @@ const LockedPositionComponent = (props) => {
                 }
             </div>
             <div className="Farmed">
-                <p><b>Unclaimed</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(lockedPositionReward), rewardTokenInfo.decimals), rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
+                <p><b>Unclaimed</b>: {window.formatMoney(window.fromDecimals(lockedPositionReward, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>
                 {
                     !showTransfer ? <a onClick={() => setShowTransfer(true)} className="web2ActionBTN">Transfer</a> : <a onClick={() => setShowTransfer(false)} className="web2ActionBTN">Close</a>
                 }

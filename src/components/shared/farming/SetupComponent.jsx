@@ -704,7 +704,7 @@ const SetupComponent = (props) => {
         const normalizedRewardPerBlock = parseInt(rewardPerBlock) * 10**(18 - rewardTokenInfo.decimals);
         const normalizedMaxStakeable = parseInt(maxStakeable) * 10**(18 - mainTokenInfo.decimals);
         const amount = normalizedRewardPerBlock * (1 / normalizedMaxStakeable);
-        return (canActivateSetup) ? window.formatMoney(amount * parseInt(setupInfo.blockDuration), rewardTokenInfo.decimals) : parseInt(blockNumber) >= parseInt(setup.endBlock) ? 0 : window.formatMoney(amount * (parseInt(setup.endBlock) - parseInt(blockNumber)), rewardTokenInfo.decimals);
+        return (canActivateSetup) ? window.formatMoney(amount * parseInt(setupInfo.blockDuration), 6) : parseInt(blockNumber) >= parseInt(setup.endBlock) ? 0 : window.formatMoney(amount * (parseInt(setup.endBlock) - parseInt(blockNumber)), 6);
     }
 
     const getAdvanced = () => {
@@ -932,7 +932,7 @@ const SetupComponent = (props) => {
                 <h5><b>{setupInfo.free ? "Free Farming" : "Locked Farming"} {(!setup.active && canActivateSetup) ? <span className="text-secondary">(new)</span> : (!setup.active) ? <span className="text-danger">(inactive)</span> : <></> } {(parseInt(setup.endBlock) <= blockNumber && parseInt(setup.endBlock) !== 0) && <span>(ended)</span>}</b> <a>{AMM.name}</a></h5>
                 <aside>
                     { parseInt(setup.endBlock) > 0 ? <p><b>block end</b>: <a target="_blank" href={`https://etherscan.io/block/${setup.endBlock}`}>{setup.endBlock}</a></p> : <p><b>Duration</b>: {setupInfo.blockDuration} blocks</p> }
-                    <p><b>Min to Stake</b>: {props.dfoCore.toDecimals(setupInfo.minStakeable, mainTokenInfo.decimals)} {mainTokenInfo.symbol}</p>
+                    <p><b>Min to Stake</b>: {window.formatMoney(window.fromDecimals(setupInfo.minStakeable, mainTokenInfo.decimals, true), 6)} {mainTokenInfo.symbol}</p>
                     {!setupInfo.free && <p><b>Penalty fee</b>: {parseInt(setupInfo.penaltyFee) === 0 ? `0` : props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(setupInfo.penaltyFee), 18) * 100, 18)}%</p>}
                 </aside>
                 <div className="SetupFarmingInstructions">
@@ -957,9 +957,9 @@ const SetupComponent = (props) => {
                         {
                             currentPosition && <>
                                 <p>
-                                    <b>Your Deposit</b>: {window.formatMoney(dfoCore.toDecimals(manageStatus.liquidityPoolAmount, lpTokenInfo.decimals), lpTokenInfo.decimals)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(dfoCore.toDecimals(manageStatus.tokensAmounts[i], token.decimals), token.decimals)} {token.symbol} </span>)}
+                                    <b>Your Deposit</b>: {window.formatMoney(window.fromDecimals(manageStatus.liquidityPoolAmount, lpTokenInfo.decimals, true), 6)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(window.fromDecimals(manageStatus.tokensAmounts[i], token.decimals, true), 6)} {token.symbol} </span>)}
                                 </p>
-                                <p><b>Earnings per Day</b>: {window.formatMoney(dfoCore.toDecimals((parseInt(setup.rewardPerBlock) * 6400) * (parseInt(manageStatus.liquidityPoolAmount)/parseInt(setup.totalSupply)), rewardTokenInfo.decimals), rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
+                                <p><b>Earnings per Day</b>: {window.formatMoney(window.fromDecimals((parseInt(setup.rewardPerBlock) * 6400) * (parseInt(manageStatus.liquidityPoolAmount)/parseInt(setup.totalSupply)), rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>
                             </>
                         }
                         {
@@ -997,7 +997,7 @@ const SetupComponent = (props) => {
                     {
                         currentPosition && 
                         <div className="Farmed">
-                            <p><b>Unclaimed</b>: {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(freeAvailableRewards), rewardTokenInfo.decimals), rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
+                            <p><b>Unclaimed</b>: {window.formatMoney(window.fromDecimals(freeAvailableRewards, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>
                             {
                                 !showFreeTransfer ? <a onClick={() => setShowFreeTransfer(true)} className="web2ActionBTN">Transfer</a> : <a onClick={() => setShowFreeTransfer(false)} className="web2ActionBTN">Close</a>
                             }
@@ -1020,15 +1020,15 @@ const SetupComponent = (props) => {
                     }
                     </> : <>
                     <div className="LockedFarmTokensPosition"> 
-                        <p><b>Your Farm Token Supply</b>: {window.formatMoney(props.dfoCore.toDecimals(farmTokenBalance, farmTokenDecimals), farmTokenDecimals)} {/* farmTokenSymbol */"fLP"} - {setupTokens.map((setupToken, i) => `${parseInt(farmTokenBalance) === 0 ? 0 : window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(farmTokenRes[i]), setupToken.decimals), setupToken.decimals)} ${setupToken.symbol} ` )}</p>
-                    </div>    
+                        <p><b>Your Farm Token Supply</b>: {window.formatMoney(window.fromDecimals(farmTokenBalance, farmTokenDecimals, true), 6)} {/* farmTokenSymbol */"fLP"} - {setupTokens.map((setupToken, i) => `${parseInt(farmTokenBalance) === 0 ? 0 : window.formatMoney(window.fromDecimals(farmTokenRes[i], setupToken.decimals, true), 6)} ${setupToken.symbol}`)}</p>
+                    </div>
                     {
                         parseInt(farmTokenBalance) > 0 && <>
                             <a className="web2ActionBTN" onClick={() => props.dfoCore.addTokenToMetamask(farmTokenERC20Address, /* farmTokenSymbol */"fLP", farmTokenDecimals)}>
                             <img height={14} src={metamaskLogo} alt="Metamask" className="mb-1" /> Add {/* farmTokenSymbol */ "fLP"}
                             </a>
                         </>
-                    }                           
+                    }
                     {
                         (parseInt(blockNumber) >= parseInt(setup.endBlock) && parseInt(farmTokenBalance) > 0) && <>
                             <div className="QuestionRegular">
