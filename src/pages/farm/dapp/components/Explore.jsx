@@ -100,8 +100,7 @@ const Explore = (props) => {
             setTokenFilter(value);
             const filteredFarmingContracts = [];
             await Promise.all(startingContracts.map(async (contract) => {
-                const rewardTokenAddress = await contract.methods._rewardTokenAddress().call();
-                if (rewardTokenAddress.toLowerCase().includes(value.toLowerCase())) {
+                if (contract.metadata.rewardTokenAddress.toLowerCase().includes(value.toLowerCase())) {
                     filteredFarmingContracts.push(contract);
                 }
             }));
@@ -118,9 +117,10 @@ const Explore = (props) => {
         let filteredFarmingContracts = tokenFilter ? [] : startingContracts;
         if (tokenFilter) {
             await Promise.all(startingContracts.map(async (contract) => {
-                const rewardTokenAddress = await contract.methods._rewardTokenAddress().call();
-                if (rewardTokenAddress.toLowerCase().includes(value.toLowerCase())) {
-                    filteredFarmingContracts.push(contract);
+                if (contract) {
+                    if (contract.metadata.rewardTokenAddress.toLowerCase().includes(tokenFilter.toLowerCase())) {
+                        filteredFarmingContracts.push(contract);
+                    }
                 }
             }));
         }
@@ -138,7 +138,7 @@ const Explore = (props) => {
                 setFarmingContracts(filteredFarmingContracts.sort((a, b) => parseInt(b.metadata.freeSetups.length + b.metadata.lockedSetups.length) - parseInt(a.metadata.freeSetups.length + a.metadata.lockedSetups.length)));
                 break
             case "6":
-                setFarmingContracts(filteredFarmingContracts.sort((a, b) => parseInt(a.metadata.freeSetups.length + a.metadata.lockedSetups.length) > parseInt(b.metadata.freeSetups.length + b.metadata.lockedSetups.length)));
+                setFarmingContracts(filteredFarmingContracts.sort((a, b) => parseInt(a.metadata.freeSetups.length + a.metadata.lockedSetups.length) - parseInt(b.metadata.freeSetups.length + b.metadata.lockedSetups.length)));
                 break
             default:
                 break
