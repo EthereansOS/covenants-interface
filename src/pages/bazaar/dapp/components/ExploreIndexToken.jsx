@@ -392,7 +392,7 @@ const ExploreIndexToken = (props) => {
                 <div className="IndexContractOpenInfo">
                     <Link to={"/bazaar/dapp"} className="web2ActionBTN">Close</Link>
                     <figure className="IndexLogoL">
-                        <img src={metadata.ipfsInfo.image || defaultLogoImage} />
+                        <img src={metadata.ipfsInfo.image ? window.formatLink(metadata.ipfsInfo.image) : defaultLogoImage} />
                     </figure>
                     <div className="IndexThings">
                         <h3><b>{metadata.name} ({metadata.symbol})</b></h3>

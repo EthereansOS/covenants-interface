@@ -94,7 +94,7 @@ const BazaarComponent = (props) => {
                 {
                     indexToken ? <>
                     <figure className="IndexLogo">
-                            <img src={indexToken.ipfsInfo.image || defaultLogoImage} />
+                            <img src={indexToken.ipfsInfo.image ? window.formatLink(indexToken.ipfsInfo.image) : defaultLogoImage} />
                     </figure>
                     <div className="IndexInfo">
                             <h6><b>{indexToken.name}</b></h6>
