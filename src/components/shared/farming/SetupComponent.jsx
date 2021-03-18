@@ -142,6 +142,7 @@ const SetupComponent = (props) => {
                     res = await ammContract.methods.byTokenAmount(tokenAddress, setupInfo.mainTokenAddress, setup.totalSupply).call();
                     res = await ammContract.methods.byLiquidityPoolAmount(tokenAddress, res.liquidityPoolAmount).call();
                 }
+                let mtInfo = null;
                 const tokens = [];
                 const approvals = [];
                 const contracts = [];
@@ -157,7 +158,8 @@ const SetupComponent = (props) => {
                     tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: res.tokensAmounts[i], decimals, address: token ? address : dfoCore.voidEthereumAddress, symbol });
                     contracts.push(token);
                     if (address.toLowerCase() === setupInfo.mainTokenAddress.toLowerCase()) {
-                        setMainTokenInfo({ approval: parseInt(approval) !== 0, decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol })
+                        mtInfo = { approval: parseInt(approval) !== 0, decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol };
+                        setMainTokenInfo(mtInfo);
                     }
                 }
                 setSetupTokens(tokens);
@@ -208,6 +210,18 @@ const SetupComponent = (props) => {
                     setLockedPositionStatuses(lockStatuses);
                     setLockedPositionRewards(lockRewards);
                     //setLockedPositions(lockPositions);
+                }
+                // calculate APY
+                let rewardTokenPriceUsd = 0;
+                try {
+                    const { data } = await axios.get(dfoCore.getContextElement("coingeckoCoinPriceURL") + rewardTokenAddress);
+                    rewardTokenPriceUsd = data[rewardTokenAddress.toLowerCase()].usd;
+                } catch (error) {
+                    rewardTokenPriceUsd = 0;
+                }
+                const yearlyBlocks = 2304000;
+                if (setup.totalSupply !== "0") {
+                    setApy((parseInt(setup.rewardPerBlock * 10**(18 - parseInt(rewardTokenInfo.decimals))) * yearlyBlocks) / parseInt(setup.totalSupply * 10**(18 - parseInt(setupInfo.free ? lpTokenInfo.decimals : mtInfo?.decimals))) * rewardTokenPriceUsd);
                 }
             }, 5000);
             setIntervalId(interval);
@@ -323,6 +337,7 @@ const SetupComponent = (props) => {
                 res = await ammContract.methods.byTokenAmount(tokenAddress, farmSetupInfo.mainTokenAddress, farmSetup.totalSupply).call();
                 res = await ammContract.methods.byLiquidityPoolAmount(tokenAddress, res.liquidityPoolAmount).call();
             }
+            let mtInfo = null;
             const tokens = [];
             const approvals = [];
             const contracts = [];
@@ -337,7 +352,8 @@ const SetupComponent = (props) => {
                 tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: res.tokensAmounts[i], decimals, address: token ? address : dfoCore.voidEthereumAddress, symbol });
                 contracts.push(token);
                 if (address.toLowerCase() === farmSetupInfo.mainTokenAddress.toLowerCase()) {
-                    setMainTokenInfo({ approval: parseInt(approval) !== 0, decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol })
+                    mtInfo = { approval: parseInt(approval) !== 0, decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol };
+                    setMainTokenInfo(mtInfo)
                 }
             }
             const info = await ammContract.methods.info().call();
@@ -393,7 +409,7 @@ const SetupComponent = (props) => {
             }
             const yearlyBlocks = 2304000;
             if (farmSetup.totalSupply !== "0") {
-                setApy((parseInt(farmSetup.rewardPerBlock) * yearlyBlocks) / parseInt(farmSetup.totalSupply) * rewardTokenPriceUsd);
+                setApy((parseInt(farmSetup.rewardPerBlock * 10**(18 - parseInt(rewardTokenDecimals))) * yearlyBlocks) / parseInt(farmSetup.totalSupply * 10**(18 - parseInt(farmSetupInfo.free ? lpTokenDecimals : mtInfo?.decimals))) * rewardTokenPriceUsd);
             }
         } catch (error) {
             console.error(error);
