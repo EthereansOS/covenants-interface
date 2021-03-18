@@ -140,40 +140,44 @@ export default class DFOCore {
     }
     
     addTokenToMetamask = (address, symbol, decimals, image) => {
-        if (this.web3.currentProvider.isMetaMask) {
-            this.web3.currentProvider.sendAsync({
-                    method: 'metamask_watchAsset',
-                    params: {
-                        type: "ERC20",
-                        options: {
-                            address,
-                            symbol,
-                            decimals,
-                            image,
+        try {
+            if (this.web3.currentProvider) {
+                this.web3.currentProvider.request({
+                        method: 'wallet_watchAsset',
+                        params: {
+                            type: "ERC20",
+                            options: {
+                                address,
+                                symbol,
+                                decimals,
+                                image,
+                            },
                         },
-                    },
-                    id: Math.round(Math.random() * 100000),
-                }, (err, added) => {
-                    console.log('provider returned', err, added)
-                }
-            )
-        } else if (window.web3.currentProvider.isMetaMask) {
-            window.web3.currentProvider.sendAsync({
-                    method: 'metamask_watchAsset',
-                    params: {
-                        type: "ERC20",
-                        options: {
-                            address,
-                            symbol,
-                            decimals,
-                            image,
+                        id: Math.round(Math.random() * 100000),
+                    }, (err, added) => {
+                        console.log('provider returned', err, added)
+                    }
+                )
+            } else if (window.web3.currentProvider) {
+                window.web3.currentProvider.request({
+                        method: 'wallet_watchAsset',
+                        params: {
+                            type: "ERC20",
+                            options: {
+                                address,
+                                symbol,
+                                decimals,
+                                image,
+                            },
                         },
-                    },
-                    id: Math.round(Math.random() * 100000),
-                }, (err, added) => {
-                    console.log('provider returned', err, added)
-                }
-            )
+                        id: Math.round(Math.random() * 100000),
+                    }, (err, added) => {
+                        console.log('provider returned', err, added)
+                    }
+                )
+            }
+        } catch (error) {
+            console.error(error);
         }
     }
 
@@ -312,7 +316,6 @@ export default class DFOCore {
                     console.error(error);
                 }
             }
-            console.log(this.deployedFarmingContracts);
         } catch (error) {
             console.error(error);
             this.deployedFarmingContracts = [];
@@ -404,13 +407,34 @@ export default class DFOCore {
         return hasGasMultiplierToken ? parseInt(gasLimit) * parseFloat(this.getContextElement("gasMultiplier")) : gasLimit;
     }
 
-    loadPositions = async() => {
+    loadPositions = async (factoryAddress) => {
         try {
-            this.positions = [];
-            if (this.deployedFarmingContracts.length === 0) {
-                await this.loadDeployedFarmingContracts();
+
+            if (!factoryAddress) factoryAddress = this.getContextElement("farmFactoryAddress");
+            const deployedFarmingContracts = [];
+            const events = await this.web3.eth.getPastLogs({
+                address: factoryAddress,
+                topics: [
+                    this.web3.utils.sha3('FarmMainDeployed(address,address,bytes)')
+                ],
+                fromBlock: 0,
+                toBlock: 'latest'
+            });
+            for (let i = 0; i < events.length; i++) {
+                const event = events[i];
+                const farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
+                try {
+                    const contract = new this.web3.eth.Contract(this.getContextElement("FarmMainABI"), farmMainAddress);
+                    const extensionAddress = await contract.methods._extension().call();
+                    const extensionContract = new this.web3.eth.Contract(this.getContextElement("FarmExtensionABI"), extensionAddress);
+                    const { host } = await extensionContract.methods.data().call();
+                    deployedFarmingContracts.push({ address: farmMainAddress, sender: host });
+                } catch (error) {
+                    console.error(error);
+                }
             }
-            await Promise.all(this.deployedFarmingContracts.map(async(c) => {
+            this.positions = [];
+            await Promise.all(deployedFarmingContracts.map(async(c) => {
                 const contract = new this.web3.eth.Contract(this.getContextElement("FarmMainABI"), c.address);
                 const events = await window.getLogs({
                     address : c.address,
@@ -425,15 +449,12 @@ export default class DFOCore {
                     const event = events[i];
                     const { topics } = event;
                     var owner = this.web3.eth.abi.decodeParameter("address", topics[3]);
-                    console.log(owner);
                     if (owner.toLowerCase() === this.address.toLowerCase()) {
                         var positionId = this.web3.eth.abi.decodeParameter("uint256", topics[1]);
                         const pos = await contract.methods.position(positionId).call();
                         if (!found.includes(pos.setupIndex)) {
                             try {
                                 const {'0': setup, '1': setupInfo} = await contract.methods.setup(pos.setupIndex).call();
-                                // const setup = (await contract.methods.setups().call())[pos.setupIndex];
-                                // const setupInfo = await contract.methods._setupsInfo(setup.infoIndex).call();
                                 if (this.isValidPosition(pos) && !this.positions.includes({...setup, contract, setupInfo, setupIndex: pos.setupIndex })) {
                                     this.positions.push({...setup, contract, setupInfo, setupIndex: pos.setupIndex });
                                     found.push(pos.setupIndex);
