@@ -218,9 +218,9 @@ a:disabled {cursor:wait !important;}
 .SetupFarmingOthers p span {font-size: 11px;}
 .YourFarmingPositions {width: 100%; border-top: 1px solid; padding-top: 10px; text-align: center;}
 .YourFarmingPositions p {font-size: 13px; margin: 5px; display: inline-block; width: 100%;}
-.YourFarmingPositions .web2ActionBTN {margin: 5px;}
-.FarmYou {width: 48%; display: inline-block; margin-right: 2%; vertical-align: middle; text-align: center;}
-.Farmed {width: 48%; display: inline-block;vertical-align: middle; text-align: right;}
+.YourFarmingPositions .web2ActionBTN, .YourFarmingPositions .backActionBTN {margin: 5px;}
+.FarmYou {width: 48%; display: inline-block; margin-right: 2%; vertical-align: top; text-align: center;}
+.Farmed {width: 48%; display: inline-block;vertical-align: top; text-align: right;}
 .SetupFarmingBotton {display: inline-block; width: 15%; vertical-align: middle; text-align: left;}
 .InflationContract h4 {font-size: 20px; display: inline-block; width: 70%; font-weight: bold; vertical-align: middle; margin-bottom: 20px;}
 .InflationContractLinks {display: inline-block; width: 28%; text-align: right;vertical-align: middle;}
