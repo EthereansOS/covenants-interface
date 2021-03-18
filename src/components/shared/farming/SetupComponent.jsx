@@ -779,15 +779,15 @@ const SetupComponent = (props) => {
                             {setup.active && (setupInfo.free || !currentPosition) && parseInt(setup.endBlock) > parseInt(blockNumber) && <>
                                     <label className="PrestoSelector">
                                         <span>From Pair</span>
-                                        <input name={`inputType-${setupIndex}`} type="radio" value="add-pair" checked={inputType === "add-pair"} onChange={(e) => onInputTypeChange(e)} />
+                                        <input name={`inputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="add-pair" checked={inputType === "add-pair"} onChange={(e) => onInputTypeChange(e)} />
                                     </label>
                                     <label className="PrestoSelector">
                                         <span>From ETH</span>
-                                        <input name={`inputType-${setupIndex}`} type="radio" value="add-eth" checked={inputType === "add-eth"} onChange={(e) => onInputTypeChange(e)} />
+                                        <input name={`inputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="add-eth" checked={inputType === "add-eth"} onChange={(e) => onInputTypeChange(e)} />
                                     </label>
                                     <label className="PrestoSelector">
                                         <span>From LP Token</span>
-                                        <input name={`inputType-${setupIndex}`} type="radio" value="add-lp" checked={inputType === "add-lp"} onChange={(e) => onInputTypeChange(e)} />
+                                        <input name={`inputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="add-lp" checked={inputType === "add-lp"} onChange={(e) => onInputTypeChange(e)} />
                                     </label>
                                 </>
                             }
@@ -1034,11 +1034,11 @@ const SetupComponent = (props) => {
                             <div className="QuestionRegular">
                                 <label className="PrestoSelector">
                                     <span>To Pair</span>
-                                    <input name={`outputType-${setupIndex}`} type="radio" value="to-pair" checked={outputType === "to-pair"} onChange={onOutputTypeChange} />
+                                    <input name={`outputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="to-pair" checked={outputType === "to-pair"} onChange={onOutputTypeChange} />
                                 </label>
                                 <label className="PrestoSelector">
                                     <span>To LP Token</span>
-                                    <input name={`outputType-${setupIndex}`} type="radio" value="to-lp" checked={outputType === "to-lp"} onChange={onOutputTypeChange} />
+                                    <input name={`outputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="to-lp" checked={outputType === "to-lp"} onChange={onOutputTypeChange} />
                                 </label>
                             </div>
                             {
