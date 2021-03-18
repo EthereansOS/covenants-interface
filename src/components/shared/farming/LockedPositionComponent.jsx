@@ -85,7 +85,7 @@ const LockedPositionComponent = (props) => {
                     (parseInt(blockNumber) < parseInt(setup.endBlock) && !showUnlock) && <a onClick={() => setShowUnlock(true)} className="web2ActionBTN">Unlock</a>
                 }
                 {
-                    showUnlock && <a onClick={() => setShowUnlock(false)} className="web2ActionBTN">Close</a>
+                    showUnlock && <a onClick={() => setShowUnlock(false)} className="backActionBTN">Close</a>
                 }
                 {
                     showUnlock && <div>
@@ -104,7 +104,7 @@ const LockedPositionComponent = (props) => {
             <div className="Farmed">
                 <p><b>Unclaimed</b>: {window.formatMoney(window.fromDecimals(lockedPositionReward, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>
                 {
-                    !showTransfer ? <a onClick={() => setShowTransfer(true)} className="web2ActionBTN">Transfer</a> : <a onClick={() => setShowTransfer(false)} className="web2ActionBTN">Close</a>
+                    !showTransfer ? <a onClick={() => setShowTransfer(true)} className="web2ActionBTN">Transfer</a> : <a onClick={() => setShowTransfer(false)} className="backActionBTN">Close</a>
                 }
                 {
                     claimLoading ? <a className="web2ActionBTN" disabled={claimLoading}>

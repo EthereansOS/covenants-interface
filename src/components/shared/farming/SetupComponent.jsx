@@ -216,6 +216,16 @@ const SetupComponent = (props) => {
         return address.toLowerCase() === setupInfo.ethereumAddress.toLowerCase() && setupInfo.involvingETH;
     }
 
+    const getPeriodFromDuration = (duration) => {
+        const blockIntervals = dfoCore.getContextElement('blockIntervals');
+        const inv = Object.entries(blockIntervals).reduce((ret, entry) => {
+            const [ key, value ] = entry;
+            ret[ value ] = key;
+            return ret;
+            }, {});
+        return inv[duration];
+    }
+
     const getSetupMetadata = async () => {
         setLoading(true);
         try {
@@ -931,12 +941,12 @@ const SetupComponent = (props) => {
             <div className="FarmSetupMain">
                 <h5><b>{setupInfo.free ? "Free Farming" : "Locked Farming"} {(!setup.active && canActivateSetup) ? <span className="text-secondary">(new)</span> : (!setup.active) ? <span className="text-danger">(inactive)</span> : <></> } {(parseInt(setup.endBlock) <= blockNumber && parseInt(setup.endBlock) !== 0) && <span>(ended)</span>}</b> <a>{AMM.name}</a></h5>
                 <aside>
-                    { parseInt(setup.endBlock) > 0 ? <p><b>block end</b>: <a target="_blank" href={`https://etherscan.io/block/${setup.endBlock}`}>{setup.endBlock}</a></p> : <p><b>Duration</b>: {setupInfo.blockDuration} blocks</p> }
+                    { parseInt(setup.endBlock) > 0 ? <p><b>block end</b>: <a target="_blank" href={`https://etherscan.io/block/${setup.endBlock}`}>{setup.endBlock}</a></p> : <p><b>Duration</b>: {getPeriodFromDuration(setupInfo.blockDuration)}</p> }
                     <p><b>Min to Stake</b>: {window.formatMoney(window.fromDecimals(setupInfo.minStakeable, mainTokenInfo.decimals, true), 6)} {mainTokenInfo.symbol}</p>
                     {!setupInfo.free && <p><b>Penalty fee</b>: {parseInt(setupInfo.penaltyFee) === 0 ? `0` : props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(setupInfo.penaltyFee), 18) * 100, 18)}%</p>}
                 </aside>
                 <div className="SetupFarmingInstructions">
-                    <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}<a target="_blank" href={`https://etherscan.io/address/${token.address}`}><Coin address={token.address} /></a> </figure>)} = <b>APY</b>: {window.formatMoney(apy, 0)}%</p>
+                    <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`https://etherscan.io/address/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />} </figure>)} = <b>APY</b>: {window.formatMoney(apy, 0)}%</p>
                 </div>
                 <div className="SetupFarmingOthers">
                     {
@@ -999,7 +1009,7 @@ const SetupComponent = (props) => {
                         <div className="Farmed">
                             <p><b>Unclaimed</b>: {window.formatMoney(window.fromDecimals(freeAvailableRewards, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>
                             {
-                                !showFreeTransfer ? <a onClick={() => setShowFreeTransfer(true)} className="web2ActionBTN">Transfer</a> : <a onClick={() => setShowFreeTransfer(false)} className="web2ActionBTN">Close</a>
+                                !showFreeTransfer ? <a onClick={() => setShowFreeTransfer(true)} className="web2ActionBTN">Transfer</a> : <a onClick={() => setShowFreeTransfer(false)} className="backActionBTN">Close</a>
                             }
                             {
                                 claimLoading ? <a className="web2ActionBTN" disabled={claimLoading}>
