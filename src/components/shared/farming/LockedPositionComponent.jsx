@@ -113,7 +113,7 @@ const LockedPositionComponent = (props) => {
                     </a> : <a onClick={() => withdrawReward()} className="Web3ActionBTN">Claim</a>
                 }
                 {
-                    showTransfer && <div>
+                    showTransfer && <div className="Tranferpos">
                         <input type="text" className="TextRegular" placeholder="Position receiver" value={transferAddress} onChange={(e) => setTransferAddress(e.target.value)} id="transferAddress" />
                         {
                             transferLoading ? <a className="Web3ActionBTN" disabled={transferLoading}>

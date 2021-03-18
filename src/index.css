@@ -126,7 +126,7 @@ a:disabled {cursor:wait !important;}
 .InputTokenRegular aside a {display: inline-block; padding: 2px 4px; background-color: #9e6915; color: #ffffff !important; border-radius: 8px; font-size: 10px; font-weight: bold;vertical-align: middle;}
 .InputTokenRegular aside p {display: inline-block; font-size: 12px; margin-left: 10px; vertical-align: middle; color: #5f5b53;}
 .InputTokenRegular img {width: 22px;height: 22px;margin-right: 5px;}
-.ApproveBTN {display: inline-block; padding: 8px 17px; background-color: #9e6915; color: #ffffff; border-radius: 20px; font-size: 16px; font-weight: bold; cursor: pointer;}
+.ApproveBTN {display: inline-block; padding: 8px 17px; background-color: #bd84fb; color: #ffffff; border-radius: 20px; font-size: 16px; font-weight: bold; cursor: pointer;}
 .ApproveBTN:hover {color: #ffffff; text-decoration: none;}
 .ApproveBTN:disabled {font-weight: normal;}
 .Web3ActionBTN {display: inline-block; padding: 8px 17px; background-color: #7474f7; color: #ffffff; border-radius: 20px; font-size: 16px; font-weight: bold; cursor: pointer;}
@@ -333,6 +333,7 @@ input[type=range] {height: 39px;-webkit-appearance: none;margin: 10px 0;width: 1
  input[type=range]::-ms-thumb {margin-top: 1px;box-shadow: 1px 1px 1px #000031;border: 0px solid #00001E;height: 32px;width: 30px;border-radius: 16px;background: #9e6915;cursor: pointer;}
  input[type=range]:focus::-ms-fill-lower {background: #9e6915;}
  input[type=range]:focus::-ms-fill-upper {background: #9e6915;}
+ .FarmSetup .Web3ActionBTN, .FarmSetup .ApproveBTN {padding: 4px 14px;}
  .BreefExpl {font-size: 11px;margin-top: 4px;margin-bottom: 5px;}
  .Web3ActionBTN .spinner-border,  .Web3ActionBTN .spinner-border-sm {color: #ffffff !important;}
  .Tranferpos {display: inline-block; width: 80%; margin: 5px auto; text-align: center;}

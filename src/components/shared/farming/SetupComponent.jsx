@@ -838,7 +838,7 @@ const SetupComponent = (props) => {
                     {
                         addLoading ? <a className="Web3ActionBTN" disabled={addLoading}>
                             <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        </a> : <a className="Web3ActionBTN" onClick={() => addLiquidity()} disabled={tokensApprovals.some((value) => !value) || tokensAmounts.some((value) => value === 0)}>Add</a>
+                        </a> : <a className="Web3ActionBTN" onClick={() => addLiquidity()} disabled={tokensApprovals.some((value) => !value) || tokensAmounts.some((value) => value === 0)}>Add Liquidity</a>
                     }
                 </div>
             </> : inputType === 'add-lp' ? <>
@@ -880,7 +880,7 @@ const SetupComponent = (props) => {
                     {
                         addLoading ? <a className="Web3ActionBTN" disabled={addLoading}>
                             <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        </a> : <a className="Web3ActionBTN" onClick={() => addLiquidity()} disabled={!lpTokenInfo.approval || parseFloat(lpTokenAmount) === 0}>Add</a>
+                        </a> : <a className="Web3ActionBTN" onClick={() => addLiquidity()} disabled={!lpTokenInfo.approval || parseFloat(lpTokenAmount) === 0}>Add Liquidity</a>
                     }
                 </div>
             </> : 
@@ -910,7 +910,7 @@ const SetupComponent = (props) => {
                 {
                     addLoading ? <a className="Web3ActionBTN" disabled={addLoading}>
                         <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    </a> :  <a className="Web3ActionBTN" onClick={() => addLiquidity()} disabled={parseFloat(ethAmount) === 0}>Add</a>
+                    </a> :  <a className="Web3ActionBTN" onClick={() => addLiquidity()} disabled={parseFloat(ethAmount) === 0}>Add Liquidity</a>
                 }
              </div>
          </> : <></>
@@ -993,7 +993,7 @@ const SetupComponent = (props) => {
                             <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>
                         }
                         {
-                            (!withdrawOpen && currentPosition) && <a className="web2ActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(true); setEdit(false); }}>Withdraw</a>   
+                            (!withdrawOpen && currentPosition) && <a className="web2ActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(true); setEdit(false); }}>Remove</a>   
                         }
                         {
                             (withdrawOpen) &&
