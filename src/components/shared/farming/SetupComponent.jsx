@@ -178,6 +178,7 @@ const SetupComponent = (props) => {
                         if (blockNumber < parseInt(setup.endBlock)) {
                             freeReward += (parseInt(setup.rewardPerBlock) * (parseInt(position.liquidityPoolTokenAmount) / parseInt(setup.totalSupply)))
                         }
+                        freeReward = freeReward.toString().split('.')[0];
                         setFreeAvailableRewards(freeReward);
                         setManageStatus({ free, creationBlock, positionSetupIndex, liquidityPoolAmount: liquidityPoolTokenAmount, mainTokenAmount, tokensAmounts: amounts['tokensAmounts'], tokens })
                     }
@@ -358,6 +359,7 @@ const SetupComponent = (props) => {
                 if (blockNumber < parseInt(farmSetup.endBlock)) {
                     freeReward += (parseInt(farmSetup.rewardPerBlock) * (parseInt(position.liquidityPoolTokenAmount) / parseInt(farmSetup.totalSupply)))
                 }
+                freeReward = freeReward.toString().split('.')[0];
                 setFreeAvailableRewards(freeReward);
                 setManageStatus({ free, creationBlock, positionSetupIndex, liquidityPoolAmount: liquidityPoolTokenAmount, mainTokenAmount, tokensAmounts: amounts['tokensAmounts'], tokens })
             } else if (lockPositions.length > 0) {
