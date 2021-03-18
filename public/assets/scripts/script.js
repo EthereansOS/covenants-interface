@@ -2059,8 +2059,8 @@ window.formatLink = function formatLink(link) {
     if (link.indexOf('assets') === 0 || link.indexOf('/assets') === 0) {
         return link;
     }
-    for (var temp of window.context.ipfsUrlTemplates) {
-        link = link.split(temp).join(window.context.ipfsUrlChanger);
+    for (var temp of window.dfoCore.getContextElement("ipfsUrlTemplates")) {
+        link = link.split(temp).join(window.dfoCore.getContextElement("ipfsUrlChanger"));
     }
     while (link && link.startsWith('/')) {
         link = link.substring(1);

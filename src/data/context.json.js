@@ -20,6 +20,8 @@ export default {
     "daiTokenAddressRopsten": "0x6b175474e89094c44da98b954eedeac495271d0f",
     "singleTokenLength": 23000,
     "ipfsHost": "https://ipfs.infura.io:5001/api/v0",
+    "ipfsUrlTemplates": ["ipfs://ipfs/", "ipfs://"],
+    "ipfsUrlChanger" : "https://gateway.ipfs.io/ipfs/",
     "dfoAddress": "0xc3BE549499f1e504c793a6c89371Bd7A98229500",
     "dfoAddressRopsten": "0x761E02FEC5A21C6d3F284bd536dB2D2d33d5540B",
     "ensAddress": "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
