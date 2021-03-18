@@ -950,8 +950,8 @@ const SetupComponent = (props) => {
                 <div className="SetupFarmingOthers">
                     {
                         setupInfo.free ? <>
-                            <p><b>Total {rewardTokenInfo.symbol}/day</b>: {window.formatMoney(props.dfoCore.toDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals), rewardTokenInfo.decimals)} {rewardTokenInfo.symbol} <span>(Shared)</span></p>
-                            <p><b>Total Deposited</b>: {window.formatMoney(props.dfoCore.toDecimals(parseInt(setup.totalSupply), lpTokenInfo.decimals), lpTokenInfo.decimals)} {lpTokenInfo.symbol} ({setupTokens.map((token, index) => <span key={token.address}>{window.formatMoney(props.dfoCore.toDecimals(token.liquidity, token.decimals), token.decimals)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span> )})</p>
+                            <p><b>Total {rewardTokenInfo.symbol}/day</b>: {props.dfoCore.toDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals, 6)} {rewardTokenInfo.symbol} <span>(Shared)</span></p>
+                            <p><b>Total Deposited</b>: {props.dfoCore.toDecimals(parseInt(setup.totalSupply), lpTokenInfo.decimals, 6)} {lpTokenInfo.symbol} ({setupTokens.map((token, index) => <span key={token.address}>{props.dfoCore.toDecimals(token.liquidity, token.decimals, 6)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span> )})</p>
                         </> : <>
                                 <p><b>Max Stakeable</b>: {props.dfoCore.toDecimals(setupInfo.maxStakeable, mainTokenInfo.decimals)} {mainTokenInfo.symbol} (Available: {props.dfoCore.toDecimals(parseInt(setupInfo.maxStakeable) - parseInt(setup.totalSupply), mainTokenInfo.decimals)} {mainTokenInfo.symbol})</p>
                                 <p><b>{calculateLockedFixedValue()} {rewardTokenInfo.symbol}</b> (fixed) for every {mainTokenInfo.symbol} locked until the end block</p>
