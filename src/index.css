@@ -333,6 +333,11 @@ input[type=range] {height: 39px;-webkit-appearance: none;margin: 10px 0;width: 1
  input[type=range]::-ms-thumb {margin-top: 1px;box-shadow: 1px 1px 1px #000031;border: 0px solid #00001E;height: 32px;width: 30px;border-radius: 16px;background: #9e6915;cursor: pointer;}
  input[type=range]:focus::-ms-fill-lower {background: #9e6915;}
  input[type=range]:focus::-ms-fill-upper {background: #9e6915;}
+ .BreefExpl {font-size: 11px;margin-top: 4px;margin-bottom: 5px;}
+ .Web3ActionBTN .spinner-border,  .Web3ActionBTN .spinner-border-sm {color: #ffffff !important;}
+ .Tranferpos {display: inline-block; width: 80%; margin: 5px auto; text-align: center;}
+ .Tranferpos input {margin: 5px auto;}
+ .DiffWallet {width: 390px; display: block; margin: 10px auto;}
 
 .fantasy {background-color: #4d4c4a !important;}
 .fantasy .LogoM {background-position: 0 -50px;}

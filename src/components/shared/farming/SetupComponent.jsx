@@ -819,10 +819,9 @@ const SetupComponent = (props) => {
                     </label>
                 }
                 {
-                    openPositionForAnotherWallet && <div className="row justify-content-center mb-4">
-                        <div className="col-md-6 col-12">
+                    openPositionForAnotherWallet && <div className="DiffWallet">
                             <input type="text" className="TextRegular" placeholder="Position owner address" value={uniqueOwner} onChange={(e) => setUniqueOwner(e.target.value)} id="uniqueOwner" />
-                        </div>
+                            <p className="BreefExpl">Open this farming position as another wallet - The wallet you insert here will be the owner of the entire position and Farm Tokens (if "Locked Position")</p>
                     </div>
                 }
                 {
@@ -862,10 +861,9 @@ const SetupComponent = (props) => {
                     </label>
                 }
                 {
-                    openPositionForAnotherWallet && <div className="row justify-content-center mb-4">
-                        <div className="col-md-6 col-12">
+                    openPositionForAnotherWallet && <div>
                         <input type="text" className="TextRegular" placeholder="Position owner address" value={uniqueOwner} onChange={(e) => setUniqueOwner(e.target.value)} id="uniqueOwner" />
-                        </div>
+                        <p className="BreefExpl">Open this farming position as another wallet - The wallet you insert here will be the owner of the entire position and Farm Tokens (if "Locked Position")</p>
                     </div>
                 }
                 {
@@ -898,10 +896,9 @@ const SetupComponent = (props) => {
                     </label>
              }
              {
-                 openPositionForAnotherWallet && <div className="row justify-content-center mb-4">
-                     <div className="col-md-6 col-12">
+                 openPositionForAnotherWallet && <div>
                         <input type="text" className="TextRegular" placeholder="Position owner address" value={uniqueOwner} onChange={(e) => setUniqueOwner(e.target.value)} id="uniqueOwner" />
-                     </div>
+                        <p className="BreefExpl">Open this farming position as another wallet - The wallet you insert here will be the owner of the entire position and Farm Tokens (if "Locked Position")</p>
                  </div>
              }
              {
@@ -1014,10 +1011,10 @@ const SetupComponent = (props) => {
                             {
                                 claimLoading ? <a className="web2ActionBTN" disabled={claimLoading}>
                                     <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                </a> : <a onClick={() => withdrawReward()} className="web2ActionBTN">Claim</a>
+                                </a> : <a onClick={() => withdrawReward()} className="Web3ActionBTN">Claim</a>
                             }
                             {
-                                showFreeTransfer && <div>
+                                showFreeTransfer && <div className="Tranferpos">
                                     <input type="text" className="TextRegular" placeholder="Position receiver" value={freeTransferAddress} onChange={(e) => setFreeTransferAddress(e.target.value)} id={`transferAddress`} />
                                     {
                                         transferLoading ? <a className="Web3ActionBTN" disabled={transferLoading}>
