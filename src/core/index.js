@@ -436,6 +436,11 @@ export default class DFOCore {
             this.positions = [];
             await Promise.all(deployedFarmingContracts.map(async(c) => {
                 const contract = new this.web3.eth.Contract(this.getContextElement("FarmMainABI"), c.address);
+                const farmTokenCollectionAddress = await contract.methods._farmTokenCollection().call();
+                let farmTokenCollection = null;
+                if (farmTokenCollectionAddress !== this.voidEthereumAddress) {
+                    farmTokenCollection = await this.getContract(this.getContextElement("INativeV1ABI"), farmTokenCollectionAddress);
+                }
                 const events = await window.getLogs({
                     address : c.address,
                     topics : [
@@ -462,6 +467,26 @@ export default class DFOCore {
                             } catch (error) {
                                 console.error(error);
                             }
+                        }
+                    }
+                }
+                if (farmTokenCollection) {
+                    const farmTokenEvents = await contract.getPastEvents('FarmToken', { fromBlock: this.getContextElement('deploySearchStart') });
+                    for (let i = 0; i < farmTokenEvents.length; i++) {
+                        try {
+                            const farmTokenEvent = farmTokenEvents[i]; 
+                            const { returnValues } = farmTokenEvent;
+                            const { objectId, setupIndex } = returnValues;
+                            if (!found.includes(setupIndex)) {
+                                const {'0': setup, '1': setupInfo} = await contract.methods.setup(setupIndex).call();
+                                const balance = await farmTokenCollection.methods.balanceOf(this.address, objectId).call();
+                                if (parseInt(balance) > 0) {
+                                    this.positions.push({...setup, contract, setupInfo, setupIndex })
+                                    found.push(setupIndex);
+                                }
+                            }
+                        } catch (error) {
+                            console.log(error);
                         }
                     }
                 }

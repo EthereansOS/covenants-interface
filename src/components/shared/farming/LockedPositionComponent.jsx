@@ -38,7 +38,7 @@ const LockedPositionComponent = (props) => {
 
     const transferPosition = async () => {
         if (!transferAddress) return;
-        setTransferLoading(false);
+        setTransferLoading(true);
         try {
             const gasLimit = await lmContract.methods.transferPosition(transferAddress, position.positionId).estimateGas({ from: dfoCore.address });
             const result = await lmContract.methods.transferPosition(transferAddress, position.positionId).send({ from: dfoCore.address, gasLimit });
