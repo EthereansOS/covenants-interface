@@ -1027,7 +1027,7 @@ const SetupComponent = (props) => {
                     }
                     </> : <>
                     <div className="LockedFarmTokensPosition"> 
-                        <p><b>Your Farm Token Supply</b>: {window.formatMoney(window.fromDecimals(farmTokenBalance, farmTokenDecimals, true), 6)} {/* farmTokenSymbol */"fLP"} - {setupTokens.map((setupToken, i) => `${parseInt(farmTokenBalance) === 0 ? 0 : window.formatMoney(window.fromDecimals(farmTokenRes[i], setupToken.decimals, true), 6)} ${setupToken.symbol}`)}</p>
+                        <p><b>Your Farm Token (fLP) Supply</b>: {window.formatMoney(window.fromDecimals(farmTokenBalance, farmTokenDecimals, true), 5)} {/* farmTokenSymbol */"fLP"} - {setupTokens.map((setupToken, i) => `${parseInt(farmTokenBalance) === 0 ? 0 : window.formatMoney(window.fromDecimals(farmTokenRes[i], setupToken.decimals, true), 4)} ${setupToken.symbol}`)}</p>
                     </div>
                     {
                         parseInt(farmTokenBalance) > 0 && <>

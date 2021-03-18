@@ -335,7 +335,7 @@ input[type=range] {height: 39px;-webkit-appearance: none;margin: 10px 0;width: 1
  input[type=range]:focus::-ms-fill-upper {background: #9e6915;}
  .FarmSetup .Web3ActionBTN, .FarmSetup .ApproveBTN {padding: 4px 14px;}
  .BreefExpl {font-size: 11px;margin-top: 4px;margin-bottom: 5px;}
- .Web3ActionBTN .spinner-border,  .Web3ActionBTN .spinner-border-sm {color: #ffffff !important;}
+ .Web3ActionBTN .spinner-border,  .Web3ActionBTN .spinner-border-sm, .ApproveBTN .spinner-border, .ApproveBTN .spinner-border-sm {color: #ffffff !important;}
  .Tranferpos {display: inline-block; width: 80%; margin: 5px auto; text-align: center;}
  .Tranferpos input {margin: 5px auto;}
  .DiffWallet {width: 390px; display: block; margin: 10px auto;}
