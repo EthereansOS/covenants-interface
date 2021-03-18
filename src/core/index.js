@@ -516,7 +516,7 @@ export default class DFOCore {
         if (precision < 0) precision = 4;
         const res = decimals === 18 ? this.web3.utils.fromWei(amount, 'ether') : parseInt(amount) / 10**decimals;
         return parseFloat(res).toFixed(precision);*/
-        var dec = window.fromDecimals(amount, decimals, true);
+        var dec = window.fromDecimals(amount, decimals, precision ? true : false);
         if (precision) {
             dec = window.formatMoney(dec, precision);
         }
