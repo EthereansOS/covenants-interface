@@ -41,7 +41,7 @@ const SetupComponent = (props) => {
     const [tokensApprovals, setTokensApprovals] = useState([]);
     const [tokensContracts, setTokensContracts] = useState([]);
     const [lpTokenAmount, setLpTokenAmount] = useState(0);
-    const [lockedEstimatedReward, setLockedEstimatedReward] = useState(0);
+    const [estimatedReward, setEstimatedReward] = useState(0);
     const [lpTokenInfo, setLpTokenInfo] = useState(null);
     const [mainTokenInfo, setMainTokenInfo] = useState(null);
     const [rewardTokenInfo, setRewardTokenInfo] = useState(null);
@@ -256,7 +256,7 @@ const SetupComponent = (props) => {
                     setFarmTokenBalance("0");
                 }
             }
-            setLockedEstimatedReward(0);
+            setEstimatedReward(0);
             setUpdatedRenewTimes(farmSetupInfo.renewTimes);
             setUpdatedRewardPerBlock(farmSetup.rewardPerBlock);
             setSetup(farmSetup);
@@ -429,7 +429,7 @@ const SetupComponent = (props) => {
 
     const onUpdateTokenAmount = async (value, index) => {
         if (!value) {
-            setLockedEstimatedReward(0);
+            setEstimatedReward(0);
             setTokensAmount(tokensAmounts.map((old, i) => "0"));
             return;
         }
@@ -452,14 +452,16 @@ const SetupComponent = (props) => {
             })
             if (parseInt(ams[mainTokenIndex]) > 0) {
                 const reward = await lmContract.methods.calculateLockedFarmingReward(setupIndex, ams[mainTokenIndex], false, 0).call();
-                setLockedEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(parseInt(reward.relativeRewardPerBlock) * (parseInt(setup.endBlock) - blockNumber)), rewardTokenInfo.decimals));
+                setEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(parseInt(reward.relativeRewardPerBlock) * (parseInt(setup.endBlock) - blockNumber)), rewardTokenInfo.decimals));
             }
+        } else {
+            setEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(parseInt(liquidityPoolAmount) * 6400 * parseInt(setup.rewardPerBlock) / (parseInt(setup.totalSupply) + parseInt(liquidityPoolAmount))), rewardTokenInfo.decimals))
         }
     }
 
     const onUpdateLpTokenAmount = async (value, index) => {
         if (!value || value === 'NaN') {
-            setLockedEstimatedReward(0);
+            setEstimatedReward(0);
             // setLpTokenAmount("0");
             return;
         }
@@ -476,9 +478,10 @@ const SetupComponent = (props) => {
             })
             if (parseInt(ams[mainTokenIndex]) > 0) {
                 const reward = await lmContract.methods.calculateLockedFarmingReward(setupIndex, ams[mainTokenIndex], false, 0).call();
-                setLockedEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(parseInt(reward.relativeRewardPerBlock) * (parseInt(setup.endBlock) - blockNumber)), rewardTokenInfo.decimals));
+                setEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(parseInt(reward.relativeRewardPerBlock) * (parseInt(setup.endBlock) - blockNumber)), rewardTokenInfo.decimals));
             }
         }
+        setEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(parseInt(value) * 6400 * parseInt(setup.rewardPerBlock) / (parseInt(setup.totalSupply) + parseInt(value))), rewardTokenInfo.decimals))
     }
 
     const addLiquidity = async () => {
@@ -828,7 +831,12 @@ const SetupComponent = (props) => {
                 }
                 {
                     (!setupInfo.free && rewardTokenInfo) && <div className="row justify-content-center mt-4">
-                            <p><b>Estimated earnings until end block</b>: {window.formatMoney(lockedEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
+                            <p><b>Estimated earnings until end block</b>: {window.formatMoney(estimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
+                    </div>
+                }
+                {
+                    (setupInfo.free && rewardTokenInfo) && <div className="row justify-content-center mt-4">
+                            <p><b>Estimated earnings per day</b>: {window.formatMoney(estimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
                     </div>
                 }
                 <div className="Web3BTNs">
@@ -870,7 +878,7 @@ const SetupComponent = (props) => {
                 }
                 {
                     (!setupInfo.free && rewardTokenInfo) && <div className="row justify-content-center mt-4">
-                        <p><b>Estimated earnings until end block</b>: {window.formatMoney(lockedEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
+                        <p><b>Estimated earnings until end block</b>: {window.formatMoney(estimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
                     </div>
                 }
                 <div className="Web3BTNs">
@@ -905,7 +913,7 @@ const SetupComponent = (props) => {
              }
              {
                 (!setupInfo.free && rewardTokenInfo) && <div className="row justify-content-center mt-4">
-                    <p><b>Estimated earnings until end block</b>: {window.formatMoney(lockedEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
+                    <p><b>Estimated earnings until end block</b>: {window.formatMoney(estimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
                 </div>
              }
              <div className="Web3BTNs">
