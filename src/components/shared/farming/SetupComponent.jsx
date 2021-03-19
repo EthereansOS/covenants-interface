@@ -1159,6 +1159,7 @@ const SetupComponent = (props) => {
                     </div>
                     </>
                 }
+            </div>
             {
                 ((open || withdrawOpen) && !edit) ? <><hr />{getAdvanced()}</> : <div />
             }
