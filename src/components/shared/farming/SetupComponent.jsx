@@ -84,7 +84,7 @@ const SetupComponent = (props) => {
                     topics: [
                         window.web3.utils.sha3("Transfer(uint256,address,address)")
                     ],
-                    fromBlock: props.dfoCore.getContextElement('deploySearchStart'),
+                    fromBlock: 9851551,//props.dfoCore.getContextElement('deploySearchStart'),
                     toBlock: await window.web3ForLogs.eth.getBlockNumber(),
                 });
                 for (let i = 0; i < events.length; i++) {
@@ -293,7 +293,7 @@ const SetupComponent = (props) => {
                 topics: [
                     window.web3.utils.sha3("Transfer(uint256,address,address)")
                 ],
-                fromBlock: props.dfoCore.getContextElement('deploySearchStart'),
+                fromBlock: 9851551,//props.dfoCore.getContextElement('deploySearchStart'),
                 toBlock: 'latest',
             });
             for (let i = 0; i < events.length; i++) {
