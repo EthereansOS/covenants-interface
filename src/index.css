@@ -551,6 +551,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
    .UnlockInfoBal {font-size: 10px !important;}
    .FarmYou a {width: 100%; display: block; margin: 5px auto;}
    .Web2ActionsBTNs a {margin: 4px 4px;font-size: 12px; padding: 4px 8px;}
+   .FarmContractOpen {padding: 0 3%;}
 }
 
 @media only screen and (min-device-width: 751px) and (max-device-width: 1024px) {
