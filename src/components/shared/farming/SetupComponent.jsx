@@ -987,7 +987,7 @@ const SetupComponent = (props) => {
                     {!setupInfo.free && <p><b>Penalty fee</b>: {parseInt(setupInfo.penaltyFee) === 0 ? `0` : props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(setupInfo.penaltyFee), 18) * 100, 18)}%</p>}
                 </aside>
                 <div className="SetupFarmingInstructions">
-                    <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`https://etherscan.io/token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />} </figure>)} = <b>APY</b>: {apy < 0 ? "(not enough liquidity)" : apy === 0 ? "(not available)" : `${window.formatMoney(apy, 0)}%`}</p>
+                    <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`https://etherscan.io/token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />} </figure>)} = <b>APY</b>: {apy < 0 ? "(Insufficient Liquidity)" : apy === 0 ? "(No Price Feed)" : `${window.formatMoney(apy, 0)}%`}</p>
                 </div>
                 <div className="SetupFarmingOthers">
                     {
