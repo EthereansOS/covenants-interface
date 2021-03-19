@@ -6,7 +6,6 @@ const ApproveButton = (props) => {
     const [loading, setLoading] = useState(false);
 
     const approveContract = async () => {
-        console.log(spender, from);
         setLoading(true);
         if (!isERC1155) {
             try {
