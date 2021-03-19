@@ -327,7 +327,7 @@ const SetupComponent = (props) => {
             const rewardTokenDecimals = await rewardToken.methods.decimals().call();
             const rewardTokenApproval = await rewardToken.methods.allowance(dfoCore.address, lmContract.options.address).call();
             const rewardTokenBalance = await rewardToken.methods.balanceOf(dfoCore.address).call();
-            setRewardTokenInfo({ contract: rewardToken, symbol: rewardTokenSymbol, decimals: rewardTokenDecimals, balance: rewardTokenBalance, address: rewardTokenAddress, approval: parseInt(rewardTokenApproval) !== 0 && parseInt(rewardTokenApproval) > parseInt(rewardTokenBalance)  });
+            setRewardTokenInfo({ contract: rewardToken, symbol: rewardTokenSymbol, decimals: rewardTokenDecimals, balance: rewardTokenBalance, address: rewardTokenAddress, approval: parseInt(rewardTokenApproval) !== 0 && parseInt(rewardTokenApproval) >= parseInt(rewardTokenBalance)  });
 
             const bNumber = await dfoCore.getBlockNumber();
             setBlockNumber(bNumber);
@@ -337,7 +337,7 @@ const SetupComponent = (props) => {
             const lpTokenDecimals = await lpToken.methods.decimals().call();
             const lpTokenBalance = await lpToken.methods.balanceOf(dfoCore.address).call();
             const lpTokenApproval = await lpToken.methods.allowance(dfoCore.address, lmContract.options.address).call();
-            setLpTokenInfo({ contract: lpToken, symbol: lpTokenSymbol, decimals: lpTokenDecimals, balance: lpTokenBalance, approval: parseInt(lpTokenApproval) !== 0 && parseInt(lpTokenApproval) > parseInt(lpTokenBalance) });
+            setLpTokenInfo({ contract: lpToken, symbol: lpTokenSymbol, decimals: lpTokenDecimals, balance: lpTokenBalance, approval: parseInt(lpTokenApproval) !== 0 && parseInt(lpTokenApproval) >= parseInt(lpTokenBalance) });
 
             const activateSetup = parseInt(farmSetupInfo.renewTimes) > 0 && !farmSetup.active && parseInt(farmSetupInfo.lastSetupIndex) === parseInt(setupIndex);
             setCanActivateSetup(activateSetup);

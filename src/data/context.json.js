@@ -39,7 +39,7 @@ export default {
     "blockSearchSection": 9000000,
     "transactionConfirmations": 0,
     "transactionConfirmationsTimeoutMillis": 7000,
-    "farmGasMultiplier": 1.2,
+    "farmGasMultiplier": 1.05,
     "gasMultiplier": 1.2,
     "gasMultiplierTokens": ["0x056fd409e1d7a124bd7017459dfea2f387b6d5cd", "0xdac17f958d2ee523a2206206994597c13d831ec7", "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"],
     "defaultItemData" : {
@@ -163,7 +163,7 @@ export default {
     "WUSDAddress": "0x7c974104df9dd7fb91205ab3d66d15aff1049de8",
     "WUSDPrestoAddress" : "0x1a0107aC208775820B14B998460F1333a145A854",
     "WUSDPrestoAddressRopsten" : "0x7c974104df9dd7fb91205ab3d66d15aff1049de8",
-    "WUSDFarmMainAddress": "0xb19dA910aca635E3DCFc9F170002a7FBff65F0F1",
+    "WUSDFarmMainAddress": "0x0c0a8F2b7dACB9Efe8b805fd77D08363A74A208A",
     "prestoAddress" : "0x3660c73E030C497cccbE8aaabdc7431fAEB6E495",
     "prestoAddressRopsten" : "0x7c974104df9dd7fb91205ab3d66d15aff1049de8",
     "icons": {
