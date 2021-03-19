@@ -607,26 +607,6 @@ const SetupComponent = (props) => {
         if (setupInfo.free) {
             setTransferLoading(true);
             try {
-                /*
-                const events = await window.getLogs({
-                    address: lmContract.options.address,
-                    topics: [
-                        window.web3.utils.sha3("Transfer(uint256,address,address)")
-                    ],
-                    fromBlock: props.dfoCore.getContextElement('deploySearchStart'),
-                    toBlock: await window.web3ForLogs.eth.getBlockNumber(),
-                });
-                for (let i = 0; i < events.length; i++) {
-                    const event = events[i];
-                    const { topics } = event;
-                    var positionId = props.dfoCore.web3.eth.abi.decodeParameter("uint256", topics[1]);
-                    const pos = await lmContract.methods.position(positionId).call();
-                    if (dfoCore.isValidPosition(pos) && parseInt(pos.setupIndex) === parseInt(setupIndex) && pos.uniqueOwner.toLowerCase() === freeTransferAddress.toLowerCase()) {
-                        setTransferLoading(false);
-                        return;
-                    }
-                }
-                */
                 const gasLimit = await lmContract.methods.transferPosition(freeTransferAddress, positionId).estimateGas({ from: dfoCore.address });
                 const result = await lmContract.methods.transferPosition(freeTransferAddress, positionId).send({ from: dfoCore.address, gasLimit });
                 props.addTransaction(result);
@@ -637,21 +617,6 @@ const SetupComponent = (props) => {
                 setTransferLoading(false);
             }
         }
-        /* 
-        else {
-            if ((!index && index !== 0) || !transferAddress[index]) return;
-            setLockedTransferLoading(lockedTransferLoading.map((v, i) => i === index ? true : v));
-            try {
-                const gasLimit = await lmContract.methods.transferPosition(transferAddress[index], positionId).estimateGas({ from: dfoCore.address });
-                const result = await lmContract.methods.transferPosition(transferAddress[index], positionId).send({ from: dfoCore.address, gasLimit });
-                await getSetupMetadata();
-            } catch (error) {
-                console.error(error);
-            } finally {
-                setTransferLoading(lockedTransferLoading.map((v, i) => i === index ? false : v));
-            }
-        }
-        */
     }
 /*
     const updateSetup = async () => {
