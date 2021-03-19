@@ -1093,9 +1093,9 @@ const SetupComponent = (props) => {
                                 </label>
                             </div>
                             {
-                            removeLoading ? <a className="web2ActionBTN" disabled={removeLoading}>
+                            removeLoading ? <a className="Web3ActionBTN Web3ActionBTNV" disabled={removeLoading}>
                                     <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                </a> : (parseInt(blockNumber) >= parseInt(setup.endBlock)) ? <a className="web2ActionBTN" onClick={() => removeLiquidity()}>Withdraw Liquidity</a> : <></>
+                                </a> : (parseInt(blockNumber) >= parseInt(setup.endBlock)) ? <a className="Web3ActionBTN Web3ActionBTNV" onClick={() => removeLiquidity()}>Withdraw Liquidity</a> : <></>
                             }
                         </>
                     }
@@ -1135,9 +1135,9 @@ const SetupComponent = (props) => {
                         {
                             canActivateSetup && <>
                                 {
-                                    activateLoading ? <a className="web2ActionBTN" disabled={activateLoading}>
+                                    activateLoading ? <a className="Web3ActionBTN" disabled={activateLoading}>
                                         <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                    </a> : <a className="web2ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
+                                    </a> : <a className="Web3ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
                                 }
                             </>
                         } 
@@ -1159,7 +1159,6 @@ const SetupComponent = (props) => {
                     </div>
                     </>
                 }
-            </div>
             {
                 ((open || withdrawOpen) && !edit) ? <><hr />{getAdvanced()}</> : <div />
             }

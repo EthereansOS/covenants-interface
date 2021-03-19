@@ -344,6 +344,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
  .UnlockInfo {font-size: 14px !important;width: 90% !important;display: block !important;}
  .UnlockInfoBal {font-size: 12px !important;width: 90% !important;}
 .UnlockDiv, .Tranferpos {padding: 10px 8px; border: 1px solid #9e6915; border-radius: 12px;}
+.Web3ActionBTNV {display: inline-block; margin: 10px auto;}
 
 
  .fantasy {background-color: #4d4c4a !important;}
