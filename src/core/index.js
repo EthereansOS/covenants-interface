@@ -246,14 +246,15 @@ export default class DFOCore {
     }
 
     formatNumber = (value) => {
-            return parseFloat(this.numberToString(value).split(',').join(''));
-        }
-        /**
-         * returns the sending options for the given method and value.
-         * if no params are used, the {from: address, gas: '99999999'} object is returned.
-         * @param {*} method contract method that will be called.
-         * @param {*} value eventual amount of ETH that will be sent.
-         */
+        return parseFloat(this.numberToString(value).split(',').join(''));
+    }
+    
+    /**
+     * returns the sending options for the given method and value.
+     * if no params are used, the {from: address, gas: '99999999'} object is returned.
+     * @param {*} method contract method that will be called.
+     * @param {*} value eventual amount of ETH that will be sent.
+     */
     getSendingOptions = async(method, value) => {
         try {
             // if a method is provided we use it to estimate the gas

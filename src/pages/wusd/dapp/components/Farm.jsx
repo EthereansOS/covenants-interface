@@ -7,7 +7,7 @@ const Farm = (props) => {
     const { dfoCore } = props;
 
     return (
-        <ExploreFarmingContract dfoCore={dfoCore} farmAddress={dfoCore.getContextElement("WUSDFarmMainAddress")} />
+        <ExploreFarmingContract dfoCore={dfoCore} farmAddress={dfoCore.getContextElement("WUSDFarmMainAddress")} withoutBack={true} />
     )
 }
 

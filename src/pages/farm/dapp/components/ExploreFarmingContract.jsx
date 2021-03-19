@@ -7,7 +7,7 @@ import CreateOrEditFarmingSetups from './CreateOrEditFarmingSetups';
 
 
 const ExploreFarmingContract = (props) => {
-    const { dfoCore, farmAddress } = props;
+    const { dfoCore, farmAddress, withoutBack } = props;
     let { address } = useParams();
     if (!address) {
         address = farmAddress;
@@ -194,7 +194,7 @@ const ExploreFarmingContract = (props) => {
             {
                 (contract && metadata) ? 
                 <div className="row">
-                    <FarmingComponent className="FarmContractOpen" dfoCore={dfoCore} contract={metadata.contract} metadata={metadata.metadata} goBack={true} hostedBy={isHost} />
+                    <FarmingComponent className="FarmContractOpen" dfoCore={dfoCore} contract={metadata.contract} metadata={metadata.metadata} goBack={true} withoutBack={withoutBack} hostedBy={isHost} />
                 </div> : <div/>
             }
             {
