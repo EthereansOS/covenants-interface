@@ -301,7 +301,7 @@ export default class DFOCore {
                 topics: [
                     this.web3.utils.sha3('FarmMainDeployed(address,address,bytes)')
                 ],
-                fromBlock: 9851551,
+                fromBlock: this.getContextElement('deploySearchStart'),
                 toBlock: 'latest'
             });
             for (let i = 0; i < events.length; i++) {
@@ -320,44 +320,6 @@ export default class DFOCore {
         } catch (error) {
             console.error(error);
             this.deployedFarmingContracts = [];
-        }
-    }
-
-    /**
-     * retrieves all the deployed wusd farming contracts contracts from the given factory address.
-     */
-     loadWUSDFarmingContracts = async(factoryAddress) => {
-        try {
-            if (!factoryAddress) factoryAddress = this.getContextElement("farmFactoryAddress");
-            const wusdFarmingContracts = [];
-            const events = await this.web3.eth.getPastLogs({
-                address: factoryAddress,
-                topics: [
-                    this.web3.utils.sha3('FarmMainDeployed(address,address,bytes)')
-                ],
-                fromBlock: this.getContextElement('deploySearchStart'),
-                toBlock: 'latest'
-            });
-            for (let i = 0; i < events.length; i++) {
-                const event = events[i];
-                const farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
-                try {
-                    const contract = new this.web3.eth.Contract(this.getContextElement("FarmMainABI"), farmMainAddress);
-                    const rewardTokenAddress = await contract.methods._rewardTokenAddress().call();
-                    if (rewardTokenAddress.toLowerCase() === this.getContextElement("WUSDAddress")) {
-                        const extensionAddress = await contract.methods._extension().call();
-                        const extensionContract = new this.web3.eth.Contract(this.getContextElement("FarmExtensionABI"), extensionAddress);
-                        const { host } = await extensionContract.methods.data().call();
-                        wusdFarmingContracts.push({ address: farmMainAddress, sender: host });
-                    }
-                } catch (error) {
-                    console.error(error);
-                }
-            }
-            return wusdFarmingContracts;
-        } catch (error) {
-            console.error(error);
-            return [];
         }
     }
 
@@ -456,7 +418,7 @@ export default class DFOCore {
                 topics: [
                     this.web3.utils.sha3('FarmMainDeployed(address,address,bytes)')
                 ],
-                fromBlock: 0,
+                fromBlock: this.getContextElement('deploySearchStart'),
                 toBlock: 'latest'
             });
             for (let i = 0; i < events.length; i++) {
