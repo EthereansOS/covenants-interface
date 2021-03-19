@@ -7,8 +7,11 @@ import CreateOrEditFarmingSetups from './CreateOrEditFarmingSetups';
 
 
 const ExploreFarmingContract = (props) => {
-    const { dfoCore } = props;
-    const { address } = useParams();
+    const { dfoCore, farmAddress } = props;
+    let { address } = useParams();
+    if (!address) {
+        address = farmAddress;
+    }
     const [farmingSetups, setFarmingSetups] = useState([]);
     const [contract, setContract] = useState(null);
     const [metadata, setMetadata] = useState(null);
