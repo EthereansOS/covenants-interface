@@ -2,7 +2,7 @@ import Coin from '../coin/Coin';
 import { Link } from 'react-router-dom';
 
 const FarmingComponent = (props) => {
-    const { className, goBack, metadata } = props;
+    const { className, goBack, metadata, dfoCore } = props;
     const symbol = metadata.name.replace("Farm ", "");
 
     return (
@@ -11,7 +11,7 @@ const FarmingComponent = (props) => {
                 metadata ? <>
                 <div className="FarmTitle">
                     <figure>
-                        <a target="_blank" href={`https://etherscan.io/address/${metadata.rewardTokenAddress}`} ><Coin height={45} address={metadata.rewardTokenAddress} /></a>
+                        { metadata.rewardTokenAddress !== dfoCore.voidEthereumAddress ? <a target="_blank" href={`https://etherscan.io/address/${metadata.rewardTokenAddress}`} ><Coin height={45} address={metadata.rewardTokenAddress} /></a> : <Coin height={45} address={metadata.rewardTokenAddress} />}
                     </figure>
                     <aside>
                         <h6><b>{metadata.name}</b> {(metadata.freeSetups.length + metadata.lockedSetups.length === 0 && !metadata.canActivateSetup) ? <span className="text-danger"><b>(inactive)</b></span> : <></> }</h6>
