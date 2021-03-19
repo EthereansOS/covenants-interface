@@ -230,7 +230,7 @@ const SetupComponent = (props) => {
             let den = 0;
             await Promise.all(setupTokens.map(async (token) => {
                 if (token && token.address) {
-                    const tokenPrice = token.address !== dfoCore.voidEthereumAddress ? data[token.address.toLowerCase()].usd : ethPrice;
+                    const tokenPrice = token.address !== dfoCore.voidEthereumAddress ? data[token.address.toLowerCase()].usd : ethPrice[0].current_price;
                     den += (tokenPrice * token.liquidity * 10**(18 - token.decimals));
                 }
             }))
