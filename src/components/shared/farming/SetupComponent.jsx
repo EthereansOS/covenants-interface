@@ -551,12 +551,12 @@ const SetupComponent = (props) => {
                 if (!currentPosition) {
                     const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value});
                     console.log(gasLimit);
-                    const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("gasMultiplier") || 1)), value});
+                    const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value});
                     props.addTransaction(result);
 
                 } else {
                     const gasLimit = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).estimateGas({ from: dfoCore.address, value});
-                    const result = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).send({ from: dfoCore.address, gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("gasMultiplier") || 1)), value});
+                    const result = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).send({ from: dfoCore.address, gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value});
                     props.addTransaction(result);
                 }
 
@@ -565,7 +565,7 @@ const SetupComponent = (props) => {
                 // opening position
                 const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value});
                 console.log(gasLimit);
-                const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("gasMultiplier") || 1)), value});
+                const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value});
                 props.addTransaction(result);
             }
             await getSetupMetadata();
@@ -898,9 +898,9 @@ const SetupComponent = (props) => {
                     </label>
                 }
                 {
-                    openPositionForAnotherWallet && <div>
-                        <input type="text" className="TextRegular" placeholder="Position owner address" value={uniqueOwner} onChange={(e) => setUniqueOwner(e.target.value)} id="uniqueOwner" />
-                        <p className="BreefExpl">Open this farming position as another wallet - The wallet you insert here will be the owner of the entire position and Farm Tokens (if "Locked Position")</p>
+                    openPositionForAnotherWallet && <div className="DiffWallet">
+                            <input type="text" className="TextRegular" placeholder="Position owner address" value={uniqueOwner} onChange={(e) => setUniqueOwner(e.target.value)} id="uniqueOwner" />
+                            <p className="BreefExpl">Open this farming position as another wallet - The wallet you insert here will be the owner of the entire position and Farm Tokens (if "Locked Position")</p>
                     </div>
                 }
                 {
@@ -939,9 +939,9 @@ const SetupComponent = (props) => {
                     </label>
              }
              {
-                 openPositionForAnotherWallet && <div>
-                        <input type="text" className="TextRegular" placeholder="Position owner address" value={uniqueOwner} onChange={(e) => setUniqueOwner(e.target.value)} id="uniqueOwner" />
-                        <p className="BreefExpl">Open this farming position as another wallet - The wallet you insert here will be the owner of the entire position and Farm Tokens (if "Locked Position")</p>
+                 openPositionForAnotherWallet && <div className="DiffWallet">
+                         <input type="text" className="TextRegular" placeholder="Position owner address" value={uniqueOwner} onChange={(e) => setUniqueOwner(e.target.value)} id="uniqueOwner" />
+                         <p className="BreefExpl">Open this farming position as another wallet - The wallet you insert here will be the owner of the entire position and Farm Tokens (if "Locked Position")</p>
                  </div>
              }
              {

@@ -39,6 +39,7 @@ export default {
     "blockSearchSection": 9000000,
     "transactionConfirmations": 0,
     "transactionConfirmationsTimeoutMillis": 7000,
+    "farmGasMultiplier": 1.2,
     "gasMultiplier": 1.2,
     "gasMultiplierTokens": ["0x056fd409e1d7a124bd7017459dfea2f387b6d5cd", "0xdac17f958d2ee523a2206206994597c13d831ec7", "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"],
     "defaultItemData" : {
