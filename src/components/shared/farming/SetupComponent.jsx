@@ -224,13 +224,14 @@ const SetupComponent = (props) => {
         const yearlyBlocks = 2304000;
         try {
             const ethPrice = await axios.get(dfoCore.getContextElement("coingeckoEthereumPriceURL"));
+            console.log(ethPrice);
             const searchTokens = `${rewardTokenAddress},${setupTokens.map((token) => (token && token.address) ? `${token.address},` : '')}`.slice(0, -1);
             const { data } = await axios.get(dfoCore.getContextElement("coingeckoCoinPriceURL") + searchTokens);
             const rewardTokenPriceUsd = data[rewardTokenAddress.toLowerCase()].usd;
             let den = 0;
             await Promise.all(setupTokens.map(async (token) => {
                 if (token && token.address) {
-                    const tokenPrice = token.address !== dfoCore.voidEthereumAddress ? data[token.address.toLowerCase()].usd : ethPrice[0].current_price;
+                    const tokenPrice = token.address !== dfoCore.voidEthereumAddress ? data[token.address.toLowerCase()].usd : ethPrice.data[0].current_price;
                     den += (tokenPrice * token.liquidity * 10**(18 - token.decimals));
                 }
             }))
@@ -1051,7 +1052,7 @@ const SetupComponent = (props) => {
                     {
                         currentPosition && 
                         <div className="Farmed">
-                            <p><b>{rewardTokenInfo.symbol}/Day</b>: {window.formatMoney(window.fromDecimals((parseInt(setup.rewardPerBlock) * 6400) * (parseInt(manageStatus.liquidityPoolAmount)/parseInt(setup.totalSupply)).toString().split('.')[0], rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>
+                            <p><b>{rewardTokenInfo.symbol}/Day</b>: {window.formatMoney(dfoCore.toDecimals(((parseInt(setup.rewardPerBlock) * 6400) * (parseInt(manageStatus.liquidityPoolAmount)/parseInt(setup.totalSupply))).toString().split('.')[0], rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>
                             <p><b>Available</b>: {window.formatMoney(window.fromDecimals(freeAvailableRewards, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>
                             {
                                 !showFreeTransfer ? <a onClick={() => setShowFreeTransfer(true)} className="web2ActionBTN">Transfer</a> : <a onClick={() => setShowFreeTransfer(false)} className="backActionBTN">Close</a>
