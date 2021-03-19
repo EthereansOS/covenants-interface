@@ -1015,9 +1015,9 @@ const SetupComponent = (props) => {
                         {
                             canActivateSetup && <>
                                 {
-                                    activateLoading ? <a className="web2ActionBTN" disabled={activateLoading}>
+                                    activateLoading ? <a className="Web3ActionBTN" disabled={activateLoading}>
                                         <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                    </a> : <a className="web2ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
+                                    </a> : <a className="Web3ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
                                 }
                             </>
                         }
