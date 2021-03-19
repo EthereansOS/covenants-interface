@@ -84,7 +84,7 @@ const SetupComponent = (props) => {
                     topics: [
                         window.web3.utils.sha3("Transfer(uint256,address,address)")
                     ],
-                    fromBlock: 9851551,//props.dfoCore.getContextElement('deploySearchStart'),
+                    fromBlock: props.dfoCore.getContextElement('deploySearchStart'),
                     toBlock: await window.web3ForLogs.eth.getBlockNumber(),
                 });
                 for (let i = 0; i < events.length; i++) {
@@ -154,11 +154,11 @@ const SetupComponent = (props) => {
                     const decimals = token ? await token.methods.decimals().call() : 18;
                     const balance = token ? await token.methods.balanceOf(dfoCore.address).call() : await dfoCore.web3.eth.getBalance(dfoCore.address);
                     const approval = token ? await token.methods.allowance(dfoCore.address, lmContract.options.address).call() : true;
-                    approvals.push(parseInt(approval) !== 0 && parseInt(approval) > parseInt(balance));
+                    approvals.push(parseInt(approval) !== 0 && (parseInt(approval) >= parseInt(balance) || !token));
                     tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: res.tokensAmounts[i], decimals, address: token ? address : dfoCore.voidEthereumAddress, symbol });
                     contracts.push(token);
                     if (address.toLowerCase() === setupInfo.mainTokenAddress.toLowerCase()) {
-                        mtInfo = { approval: parseInt(approval) !== 0 && parseInt(approval) > parseInt(balance), decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol };
+                        mtInfo = { approval: parseInt(approval) !== 0 && (parseInt(approval) >= parseInt(balance) || !token), decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol };
                         setMainTokenInfo(mtInfo);
                     }
                 }
@@ -294,7 +294,7 @@ const SetupComponent = (props) => {
                 topics: [
                     window.web3.utils.sha3("Transfer(uint256,address,address)")
                 ],
-                fromBlock: 9851551,//props.dfoCore.getContextElement('deploySearchStart'),
+                fromBlock: props.dfoCore.getContextElement('deploySearchStart'),
                 toBlock: 'latest',
             });
             for (let i = 0; i < events.length; i++) {
@@ -361,11 +361,11 @@ const SetupComponent = (props) => {
                 const decimals = token ? await token.methods.decimals().call() : 18;
                 const balance = token ? await token.methods.balanceOf(dfoCore.address).call() : await dfoCore.web3.eth.getBalance(dfoCore.address);
                 const approval = token ? await token.methods.allowance(dfoCore.address, lmContract.options.address).call() : true;
-                approvals.push(parseInt(approval) !== 0 && parseInt(approval) > parseInt(balance));
+                approvals.push(parseInt(approval) !== 0 && (parseInt(approval) >= parseInt(balance) || !token));
                 tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: res.tokensAmounts[i], decimals, address: token ? address : dfoCore.voidEthereumAddress, symbol });
                 contracts.push(token);
                 if (address.toLowerCase() === farmSetupInfo.mainTokenAddress.toLowerCase()) {
-                    mtInfo = { approval: parseInt(approval) !== 0 && parseInt(approval) > parseInt(balance), decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol };
+                    mtInfo = { approval: parseInt(approval) !== 0 && (parseInt(approval) >= parseInt(balance) || !token), decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol };
                     setMainTokenInfo(mtInfo)
                 }
             }
