@@ -851,13 +851,13 @@ const SetupComponent = (props) => {
                 }
                 {
                     (!setupInfo.free && rewardTokenInfo) && <div className="DiffWallet">
-                            <p className="BreefRecap"><b>Total Rewards until end block</b>: {window.formatMoney(lockedEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
+                            <p className="BreefRecap">Total Rewards until end block: <br></br><b>{window.formatMoney(lockedEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</b></p>
                             <p className="BreefExpl">Once you lock this liquidity you'll be able to withdraw it at the Setup End Block. If you want to Unlock this position earlier, you'll need to pay a Penalty Fee (in Reward Tokens) + all of the Reward Tokens you Claimed from this position + All of the Farm Token you're minting (representing your LP tokens locked).</p>
                     </div>
                 }
                 {
                     (setupInfo.free && rewardTokenInfo) && <div className="DiffWallet">
-                            <p className="BreefRecap"><b>Estimated reward per day</b>: {window.formatMoney(freeEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
+                            <p className="BreefRecap">Estimated reward per day: <br></br><b>{window.formatMoney(freeEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</b></p>
                     </div>
                 }
                 <div className="Web3BTNs">
@@ -904,7 +904,7 @@ const SetupComponent = (props) => {
                 }
                 {
                     (!setupInfo.free && rewardTokenInfo) && <div className="DiffWallet">
-                            <p className="BreefRecap"><b>Total Rewards until end block</b>: {window.formatMoney(lockedEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
+                            <p className="BreefRecap">Total Rewards until end block: <br></br><b>{window.formatMoney(lockedEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</b></p>
                             <p className="BreefExpl">Once you lock this liquidity you'll be able to withdraw it at the Setup End Block. If you want to Unlock this position earlier, you'll need to pay a Penalty Fee (in Reward Tokens) + all of the Reward Tokens you Claimed from this position + All of the Farm Token you're minting (representing your LP tokens locked).</p>
                     </div>
                 }
@@ -945,13 +945,13 @@ const SetupComponent = (props) => {
              }
              {
                  (!setupInfo.free && rewardTokenInfo) && <div className="DiffWallet">
-                         <p className="BreefRecap"><b>Total Rewards until end block</b>: {window.formatMoney(lockedEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
+                         <p className="BreefRecap">Total Rewards until end block: <br></br><b>{window.formatMoney(lockedEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</b></p>
                          <p className="BreefExpl">Once you lock this liquidity you'll be able to withdraw it at the Setup End Block. If you want to Unlock this position earlier, you'll need to pay a Penalty Fee (in Reward Tokens) + all of the Reward Tokens you Claimed from this position + All of the Farm Token you're minting (representing your LP tokens locked).</p>
                  </div>
              }
              {
                  (setupInfo.free && rewardTokenInfo) && <div className="DiffWallet">
-                         <p className="BreefRecap"><b>Estimated reward per day</b>: {window.formatMoney(freeEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
+                         <p className="BreefRecap">Estimated reward per day: <br></br><b>{window.formatMoney(freeEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol} {window.formatMoney(freeEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</b></p>
                  </div>
              }
              <div className="Web3BTNs">
