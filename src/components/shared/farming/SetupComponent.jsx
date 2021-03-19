@@ -129,11 +129,11 @@ const SetupComponent = (props) => {
                 const rewardToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), rewardTokenAddress);
                 const rewardTokenApproval = await rewardToken.methods.allowance(dfoCore.address, lmContract.options.address).call();
                 const rewardTokenBalance = await rewardToken.methods.balanceOf(dfoCore.address).call();
-                setRewardTokenInfo({ ...rewardTokenInfo, approval: parseInt(rewardTokenApproval) !== 0, balance: rewardTokenBalance });
+                setRewardTokenInfo({ ...rewardTokenInfo, approval: parseInt(rewardTokenApproval) !== 0 && parseInt(rewardTokenApproval) > parseInt(rewardTokenBalance), balance: rewardTokenBalance });
     
                 const lpTokenBalance = await lpTokenInfo.contract.methods.balanceOf(dfoCore.address).call();
                 const lpTokenApproval = await lpTokenInfo.contract.methods.allowance(dfoCore.address, lmContract.options.address).call();
-                setLpTokenInfo({ ...lpTokenInfo, balance: lpTokenBalance, approval: parseInt(lpTokenApproval) !== 0 });
+                setLpTokenInfo({ ...lpTokenInfo, balance: lpTokenBalance, approval: parseInt(lpTokenApproval) !== 0 && parseInt(lpTokenApproval) > parseInt(lpTokenBalance) });
                 const tokenAddress = setupInfo.liquidityPoolTokenAddress;
                 let res;
                 if (setupInfo.free) {
@@ -154,11 +154,11 @@ const SetupComponent = (props) => {
                     const decimals = token ? await token.methods.decimals().call() : 18;
                     const balance = token ? await token.methods.balanceOf(dfoCore.address).call() : await dfoCore.web3.eth.getBalance(dfoCore.address);
                     const approval = token ? await token.methods.allowance(dfoCore.address, lmContract.options.address).call() : true;
-                    approvals.push(parseInt(approval) !== 0);
+                    approvals.push(parseInt(approval) !== 0 && parseInt(approval) > parseInt(balance));
                     tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: res.tokensAmounts[i], decimals, address: token ? address : dfoCore.voidEthereumAddress, symbol });
                     contracts.push(token);
                     if (address.toLowerCase() === setupInfo.mainTokenAddress.toLowerCase()) {
-                        mtInfo = { approval: parseInt(approval) !== 0, decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol };
+                        mtInfo = { approval: parseInt(approval) !== 0 && parseInt(approval) > parseInt(balance), decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol };
                         setMainTokenInfo(mtInfo);
                     }
                 }
@@ -328,7 +328,7 @@ const SetupComponent = (props) => {
             const rewardTokenDecimals = await rewardToken.methods.decimals().call();
             const rewardTokenApproval = await rewardToken.methods.allowance(dfoCore.address, lmContract.options.address).call();
             const rewardTokenBalance = await rewardToken.methods.balanceOf(dfoCore.address).call();
-            setRewardTokenInfo({ contract: rewardToken, symbol: rewardTokenSymbol, decimals: rewardTokenDecimals, balance: rewardTokenBalance, address: rewardTokenAddress, approval: parseInt(rewardTokenApproval) !== 0  });
+            setRewardTokenInfo({ contract: rewardToken, symbol: rewardTokenSymbol, decimals: rewardTokenDecimals, balance: rewardTokenBalance, address: rewardTokenAddress, approval: parseInt(rewardTokenApproval) !== 0 && parseInt(rewardTokenApproval) > parseInt(rewardTokenBalance)  });
 
             const bNumber = await dfoCore.getBlockNumber();
             setBlockNumber(bNumber);
@@ -338,7 +338,7 @@ const SetupComponent = (props) => {
             const lpTokenDecimals = await lpToken.methods.decimals().call();
             const lpTokenBalance = await lpToken.methods.balanceOf(dfoCore.address).call();
             const lpTokenApproval = await lpToken.methods.allowance(dfoCore.address, lmContract.options.address).call();
-            setLpTokenInfo({ contract: lpToken, symbol: lpTokenSymbol, decimals: lpTokenDecimals, balance: lpTokenBalance, approval: parseInt(lpTokenApproval) !== 0 });
+            setLpTokenInfo({ contract: lpToken, symbol: lpTokenSymbol, decimals: lpTokenDecimals, balance: lpTokenBalance, approval: parseInt(lpTokenApproval) !== 0 && parseInt(lpTokenApproval) > parseInt(lpTokenBalance) });
 
             const activateSetup = parseInt(farmSetupInfo.renewTimes) > 0 && !farmSetup.active && parseInt(farmSetupInfo.lastSetupIndex) === parseInt(setupIndex);
             setCanActivateSetup(activateSetup);
@@ -362,11 +362,11 @@ const SetupComponent = (props) => {
                 const decimals = token ? await token.methods.decimals().call() : 18;
                 const balance = token ? await token.methods.balanceOf(dfoCore.address).call() : await dfoCore.web3.eth.getBalance(dfoCore.address);
                 const approval = token ? await token.methods.allowance(dfoCore.address, lmContract.options.address).call() : true;
-                approvals.push(parseInt(approval) !== 0);
+                approvals.push(parseInt(approval) !== 0 && parseInt(approval) > parseInt(balance));
                 tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: res.tokensAmounts[i], decimals, address: token ? address : dfoCore.voidEthereumAddress, symbol });
                 contracts.push(token);
                 if (address.toLowerCase() === farmSetupInfo.mainTokenAddress.toLowerCase()) {
-                    mtInfo = { approval: parseInt(approval) !== 0, decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol };
+                    mtInfo = { approval: parseInt(approval) !== 0 && parseInt(approval) > parseInt(balance), decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol };
                     setMainTokenInfo(mtInfo)
                 }
             }
