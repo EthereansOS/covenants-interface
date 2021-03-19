@@ -1131,32 +1131,34 @@ const SetupComponent = (props) => {
                             }
                         </>
                     }
-                    <div className="FarmYou">
-                        {
-                            canActivateSetup && <>
-                                {
-                                    activateLoading ? <a className="Web3ActionBTN" disabled={activateLoading}>
-                                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                    </a> : <a className="Web3ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
-                                }
-                            </>
-                        } 
-                        {
-                            (hostedBy && extensionContract && !edit && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex) && hostedBy) &&
-                            <a className="web2ActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(true) }}>Edit</a>
-                        }
-                        {
-                            (edit) &&
-                            <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>
-                        }
-                        {
-                            (!open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Farm</a>
-                        }
-                        {
-                            (open) &&
-                            <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>
-                        }
-                    </div>
+                    {   (canActivateSetup || (hostedBy && extensionContract && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex)) || parseInt(setup.endBlock) > parseInt(blockNumber)) &&
+                        <div className="FarmYou">
+                            {
+                                canActivateSetup && <>
+                                    {
+                                        activateLoading ? <a className="Web3ActionBTN" disabled={activateLoading}>
+                                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        </a> : <a className="Web3ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
+                                    }
+                                </>
+                            } 
+                            {
+                                (hostedBy && extensionContract && !edit && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex)) &&
+                                <a className="web2ActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(true) }}>Edit</a>
+                            }
+                            {
+                                (edit) &&
+                                <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>
+                            }
+                            {
+                                (!open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Farm</a>
+                            }
+                            {
+                                (open) &&
+                                <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>
+                            }
+                        </div>
+                    }
                     </>
                 }
             </div>
