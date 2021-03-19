@@ -1072,7 +1072,7 @@ const SetupComponent = (props) => {
                     </> : <>
                     <div className="LockedFarmTokensPosition"> 
                         <p><b>Your Farm ITEM (fLP) Balance</b>:</p>
-                        <p>{window.formatMoney(window.fromDecimals(farmTokenBalance, farmTokenDecimals, true), 9)} ({setupTokens.map((setupToken, i) => `${parseInt(farmTokenBalance) === 0 ? 0 : window.formatMoney(window.fromDecimals(farmTokenRes[i], setupToken.decimals, true), 3)} ${setupToken.symbol}`)}) 
+                        <p>{window.formatMoney(window.fromDecimals(farmTokenBalance, farmTokenDecimals, true), 9)} ({setupTokens.map((setupToken, i) => `${parseInt(farmTokenBalance) === 0 ? 0 : window.formatMoney(window.fromDecimals(farmTokenRes[i], setupToken.decimals, true), 3)} ${setupToken.symbol}${i !== setupTokens.length - 1 ? ' - ' : ''}`)}) 
                         <a className="MetamaskAddButton" onClick={() => props.dfoCore.addTokenToMetamask(farmTokenERC20Address, /* farmTokenSymbol */"fLP", farmTokenDecimals)}>
                                 <img height={14} src={metamaskLogo} alt="Metamask" className="mb-1" /> Add {/* farmTokenSymbol */ "fLP"}
                             </a>
