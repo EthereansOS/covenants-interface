@@ -300,7 +300,7 @@ export default class DFOCore {
                 topics: [
                     this.web3.utils.sha3('FarmMainDeployed(address,address,bytes)')
                 ],
-                fromBlock: 0,
+                fromBlock: this.getContextElement('deploySearchStart'),
                 toBlock: 'latest'
             });
             for (let i = 0; i < events.length; i++) {
@@ -334,7 +334,7 @@ export default class DFOCore {
                 topics: [
                     this.web3.utils.sha3('FarmMainDeployed(address,address,bytes)')
                 ],
-                fromBlock: 0,
+                fromBlock: this.getContextElement('deploySearchStart'),
                 toBlock: 'latest'
             });
             for (let i = 0; i < events.length; i++) {

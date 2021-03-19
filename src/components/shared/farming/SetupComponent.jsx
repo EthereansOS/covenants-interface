@@ -294,7 +294,7 @@ const SetupComponent = (props) => {
                     window.web3.utils.sha3("Transfer(uint256,address,address)")
                 ],
                 fromBlock: props.dfoCore.getContextElement('deploySearchStart'),
-                toBlock: await window.web3ForLogs.eth.getBlockNumber(),
+                toBlock: 'latest',
             });
             for (let i = 0; i < events.length; i++) {
                 const event = events[i];
@@ -512,7 +512,7 @@ const SetupComponent = (props) => {
                 setupIndex,
                 amount: 0,
                 amountIsLiquidityPool: inputType === 'add-lp' ? true : false,
-                positionOwner: uniqueOwner || dfoCore.voidEthereumAddress,
+                positionOwner: openPositionForAnotherWallet ? uniqueOwner : dfoCore.voidEthereumAddress,
             };
 
             let ethTokenIndex = null;
@@ -840,7 +840,12 @@ const SetupComponent = (props) => {
                 {
                     (!setupInfo.free || !currentPosition) && 
                     <label className="OptionalThingsFarmers" htmlFor="openPositionWallet1">
-                        <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => setOpenPositionForAnotherWallet(e.target.checked)} id="openPositionWallet1" />
+                        <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => {
+                            if (!e.target.checked) {
+                                setUniqueOwner("");
+                            }
+                            setOpenPositionForAnotherWallet(e.target.checked);
+                        }} id="openPositionWallet1" />
                         <p>External Owner</p>
                     </label>
                 }
@@ -888,7 +893,12 @@ const SetupComponent = (props) => {
                 }
                 {
                     (!setupInfo.free || !currentPosition) && <label className="OptionalThingsFarmers" htmlFor="openPosition2">
-                        <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => setOpenPositionForAnotherWallet(e.target.checked)} id="openPosition2" />
+                        <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => {
+                            if (!e.target.checked) {
+                                setUniqueOwner("");
+                            }
+                            setOpenPositionForAnotherWallet(e.target.checked);
+                        }} id="openPosition2" />
                          <p>External Owner</p>
                     </label>
                 }
