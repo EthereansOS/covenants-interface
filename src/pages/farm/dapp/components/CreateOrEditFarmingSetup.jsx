@@ -88,7 +88,7 @@ const CreateOrEditFarmingSetup = (props) => {
                     mainTokenFound = true;
                 }
                 const currentToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), tkAddress);
-                const symbol = await currentToken.methods.symbol().call();
+                const symbol = tkAddress === window.voidEthereumAddress ? "ETH" : await currentToken.methods.symbol().call();
                 tokens.push({ symbol, address: tkAddress, isEth: tkAddress.toLowerCase() === ammData[0].toLowerCase() })
             }));
             if (!mainTokenFound) return;
@@ -136,7 +136,7 @@ const CreateOrEditFarmingSetup = (props) => {
                     }
                 }
                 const currentToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), tkAddress);
-                const symbol = await currentToken.methods.symbol().call();
+                const symbol = tkAddress === window.voidEthereumAddress ? "ETH" : await currentToken.methods.symbol().call();
                 tokens.push({ symbol, address: tkAddress, isEth: tkAddress.toLowerCase() === ammData[0].toLowerCase() })
             }));
             const lpTokenContract = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), address);
@@ -168,7 +168,7 @@ const CreateOrEditFarmingSetup = (props) => {
     }
 
     const addFreeSetup = () => {
-            if (!freeLiquidityPoolToken || freeRewardPerBlock <= 0 || minStakeable <= 0 || !blockDuration) return;
+            if (!freeLiquidityPoolToken || freeRewardPerBlock <= 0 || !blockDuration) return;
             if (editSetup) {
                 onEditFarmingSetup(
                     { 
@@ -289,7 +289,7 @@ const CreateOrEditFarmingSetup = (props) => {
                         <a onClick={() => onCancel() } className="backActionBTN mr-4">Back</a>
                         <a 
                             onClick={() => addFreeSetup()} 
-                            disabled={!freeLiquidityPoolToken || freeRewardPerBlock <= 0 || minStakeable <= 0 || !blockDuration} 
+                            disabled={!freeLiquidityPoolToken || freeRewardPerBlock <= 0 || !blockDuration} 
                             className="web2ActionBTN ml-4"
                         >
                             {editSetup ? 'Edit' : 'Add'}
