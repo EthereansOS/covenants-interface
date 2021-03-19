@@ -181,6 +181,14 @@ const Stats = (props) => {
         }
     }
 
+    const getTreasuryValue = (isFarm) => {
+        const value = props.dfoCore.toDecimals(credit, wusdDecimals) -
+                      props.dfoCore.toDecimals(credit * percentages[0], wusdDecimals) -
+                      props.dfoCore.toDecimals(credit * percentages[1], wusdDecimals) -
+                      props.dfoCore.toDecimals(credit * percentages[2], wusdDecimals);
+        return value * (isFarm ? 86.7 : 13.3) / 100;
+    }
+
     const rebalanceByDebit = async () => {
         if (rebalanceByDebitDisabled()) return;
         setLoading(true);
@@ -387,20 +395,10 @@ const Stats = (props) => {
                     <div className="Rebalance">
                         <aside>
                             <h6><b>Rebalance Credit</b></h6>
-                            {
-                                /* 
-                                    <br/>
-                                    {props.dfoCore.formatMoney(farmTreasury * percentages[2], 2)} uSD Farm treasury
-                             */
-                            }
                             <p>x2Treasury: {props.dfoCore.formatMoney(props.dfoCore.toDecimals(credit * percentages[0], wusdDecimals), 2)} WUSD</p>
-                            
                             <p>x5Treasury: {props.dfoCore.formatMoney(props.dfoCore.toDecimals(credit * percentages[1], wusdDecimals), 2)} WUSD</p>
-                            <p>DFO Treasury: {
-                            props.dfoCore.formatMoney(props.dfoCore.toDecimals(credit, wusdDecimals) 
-                                - props.dfoCore.toDecimals(credit * percentages[0], wusdDecimals) 
-                                - props.dfoCore.toDecimals(credit * percentages[1], wusdDecimals) 
-                                - props.dfoCore.toDecimals(credit * percentages[2], wusdDecimals), 2)} WUSD</p>
+                            <p>DFO Treasury: {props.dfoCore.formatMoney(getTreasuryValue(false), 2)} WUSD</p>
+                            <p>Farm Treasury: {props.dfoCore.formatMoney(getTreasuryValue(true), 2)} WUSD</p>
                             <p>Executor: {props.dfoCore.formatMoney(props.dfoCore.toDecimals(credit * percentages[2], wusdDecimals), 2)} WUSD</p>
                         </aside>
                         <div className="CreditAction">

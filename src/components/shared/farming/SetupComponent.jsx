@@ -220,7 +220,7 @@ const SetupComponent = (props) => {
 
 
     const calculateApy = async (setup, rewardTokenAddress, rewardTokenDecimals, setupTokens) => {
-        if (parseInt(setup.totalSupply) === 0) return 0;
+        if (parseInt(setup.totalSupply) === 0) return -1;
         const yearlyBlocks = 2304000;
         try {
             const searchTokens = `${rewardTokenAddress},${setupTokens.map((token) => (token && token.address) ? `${token.address},` : '')}`.slice(0, -1);
@@ -987,7 +987,7 @@ const SetupComponent = (props) => {
                     {!setupInfo.free && <p><b>Penalty fee</b>: {parseInt(setupInfo.penaltyFee) === 0 ? `0` : props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(setupInfo.penaltyFee), 18) * 100, 18)}%</p>}
                 </aside>
                 <div className="SetupFarmingInstructions">
-                    <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`https://etherscan.io/token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />} </figure>)} = <b>APY</b>: {!apy || apy === 0 ? "?" : window.formatMoney(apy, 0)}%</p>
+                    <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`https://etherscan.io/token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />} </figure>)} = <b>APY</b>: {apy < 0 ? "(not enough liquidity)" : apy === 0 ? "(not available)" : `${window.formatMoney(apy, 0)}%`}</p>
                 </div>
                 <div className="SetupFarmingOthers">
                     {
