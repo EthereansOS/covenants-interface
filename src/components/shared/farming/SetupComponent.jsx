@@ -1077,7 +1077,7 @@ const SetupComponent = (props) => {
                     {
                         currentPosition && 
                         <div className="Farmed">
-                            <p><b>{rewardTokenInfo.symbol}/Day</b>: {window.formatMoney(window.fromDecimals((parseInt(setup.rewardPerBlock) * 6400) * (parseInt(manageStatus.liquidityPoolAmount)/parseInt(setup.totalSupply)), rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>
+                            <p><b>{rewardTokenInfo.symbol}/Day</b>: {window.formatMoney(window.fromDecimals((parseInt(setup.rewardPerBlock) * 6400) * (parseInt(manageStatus.liquidityPoolAmount)/parseInt(setup.totalSupply)).toString().split('.')[0], rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>
                             <p><b>Available</b>: {window.formatMoney(window.fromDecimals(freeAvailableRewards, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>
                             {
                                 !showFreeTransfer ? <a onClick={() => setShowFreeTransfer(true)} className="web2ActionBTN">Transfer</a> : <a onClick={() => setShowFreeTransfer(false)} className="backActionBTN">Close</a>
