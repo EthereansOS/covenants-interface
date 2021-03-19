@@ -223,13 +223,14 @@ const SetupComponent = (props) => {
         if (parseInt(setup.totalSupply) === 0) return -1;
         const yearlyBlocks = 2304000;
         try {
+            const ethPrice = await axios.get(dfoCore.getContextElement("coingeckoEthereumPriceURL"));
             const searchTokens = `${rewardTokenAddress},${setupTokens.map((token) => (token && token.address) ? `${token.address},` : '')}`.slice(0, -1);
             const { data } = await axios.get(dfoCore.getContextElement("coingeckoCoinPriceURL") + searchTokens);
             const rewardTokenPriceUsd = data[rewardTokenAddress.toLowerCase()].usd;
             let den = 0;
             await Promise.all(setupTokens.map(async (token) => {
                 if (token && token.address) {
-                    const tokenPrice = data[token.address.toLowerCase()].usd;
+                    const tokenPrice = token.address !== dfoCore.voidEthereumAddress ? data[token.address.toLowerCase()].usd : ethPrice;
                     den += (tokenPrice * token.liquidity * 10**(18 - token.decimals));
                 }
             }))
