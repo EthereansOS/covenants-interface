@@ -289,7 +289,7 @@ a:disabled {cursor:wait !important;}
 .IndexContractOpenStatistic {width: 95%; display: inline-block; margin: 30px auto; border: 1px solid; border-radius: 12px;}
 .IndexContractOpenStatistic p {font-size: 14px; display: inline-block; margin: 10px 10px; vertical-align: middle;}
 .IndexManageMB .Web3BTNs {width: 100%;}
-.success {position: absolute; top: 0; left: 0; z-index: 99999999999; background-color: #7474f7; padding: 25px 0; text-align: center; border-radius: 12px; width: 100%;}
+.success {position: fixed; top: 0; left: 0; z-index: 99999999999; background-color: #7474f7; padding: 25px 0; text-align: center; border-radius: 12px; width: 100%;}
 .success p {font-size: 18px; display: inline-block; color: #ffffff; font-weight: normal;}
 .success p a {font-size: 18px; display: inline-block; color: #ffffff; font-weight: bold; text-decoration: underline !important;}
 .success > a {font-size: 14px; position: absolute; bottom: 5px; left: 5px;z-index: 999999999999; color: #ffffff;}
