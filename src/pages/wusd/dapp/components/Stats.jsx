@@ -14,7 +14,7 @@ const Stats = (props) => {
     const [health, setHealth] = useState(100);
     const [credit, setCredit] = useState(0);
     const [debit, setDebit] = useState(0);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [farmTreasury, setFarmTreasury] = useState(0);
     const [farmReward, setFarmReward] = useState(0);
     const [newFarmReward, setNewFarmReward] = useState(0);
