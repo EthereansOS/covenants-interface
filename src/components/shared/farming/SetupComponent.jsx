@@ -142,6 +142,7 @@ const SetupComponent = (props) => {
                     res = await ammContract.methods.byTokenAmount(tokenAddress, setupInfo.mainTokenAddress, setup.totalSupply).call();
                     res = await ammContract.methods.byLiquidityPoolAmount(tokenAddress, res.liquidityPoolAmount).call();
                 }
+                let mtInfo = null;
                 const tokens = [];
                 const approvals = [];
                 const contracts = [];
@@ -157,7 +158,8 @@ const SetupComponent = (props) => {
                     tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: res.tokensAmounts[i], decimals, address: token ? address : dfoCore.voidEthereumAddress, symbol });
                     contracts.push(token);
                     if (address.toLowerCase() === setupInfo.mainTokenAddress.toLowerCase()) {
-                        setMainTokenInfo({ approval: parseInt(approval) !== 0, decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol })
+                        mtInfo = { approval: parseInt(approval) !== 0, decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol };
+                        setMainTokenInfo(mtInfo);
                     }
                 }
                 setSetupTokens(tokens);
@@ -209,10 +211,34 @@ const SetupComponent = (props) => {
                     setLockedPositionRewards(lockRewards);
                     //setLockedPositions(lockPositions);
                 }
+                // calculate APY
+                setApy(await calculateApy(setup, rewardTokenAddress, rewardTokenInfo.decimals, setupTokens));
             }, 5000);
             setIntervalId(interval);
         }
     }, [tokensApprovals]);
+
+
+    const calculateApy = async (setup, rewardTokenAddress, rewardTokenDecimals, setupTokens) => {
+        if (parseInt(setup.totalSupply) === 0) return 0;
+        const yearlyBlocks = 2304000;
+        try {
+            const searchTokens = `${rewardTokenAddress},${setupTokens.map((token) => (token && token.address) ? `${token.address},` : '')}`.slice(0, -1);
+            const { data } = await axios.get(dfoCore.getContextElement("coingeckoCoinPriceURL") + searchTokens);
+            const rewardTokenPriceUsd = data[rewardTokenAddress.toLowerCase()].usd;
+            let den = 0;
+            await Promise.all(setupTokens.map(async (token) => {
+                if (token && token.address) {
+                    const tokenPrice = data[token.address.toLowerCase()].usd;
+                    den += (tokenPrice * token.liquidity * 10**(18 - token.decimals));
+                }
+            }))
+            const num = (parseInt(setup.rewardPerBlock) * 10**(18 - rewardTokenDecimals) * yearlyBlocks) * rewardTokenPriceUsd;
+            return (num / (den * 100));
+        } catch (error) {
+            return 0;
+        }
+    }
 
     const isWeth = (setupInfo, address) => {
         return address.toLowerCase() === setupInfo.ethereumAddress.toLowerCase() && setupInfo.involvingETH;
@@ -323,6 +349,7 @@ const SetupComponent = (props) => {
                 res = await ammContract.methods.byTokenAmount(tokenAddress, farmSetupInfo.mainTokenAddress, farmSetup.totalSupply).call();
                 res = await ammContract.methods.byLiquidityPoolAmount(tokenAddress, res.liquidityPoolAmount).call();
             }
+            let mtInfo = null;
             const tokens = [];
             const approvals = [];
             const contracts = [];
@@ -337,7 +364,8 @@ const SetupComponent = (props) => {
                 tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: res.tokensAmounts[i], decimals, address: token ? address : dfoCore.voidEthereumAddress, symbol });
                 contracts.push(token);
                 if (address.toLowerCase() === farmSetupInfo.mainTokenAddress.toLowerCase()) {
-                    setMainTokenInfo({ approval: parseInt(approval) !== 0, decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol })
+                    mtInfo = { approval: parseInt(approval) !== 0, decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol };
+                    setMainTokenInfo(mtInfo)
                 }
             }
             const info = await ammContract.methods.info().call();
@@ -384,17 +412,7 @@ const SetupComponent = (props) => {
                 setLockedPositionRewards(lockRewards);
             }
             // calculate APY
-            let rewardTokenPriceUsd = 0;
-            try {
-                const { data } = await axios.get(dfoCore.getContextElement("coingeckoCoinPriceURL") + rewardTokenAddress);
-                rewardTokenPriceUsd = data[rewardTokenAddress.toLowerCase()].usd;
-            } catch (error) {
-                rewardTokenPriceUsd = 0;
-            }
-            const yearlyBlocks = 2304000;
-            if (farmSetup.totalSupply !== "0") {
-                setApy((parseInt(farmSetup.rewardPerBlock) * yearlyBlocks) / parseInt(farmSetup.totalSupply) * rewardTokenPriceUsd);
-            }
+            setApy(await calculateApy(farmSetup, rewardTokenAddress, rewardTokenDecimals, tokens));
         } catch (error) {
             console.error(error);
         } finally {
@@ -971,7 +989,7 @@ const SetupComponent = (props) => {
                     {!setupInfo.free && <p><b>Penalty fee</b>: {parseInt(setupInfo.penaltyFee) === 0 ? `0` : props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(setupInfo.penaltyFee), 18) * 100, 18)}%</p>}
                 </aside>
                 <div className="SetupFarmingInstructions">
-                    <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`https://etherscan.io/address/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />} </figure>)} = <b>APY</b>: {window.formatMoney(apy, 0)}%</p>
+                    <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`https://etherscan.io/address/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />} </figure>)} = <b>APY</b>: {!apy || apy === 0 ? "?" : window.formatMoney(apy, 0)}%</p>
                 </div>
                 <div className="SetupFarmingOthers">
                     {
