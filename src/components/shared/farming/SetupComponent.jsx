@@ -841,7 +841,6 @@ const SetupComponent = (props) => {
                 {
                     (setupInfo.free && rewardTokenInfo) && <div className="row justify-content-center mt-4">
                             <p><b>Estimated reward per day</b>: {window.formatMoney(freeEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
-                            <p className="BreefExpl">Lorem ipsum.</p>
                     </div>
                 }
                 <div className="Web3BTNs">
