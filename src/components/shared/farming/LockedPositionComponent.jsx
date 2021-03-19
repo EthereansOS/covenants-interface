@@ -109,7 +109,7 @@ const LockedPositionComponent = (props) => {
                     !showTransfer ? <a onClick={() => setShowTransfer(true)} className="web2ActionBTN">Transfer</a> : <a onClick={() => setShowTransfer(false)} className="backActionBTN">Close</a>
                 }
                 {
-                    claimLoading ? <a className="web2ActionBTN" disabled={claimLoading}>
+                    claimLoading ? <a className="Web3ActionBTN" disabled={claimLoading}>
                         <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                     </a> : <a onClick={() => withdrawReward()} className="Web3ActionBTN">Claim</a>
                 }
