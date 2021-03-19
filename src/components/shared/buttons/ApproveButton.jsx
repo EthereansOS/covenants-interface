@@ -10,11 +10,7 @@ const ApproveButton = (props) => {
         setLoading(true);
         if (!isERC1155) {
             try {
-                const approval = await contract.methods.allowance(from, spender).call();
-                if (parseInt(approval) > 0) {
-                    onApproval(true);
-                    return;
-                } 
+                // const approval = await contract.methods.allowance(from, spender).call();
                 // const totalSupply = await contract.methods.totalSupply().call();
                 const gas = await contract.methods.approve(spender, "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff").estimateGas({ from });
                 const approve = await contract.methods.approve(spender, "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff").send({ from, gas });
