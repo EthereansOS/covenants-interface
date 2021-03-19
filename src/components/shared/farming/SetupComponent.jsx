@@ -224,7 +224,6 @@ const SetupComponent = (props) => {
         const yearlyBlocks = 2304000;
         try {
             const ethPrice = await axios.get(dfoCore.getContextElement("coingeckoEthereumPriceURL"));
-            console.log(ethPrice);
             const searchTokens = `${rewardTokenAddress},${setupTokens.map((token) => (token && token.address) ? `${token.address},` : '')}`.slice(0, -1);
             const { data } = await axios.get(dfoCore.getContextElement("coingeckoCoinPriceURL") + searchTokens);
             const rewardTokenPriceUsd = data[rewardTokenAddress.toLowerCase()].usd;
