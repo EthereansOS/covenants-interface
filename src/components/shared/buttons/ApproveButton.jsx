@@ -16,8 +16,8 @@ const ApproveButton = (props) => {
                     return;
                 } 
                 // const totalSupply = await contract.methods.totalSupply().call();
-                const gas = await contract.methods.approve(spender, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff).estimateGas({ from });
-                const approve = await contract.methods.approve(spender, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff).send({ from, gas });
+                const gas = await contract.methods.approve(spender, "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff").estimateGas({ from });
+                const approve = await contract.methods.approve(spender, "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff").send({ from, gas });
                 setLoading(false);
                 onApproval(approve);
             } catch (error) {
