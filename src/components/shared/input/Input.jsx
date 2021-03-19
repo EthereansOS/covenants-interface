@@ -38,7 +38,7 @@ const Input = (props) => {
                 showMax && 
                     <a onClick={() => onChange(onDetectedChange(0, balance))} type="button">MAX</a>
             }
-            { showBalance && <span>Balance: {balance.indexOf("0.00") === 0 ? balance : window.formatMoney(balance, 2)} {name} {extra ? extra : ''}</span> }
+            { showBalance && <span className="BalanceImputPRCD">Balance: {balance.indexOf("0.00") === 0 ? balance : window.formatMoney(balance, 2)} {name} {extra ? extra : ''}</span> }
             </aside>
         </>
     )
