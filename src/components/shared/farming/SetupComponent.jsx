@@ -476,7 +476,10 @@ const SetupComponent = (props) => {
                 setLockedEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(parseInt(reward.relativeRewardPerBlock) * (parseInt(setup.endBlock) - blockNumber)), rewardTokenInfo.decimals));
             }
         } else {
-            setFreeEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(parseInt(liquidityPoolAmount) * 6400 * parseInt(setup.rewardPerBlock) / (parseInt(setup.totalSupply) + parseInt(liquidityPoolAmount))), rewardTokenInfo.decimals))
+            const val = parseInt(liquidityPoolAmount) * 6400 * parseInt(setup.rewardPerBlock) / (parseInt(setup.totalSupply) + parseInt(liquidityPoolAmount));
+            if (!isNaN(val)) {
+                setFreeEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(val), rewardTokenInfo.decimals))
+            }
         }
     }
 
@@ -502,8 +505,13 @@ const SetupComponent = (props) => {
                 const reward = await lmContract.methods.calculateLockedFarmingReward(setupIndex, ams[mainTokenIndex], false, 0).call();
                 setLockedEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(parseInt(reward.relativeRewardPerBlock) * (parseInt(setup.endBlock) - blockNumber)), rewardTokenInfo.decimals));
             }
+        } else {
+            const val = parseInt(props.dfoCore.fromDecimals(value, parseInt(lpTokenInfo.decimals))) * 6400 * parseInt(setup.rewardPerBlock) / (parseInt(setup.totalSupply) + parseInt(props.dfoCore.fromDecimals(value, parseInt(lpTokenInfo.decimals))));
+            if (!isNaN(val)) {
+                setFreeEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(lpTokenInfo.decimals))), rewardTokenInfo.decimals))
+            }
         }
-        setFreeEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(parseInt(props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(lpTokenInfo.decimals)))) * 6400 * parseInt(setup.rewardPerBlock) / (parseInt(setup.totalSupply) + parseInt(value))), rewardTokenInfo.decimals))
+        // setFreeEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(parseInt(props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(lpTokenInfo.decimals)))) * 6400 * parseInt(setup.rewardPerBlock) / (parseInt(setup.totalSupply) + parseInt(value))), rewardTokenInfo.decimals))
     }
 
     const addLiquidity = async () => {
