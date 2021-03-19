@@ -531,6 +531,26 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
    .InputTokenRegularS .PrestoSelector {left: auto;right: 0px;top: -28px;}
    .PrestoSelector span {font-size: 12px;margin: auto 4px auto auto;}
    .QuestionRegular {font-size: 12px;margin: 10px auto 0px auto;}
+   .FarmContract, .FarmContractOpen, .FarmSetup {width: 100%;min-width: 100%;}
+   .FarmThings {text-align: center; width: 100%; margin-left: 0;}
+   .FarmTitle {width: 100%;margin-bottom: 10px;}
+   .SortBox .TextRegular {width: 100%;display: block;}
+   .SortOptions {width: 100%;margin-top: 10px;display: block;}
+   .FarmContractOpen > .FarmThings {display: none;}
+   .SetupFarmingInstructions p {width: 100%;margin-left: 0;text-align: center;}
+   .DiffWallet {width: 100%;}
+   .SetupFarmingOthers p {width: 100%; text-align: center;}
+   .MetamaskAddButton {display: block;}
+   .FarmYou {width: 100%; margin-left: 0;}
+   .Farmed {width: 100%; text-align: center;}
+   .LockedFarmPositions {display: block; margin: 10px auto; padding: 10px 0; width: 100%; border-top: 1px solid;}
+   .magic .LockedFarmPositions {border-color: #bdbdbd;}
+   .penguin .LockedFarmPositions {border-color: #2d2e40;}
+   .YourFarmingPositions .web2ActionBTN, .YourFarmingPositions .backActionBTN, .FarmSetup .Web3ActionBTN, .FarmSetup .ApproveBTN {margin: 5px;padding: 5px 8px;font-size: 12px;}
+   .UnlockInfo {font-size: 12px !important;}
+   .UnlockInfoBal {font-size: 10px !important;}
+   .FarmYou a {width: 100%; display: block; margin: 5px auto;}
+   .Web2ActionsBTNs a {margin: 4px 4px;font-size: 12px; padding: 4px 8px;}
 }
 
 @media only screen and (min-device-width: 751px) and (max-device-width: 1024px) {
