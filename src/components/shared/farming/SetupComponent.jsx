@@ -6,6 +6,7 @@ import { addTransaction } from '../../../store/actions';
 import axios from 'axios';
 import LockedPositionComponent from './LockedPositionComponent';
 import metamaskLogo from "../../../assets/images/metamask-fox.svg";
+import Loading from "../Loading";
 import { useRef } from 'react';
 
 const SetupComponent = (props) => {
@@ -66,11 +67,35 @@ const SetupComponent = (props) => {
     const [ethBalanceOf, setEthBalanceOf] = useState("0");
     const intervalId = useRef(null);
     const [prestoData, setPrestoData] = useState(null);
+    const [selectedAmmIndex, setSelectedAmmIndex] = useState(0);
+    const [amms, setAmms] = useState(0);
+    const [loadingPrestoData, setLoadingPrestoData] = useState(false);
 
     var farmingPresto = new props.dfoCore.web3.eth.Contract(props.dfoCore.getContextElement("FarmingPrestoABI"), props.dfoCore.getContextElement("farmingPrestoAddress"));
 
     useEffect(() => {
         getSetupMetadata();
+        setTimeout(async () => {
+            let amms = [];
+            const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
+            const ammAddresses = await ammAggregator.methods.amms().call();
+            for (let address of ammAddresses) {
+                const ammContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("AMMABI"), address);
+                const amm = {
+                    address,
+                    contract: ammContract,
+                    info: await ammContract.methods.info().call(),
+                    data: await ammContract.methods.data().call()
+                }
+                amm.data[2] && amms.push(amm);
+            }
+            setSelectedAmmIndex(0);
+            const uniswap = amms.filter(it => it.info[0] === 'UniswapV2')[0];
+            const index = amms.indexOf(uniswap);
+            amms.splice(index, 1);
+            amms.unshift(uniswap);
+            setAmms(amms);
+        });
         return () => {
             clearInterval(intervalId.current)
         }
@@ -78,7 +103,7 @@ const SetupComponent = (props) => {
 
     useEffect(() => {
         updateEthAmount(ethAmount);
-    }, [uniqueOwner]);
+    }, [uniqueOwner, selectedAmmIndex]);
 
     const getSetupMetadata = async () => {
         setLoading(true);
@@ -612,10 +637,11 @@ const SetupComponent = (props) => {
 
     const updateEthAmount = async amount => {
         try {
+            setLoadingPrestoData(true);
             setPrestoData(null);
             setEthAmount(amount || "0");
             if (!parseFloat(amount)) {
-                return;
+                return setLoadingPrestoData(false);
             };
             var value = window.toDecimals(window.numberToString(amount), 18);
 
@@ -635,7 +661,7 @@ const SetupComponent = (props) => {
 
             var mainTokenIndex = tokens[2].indexOf(info.mainTokenAddress);
 
-            var amm = ammContract;
+            var amm = amms[selectedAmmIndex].contract;
 
             var ethereumAddress = (await amm.methods.data().call())[0];
 
@@ -758,6 +784,7 @@ const SetupComponent = (props) => {
         } catch (error) {
             console.error(error);
         }
+        setLoadingPrestoData(false);
     }
 
     const calculateLockedFixedValue = () => {
@@ -960,11 +987,14 @@ const SetupComponent = (props) => {
                 <div className="InputTokenRegular">
                     <Input showMax={true} address={dfoCore.voidEthereumAddress} value={ethAmount} balance={dfoCore.toDecimals(ethBalanceOf, 18)} min={0} onChange={e => updateEthAmount(e.target.value)} showCoin={true} showBalance={true} name={"ETH"} />
                 </div>
-                {
-                    prestoData && <div className="DiffWallet">
-                        <p className="BreefRecap">Opening position with: <br></br><b>{window.fromDecimals(prestoData.firstTokenAmount, prestoData.token0decimals)} {prestoData.token0Symbol}</b> and <b>{window.fromDecimals(prestoData.secondTokenAmount, prestoData.token1decimals)} {prestoData.token1Symbol}</b></p>
-                    </div>
-                }
+                <div className="DiffWallet">
+                    <p>On:</p>
+                    {amms.length > 0 && <select className="SelectRegular" value={selectedAmmIndex.toString()} onChange={e => setSelectedAmmIndex(e.target.value)}>
+                        {amms.map((it, i) => <option key={it.address} value={i}>{it.info[0]}</option>)}
+                    </select>}
+                    {loadingPrestoData && <Loading/>}
+                    {prestoData && <p className="BreefRecap">Opening position with: <br></br><b>{window.fromDecimals(prestoData.firstTokenAmount, prestoData.token0decimals)} {prestoData.token0Symbol}</b> and <b>{window.fromDecimals(prestoData.secondTokenAmount, prestoData.token1decimals)} {prestoData.token1Symbol}</b></p>}
+                </div>
                 <label className="OptionalThingsFarmers" htmlFor="openPosition2">
                     <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => {
                         if (!e.target.checked) {
