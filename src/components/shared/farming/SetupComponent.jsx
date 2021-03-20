@@ -709,7 +709,7 @@ const SetupComponent = (props) => {
             var token0EthLiquidityPoolAddress = bestLP.firstTokenEthLiquidityPoolAddress;
             var token1EthLiquidityPoolAddress = bestLP.secondTokenEthLiquidityPoolAddress;
 
-            if (token0.options.address === ammEthereumAddress || !lpAmount) {
+            if (token0.options.address === ammEthereumAddress || !lpAmount || (bestLP.updatedSecondTokenAmount > bestLP.updatedFirstTokenAmount)) {
                 bestLP = await calculateBestLP(token1.options.address, token0.options.address, token1decimals, token0decimals);
 
                 lpAmount = bestLP.lpAmount;
@@ -999,7 +999,7 @@ const SetupComponent = (props) => {
                         {amms.map((it, i) => <option key={it.address} value={i}>{it.info[0]}</option>)}
                     </select>}
                     {loadingPrestoData && <Loading/>}
-                    {prestoData && <p className="BreefRecap">Opening position with: <br></br><b>{window.fromDecimals(prestoData.firstTokenAmount, prestoData.token0decimals)} {prestoData.token0Symbol}</b> and <b>{window.fromDecimals(prestoData.secondTokenAmount, prestoData.token1decimals)} {prestoData.token1Symbol}</b></p>}
+                    {prestoData && <p className="BreefRecap">Position Weight: <br></br><b>{window.fromDecimals(prestoData.firstTokenAmount, prestoData.token0decimals)} {prestoData.token0Symbol}</b> and <b>{window.fromDecimals(prestoData.secondTokenAmount, prestoData.token1decimals)} {prestoData.token1Symbol}</b></p>}
                 </div>
                 <label className="OptionalThingsFarmers" htmlFor="openPosition2">
                     <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => {
@@ -1135,7 +1135,7 @@ const SetupComponent = (props) => {
                     {
                         currentPosition && 
                         <div className="Farmed">
-                            <p><b>{rewardTokenInfo.symbol}/Day</b>: {window.formatMoney(dfoCore.toDecimals((parseInt(setup.rewardPerBlock) * 6400 * parseInt(manageStatus.liquidityPoolAmount)/parseInt(setup.totalSupply)).toString().split('.')[0], rewardTokenInfo.decimals), 9)} {rewardTokenInfo.symbol}</p>
+                            <p><b>Daily Earnings</b>: {window.formatMoney(dfoCore.toDecimals((parseInt(setup.rewardPerBlock) * 6400 * parseInt(manageStatus.liquidityPoolAmount)/parseInt(setup.totalSupply)).toString().split('.')[0], rewardTokenInfo.decimals), 9)} {rewardTokenInfo.symbol}</p>
                             <p><b>Available</b>: {window.formatMoney(dfoCore.toDecimals(freeAvailableRewards, rewardTokenInfo.decimals), 9)} {rewardTokenInfo.symbol}</p>
                             {
                                 !showFreeTransfer ? <a onClick={() => setShowFreeTransfer(true)} className="web2ActionBTN">Transfer</a> : <a onClick={() => setShowFreeTransfer(false)} className="backActionBTN">Close</a>
