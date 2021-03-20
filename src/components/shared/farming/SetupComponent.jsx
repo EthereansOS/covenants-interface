@@ -879,7 +879,7 @@ const SetupComponent = (props) => {
                                     {
                                         (!currentPosition || openPositionForAnotherWallet || !setupInfo.free) &&
                                             <label className="PrestoSelector">
-                                                <span>From ETH</span>
+                                                { setupInfo.involvingETH ? <span>From ETH (BETA)</span> : <span>From ETH</span> }
                                                 <input name={`inputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="add-eth" checked={inputType === "add-eth"} onChange={(e) => onInputTypeChange(e)} />
                                             </label>
                                     }
@@ -990,6 +990,7 @@ const SetupComponent = (props) => {
                 </div>
             </> : 
              inputType === 'add-eth' ? <>
+                {setupInfo.involvingETH && <div className="BetaAlert"><p className="BreefRecap"><b>This pool contains ETH! The Presto Ethereum feature in this specific case is in beta. In some cases you might receive a failed transaction. Use it at your own risk!</b></p></div>}
                 <div className="InputTokenRegular">
                     <Input showMax={true} address={dfoCore.voidEthereumAddress} value={ethAmount} balance={dfoCore.toDecimals(ethBalanceOf, 18)} min={0} onChange={e => updateEthAmount(e.target.value)} showCoin={true} showBalance={true} name={"ETH"} />
                 </div>
