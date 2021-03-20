@@ -26,11 +26,13 @@ const Explore = (props) => {
                     try {
                         const contract = await dfoCore.getContract(dfoCore.getContextElement('FarmMainABI'), c.address)
                         const rewardTokenAddress = await contract.methods._rewardTokenAddress().call();
-                        const rewardToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), rewardTokenAddress);
-                        const symbol = await rewardToken.methods.symbol().call();
-                        const decimals = await rewardToken.methods.decimals().call();
+                        const rewardTokenIsEth = rewardTokenAddress === dfoCore.voidEthereumAddress; 
+                        const rewardToken = !rewardTokenIsEth ? await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), rewardTokenAddress) : null;
+                        const symbol = !rewardTokenIsEth ? await rewardToken.methods.symbol().call() : 'ETH';
+                        const decimals = !rewardTokenIsEth ? await rewardToken.methods.decimals().call() : 18;
                         const extensionAddress = await contract.methods._extension().call();
                         const extensionContract = await dfoCore.getContract(dfoCore.getContextElement('FarmExtensionABI'), extensionAddress);
+                        const extensionBalance = !rewardTokenIsEth ? await rewardToken.methods.balanceOf(extensionAddress).call() : await dfoCore.web3.eth.getBalance(extensionAddress);
                         const { host, byMint } = await extensionContract.methods.data().call();
                         const blockNumber = await dfoCore.getBlockNumber();
                         const setups = await contract.methods.setups().call();
@@ -41,10 +43,28 @@ const Explore = (props) => {
                 
                         let rewardPerBlock = 0;
                         let canActivateSetup = false;
+                        let fromDfo = false;
+                        let fromDfoReady = false;
+
+                        // check if it's a setup from a DFO
+                        try {
+                            const doubleProxyContract = await dfoCore.getContract(dfoCore.getContextElement('dfoDoubleProxyABI'), host);
+                            const proxyContract = await dfoCore.getContract(dfoCore.getContextElement('dfoProxyABI'), await doubleProxyContract.methods.proxy().call());
+                            const stateHolderContract = await dfoCore.getContract(dfoCore.getContextElement('dfoStateHolderABI'), await proxyContract.methods.getStateHolderAddress().call());
+                            fromDfoReady = await stateHolderContract.methods.getBool(`farming.authorized.${extensionAddress.toLowerCase()}`).call();
+                            fromDfo = true;
+                        } catch (error) {
+                            // not from dfo
+                            fromDfo = false;
+                        }
+
                         await Promise.all(setups.map(async (setup, i) => {
                             const {'0': s, '1': setupInfo} = await contract.methods.setup(i).call();
                             if (!canActivateSetup) {
                                 canActivateSetup = parseInt(setupInfo.renewTimes) > 0 && !setup.active && parseInt(setupInfo.lastSetupIndex) === parseInt(i);
+                                if (!fromDfo && !byMint && setup.rewardPerBlock !== "0") {
+                                    canActivateSetup = canActivateSetup && (parseInt(extensionBalance) >= (parseInt(setup.rewardPerBlock) * parseInt(setupInfo.blockDuration)));
+                                }
                             }
                             if (setup.active && (parseInt(setup.endBlock) > blockNumber)) {
                                 setupInfo.free ? freeSetups.push(setup) : lockedSetups.push(setup);
@@ -69,6 +89,8 @@ const Explore = (props) => {
                             totalFreeSetups,
                             totalLockedSetups,
                             canActivateSetup,
+                            fromDfo,
+                            fromDfoReady,
                             host: `${host.substring(0, 5)}...${host.substring(host.length - 3, host.length)}`,
                             fullhost: `${host}`,
                         };
@@ -134,10 +156,10 @@ const Explore = (props) => {
             case "2":
                 setFarmingContracts(filteredFarmingContracts.sort((a, b) => parseFloat(a.metadata.rewardPerBlock) - parseFloat(b.metadata.rewardPerBlock)));
                 break;
-            case "5":
+            case "3":
                 setFarmingContracts(filteredFarmingContracts.sort((a, b) => parseInt(b.metadata.freeSetups.length + b.metadata.lockedSetups.length) - parseInt(a.metadata.freeSetups.length + a.metadata.lockedSetups.length)));
                 break
-            case "6":
+            case "4":
                 setFarmingContracts(filteredFarmingContracts.sort((a, b) => parseInt(a.metadata.freeSetups.length + a.metadata.lockedSetups.length) - parseInt(b.metadata.freeSetups.length + b.metadata.lockedSetups.length)));
                 break
             default:
@@ -154,14 +176,8 @@ const Explore = (props) => {
                         <option value="0">Sort by..</option>
                         <option value="1">Higher Rewards per day</option>
                         <option value="2">Lower Rewards per day</option>
-                        {
-                            /*
-                            <option value="3">Higher APY</option>
-                            <option value="4">Lower APY</option>
-                            */
-                        }
-                        <option value="5">More Setups</option>
-                        <option value="6">Less Setups</option>
+                        <option value="3">More Setups</option>
+                        <option value="4">Less Setups</option>
                     </select>
                 <label>
                     <input type="checkbox" checked={activeOnly} onChange={(e) => setActiveOnly(e.target.checked)}></input><p>Only Active</p>

@@ -24,6 +24,8 @@ const SetupComponent = (props) => {
     const [edit, setEdit] = useState(false);
     const [withdrawOpen, setWithdrawOpen] = useState(false);
     const [showFreeTransfer, setShowFreeTransfer] = useState(false);
+    const [canActivateSetup, setCanActivateSetup] = useState(false);
+    const [setupReady, setSetupReady] = useState(false);
     // amm data
     const [AMM, setAMM] = useState({ name: "", version: "" });
     const [ammContract, setAmmContract] = useState(null);
@@ -35,7 +37,6 @@ const SetupComponent = (props) => {
     const [farmTokenSymbol, setFarmTokenSymbol] = useState("");
     const [farmTokenBalance, setFarmTokenBalance] = useState("0");
     const [farmTokenRes, setFarmTokenRes] = useState([]);
-    const [canActivateSetup, setCanActivateSetup] = useState(false);
     const [setupTokens, setSetupTokens] = useState([]);
     const [tokensAmounts, setTokensAmount] = useState([]);
     const [tokensApprovals, setTokensApprovals] = useState([]);
@@ -72,152 +73,205 @@ const SetupComponent = (props) => {
         }
     }, []);
 
+    const getSetupMetadata = async () => {
+        setLoading(true);
+        try {
+            const { '0': farmSetup, '1': farmSetupInfo } = await lmContract.methods.setup(setupIndex).call();
+            setSetup(farmSetup);
+            setSetupInfo(farmSetupInfo);
+            await loadData(farmSetup, farmSetupInfo, true);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
     useEffect(() => {
         if (intervalId) clearInterval(intervalId);
         if (setupTokens && setupTokens.length > 0) {
             const interval = setInterval(async () => {
-                const lockPositions = [];
-                const positionIds = [];
-                let position = null;
-                const events = await window.getLogs({
-                    address: lmContract.options.address,
-                    topics: [
-                        window.web3.utils.sha3("Transfer(uint256,address,address)")
-                    ],
-                    fromBlock: props.dfoCore.getContextElement('deploySearchStart'),
-                    toBlock: await window.web3ForLogs.eth.getBlockNumber(),
-                });
-                for (let i = 0; i < events.length; i++) {
-                    const event = events[i];
-                    const { topics } = event;
-                    var positionId = props.dfoCore.web3.eth.abi.decodeParameter("uint256", topics[1]);
-                    const pos = await lmContract.methods.position(positionId).call();
-                    if (dfoCore.isValidPosition(pos) && parseInt(pos.setupIndex) === parseInt(setupIndex)) {
-                        if (setupInfo.free) {
-                            position = { ...pos, positionId };
-                        } else if (!positionIds.includes(positionId)) {
-                            lockPositions.push({ ...pos, positionId });
-                            positionIds.push(positionId);
-                        }
-                    }
-                }
-                setCurrentPosition(position);
-                setLockedPositions(lockPositions);
-
-                const farmTokenCollectionAddress = await lmContract.methods._farmTokenCollection().call();
-                const farmTokenCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), farmTokenCollectionAddress);
-                if (!setupInfo.free) {
-                    // retrieve farm token data
-                    const objectId = setup.objectId;
-                    if (objectId !== "0") {
-                        const ftBalance = await farmTokenCollection.methods.balanceOf(props.dfoCore.address, objectId).call();
-                        const ftSymbol = await farmTokenCollection.methods.symbol(objectId).call();
-                        const ftDecimals = await farmTokenCollection.methods.decimals(objectId).call();
-                        const ftERC20Address = await farmTokenCollection.methods.asInteroperable(objectId).call();
-                        setFarmTokenERC20Address(ftERC20Address);
-                        setFarmTokenSymbol(ftSymbol);
-                        setFarmTokenBalance(ftBalance);
-                        setFarmTokenDecimals(ftDecimals);
-                        const ftRes = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, ftBalance).call();
-                        setFarmTokenRes(ftRes['tokensAmounts']);
-                    } else {
-                        setFarmTokenBalance("0");
-                    }
-                }
-
-                const rewardTokenAddress = await lmContract.methods._rewardTokenAddress().call();
-                const rewardToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), rewardTokenAddress);
-                const rewardTokenApproval = await rewardToken.methods.allowance(dfoCore.address, lmContract.options.address).call();
-                const rewardTokenBalance = await rewardToken.methods.balanceOf(dfoCore.address).call();
-                setRewardTokenInfo({ ...rewardTokenInfo, approval: parseInt(rewardTokenApproval) !== 0 && parseInt(rewardTokenApproval) > parseInt(rewardTokenBalance), balance: rewardTokenBalance });
-    
-                const lpTokenBalance = await lpTokenInfo.contract.methods.balanceOf(dfoCore.address).call();
-                const lpTokenApproval = await lpTokenInfo.contract.methods.allowance(dfoCore.address, lmContract.options.address).call();
-                setLpTokenInfo({ ...lpTokenInfo, balance: lpTokenBalance, approval: parseInt(lpTokenApproval) !== 0 && parseInt(lpTokenApproval) > parseInt(lpTokenBalance) });
-                const tokenAddress = setupInfo.liquidityPoolTokenAddress;
-                let res;
-                if (setupInfo.free) {
-                    res = await ammContract.methods.byLiquidityPoolAmount(tokenAddress, setup.totalSupply).call();
-                } else {
-                    res = await ammContract.methods.byTokenAmount(tokenAddress, setupInfo.mainTokenAddress, setup.totalSupply).call();
-                    res = await ammContract.methods.byLiquidityPoolAmount(tokenAddress, res.liquidityPoolAmount).call();
-                }
-                let mtInfo = null;
-                const tokens = [];
-                const approvals = [];
-                const contracts = [];
-                
-                for (let i = 0; i < res.liquidityPoolTokens.length; i++) {
-                    const address = res.liquidityPoolTokens[i];
-                    const token = !isWeth(setupInfo, address) ? await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), address) : null;
-                    const symbol = token ? await token.methods.symbol().call() : 'ETH';
-                    const decimals = token ? await token.methods.decimals().call() : 18;
-                    const balance = token ? await token.methods.balanceOf(dfoCore.address).call() : await dfoCore.web3.eth.getBalance(dfoCore.address);
-                    const approval = token ? await token.methods.allowance(dfoCore.address, lmContract.options.address).call() : true;
-                    approvals.push(parseInt(approval) !== 0 && (parseInt(approval) >= parseInt(balance) || !token));
-                    tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: res.tokensAmounts[i], decimals, address: token ? address : dfoCore.voidEthereumAddress, symbol });
-                    contracts.push(token);
-                    if (address.toLowerCase() === setupInfo.mainTokenAddress.toLowerCase()) {
-                        mtInfo = { approval: parseInt(approval) !== 0 && (parseInt(approval) >= parseInt(balance) || !token), decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol };
-                        setMainTokenInfo(mtInfo);
-                    }
-                }
-                setSetupTokens(tokens);
-                setTokensContracts(contracts);
-                setTokensApprovals(approvals);
-                if (position && position.positionId) {
-                    const positionId = position.positionId;
-                    //position = await lmContract.methods.position(positionId).call();
-                    setCurrentPosition(position.creationBlock != "0" ? { ...position, positionId } : null);
-                    if (position.creationBlock != "0") {
-                        const free = position['free'];
-                        const creationBlock = position['creationBlock'];
-                        const positionSetupIndex = position['setupIndex'];
-                        const liquidityPoolTokenAmount = position['liquidityPoolTokenAmount'];
-                        const mainTokenAmount = position['mainTokenAmount'];
-                        const amounts = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, liquidityPoolTokenAmount).call();
-                        const availableReward = await lmContract.methods.calculateFreeFarmingReward(positionId, true).call();
-                        let freeReward = parseInt(availableReward);
-                        if (blockNumber < parseInt(setup.endBlock)) {
-                            freeReward += (parseInt(setup.rewardPerBlock) * (parseInt(position.liquidityPoolTokenAmount) / parseInt(setup.totalSupply)))
-                        }
-                        freeReward = freeReward.toString().split('.')[0];
-                        setFreeAvailableRewards(freeReward);
-                        setManageStatus({ free, creationBlock, positionSetupIndex, liquidityPoolAmount: liquidityPoolTokenAmount, mainTokenAmount, tokensAmounts: amounts['tokensAmounts'], tokens })
-                    }
-                } else if (lockPositions.length > 0) {
-                    const lockStatuses = [];
-                    const lockRewards = [];
-                    for (let j = 0; j < lockPositions.length; j++) {
-                        let lockedPosition = lockPositions[j];
-                        const positionId = lockedPosition.positionId;
-                        lockedPosition = await lmContract.methods.position(positionId).call();
-                        if (lockedPosition.creationBlock != "0") {
-                            const free = lockedPosition['free'];
-                            const creationBlock = lockedPosition['creationBlock'];
-                            const positionSetupIndex = lockedPosition['setupIndex'];
-                            const liquidityPoolTokenAmount = lockedPosition['liquidityPoolTokenAmount'];
-                            const mainTokenAmount = lockedPosition['mainTokenAmount'];
-                            const amounts = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, liquidityPoolTokenAmount).call();
-                            const availableReward = await lmContract.methods.calculateLockedFarmingReward(0, 0, true, positionId).call();
-                            const lockedReward = parseInt(availableReward.reward) + (parseInt(setup.endBlock) <= parseInt(blockNumber) ? 0 : parseInt(lockedPosition.lockedRewardPerBlock));
-                            const partiallyRedeemed = await lmContract.methods._partiallyRedeemed(positionId).call();
-                            lockRewards.push(lockedReward);
-                            lockStatuses.push({ free, creationBlock, positionSetupIndex, partiallyRedeemed, liquidityPoolAmount: liquidityPoolTokenAmount, mainTokenAmount, tokensAmounts: amounts['tokensAmounts'], tokens })    
-                            //lockPositions.push({ ...lockedPosition, positionId: positionId });
-                        }
-                    }
-                    setLockedPositionStatuses(lockStatuses);
-                    setLockedPositionRewards(lockRewards);
-                    //setLockedPositions(lockPositions);
-                }
-                // calculate APY
-                setApy(await calculateApy(setup, rewardTokenAddress, rewardTokenInfo.decimals, setupTokens));
+                const { '0': farmSetup, '1': farmSetupInfo } = await lmContract.methods.setup(setupIndex).call();
+                setSetup(farmSetup);
+                setSetupInfo(farmSetupInfo);
+                await loadData(setup, setupInfo);
             }, 5000);
             setIntervalId(interval);
         }
     }, [tokensApprovals]);
 
+    const loadData = async (farmSetup, farmSetupInfo, reset) => {
+        console.log(`start loading data for setup ${setupIndex}..`);
+        let position = null;
+        let lockPositions = [];
+        let positionIds = [];
+        const farmTokenCollectionAddress = await lmContract.methods._farmTokenCollection().call();
+        const farmTokenCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), farmTokenCollectionAddress);
+        const ammContract = await dfoCore.getContract(dfoCore.getContextElement('AMMABI'), farmSetupInfo.ammPlugin);
+        setAmmContract(ammContract);
+        if (!farmSetup.free) {
+            // retrieve farm token data
+            const objectId = farmSetup.objectId;
+            if (objectId !== "0") {
+                const ftBalance = await farmTokenCollection.methods.balanceOf(props.dfoCore.address, objectId).call();
+                const ftSymbol = await farmTokenCollection.methods.symbol(objectId).call();
+                const ftDecimals = await farmTokenCollection.methods.decimals(objectId).call();
+                const ftERC20Address = await farmTokenCollection.methods.asInteroperable(objectId).call();
+                setFarmTokenERC20Address(ftERC20Address);
+                setFarmTokenSymbol(ftSymbol);
+                setFarmTokenBalance(ftBalance);
+                setFarmTokenDecimals(ftDecimals);
+                const ftRes = await ammContract.methods.byLiquidityPoolAmount(farmSetupInfo.liquidityPoolTokenAddress, ftBalance).call();
+                setFarmTokenRes(ftRes['tokensAmounts']);
+            } else {
+                setFarmTokenBalance("0");
+            }
+        }
+        reset && setLockedEstimatedReward(0);
+        setUpdatedRenewTimes(farmSetupInfo.renewTimes);
+        setUpdatedRewardPerBlock(farmSetup.rewardPerBlock);
+        const events = await window.getLogs({
+            address: lmContract.options.address,
+            topics: [
+                window.web3.utils.sha3("Transfer(uint256,address,address)")
+            ],
+            fromBlock: props.dfoCore.getContextElement('deploySearchStart'),
+            toBlock: 'latest',
+        });
+        for (let i = 0; i < events.length; i++) {
+            const event = events[i];
+            const { topics } = event;
+            var positionId = props.dfoCore.web3.eth.abi.decodeParameter("uint256", topics[1]);
+            const pos = await lmContract.methods.position(positionId).call();
+            if (dfoCore.isValidPosition(pos) && parseInt(pos.setupIndex) === parseInt(setupIndex)) {
+                if (farmSetupInfo.free) {
+                    position = { ...pos, positionId };
+                } else if (!positionIds.includes(positionId)) {
+                    lockPositions.push({ ...pos, positionId });
+                    positionIds.push(positionId);
+                }
+            }
+        }
+        setCurrentPosition(position);
+        setLockedPositions(lockPositions);
+        if (!position && reset) {
+            setOpen(false);
+            setWithdrawOpen(false);
+        }
+        const extensionAddress = await lmContract.methods._extension().call();
+        const extContract = await dfoCore.getContract(dfoCore.getContextElement("FarmExtensionABI"), extensionAddress);
+        setExtensionContract(extContract);
+        const rewardTokenAddress = await lmContract.methods._rewardTokenAddress().call();
+        const isEth = rewardTokenAddress === dfoCore.voidEthereumAddress;
+        const rewardToken = !isEth ? await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), rewardTokenAddress) : null;
+        const rewardTokenSymbol = !isEth ? await rewardToken.methods.symbol().call() : 'ETH';
+        const rewardTokenDecimals = !isEth ? await rewardToken.methods.decimals().call() : 18;
+        const rewardTokenApproval = !isEth ? await rewardToken.methods.allowance(dfoCore.address, lmContract.options.address).call() : 2^256-1;
+        const rewardTokenBalance = !isEth ? await rewardToken.methods.balanceOf(dfoCore.address).call() : await dfoCore.web3.eth.getBalance(dfoCore.address);
+        setRewardTokenInfo({ contract: rewardToken, symbol: rewardTokenSymbol, decimals: rewardTokenDecimals, balance: rewardTokenBalance, address: rewardTokenAddress, approval: parseInt(rewardTokenApproval) !== 0 && parseInt(rewardTokenApproval) >= parseInt(rewardTokenBalance)  });
+
+        const bNumber = await dfoCore.getBlockNumber();
+        setBlockNumber(bNumber);
+
+        const lpToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), farmSetupInfo.liquidityPoolTokenAddress);
+        const lpTokenSymbol = await lpToken.methods.symbol().call();
+        const lpTokenDecimals = await lpToken.methods.decimals().call();
+        const lpTokenBalance = await lpToken.methods.balanceOf(dfoCore.address).call();
+        const lpTokenApproval = await lpToken.methods.allowance(dfoCore.address, lmContract.options.address).call();
+        setLpTokenInfo({ contract: lpToken, symbol: lpTokenSymbol, decimals: lpTokenDecimals, balance: lpTokenBalance, approval: parseInt(lpTokenApproval) !== 0 && parseInt(lpTokenApproval) >= parseInt(lpTokenBalance) });
+
+        const activateSetup = parseInt(farmSetupInfo.renewTimes) > 0 && !farmSetup.active && parseInt(farmSetupInfo.lastSetupIndex) === parseInt(setupIndex);
+        setCanActivateSetup(activateSetup);
+
+        const { host, byMint } = await extContract.methods.data().call();
+        let isSetupReady = false;
+        const extensionBalance = !isEth ? await rewardToken.methods.balanceOf(extensionAddress).call() : await dfoCore.web3.eth.getBalance(extensionAddress);
+        // check if it's a setup from a DFO
+        try {
+            const doubleProxyContract = await dfoCore.getContract(dfoCore.getContextElement('dfoDoubleProxyABI'), host);
+            const proxyContract = await dfoCore.getContract(dfoCore.getContextElement('dfoProxyABI'), await doubleProxyContract.methods.proxy().call());
+            const stateHolderContract = await dfoCore.getContract(dfoCore.getContextElement('dfoStateHolderABI'), await proxyContract.methods.getStateHolderAddress().call());
+            isSetupReady = await stateHolderContract.methods.getBool(`farming.authorized.${extensionAddress.toLowerCase()}`).call();
+        } catch (error) {
+            // not from dfo
+            isSetupReady = byMint || parseInt(extensionBalance) >= (parseInt(farmSetup.rewardPerBlock) * parseInt(farmSetupInfo.blockDuration));
+        }
+        setSetupReady(isSetupReady);
+
+        const tokenAddress = farmSetupInfo.liquidityPoolTokenAddress;
+        let res;
+        if (farmSetupInfo.free) {
+            res = await ammContract.methods.byLiquidityPoolAmount(tokenAddress, farmSetup.totalSupply).call();
+        } else {
+            res = await ammContract.methods.byTokenAmount(tokenAddress, farmSetupInfo.mainTokenAddress, farmSetup.totalSupply).call();
+            res = await ammContract.methods.byLiquidityPoolAmount(tokenAddress, res.liquidityPoolAmount).call();
+        }
+        let mtInfo = null;
+        const tokens = [];
+        const approvals = [];
+        const contracts = [];
+        for (let i = 0; i < res.liquidityPoolTokens.length; i++) {
+            const address = res.liquidityPoolTokens[i];
+            const token = !isWeth(farmSetupInfo, address) ? await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), address) : null;
+            const symbol = token ? await token.methods.symbol().call() : 'ETH';
+            const decimals = token ? await token.methods.decimals().call() : 18;
+            const balance = token ? await token.methods.balanceOf(dfoCore.address).call() : await dfoCore.web3.eth.getBalance(dfoCore.address);
+            const approval = token ? await token.methods.allowance(dfoCore.address, lmContract.options.address).call() : true;
+            approvals.push(parseInt(approval) !== 0 && (parseInt(approval) >= parseInt(balance) || !token));
+            tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: res.tokensAmounts[i], decimals, address: token ? address : dfoCore.voidEthereumAddress, symbol });
+            contracts.push(token);
+            if (address.toLowerCase() === farmSetupInfo.mainTokenAddress.toLowerCase()) {
+                mtInfo = { approval: parseInt(approval) !== 0 && (parseInt(approval) >= parseInt(balance) || !token), decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol };
+                setMainTokenInfo(mtInfo)
+            }
+        }
+        const info = await ammContract.methods.info().call();
+        setAMM({ name: info['0'], version: info['1'] });
+        setSetupTokens(tokens);
+        setTokensContracts(contracts);
+        reset && setLpTokenAmount(0);
+        reset && setTokensAmount(new Array(tokens.length).fill(0));
+        setTokensApprovals(approvals);
+        // retrieve the manage data using the position
+        if (position) {
+            const free = position['free'];
+            const creationBlock = position['creationBlock'];
+            const positionSetupIndex = position['setupIndex'];
+            const liquidityPoolTokenAmount = position['liquidityPoolTokenAmount'];
+            const mainTokenAmount = position['mainTokenAmount'];
+            const amounts = await ammContract.methods.byLiquidityPoolAmount(farmSetupInfo.liquidityPoolTokenAddress, liquidityPoolTokenAmount).call();
+            const availableReward = await lmContract.methods.calculateFreeFarmingReward(position.positionId, true).call();
+            let freeReward = parseInt(availableReward);
+            if (blockNumber < parseInt(farmSetup.endBlock)) {
+                freeReward += (parseInt(farmSetup.rewardPerBlock) * (parseInt(position.liquidityPoolTokenAmount) / parseInt(farmSetup.totalSupply)))
+            }
+            freeReward = freeReward.toString().split('.')[0];
+            setFreeAvailableRewards(freeReward);
+            setManageStatus({ free, creationBlock, positionSetupIndex, liquidityPoolAmount: liquidityPoolTokenAmount, mainTokenAmount, tokensAmounts: amounts['tokensAmounts'], tokens })
+        } else if (lockPositions.length > 0) {
+            const lockStatuses = [];
+            const lockRewards = [];
+            for (let j = 0; j < lockPositions.length; j++) {
+                const lockedPosition = lockPositions[j];
+                const free = lockedPosition['free'];
+                const creationBlock = lockedPosition['creationBlock'];
+                const positionSetupIndex = lockedPosition['setupIndex'];
+                const liquidityPoolTokenAmount = lockedPosition['liquidityPoolTokenAmount'];
+                const mainTokenAmount = lockedPosition['mainTokenAmount'];
+                const amounts = await ammContract.methods.byLiquidityPoolAmount(farmSetupInfo.liquidityPoolTokenAddress, liquidityPoolTokenAmount).call();
+                const availableReward = await lmContract.methods.calculateLockedFarmingReward(0, 0, true, lockedPosition.positionId).call();
+                const lockedReward = parseInt(availableReward.reward) + (parseInt(farmSetup.endBlock) <= parseInt(blockNumber) ? 0 : parseInt(lockedPosition.lockedRewardPerBlock));
+                const partiallyRedeemed = await lmContract.methods._partiallyRedeemed(lockedPosition.positionId).call();
+                lockRewards.push(lockedReward);
+                lockStatuses.push({ free, creationBlock, positionSetupIndex, partiallyRedeemed, liquidityPoolAmount: liquidityPoolTokenAmount, mainTokenAmount, tokensAmounts: amounts['tokensAmounts'], tokens })    
+            }
+            setLockedPositionStatuses(lockStatuses);
+            setLockedPositionRewards(lockRewards);
+        }
+        // calculate APY
+        setApy(await calculateApy(farmSetup, rewardTokenAddress, rewardTokenDecimals, tokens));
+        console.log(`finished loading data for setup ${setupIndex}..`);
+    }
 
     const calculateApy = async (setup, rewardTokenAddress, rewardTokenDecimals, setupTokens) => {
         if (parseInt(setup.totalSupply) === 0) return -1;
@@ -226,7 +280,7 @@ const SetupComponent = (props) => {
             const ethPrice = await axios.get(dfoCore.getContextElement("coingeckoEthereumPriceURL"));
             const searchTokens = `${rewardTokenAddress},${setupTokens.map((token) => (token && token.address) ? `${token.address},` : '')}`.slice(0, -1);
             const { data } = await axios.get(dfoCore.getContextElement("coingeckoCoinPriceURL") + searchTokens);
-            const rewardTokenPriceUsd = data[rewardTokenAddress.toLowerCase()].usd;
+            const rewardTokenPriceUsd = rewardTokenAddress !== dfoCore.voidEthereumAddress ? data[rewardTokenAddress.toLowerCase()].usd : ethPrice;
             let den = 0;
             await Promise.all(setupTokens.map(async (token) => {
                 if (token && token.address) {
@@ -255,176 +309,10 @@ const SetupComponent = (props) => {
         return inv[duration];
     }
 
-    const getSetupMetadata = async () => {
-        setLoading(true);
-        try {
-            let position = null;
-            let lockPositions = [];
-            let positionIds = [];
-            const { '0': farmSetup, '1': farmSetupInfo } = await lmContract.methods.setup(setupIndex).call();
-            const farmTokenCollectionAddress = await lmContract.methods._farmTokenCollection().call();
-            const farmTokenCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), farmTokenCollectionAddress);
-            const ammContract = await dfoCore.getContract(dfoCore.getContextElement('AMMABI'), farmSetupInfo.ammPlugin);
-            setAmmContract(ammContract);
-            if (!farmSetup.free) {
-                // retrieve farm token data
-                const objectId = farmSetup.objectId;
-                if (objectId !== "0") {
-                    const ftBalance = await farmTokenCollection.methods.balanceOf(props.dfoCore.address, objectId).call();
-                    const ftSymbol = await farmTokenCollection.methods.symbol(objectId).call();
-                    const ftDecimals = await farmTokenCollection.methods.decimals(objectId).call();
-                    const ftERC20Address = await farmTokenCollection.methods.asInteroperable(objectId).call();
-                    setFarmTokenERC20Address(ftERC20Address);
-                    setFarmTokenSymbol(ftSymbol);
-                    setFarmTokenBalance(ftBalance);
-                    setFarmTokenDecimals(ftDecimals);
-                    const ftRes = await ammContract.methods.byLiquidityPoolAmount(farmSetupInfo.liquidityPoolTokenAddress, ftBalance).call();
-                    setFarmTokenRes(ftRes['tokensAmounts']);
-                } else {
-                    setFarmTokenBalance("0");
-                }
-            }
-            setLockedEstimatedReward(0);
-            setUpdatedRenewTimes(farmSetupInfo.renewTimes);
-            setUpdatedRewardPerBlock(farmSetup.rewardPerBlock);
-            setSetup(farmSetup);
-            setSetupInfo(farmSetupInfo);
-            const events = await window.getLogs({
-                address: lmContract.options.address,
-                topics: [
-                    window.web3.utils.sha3("Transfer(uint256,address,address)")
-                ],
-                fromBlock: props.dfoCore.getContextElement('deploySearchStart'),
-                toBlock: 'latest',
-            });
-            for (let i = 0; i < events.length; i++) {
-                const event = events[i];
-                const { topics } = event;
-                var positionId = props.dfoCore.web3.eth.abi.decodeParameter("uint256", topics[1]);
-                const pos = await lmContract.methods.position(positionId).call();
-                if (dfoCore.isValidPosition(pos) && parseInt(pos.setupIndex) === parseInt(setupIndex)) {
-                    if (farmSetupInfo.free) {
-                        position = { ...pos, positionId };
-                    } else if (!positionIds.includes(positionId)) {
-                        lockPositions.push({ ...pos, positionId });
-                        positionIds.push(positionId);
-                    }
-                }
-            }
-            setCurrentPosition(position);
-            setLockedPositions(lockPositions);
-            if (!position) {
-                setOpen(false);
-                setWithdrawOpen(false);
-            }
-            const extensionAddress = await lmContract.methods._extension().call();
-            console.log(`extension address ${extensionAddress}`);
-            const extContract = await dfoCore.getContract(dfoCore.getContextElement("FarmExtensionABI"), extensionAddress);
-            setExtensionContract(extContract);
-            const rewardTokenAddress = await lmContract.methods._rewardTokenAddress().call();
-            const rewardToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), rewardTokenAddress);
-            const rewardTokenSymbol = await rewardToken.methods.symbol().call();
-            const rewardTokenDecimals = await rewardToken.methods.decimals().call();
-            const rewardTokenApproval = await rewardToken.methods.allowance(dfoCore.address, lmContract.options.address).call();
-            const rewardTokenBalance = await rewardToken.methods.balanceOf(dfoCore.address).call();
-            setRewardTokenInfo({ contract: rewardToken, symbol: rewardTokenSymbol, decimals: rewardTokenDecimals, balance: rewardTokenBalance, address: rewardTokenAddress, approval: parseInt(rewardTokenApproval) !== 0 && parseInt(rewardTokenApproval) >= parseInt(rewardTokenBalance)  });
-
-            const bNumber = await dfoCore.getBlockNumber();
-            setBlockNumber(bNumber);
-
-            const lpToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), farmSetupInfo.liquidityPoolTokenAddress);
-            const lpTokenSymbol = await lpToken.methods.symbol().call();
-            const lpTokenDecimals = await lpToken.methods.decimals().call();
-            const lpTokenBalance = await lpToken.methods.balanceOf(dfoCore.address).call();
-            const lpTokenApproval = await lpToken.methods.allowance(dfoCore.address, lmContract.options.address).call();
-            setLpTokenInfo({ contract: lpToken, symbol: lpTokenSymbol, decimals: lpTokenDecimals, balance: lpTokenBalance, approval: parseInt(lpTokenApproval) !== 0 && parseInt(lpTokenApproval) >= parseInt(lpTokenBalance) });
-
-            const activateSetup = parseInt(farmSetupInfo.renewTimes) > 0 && !farmSetup.active && parseInt(farmSetupInfo.lastSetupIndex) === parseInt(setupIndex);
-            setCanActivateSetup(activateSetup);
-
-            const tokenAddress = farmSetupInfo.liquidityPoolTokenAddress;
-            let res;
-            if (farmSetupInfo.free) {
-                res = await ammContract.methods.byLiquidityPoolAmount(tokenAddress, farmSetup.totalSupply).call();
-            } else {
-                res = await ammContract.methods.byTokenAmount(tokenAddress, farmSetupInfo.mainTokenAddress, farmSetup.totalSupply).call();
-                res = await ammContract.methods.byLiquidityPoolAmount(tokenAddress, res.liquidityPoolAmount).call();
-            }
-            let mtInfo = null;
-            const tokens = [];
-            const approvals = [];
-            const contracts = [];
-            for (let i = 0; i < res.liquidityPoolTokens.length; i++) {
-                const address = res.liquidityPoolTokens[i];
-                const token = !isWeth(farmSetupInfo, address) ? await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), address) : null;
-                const symbol = token ? await token.methods.symbol().call() : 'ETH';
-                const decimals = token ? await token.methods.decimals().call() : 18;
-                const balance = token ? await token.methods.balanceOf(dfoCore.address).call() : await dfoCore.web3.eth.getBalance(dfoCore.address);
-                const approval = token ? await token.methods.allowance(dfoCore.address, lmContract.options.address).call() : true;
-                approvals.push(parseInt(approval) !== 0 && (parseInt(approval) >= parseInt(balance) || !token));
-                tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: res.tokensAmounts[i], decimals, address: token ? address : dfoCore.voidEthereumAddress, symbol });
-                contracts.push(token);
-                if (address.toLowerCase() === farmSetupInfo.mainTokenAddress.toLowerCase()) {
-                    mtInfo = { approval: parseInt(approval) !== 0 && (parseInt(approval) >= parseInt(balance) || !token), decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol };
-                    setMainTokenInfo(mtInfo)
-                }
-            }
-            const info = await ammContract.methods.info().call();
-            setAMM({ name: info['0'], version: info['1'] });
-            setSetupTokens(tokens);
-            setTokensContracts(contracts);
-            setLpTokenAmount(0);
-            setTokensAmount(new Array(tokens.length).fill(0));
-            setTokensApprovals(approvals);
-            // retrieve the manage data using the position
-            if (position) {
-                const free = position['free'];
-                const creationBlock = position['creationBlock'];
-                const positionSetupIndex = position['setupIndex'];
-                const liquidityPoolTokenAmount = position['liquidityPoolTokenAmount'];
-                const mainTokenAmount = position['mainTokenAmount'];
-                const amounts = await ammContract.methods.byLiquidityPoolAmount(farmSetupInfo.liquidityPoolTokenAddress, liquidityPoolTokenAmount).call();
-                const availableReward = await lmContract.methods.calculateFreeFarmingReward(position.positionId, true).call();
-                let freeReward = parseInt(availableReward);
-                if (blockNumber < parseInt(farmSetup.endBlock)) {
-                    freeReward += (parseInt(farmSetup.rewardPerBlock) * (parseInt(position.liquidityPoolTokenAmount) / parseInt(farmSetup.totalSupply)))
-                }
-                freeReward = freeReward.toString().split('.')[0];
-                setFreeAvailableRewards(freeReward);
-                setManageStatus({ free, creationBlock, positionSetupIndex, liquidityPoolAmount: liquidityPoolTokenAmount, mainTokenAmount, tokensAmounts: amounts['tokensAmounts'], tokens })
-            } else if (lockPositions.length > 0) {
-                const lockStatuses = [];
-                const lockRewards = [];
-                for (let j = 0; j < lockPositions.length; j++) {
-                    const lockedPosition = lockPositions[j];
-                    const free = lockedPosition['free'];
-                    const creationBlock = lockedPosition['creationBlock'];
-                    const positionSetupIndex = lockedPosition['setupIndex'];
-                    const liquidityPoolTokenAmount = lockedPosition['liquidityPoolTokenAmount'];
-                    const mainTokenAmount = lockedPosition['mainTokenAmount'];
-                    const amounts = await ammContract.methods.byLiquidityPoolAmount(farmSetupInfo.liquidityPoolTokenAddress, liquidityPoolTokenAmount).call();
-                    const availableReward = await lmContract.methods.calculateLockedFarmingReward(0, 0, true, lockedPosition.positionId).call();
-                    const lockedReward = parseInt(availableReward.reward) + (parseInt(farmSetup.endBlock) <= parseInt(blockNumber) ? 0 : parseInt(lockedPosition.lockedRewardPerBlock));
-                    const partiallyRedeemed = await lmContract.methods._partiallyRedeemed(lockedPosition.positionId).call();
-                    lockRewards.push(lockedReward);
-                    lockStatuses.push({ free, creationBlock, positionSetupIndex, partiallyRedeemed, liquidityPoolAmount: liquidityPoolTokenAmount, mainTokenAmount, tokensAmounts: amounts['tokensAmounts'], tokens })    
-                }
-                setLockedPositionStatuses(lockStatuses);
-                setLockedPositionRewards(lockRewards);
-            }
-            // calculate APY
-            setApy(await calculateApy(farmSetup, rewardTokenAddress, rewardTokenDecimals, tokens));
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    }
-
     const activateSetup = async () => {
+        if (!setupReady) return;
         setActivateLoading(true);
         try {
-            // const expectedBalance = parseInt(setup.rewardPerBlock) * parseInt(setup.blockDuration);
             const gas = await lmContract.methods.activateSetup(setupIndex).estimateGas({ from: props.dfoCore.address });
             const result = await lmContract.methods.activateSetup(setupIndex).send({ from: props.dfoCore.address, gas });
             props.addTransaction(result);
@@ -462,7 +350,6 @@ const SetupComponent = (props) => {
         var { liquidityPoolAmount } = result;
         //result = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, liquidityPoolAmount).call();
         var ams = result.tokensAmounts;
-        console.log(ams);
         setLpTokenAmount(props.dfoCore.toDecimals(liquidityPoolAmount, lpTokenInfo.decimals))
         setTokensAmount(ams.map((old, i) => ams[i]));
         if (!setupInfo.free) {
@@ -985,7 +872,7 @@ const SetupComponent = (props) => {
     return (
         <div className={className}>
             <div className="FarmSetupMain">
-                <h5><b>{setupInfo.free ? "Free Farming" : "Locked Farming"} {(!setup.active && canActivateSetup) ? <span className="text-secondary">(new)</span> : (!setup.active) ? <span className="text-danger">(inactive)</span> : <></> } {(parseInt(setup.endBlock) <= blockNumber && parseInt(setup.endBlock) !== 0) && <span>(ended)</span>}</b> <a>{AMM.name}</a></h5>
+                <h5><b>{setupInfo.free ? "Free Farming" : "Locked Farming"} {(!setup.active && canActivateSetup) ? <span className="text-secondary">{setupReady ? "(new)" : "(soon)" }</span> : (!setup.active) ? <span className="text-danger">(inactive)</span> : <></> } {(parseInt(setup.endBlock) <= blockNumber && parseInt(setup.endBlock) !== 0) && <span>(ended)</span>}</b> <a>{AMM.name}</a></h5>
                 <aside>
                     { parseInt(setup.endBlock) > 0 ? <p><b>block end</b>: <a className="BLKEMD" target="_blank" href={`https://etherscan.io/block/${setup.endBlock}`}>{setup.endBlock}</a></p> : <p><b>Duration</b>: {getPeriodFromDuration(setupInfo.blockDuration)}</p> }
                     {!setupInfo.free && <> 
@@ -1023,9 +910,18 @@ const SetupComponent = (props) => {
                         {
                             canActivateSetup && <>
                                 {
-                                    activateLoading ? <a className="Web3ActionBTN" disabled={activateLoading}>
-                                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                    </a> : <a className="Web3ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
+                                    setupReady && <>
+                                        {
+                                            activateLoading ? <a className="Web3ActionBTN" disabled={activateLoading}>
+                                                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                            </a> : <a className="Web3ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
+                                        }
+                                    </>
+                                }
+                                {
+                                    !setupReady && <>
+                                        <a className="web2ActionBTN">Not ready to be activated, come back at another time</a>
+                                    </>
                                 }
                             </>
                         }
@@ -1144,12 +1040,21 @@ const SetupComponent = (props) => {
                             {
                                 canActivateSetup && <>
                                     {
-                                        activateLoading ? <a className="Web3ActionBTN" disabled={activateLoading}>
-                                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                        </a> : <a className="Web3ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
+                                        setupReady && <>
+                                            {
+                                                activateLoading ? <a className="Web3ActionBTN" disabled={activateLoading}>
+                                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                </a> : <a className="Web3ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
+                                            }
+                                        </>
+                                    }
+                                    {
+                                        !setupReady && <>
+                                            <a className="web2ActionBTN">Not ready to be activated, come back at another time</a>
+                                        </>
                                     }
                                 </>
-                            } 
+                            }
                             {
                                 (hostedBy && extensionContract && !edit && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex)) &&
                                 <a className="web2ActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(true) }}>Edit</a>
