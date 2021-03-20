@@ -73,7 +73,6 @@ const ExploreFarmingContract = (props) => {
                 }
             }
             const sortedRes = res.sort((a, b) => b.active - a.active);
-            console.log(sortedRes);
             setFarmingSetups(sortedRes);
     
             const metadata = {
