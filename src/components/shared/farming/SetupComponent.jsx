@@ -114,7 +114,10 @@ const SetupComponent = (props) => {
             await loadData(farmSetup, farmSetupInfo, true);
             if (!intervalId.current) {
                 intervalId.current = setInterval(async () => {
-                    await loadData(farmSetup, farmSetupInfo);
+                    const { '0': s, '1': si } = await lmContract.methods.setup(setupIndex).call();
+                    setSetup(s);
+                    setSetupInfo(si);
+                    await loadData(s, si);
                 }, 5000);
             }
         } catch (error) {
@@ -302,11 +305,12 @@ const SetupComponent = (props) => {
             const ethPrice = await axios.get(dfoCore.getContextElement("coingeckoEthereumPriceURL"));
             const searchTokens = `${rewardTokenAddress},${setupTokens.map((token) => (token && token.address) ? `${token.address},` : '')}`.slice(0, -1);
             const { data } = await axios.get(dfoCore.getContextElement("coingeckoCoinPriceURL") + searchTokens);
-            const rewardTokenPriceUsd = rewardTokenAddress !== dfoCore.voidEthereumAddress ? data[rewardTokenAddress.toLowerCase()].usd : ethPrice;
+            const wusdAddress = await dfoCore.getContextElement("WUSDAddress");
+            const rewardTokenPriceUsd = rewardTokenAddress !== dfoCore.voidEthereumAddress ? rewardTokenAddress.toLowerCase() === wusdAddress.toLowerCase() ? 1 : data[rewardTokenAddress.toLowerCase()].usd : ethPrice;
             let den = 0;
             await Promise.all(setupTokens.map(async (token) => {
                 if (token && token.address) {
-                    const tokenPrice = token.address !== dfoCore.voidEthereumAddress ? data[token.address.toLowerCase()].usd : ethPrice.data[0].current_price;
+                    const tokenPrice = token.address !== dfoCore.voidEthereumAddress ? token.address.toLowerCase() === wusdAddress.toLowerCase() ? 1 : data[token.address.toLowerCase()].usd : ethPrice.data[0].current_price;
                     den += (tokenPrice * token.liquidity * 10**(18 - token.decimals));
                 }
             }))
@@ -383,9 +387,11 @@ const SetupComponent = (props) => {
                 setLockedEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(parseInt(reward.relativeRewardPerBlock) * (parseInt(setup.endBlock) - blockNumber)), rewardTokenInfo.decimals));
             }
         } else {
-            const val = parseInt(liquidityPoolAmount) * 6400 * parseInt(setup.rewardPerBlock) / (parseInt(setup.totalSupply) + parseInt(liquidityPoolAmount));
-            if (!isNaN(val)) {
-                setFreeEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(val), rewardTokenInfo.decimals))
+            if (parseInt(setup.totalSupply) + parseInt(liquidityPoolAmount) > 0) {
+                const val = parseInt(liquidityPoolAmount) * 6400 * parseInt(setup.rewardPerBlock) / (parseInt(setup.totalSupply) + parseInt(liquidityPoolAmount));
+                if (!isNaN(val)) {
+                    setFreeEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(val), rewardTokenInfo.decimals))
+                }
             }
         }
     }
@@ -449,7 +455,6 @@ const SetupComponent = (props) => {
             // const res = await ammContract.methods.byTokensAmount(setupInfo.liquidityPoolTokenAddress,  , stake.amount).call();
             stake.amount = stake.amountIsLiquidityPool ? lpAmount : localTokensAmounts[mainTokenIndex];
             ethTokenValue = localTokensAmounts[ethTokenIndex];
-
             var value = setupInfo.involvingETH && !stake.amountIsLiquidityPool ? ethTokenValue : 0;
 
             if(prestoData) {
