@@ -703,7 +703,7 @@ const SetupComponent = (props) => {
             var token0EthLiquidityPoolAddress = bestLP.firstTokenEthLiquidityPoolAddress;
             var token1EthLiquidityPoolAddress = bestLP.secondTokenEthLiquidityPoolAddress;
 
-            if (token0.options.address === ammEthereumAddress || !lpAmount) {
+            if (token0.options.address === ammEthereumAddress || !lpAmount || (bestLP.updatedSecondTokenAmount > bestLP.updatedFirstTokenAmount)) {
                 bestLP = await calculateBestLP(token1.options.address, token0.options.address, token1decimals, token0decimals);
 
                 lpAmount = bestLP.lpAmount;
