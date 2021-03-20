@@ -329,10 +329,6 @@ const SetupComponent = (props) => {
         setTokensApprovals(tokensApprovals.map((val, i) => i === index ? true : val));
     }
 
-    const isValidPosition = (position) => {
-        return position.uniqueOwner !== dfoCore.voidEthereumAddress && position.creationBlock !== '0';
-    }
-
     const onUpdateTokenAmount = async (value, index) => {
         if (!value) {
             setLockedEstimatedReward(0);
@@ -343,12 +339,13 @@ const SetupComponent = (props) => {
         var ethereumAddress = (await ammContract.methods.data().call())[0];
         var tokenAddress = setupTokens[index].address;
         tokenAddress = tokenAddress === window.voidEthereumAddress ? ethereumAddress : tokenAddress;
-        var result = await ammContract.methods.byTokenAmount(setupInfo.liquidityPoolTokenAddress, tokenAddress, props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(setupTokens[index].decimals)))).call();
+        const fullValue = props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(setupTokens[index].decimals)));
+        var result = await ammContract.methods.byTokenAmount(setupInfo.liquidityPoolTokenAddress, tokenAddress, fullValue).call();
         var { liquidityPoolAmount } = result;
-        //result = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, liquidityPoolAmount).call();
+        result = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, liquidityPoolAmount).call();
         var ams = result.tokensAmounts;
-        setLpTokenAmount(props.dfoCore.toDecimals(liquidityPoolAmount, lpTokenInfo.decimals))
-        setTokensAmount(ams.map((old, i) => ams[i]));
+        setLpTokenAmount(liquidityPoolAmount)
+        setTokensAmount(ams.map((old, i) => index === i ? fullValue : ams[i]));
         if (!setupInfo.free) {
             let mainTokenIndex = 0;
             setupTokens.forEach((t, i) => {
@@ -375,10 +372,11 @@ const SetupComponent = (props) => {
             // setLpTokenAmount("0");
             return;
         }
-        const result = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(lpTokenInfo.decimals)))).call();
+        const fullValue = props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(lpTokenInfo.decimals)));
+        const result = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, fullValue).call();
         const ams = result.tokensAmounts;
-        setLpTokenAmount(value)
-        setTokensAmount(tokensAmounts.map((old, i) => ams[i]));
+        setLpTokenAmount(result.liquidityPoolAmount)
+        setTokensAmount(tokensAmounts.map((old, i) => i === index ? fullValue : ams[i]));
         if (!setupInfo.free) {
             let mainTokenIndex = 0;
             setupTokens.forEach((t, i) => {
@@ -419,16 +417,16 @@ const SetupComponent = (props) => {
                     mainTokenIndex = i;
                 }
             }))
-            let lpAmount = dfoCore.toFixed(dfoCore.fromDecimals(lpTokenAmount.toString()));
+            let lpAmount = lpTokenAmount.toString();
             const res = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, lpAmount).call();
-            var localTokensAmounts = stake.amountIsLiquidityPool ? res.tokensAmounts : tokensAmounts;
+
+            var localTokensAmounts = res.tokensAmounts;
             // const res = await ammContract.methods.byTokensAmount(setupInfo.liquidityPoolTokenAddress,  , stake.amount).call();
             stake.amount = stake.amountIsLiquidityPool ? lpAmount : localTokensAmounts[mainTokenIndex];
             ethTokenValue = localTokensAmounts[ethTokenIndex];
 
             var value = setupInfo.involvingETH && !stake.amountIsLiquidityPool ? ethTokenValue : 0;
 
-            console.log(stake, value);
             if(prestoData) {
                 var sendingOptions = {from : dfoCore.address, value : prestoData.ethValue, gasLimit : 9999999};
                 sendingOptions.gasLimit = await prestoData.transaction.estimateGas(sendingOptions);
@@ -600,6 +598,12 @@ const SetupComponent = (props) => {
         setEthBalanceOf(ethBalance);
         setPrestoData(null);
         setEthAmount(0);
+        if (e.target.value === 'add-eth') {
+            setLpTokenAmount(0);
+            setTokensAmount(new Array(setupTokens.length).fill(0));
+            setFreeEstimatedReward("0");
+            setLockedEstimatedReward("0");
+        }
     }
 
     const onOutputTypeChange = e => {
@@ -722,6 +726,16 @@ const SetupComponent = (props) => {
                 amount : mainTokenIndex === 0 ? firstTokenAmount : secondTokenAmount,
                 amountIsLiquidityPool : false,
                 positionOwner : window.isEthereumAddress(uniqueOwner) ? uniqueOwner : props.dfoCore.address
+            }
+
+            if (!setupInfo.free) {
+                const reward = await lmContract.methods.calculateLockedFarmingReward(setupIndex, mainTokenIndex === 0 ? firstTokenAmount : secondTokenAmount, false, 0).call();
+                setLockedEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(parseInt(reward.relativeRewardPerBlock) * (parseInt(setup.endBlock) - blockNumber)), rewardTokenInfo.decimals));
+            } else {
+                const val = parseInt(lpAmount) * 6400 * parseInt(setup.rewardPerBlock) / (parseInt(setup.totalSupply) + parseInt(lpAmount));
+                if (!isNaN(val)) {
+                    setFreeEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(val), rewardTokenInfo.decimals))
+                }
             }
 
             setPrestoData({
@@ -892,7 +906,7 @@ const SetupComponent = (props) => {
                 </div>
             </> : inputType === 'add-lp' ? <>
                         <div className="InputTokenRegular">
-                            <Input showMax={true} address={lpTokenInfo.contract.options.address} value={lpTokenAmount} balance={window.fromDecimals(lpTokenInfo.balance, lpTokenInfo.decimals, true)} min={0} onChange={(e) => onUpdateLpTokenAmount(e.target.value)} showCoin={true} showBalance={true} name={lpTokenInfo.symbol} />
+                            <Input showMax={true} address={lpTokenInfo.contract.options.address} value={window.fromDecimals(lpTokenAmount, lpTokenInfo.decimals, true)} balance={window.fromDecimals(lpTokenInfo.balance, lpTokenInfo.decimals, true)} min={0} onChange={(e) => onUpdateLpTokenAmount(e.target.value)} showCoin={true} showBalance={true} name={lpTokenInfo.symbol} />
                         </div>
                 {
                     parseFloat(lpTokenAmount) > 0 && <div className="DiffWallet">
@@ -974,7 +988,7 @@ const SetupComponent = (props) => {
              }
              {
                  (setupInfo.free && rewardTokenInfo) && <div className="DiffWallet">
-                         <p className="BreefRecap">Estimated reward per day: <br></br><b>{window.formatMoney(freeEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol} {window.formatMoney(freeEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</b></p>
+                         <p className="BreefRecap">Estimated reward per day: <br></br><b>{window.formatMoney(freeEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</b></p>
                  </div>
              }
              <div className="Web3BTNs">
