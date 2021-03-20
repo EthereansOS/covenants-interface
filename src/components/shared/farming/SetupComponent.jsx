@@ -65,6 +65,9 @@ const SetupComponent = (props) => {
     const [ethAmount, setEthAmount] = useState(0);
     const [ethBalanceOf, setEthBalanceOf] = useState("0");
     const intervalId = useRef(null);
+    const [prestoData, setPrestoData] = useState(null);
+
+    var farmingPresto = new props.dfoCore.web3.eth.Contract(props.dfoCore.getContextElement("FarmingPrestoABI"), props.dfoCore.getContextElement("farmingPrestoAddress"));
 
     useEffect(() => {
         getSetupMetadata();
@@ -72,6 +75,10 @@ const SetupComponent = (props) => {
             clearInterval(intervalId.current)
         }
     }, []);
+
+    useEffect(() => {
+        updateEthAmount(ethAmount);
+    }, [uniqueOwner]);
 
     const getSetupMetadata = async () => {
         setLoading(true);
@@ -422,22 +429,30 @@ const SetupComponent = (props) => {
             var value = setupInfo.involvingETH && !stake.amountIsLiquidityPool ? ethTokenValue : 0;
 
             console.log(stake, value);
-
-            if (setupInfo.free) {
-                if (!currentPosition || openPositionForAnotherWallet) {
+            if(prestoData) {
+                var sendingOptions = {from : dfoCore.address, value : prestoData.ethValue, gasLimit : 9999999};
+                sendingOptions.gasLimit = await prestoData.transaction.estimateGas(sendingOptions);
+                sendingOptions.gasLimit = parseInt(sendingOptions.gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1));
+                delete sendingOptions.gas;
+                var result = await prestoData.transaction.send(sendingOptions)
+                props.addTransaction(result);
+            } else {
+                if (setupInfo.free) {
+                    if (!currentPosition || openPositionForAnotherWallet) {
+                        const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value});
+                        const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value});
+                        props.addTransaction(result);
+                    } else if (currentPosition) {
+                        const gasLimit = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).estimateGas({ from: dfoCore.address, value});
+                        const result = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).send({ from: dfoCore.address, gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value});
+                        props.addTransaction(result);
+                    }
+                } else  {
+                    // opening position
                     const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value});
                     const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value});
                     props.addTransaction(result);
-                } else if (currentPosition) {
-                    const gasLimit = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).estimateGas({ from: dfoCore.address, value});
-                    const result = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).send({ from: dfoCore.address, gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value});
-                    props.addTransaction(result);
                 }
-            } else  {
-                // opening position
-                const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value});
-                const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value});
-                props.addTransaction(result);
             }
             await getSetupMetadata();
         } catch (error) {
@@ -583,6 +598,8 @@ const SetupComponent = (props) => {
         setInputType(e.target.value);
         const ethBalance = await props.dfoCore.web3.eth.getBalance(props.dfoCore.address);
         setEthBalanceOf(ethBalance);
+        setPrestoData(null);
+        setEthAmount(0);
     }
 
     const onOutputTypeChange = e => {
@@ -591,10 +608,139 @@ const SetupComponent = (props) => {
 
     const updateEthAmount = async amount => {
         try {
+            setPrestoData(null);
             setEthAmount(amount || "0");
-            if (!amount) {
+            if (!parseFloat(amount)) {
                 return;
             };
+            var value = window.toDecimals(window.numberToString(amount), 18);
+
+            var halfValue = props.dfoCore.web3.utils.toBN(value).div(props.dfoCore.web3.utils.toBN(2)).toString();
+
+            var ammEthereumAddress = (await ammContract.methods.data().call())[0];
+
+            var info = setupInfo;
+
+            var liquidityPool = info.liquidityPoolTokenAddress;
+
+            var tokens = await ammContract.methods.byLiquidityPool(liquidityPool).call();
+            var token0 = new window.web3.eth.Contract(props.dfoCore.getContextElement("ERC20ABI"), tokens[2][0]);
+            var token1 = new window.web3.eth.Contract(props.dfoCore.getContextElement("ERC20ABI"), tokens[2][1]);
+            var token0decimals = tokens[2][0] === window.voidEthereumAddress ? 18 : await token0.methods.decimals().call();
+            var token1decimals = tokens[2][1] === window.voidEthereumAddress ? 18 : await token1.methods.decimals().call();
+
+            var mainTokenIndex = tokens[2].indexOf(info.mainTokenAddress);
+
+            var amm = ammContract;
+
+            var ethereumAddress = (await amm.methods.data().call())[0];
+
+            async function calculateBestLP(firstToken, secondToken, firstDecimals, secondDecimals) {
+
+                var liquidityPoolAddress = (await amm.methods.byTokens([ethereumAddress, firstToken]).call())[2];
+
+                if (liquidityPoolAddress === window.voidEthereumAddress) {
+                    return {};
+                }
+
+                var firstTokenEthLiquidityPoolAddress = liquidityPoolAddress;
+                var token0Value = (await amm.methods.getSwapOutput(ethereumAddress, halfValue, [liquidityPoolAddress], [firstToken]).call())[1];
+
+                var token1Value = (await ammContract.methods.byTokenAmount(liquidityPool, firstToken, token0Value).call());
+                var lpAmount = token1Value[0];
+                token1Value = token1Value[1][token1Value[2].indexOf(secondToken)];
+
+                const updatedFirstTokenAmount = window.formatNumber(window.normalizeValue(token0Value, firstDecimals));
+                const updatedSecondTokenAmount = window.formatNumber(window.normalizeValue(token1Value, secondDecimals));
+
+                liquidityPoolAddress = (await amm.methods.byTokens([ethereumAddress, secondToken]).call())[2];
+                var secondTokenEthLiquidityPoolAddress = liquidityPoolAddress;
+                var token1ValueETH = "0";
+                if(secondTokenEthLiquidityPoolAddress !== window.voidEthereumAddress) {
+                    token1ValueETH = (await amm.methods.getSwapOutput(secondToken, token1Value, [liquidityPoolAddress], [ethereumAddress]).call())[1];
+                }
+
+                return { lpAmount, updatedFirstTokenAmount, updatedSecondTokenAmount, token0Value, token1Value, token1ValueETH, firstTokenEthLiquidityPoolAddress, secondTokenEthLiquidityPoolAddress };
+            }
+
+            var bestLP = await calculateBestLP(token0.options.address, token1.options.address, token0decimals, token1decimals);
+
+            var lpAmount = bestLP.lpAmount;
+            var firstTokenAmount = bestLP.token0Value;
+            var secondTokenAmount = bestLP.token1Value;
+            var firstTokenETH = halfValue;
+            var secondTokenETH = bestLP.token1ValueETH;
+            var token0EthLiquidityPoolAddress = bestLP.firstTokenEthLiquidityPoolAddress;
+            var token1EthLiquidityPoolAddress = bestLP.secondTokenEthLiquidityPoolAddress;
+
+            if (token0.options.address === ammEthereumAddress || !lpAmount) {
+                bestLP = await calculateBestLP(token1.options.address, token0.options.address, token1decimals, token0decimals);
+
+                lpAmount = bestLP.lpAmount;
+                firstTokenAmount = bestLP.token1Value;
+                secondTokenAmount = bestLP.token0Value;
+                firstTokenETH = bestLP.token1ValueETH;
+                secondTokenETH = halfValue;
+                token0EthLiquidityPoolAddress = bestLP.secondTokenEthLiquidityPoolAddress;
+                token1EthLiquidityPoolAddress = bestLP.firstTokenEthLiquidityPoolAddress;
+            }
+
+            var operations = [];
+
+            token0EthLiquidityPoolAddress !== window.voidEthereumAddress && operations.push({
+                inputTokenAddress : ethereumAddress,
+                inputTokenAmount : firstTokenETH,
+                ammPlugin : amm.options.address,
+                liquidityPoolAddresses : [token0EthLiquidityPoolAddress],
+                swapPath : [token0.options.address],
+                enterInETH : true,
+                exitInETH : false,
+                receivers : [farmingPresto.options.address],
+                receiversPercentages : []
+            });
+
+            token1EthLiquidityPoolAddress !== window.voidEthereumAddress && operations.push({
+                inputTokenAddress : ethereumAddress,
+                inputTokenAmount : secondTokenETH,
+                ammPlugin : amm.options.address,
+                liquidityPoolAddresses : [token1EthLiquidityPoolAddress],
+                swapPath : [token1.options.address],
+                enterInETH : true,
+                exitInETH : false,
+                receivers : [farmingPresto.options.address],
+                receiversPercentages : []
+            });
+
+            var ethValue = 0;
+            token0EthLiquidityPoolAddress !== window.voidEthereumAddress && (ethValue = props.dfoCore.web3.utils.toBN(ethValue).add(props.dfoCore.web3.utils.toBN(firstTokenETH)).toString());
+            token1EthLiquidityPoolAddress !== window.voidEthereumAddress && (ethValue = props.dfoCore.web3.utils.toBN(ethValue).add(props.dfoCore.web3.utils.toBN(secondTokenETH)).toString());
+            info.involvingETH && token0.options.address === ammEthereumAddress && (ethValue = props.dfoCore.web3.utils.toBN(ethValue).add(props.dfoCore.web3.utils.toBN(firstTokenAmount)).toString());
+            info.involvingETH && token1.options.address === ammEthereumAddress && (ethValue = props.dfoCore.web3.utils.toBN(ethValue).add(props.dfoCore.web3.utils.toBN(secondTokenAmount)).toString());
+
+            var request = {
+                setupIndex,
+                amount : mainTokenIndex === 0 ? firstTokenAmount : secondTokenAmount,
+                amountIsLiquidityPool : false,
+                positionOwner : window.isEthereumAddress(uniqueOwner) ? uniqueOwner : props.dfoCore.address
+            }
+
+            setPrestoData({
+                ethValue : value,
+                transaction : farmingPresto.methods.openPosition(
+                    props.dfoCore.getContextElement("prestoAddress"),
+                    operations,
+                    lmContract.options.address,
+                    request
+                ),
+                firstTokenAmount,
+                secondTokenAmount,
+                token0decimals,
+                token1decimals,
+                token0Address : token0.options.address,
+                token1Address : token1.options.address,
+                token0Symbol : info.involvingETH && token0.options.address === ammEthereumAddress ? "ETH" : await token0.methods.symbol().call(),
+                token1Symbol : info.involvingETH && token1.options.address === ammEthereumAddress ? "ETH" : await token1.methods.symbol().call()
+            });
         } catch (error) {
             console.error(error);
         }
@@ -683,13 +829,13 @@ const SetupComponent = (props) => {
                                         <span>From Pair</span>
                                         <input name={`inputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="add-pair" checked={inputType === "add-pair"} onChange={(e) => onInputTypeChange(e)} />
                                     </label>
-                                    {/*
+                                    {
                                         (!currentPosition || openPositionForAnotherWallet || !setupInfo.free) &&
                                             <label className="PrestoSelector">
                                                 <span>From ETH</span>
                                                 <input name={`inputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="add-eth" checked={inputType === "add-eth"} onChange={(e) => onInputTypeChange(e)} />
                                             </label>
-                                    */}
+                                    }
                                     <label className="PrestoSelector">
                                         <span>From LP Token</span>
                                         <input name={`inputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="add-lp" checked={inputType === "add-lp"} onChange={(e) => onInputTypeChange(e)} />
@@ -800,11 +946,15 @@ const SetupComponent = (props) => {
                 <div className="InputTokenRegular">
                     <Input showMax={true} address={dfoCore.voidEthereumAddress} value={ethAmount} balance={dfoCore.toDecimals(ethBalanceOf, 18)} min={0} onChange={e => updateEthAmount(e.target.value)} showCoin={true} showBalance={true} name={"ETH"} />
                 </div>
+                {
+                    prestoData && <div className="DiffWallet">
+                        <p className="BreefRecap">Opening position with: <br></br><b>{window.fromDecimals(prestoData.firstTokenAmount, prestoData.token0decimals)} {prestoData.token0Symbol}</b> and <b>{window.fromDecimals(prestoData.secondTokenAmount, prestoData.token1decimals)} {prestoData.token1Symbol}</b></p>
+                    </div>
+                }
                 <label className="OptionalThingsFarmers" htmlFor="openPosition2">
                     <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => {
                         if (!e.target.checked) {
                             setUniqueOwner("");
-                            setInputType("add-pair");
                         }
                         setOpenPositionForAnotherWallet(e.target.checked);
                     }} id="openPosition2" />

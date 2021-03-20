@@ -2071,6 +2071,10 @@ window.formatLink = function formatLink(link) {
     return (!link ? '' : link.indexOf('http') === -1 ? ('https://' + link) : link).split('https:').join('').split('http:').join('');
 };
 
+window.normalizeValue = function normalizeValue(amount, decimals) {
+    return window.web3.utils.toBN(amount).mul(window.web3.utils.toBN(10 ** (18 - decimals))).toString();
+}
+
 window.generateFunctionalityMetadataLink = async function generateFunctionalityMetadataLink(data) {
     var comments = {};
     try {
