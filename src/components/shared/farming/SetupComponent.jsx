@@ -279,7 +279,7 @@ const SetupComponent = (props) => {
                 }
             }))
             const num = (parseInt(setup.rewardPerBlock) * 10**(18 - rewardTokenDecimals) * yearlyBlocks) * rewardTokenPriceUsd;
-            return (num / (den * 100));
+            return (num * 100 / den);
         } catch (error) {
             return 0;
         }
