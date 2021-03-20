@@ -854,7 +854,6 @@ const SetupComponent = (props) => {
         );
     }
 
-
     return (
         <div className={className}>
             <div className="FarmSetupMain">
@@ -876,7 +875,7 @@ const SetupComponent = (props) => {
                             <p><b>Daily Rate</b>: {props.dfoCore.toDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals, 6)} {rewardTokenInfo.symbol} <span>(Shared)</span></p>
                             <p><b>Total Deposited</b>: {props.dfoCore.toDecimals(parseInt(setup.totalSupply), lpTokenInfo.decimals, 6)} LP ({setupTokens.map((token, index) => <span key={token.address}>{props.dfoCore.toDecimals(token.liquidity, token.decimals, 6)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span> )})</p>
                         </> : <>
-                                <p><b>Available to Farm</b>: {props.dfoCore.toDecimals(parseInt(setupInfo.maxStakeable) - parseInt(setup.totalSupply), mainTokenInfo.decimals)} {mainTokenInfo.symbol}</p>
+                                <p><b>Available to Farm</b>: {window.fromDecimals(parseInt(setupInfo.maxStakeable) - parseInt(setup.totalSupply), mainTokenInfo.decimals)} {mainTokenInfo.symbol}</p>
                                 <p><b>Rate</b>: {calculateLockedFixedValue()} {rewardTokenInfo.symbol} (fixed) (for every {mainTokenInfo.symbol} locked until the end block)</p>
                         </>
                     }
