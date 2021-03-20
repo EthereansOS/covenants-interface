@@ -20,9 +20,9 @@ const Explore = (props) => {
     const getDeployedContracts = async () => {
         setLoading(true);
         try {
-            await dfoCore.loadDeployedFarmingContracts();
+            const contracts = await dfoCore.loadDeployedFarmingContracts();
             const mappedContracts = await Promise.all(
-                dfoCore.deployedFarmingContracts.map(async (c) => { 
+                contracts.map(async (c) => { 
                     try {
                         const contract = await dfoCore.getContract(dfoCore.getContextElement('FarmMainABI'), c.address)
                         const rewardTokenAddress = await contract.methods._rewardTokenAddress().call();

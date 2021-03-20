@@ -295,7 +295,7 @@ export default class DFOCore {
     loadDeployedFarmingContracts = async(factoryAddress) => {
         try {
             if (!factoryAddress) factoryAddress = this.getContextElement("farmFactoryAddress");
-            this.deployedFarmingContracts = [];
+            const deployedFarmingContracts = [];
             const events = await this.web3.eth.getPastLogs({
                 address: factoryAddress,
                 topics: [
@@ -312,14 +312,15 @@ export default class DFOCore {
                     const extensionAddress = await contract.methods._extension().call();
                     const extensionContract = new this.web3.eth.Contract(this.getContextElement("FarmExtensionABI"), extensionAddress);
                     const { host } = await extensionContract.methods.data().call();
-                    this.deployedFarmingContracts.push({ address: farmMainAddress, sender: host });
+                    deployedFarmingContracts.push({ address: farmMainAddress, sender: host });
                 } catch (error) {
                     console.error(error);
                 }
             }
+            return deployedFarmingContracts;
         } catch (error) {
             console.error(error);
-            this.deployedFarmingContracts = [];
+            return [];
         }
     }
 
