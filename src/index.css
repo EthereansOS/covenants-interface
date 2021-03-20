@@ -341,7 +341,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
  .Tranferpos {display: inline-block; width: 80%; margin: 5px auto; text-align: center;}
  .Tranferpos input {margin: 5px auto;}
  .DiffWallet {width: 390px; display: block; margin: 10px auto; text-align: center;}
- .BetaAllert {width: 390px; display: block; margin: 20px auto; text-align: center; padding: 10px; color: #ffffff; background-color: #7474f7;}
+ .BetaAllert {width: 100%;display: block;margin: 20px auto;text-align: center;padding: 10px;color: #ffffff;background-color: #7474f7;border-radius: 12px;}
  .MetamaskAddButton {color: #7474f7; border-radius: 8px; border: 1px solid #7474f7;padding: 2px 8px;font-size: 12px; margin-left: 5px; text-decoration: none !important;}
  .MetamaskAddButton:hover {color: #7474f7; border-radius: 8px; border: 1px solid #7474f7;padding: 2px 8px;font-size: 12px; margin-left: 5px; text-decoration: none !important;}
  .UnlockInfo {font-size: 14px !important;width: 90% !important;display: block !important;}
