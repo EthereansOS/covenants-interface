@@ -236,7 +236,6 @@ const SetupComponent = (props) => {
             if (blockNumber < parseInt(farmSetup.endBlock)) {
                 freeReward += (parseInt(farmSetup.rewardPerBlock) * (parseInt(position.liquidityPoolTokenAmount) / parseInt(farmSetup.totalSupply)))
             }
-            console.log(`free reward is ${freeReward}`);
             freeReward = freeReward.toString().split('.')[0];
             setFreeAvailableRewards(freeReward);
             setManageStatus({ free, creationBlock, positionSetupIndex, liquidityPoolAmount: liquidityPoolTokenAmount, mainTokenAmount, tokensAmounts: amounts['tokensAmounts'], tokens })
