@@ -19,14 +19,16 @@ const FarmingComponent = (props) => {
                     </aside>
                 </div>
                 <div className="FarmThings">
-                        <p><b>Tot Rewards/Day</b>: {metadata.rewardPerBlock * 6400} {symbol}</p>
+                        <p><b>Daily Rate</b>: {metadata.rewardPerBlock * 6400} {symbol}</p>
                         {/*<p><b>APY</b>: 20%</p> If 0 (no coingecko Info) insert "Not Available"*/}
                         <p><b>Active Setups</b>: {metadata.freeSetups.length + metadata.lockedSetups.length} </p>
-                        {goBack && <>
-                            <p><b>Contract</b>: <a target="_blank" href={`https://etherscan.io/address/${metadata.contractAddress}`}>{metadata.farmAddress}</a></p>
-                            <p><b>Host</b>: <a target="_blank" href={`https://etherscan.io/address/${metadata.fullhost}`}>{metadata.host}</a></p>
-                            <p><b>Extension</b>: <a target="_blank" href={`https://etherscan.io/address/${metadata.fullExtension}`}>{metadata.extension}</a></p>
-                        </>}
+                        {goBack && 
+                            <div className="StatsLink">
+                                <a target="_blank" href={`https://etherscan.io/address/${metadata.contractAddress}`}>Contract</a>
+                                <a target="_blank" href={`https://etherscan.io/address/${metadata.fullhost}`}>Host</a>
+                                <a target="_blank" href={`https://etherscan.io/address/${metadata.fullExtension}`}>Extension</a>
+                            </div>
+                        }
                         {/*(Deprecated)<p><b>Setups</b>: {metadata.totalFreeSetups} free | {metadata.totalLockedSetups} locked</p>*/}
                         {/*<p><b>Host</b>: <a target="_blank" href={"https://etherscan.io/address/" + metadata.fullhost}>{metadata.host}</a></p>*/}
                 </div>
