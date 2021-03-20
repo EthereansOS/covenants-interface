@@ -651,8 +651,12 @@ const SetupComponent = (props) => {
             };
             var value = window.toDecimals(window.numberToString(amount), 18);
 
-            var halfValue = props.dfoCore.web3.utils.toBN(value).div(props.dfoCore.web3.utils.toBN(2)).toString();
+            var slippageAttenuation = 1 - (props.dfoCore.getContextElement("farmingSingleCoinSlippageAttenuation") * parseFloat(amount));
 
+            var halfValue = props.dfoCore.web3.utils.toBN(value).div(props.dfoCore.web3.utils.toBN(2)).toString();
+            console.log(halfValue);
+            halfValue = window.numberToString(parseInt(halfValue) * slippageAttenuation);
+            console.log(halfValue);
             var ammEthereumAddress = (await ammContract.methods.data().call())[0];
 
             var info = setupInfo;
