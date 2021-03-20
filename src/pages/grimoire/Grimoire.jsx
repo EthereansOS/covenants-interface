@@ -144,16 +144,11 @@ const Grimoire = () => {
                                 <p>4. $UniFi holders cannot change the X2 and X5 treasuries in any way, nor the rate at which they accumulate $WUSD. This prevents exploitative governance attacks on the DFO.</p>
                             </article>
                             <article>
-                                <h2>Farm $WUSD (coming Soon)</h2>
+                                <h2>Farm $WUSD</h2>
                                 <p>$WUSD is the first ever farmable stablecoin. </p>
                                 <p>It can be Free Farmed using Covenant farming contracts, and is rewarded exclusively in more $WUSD. This reward $WUSD comes from the otherwise locked FARM treasury, accumulated there via Credit Rebalancing. </p>
-                                <p>The total $WUSD rewards available are calculated based on the amount of $WUSD is in the FARM treasury after each fortnightly Credit Rebalancing, using this formula:</p>
-                                <p><b>(x/(y*1.5))/z</b></p>
-                                <p>x = $WUSD in the Farm treasury</p>
-                                <p>y = two weeks in blocks</p>
-                                <p>z = $WUSD staked in Free Farming setups.</p>
-                                <p>The calculated total is distributed to farmers in line with Free Farming rules.</p>
-                                <p>By distributing rewards based on a three week budget (y x 1.5), the FARM treasury ensures a surplus of $WUSD so that there’s always enough available to reward all $WUSD free farming.</p>
+                                <p>Once a month, the amount of $WUSD in the FARM treasury is recalculated via an operational contract (that can be executed by anyone for a reward). This entire amount is then distributed, over one month, on a block-to-block basis, to reward $WUSD farmers, all in accordance with standard free farming dynamics. After the month ends, the recalculation operation can be executed again; and the cycle repeats itself.</p>
+                                <p>All the nerdy info about this will be in Volume II of the Grimoire.</p>
                             </article>
                             <article>
                                 <h2>Integrating dApps With the $WUSD Protocol</h2>
@@ -166,8 +161,8 @@ const Grimoire = () => {
                                 </span>
                                 <header>
                                     <h2>Covenant Farming</h2>
-                                    <p>Ethereans love to farm. They do it all day and night—apes, penguins and wizards alike. But farming in DeFi is not always well-managed, and the hard-earned harvests of farmers are often at risk. </p>
-                                    <p>Covenant farming contracts allow us to farm safely and on our own terms. Anyone can host or participate in Free and Locked setups that pool tokens across multiple AMMs at once, and even free-locked hybrids using the Load Balancer.</p>
+                                    <p>Ethereans love to farm. They do it all day and night - apes, penguins and wizards alike. But farming in DeFi is not always well-managed, and the hard-earned harvests of farmers are often at risk.</p>
+                                    <p>Covenant farming contracts allow us to farm safely and on our own terms and across multiple AMMs simultaneously. Anyone can create, host or stake in Free and Locked setups without having to trust anyone.</p>
                                 </header>
                             </article>
                             <article>
@@ -177,12 +172,12 @@ const Grimoire = () => {
                                     <img src={info4}></img>
                                 </figure>
                                 <p><b>Hosting</b></p>
-                                <p>Any DAO, DFO, individual wallet or customized smart contract can host a farming setup. You can even set it up to have no host at all. This flexible design makes it easy to set rules for distributing rewards (from a treasury or via minting) while preventing hosts from touching farmer tokens or manipulating rewards for locked positions, securing farmers from exploitation.</p>
+                                <p>Any DAO, DFO, individual wallet or customized smart contract can host a farming setup. You can even set it up to have no host at all. This flexible design makes it easy to set rules for distributing rewards (from a treasury or via minting) while preventing hosts from touching farmer tokens or manipulating rewards for positions, securing farmers from exploitation.</p>
                                 <p><b>Rewards</b></p>
-                                <p>All setups reward farmers with one token. It is the centrepiece of the setup, around which the rest of the contract is customized. This simplifies managing the customizable extension for each setup’s reward method (Mint or Transfer) and makes it easy to calculate the total amount of the token being inflated via rewards. All anyone has to do is call the setup(s) using it as a reward and they will be provided with the relevant data.</p>
+                                <p>All setups reward farmers with one token. It is the centrepiece of the setup, around which the rest of the contract is customized. This simplifies managing the customizable extension for each setup’s reward method (Mint or Transfer) and makes it easy to calculate the total amount of the token being inflated via rewards; all anyone has to do is call the setup(s) using it as a reward and they will be provided with the relevant data.</p>
                                 <p><b>Setups</b></p>
-                                <p>Farming setups can be either Free or Locked, and can implement the inflation Load Balancer, which allows for dynamic Free-Locked systems (scroll down for more).</p>
-                                <p>All setups can be customized to automatically renew immediately after they end. However, this does not automatically renew old positions; new ones must be opened manually.</p>
+                                <p>Farming setups can be either Free or Locked. All setups can be customized to automatically renew after they end (however, positions cannot be, and must be reopened manually in the renewed setup if so desired).</p>
+                                <p>A core part of farming contracts is the treasury. It holds the reward tokens for all of the contract’s setups, and is programmed with the logic for how rewards will be distributed—i.e, via transfer or mint. Reward tokens must be sent to it before a setup can commence, securing farmers from any potential threats from poorly or maliciously coded custom extensions.</p>
                             </article>
                             <article>
                                 <h2>Free Farming</h2>
@@ -192,7 +187,7 @@ const Grimoire = () => {
                                 <p>Any amount of farmers can participate anytime in a free farming setup.</p>
                                 <p><b>Rewards</b></p>
                                 <p>Availability</p>
-                                <p>Provided by the host and locked in a treasury extension before the setup commences.</p>
+                                <p>Provided by the host and locked in a treasury extension before the setup can commence. This guarantees that farmers will receive their rewards securely and without having to trust that the host will send them.</p>
                                 <p>Distribution</p>
                                 <p>Block-to-block among active farmers pro rata to the % of total liquidity each provides.</p>
                                 <p>Redemption</p>
@@ -204,21 +199,19 @@ const Grimoire = () => {
                                 <h2>Locked Farming</h2>
                                 <p><b>Duration</b></p>
                                 <p>Fixed block-based periods. Farmers can stake a position anytime after the period commences, but cannot unstake until it ends—at least not without incurring penalties (see below).</p>
-                                <p>Setups can be customized to automatically renew immediately after the period ends. However, this does not automatically renew old positions. Farmers who wish to open new ones must do so manually.</p>
                                 <p><b>Position Availability</b></p>
                                 <p>A position can be opened only if enough rewards are still available.</p>
                                 <p><b>Rewards</b></p>
                                 <p>Availability</p>
                                 <p>Provided by the host and locked a treasury extension before the setup commences.</p>
                                 <p>Distribution</p>
-                                <p>Block-to-block. Farmers receive guaranteed rewards based on:</p>
+                                <p>Block-to-block from the treasury extension to farmers based on:</p>
                                 <p>1. How much liquidity they stake.</p>
                                 <p>2. How many blocks are left when the position is staked before the period ends.</p>
-                                <p>Before a setup can commence, all rewards must be sent by the host to the contract's treasury extension, which distributes them to farmers as per the fixed block-to-block terms.</p>
                                 <p>Redemption</p>
-                                <p>Redeemable as they become available from the block-to-block distribution. (but must be returned if a farmer unstakes prematurely).</p>
+                                <p>Redeemable as they become available from the block-to-block distribution. Must be returned if a farmer chooses to unstake their position prematurely.</p>
                                 <p><b>Hosts</b></p>
-                                <p>Can alter the rewards per block anytime, but this doesn’t affect previously opened positions, only ones opened after the change is made. Hosts may apply an additional penalty fee to premature withdrawals.</p>
+                                <p>Can alter the rewards per block or even disable a setup sanytime, but this does not affect previously opened positions whatsoever, only those opened afterward.</p>
                             </article>
                             <article>
                                 <h2>The Inflation Load Balancer</h2>
@@ -228,15 +221,13 @@ const Grimoire = () => {
                             <article>
                                 <h2>Farming Extensions</h2>
                                 <p>Covenant farming contracts are extendible. Extensions set the parameters for both basic and more advanced functionalities.</p>
-                                <p><b>Treasury</b></p>
-                                <p>This extension establishes a secure treasury for a setup’s reward token, and is programmed with the logic for how the token—i.e, via transfer or mint—will be distributed.</p>
                                 <p><b>Hosting</b></p>
                                 <p>This extension establishes a secure treasury for a setup’s reward token, and is programmed with the logic for how the token—i.e, via transfer or mint—will be distributed.</p>
-                                <p><b>Rewards</b></p>
-                                <p>Hosts can alter the rewards distributed per block for active Free and Locked setups, but this is only implemented with the next block. This does not affect already staked locked positions.</p>
-                                <p><b>Pinning</b></p>
+                                <p>Rewards</p>
+                                <p>Hosts can alter the rewards distributed per block for active Free setups and disable both Free and Locked setups anytime. Such alterations are implemented with the next block, but do not apply retroactively; no previously earned rewards are affected, nor are Locked positions in any respect. Any rewards not yet issued or no longer required are automatically returned to the contract’s treasury.</p>
+                                <p>Pinning</p>
                                 <p>Hosts can change for active setups which free contract is “pinned” to the Load Balancer as well as activate / deactivate the Load Balancer.</p>
-                                <p><b>Hosts</b></p>
+                                <p>Hosts</p>
                                 <p>Any dApp, DAO, DFO, individual wallet or customized smart contract can be a host. Setups can even have no host at all, in which case its rules are immutable.</p>
                                 <p>Guidelines on how to code farming extensions based on your needs can be found in the <b>the Grimoire Volume 2: Developer’s Documentation (Coming Soon).</b></p>
                             </article>
