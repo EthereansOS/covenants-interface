@@ -6,6 +6,7 @@ import { addTransaction } from '../../../store/actions';
 import axios from 'axios';
 import LockedPositionComponent from './LockedPositionComponent';
 import metamaskLogo from "../../../assets/images/metamask-fox.svg";
+import { useRef } from 'react';
 
 const SetupComponent = (props) => {
     let { className, dfoCore, setupIndex, lmContract, hostedBy } = props;
@@ -59,17 +60,16 @@ const SetupComponent = (props) => {
     const [openPositionForAnotherWallet, setOpenPositionForAnotherWallet] = useState(false);
     const [uniqueOwner, setUniqueOwner] = useState("");
     const [apy, setApy] = useState(0);
-    const [intervalId, setIntervalId] = useState(null);
     const [inputType, setInputType] = useState("add-pair");
     const [outputType, setOutputType] = useState("to-pair");
     const [ethAmount, setEthAmount] = useState(0);
     const [ethBalanceOf, setEthBalanceOf] = useState("0");
+    const intervalId = useRef(null);
 
     useEffect(() => {
         getSetupMetadata();
         return () => {
-            console.log('clearing interval.');
-            if (intervalId) clearInterval(intervalId);
+            clearInterval(intervalId.current)
         }
     }, []);
 
@@ -80,6 +80,11 @@ const SetupComponent = (props) => {
             setSetup(farmSetup);
             setSetupInfo(farmSetupInfo);
             await loadData(farmSetup, farmSetupInfo, true);
+            if (!intervalId.current) {
+                intervalId.current = setInterval(async () => {
+                    await loadData(farmSetup, farmSetupInfo);
+                }, 5000);
+            }
         } catch (error) {
             console.error(error);
         } finally {
@@ -87,21 +92,7 @@ const SetupComponent = (props) => {
         }
     }
 
-    useEffect(() => {
-        if (intervalId) clearInterval(intervalId);
-        if (setupTokens && setupTokens.length > 0) {
-            const interval = setInterval(async () => {
-                const { '0': farmSetup, '1': farmSetupInfo } = await lmContract.methods.setup(setupIndex).call();
-                setSetup(farmSetup);
-                setSetupInfo(farmSetupInfo);
-                await loadData(setup, setupInfo);
-            }, 5000);
-            setIntervalId(interval);
-        }
-    }, [tokensApprovals]);
-
     const loadData = async (farmSetup, farmSetupInfo, reset) => {
-        console.log(`start loading data for setup ${setupIndex}..`);
         let position = null;
         let lockPositions = [];
         let positionIds = [];
@@ -160,7 +151,7 @@ const SetupComponent = (props) => {
         }
         const extensionAddress = await lmContract.methods._extension().call();
         const extContract = await dfoCore.getContract(dfoCore.getContextElement("FarmExtensionABI"), extensionAddress);
-        setExtensionContract(extContract);
+        reset && setExtensionContract(extContract);
         const rewardTokenAddress = await lmContract.methods._rewardTokenAddress().call();
         const isEth = rewardTokenAddress === dfoCore.voidEthereumAddress;
         const rewardToken = !isEth ? await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), rewardTokenAddress) : null;
@@ -270,7 +261,6 @@ const SetupComponent = (props) => {
         }
         // calculate APY
         setApy(await calculateApy(farmSetup, rewardTokenAddress, rewardTokenDecimals, tokens));
-        console.log(`finished loading data for setup ${setupIndex}..`);
     }
 
     const calculateApy = async (setup, rewardTokenAddress, rewardTokenDecimals, setupTokens) => {
@@ -412,6 +402,8 @@ const SetupComponent = (props) => {
                 positionOwner: openPositionForAnotherWallet ? uniqueOwner : dfoCore.voidEthereumAddress,
             };
 
+            console.log(stake);
+
             let ethTokenIndex = null;
             let ethTokenValue = 0;
             let mainTokenIndex = 0;
@@ -422,36 +414,28 @@ const SetupComponent = (props) => {
                     mainTokenIndex = i;
                 }
             }))
-            console.log(ethTokenIndex);
             let lpAmount = dfoCore.toFixed(dfoCore.fromDecimals(lpTokenAmount.toString()));
             const res = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, lpAmount).call();
             var localTokensAmounts = stake.amountIsLiquidityPool ? res.tokensAmounts : tokensAmounts;
             // const res = await ammContract.methods.byTokensAmount(setupInfo.liquidityPoolTokenAddress,  , stake.amount).call();
             stake.amount = stake.amountIsLiquidityPool ? lpAmount : localTokensAmounts[mainTokenIndex];
             ethTokenValue = localTokensAmounts[ethTokenIndex];
-            console.log(ethTokenValue);
+
             var value = setupInfo.involvingETH && !stake.amountIsLiquidityPool ? ethTokenValue : 0;
-            console.log(value);
-            console.log(stake);
-            if ((currentPosition && isValidPosition(currentPosition)) || setupInfo.free) {
-                // adding liquidity to the setup
-                if (!currentPosition) {
+
+            if (setupInfo.free) {
+                if (!currentPosition || openPositionForAnotherWallet) {
                     const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value});
-                    console.log(gasLimit);
                     const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value});
                     props.addTransaction(result);
-
-                } else {
+                } else if (currentPosition) {
                     const gasLimit = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).estimateGas({ from: dfoCore.address, value});
                     const result = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).send({ from: dfoCore.address, gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value});
                     props.addTransaction(result);
                 }
-
-            } else if (!setupInfo.free) {
-
+            } else  {
                 // opening position
                 const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value});
-                console.log(gasLimit);
                 const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value});
                 props.addTransaction(result);
             }
@@ -699,10 +683,13 @@ const SetupComponent = (props) => {
                                         <span>From Pair</span>
                                         <input name={`inputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="add-pair" checked={inputType === "add-pair"} onChange={(e) => onInputTypeChange(e)} />
                                     </label>
-                                    <label className="PrestoSelector">
-                                        <span>From ETH</span>
-                                        <input name={`inputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="add-eth" checked={inputType === "add-eth"} onChange={(e) => onInputTypeChange(e)} />
-                                    </label>
+                                    {
+                                        (!currentPosition || openPositionForAnotherWallet || !setupInfo.free) &&
+                                            <label className="PrestoSelector">
+                                                <span>From ETH</span>
+                                                <input name={`inputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="add-eth" checked={inputType === "add-eth"} onChange={(e) => onInputTypeChange(e)} />
+                                            </label>
+                                    }
                                     <label className="PrestoSelector">
                                         <span>From LP Token</span>
                                         <input name={`inputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="add-lp" checked={inputType === "add-lp"} onChange={(e) => onInputTypeChange(e)} />
@@ -719,18 +706,15 @@ const SetupComponent = (props) => {
                         </div>
                     })
                 }
-                {
-                    (!setupInfo.free || !currentPosition) && 
-                    <label className="OptionalThingsFarmers" htmlFor="openPositionWallet1">
-                        <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => {
-                            if (!e.target.checked) {
-                                setUniqueOwner("");
-                            }
-                            setOpenPositionForAnotherWallet(e.target.checked);
-                        }} id="openPositionWallet1" />
-                        <p>External Owner</p>
-                    </label>
-                }
+                <label className="OptionalThingsFarmers" htmlFor="openPositionWallet1">
+                    <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => {
+                        if (!e.target.checked) {
+                            setUniqueOwner("");
+                        }
+                        setOpenPositionForAnotherWallet(e.target.checked);
+                    }} id="openPositionWallet1" />
+                    <p>External Owner</p>
+                </label>
                 {
                     openPositionForAnotherWallet && <div className="DiffWallet">
                             <input type="text" className="TextRegular" placeholder="Position owner address" value={uniqueOwner} onChange={(e) => setUniqueOwner(e.target.value)} id="uniqueOwner" />
@@ -773,17 +757,15 @@ const SetupComponent = (props) => {
                         </p>
                     </div>
                 }
-                {
-                    (!setupInfo.free || !currentPosition) && <label className="OptionalThingsFarmers" htmlFor="openPosition2">
-                        <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => {
-                            if (!e.target.checked) {
-                                setUniqueOwner("");
-                            }
-                            setOpenPositionForAnotherWallet(e.target.checked);
-                        }} id="openPosition2" />
-                         <p>External Owner</p>
-                    </label>
-                }
+                <label className="OptionalThingsFarmers" htmlFor="openPosition2">
+                    <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => {
+                        if (!e.target.checked) {
+                            setUniqueOwner("");
+                        }
+                        setOpenPositionForAnotherWallet(e.target.checked);
+                    }} id="openPosition2" />
+                        <p>External Owner</p>
+                </label>
                 {
                     openPositionForAnotherWallet && <div className="DiffWallet">
                             <input type="text" className="TextRegular" placeholder="Position owner address" value={uniqueOwner} onChange={(e) => setUniqueOwner(e.target.value)} id="uniqueOwner" />
@@ -818,13 +800,16 @@ const SetupComponent = (props) => {
                 <div className="InputTokenRegular">
                     <Input showMax={true} address={dfoCore.voidEthereumAddress} value={ethAmount} balance={dfoCore.toDecimals(ethBalanceOf, 18)} min={0} onChange={e => updateEthAmount(e.target.value)} showCoin={true} showBalance={true} name={"ETH"} />
                 </div>
-             {
-                 (!setupInfo.free || !currentPosition) && 
-                     <label className="OptionalThingsFarmers" htmlFor="openPosition2">
-                        <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => setOpenPositionForAnotherWallet(e.target.checked)} id="openPosition2" />
-                         <p>External Owner</p>
-                    </label>
-             }
+                <label className="OptionalThingsFarmers" htmlFor="openPosition2">
+                    <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => {
+                        if (!e.target.checked) {
+                            setUniqueOwner("");
+                            setInputType("add-pair");
+                        }
+                        setOpenPositionForAnotherWallet(e.target.checked);
+                    }} id="openPosition2" />
+                        <p>External Owner</p>
+                </label>
              {
                  openPositionForAnotherWallet && <div className="DiffWallet">
                          <input type="text" className="TextRegular" placeholder="Position owner address" value={uniqueOwner} onChange={(e) => setUniqueOwner(e.target.value)} id="uniqueOwner" />
@@ -920,7 +905,7 @@ const SetupComponent = (props) => {
                                 }
                                 {
                                     !setupReady && <>
-                                        <a className="web2ActionBTN">Not ready to be activated, come back at another time</a>
+                                        <p className="BreefRecap">Not ready to be activated, come back at another time</p>
                                     </>
                                 }
                             </>
@@ -1050,7 +1035,7 @@ const SetupComponent = (props) => {
                                     }
                                     {
                                         !setupReady && <>
-                                            <a className="web2ActionBTN">Not ready to be activated, come back at another time</a>
+                                            <p className="BreefRecap">Not ready to be activated, come back at another time</p>
                                         </>
                                     }
                                 </>
