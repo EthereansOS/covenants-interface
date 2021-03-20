@@ -204,9 +204,9 @@ a:disabled {cursor:wait !important;}
 .FarmThings p a {text-decoration: underline !important;}
 .FarmContractOpen .FarmThings p {font-size: 12px;margin-block-start: 0em;margin-block-end: 0em;}
 .FarmSetupMain {width: 100%; display: inline-block;}
-.FarmSetupMain h5 {width: 40%; display: inline-block; font-size: 16px; vertical-align: top;}
+.FarmSetupMain h5 {width: 60%; display: inline-block; font-size: 16px; vertical-align: top;}
 .FarmSetupMain h5 a {font-size: 11px; margin: 5px 5px; display: inline-block; padding: 2px 5px; border-radius: 5px; cursor: pointer;}
-.FarmSetupMain aside {width: 55%; display: inline-block;vertical-align: top; margin-left: 2%;}
+.FarmSetupMain aside {width: 37%; display: inline-block;vertical-align: top; margin-left: 2%;}
 .FarmSetupMain aside p {font-size: 12px; width: 100%; text-align: right; margin-bottom: 5px;}
 .SetupFarmingInstructions {width: 100%; display: inline-block; margin-top: 10px; text-align: left;}
 .SetupFarmingInstructions p {display: inline-block; font-size: 16px; margin-bottom: 2px; width: 66%; margin-left: 2%;}
@@ -281,6 +281,7 @@ a:disabled {cursor:wait !important;}
 .IndexSinglePerchBar span {font-size: 11px; font-weight: bold; margin-left: 5px; display: inline-block; vertical-align: middle;}
 .IndexSinglePerchBar aside {display: inline-block; height: 28px; vertical-align: middle; margin: 1px 1px; background-color: #7474f7; border-radius: 12px; min-width: 17%; max-width: 99%;}
 .IndexContractOpenCollateralSingle .StatsLink {width: 100%; text-align: center;}
+.FarmThings .StatsLink {width: 100%; text-align: left;}
 .IndexManageMB {width: 600px; margin: 20px auto; display: inline-block; text-align: center;}
 .ShowCollateralNeededBal {width: 100%; display: inline-block; margin: 10px auto; border: 1px solid; border-radius: 12px; padding: 5px;}
 .ShowCollateralNeededBal p {display: inline-block; width: auto; font-size: 13px;margin-block-start: 0em;margin-block-end: 0em;margin-inline-start: 0px;margin-inline-end: 0px; margin: 2px 5px;}
