@@ -21,7 +21,7 @@ const App = (props) => {
     }
   }, [location]);
 
-  if (props.dfoCore) {
+  if (props.dfoCore && props.dfoCore.provider) {
       props.dfoCore.provider.on('accountsChanged', (accounts) => {
           window.location.reload();
       })
