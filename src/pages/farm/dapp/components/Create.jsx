@@ -401,14 +401,14 @@ const Create = (props) => {
     }
 
     return (
-        <div className="create-component">
-            <div className="row mb-4">
+        <div>
                 {/* @locked for upcoming release 
                 <p>Coming Soon</p>
-                */}
+                
                 { !props.farmingContract && getCreationComponent() }
                 { props.farmingContract && getFarmingContractStatus() }
-            </div>
+                */}
+                <h3>Coming soon</h3>
         </div>
     )
 }

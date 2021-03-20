@@ -113,6 +113,7 @@ const Hosted = (props) => {
 
     return (
         <div className="MainExploration">
+            {/*
             <h6><b>Reward token address</b></h6>
             <input type="text" className="TextRegular" placeholder="Reward token address.." value={tokenFilter} onChange={(e) => onChangeTokenFilter(e.target.value)} />
             {
@@ -138,6 +139,8 @@ const Hosted = (props) => {
                     }
                 </div>
             }
+            */}
+                <h3>Coming soon</h3>
         </div>
     )
 }
