@@ -866,7 +866,7 @@ const SetupComponent = (props) => {
                     {setupInfo.minStakeable > 0 && <p><b>Min to Farm</b>: {window.formatMoney(window.fromDecimals(setupInfo.minStakeable, mainTokenInfo.decimals, true), 6)} {mainTokenInfo.symbol}</p>}
                 </aside>
                 <div className="SetupFarmingInstructions">
-                    <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`https://etherscan.io/token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />} </figure>)} = <b>APY</b>: {apy < 0 ? "(Insufficient Liquidity)" : apy === 0 ? "(Missed Price Feed)" : `${window.formatMoney(apy, 0)}%`}</p>
+                    <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`https://etherscan.io/token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />} </figure>)} = <b>APY</b>: {apy < 0 ? "(Insufficient Liquidity)" : apy === 0 ? "(Missed Price Feed)" : `${window.formatMoney(apy, 3)}%`}</p>
                 </div>
                 <div className="SetupFarmingOthers">
                     {
