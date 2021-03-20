@@ -684,13 +684,13 @@ const SetupComponent = (props) => {
                                         <span>From Pair</span>
                                         <input name={`inputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="add-pair" checked={inputType === "add-pair"} onChange={(e) => onInputTypeChange(e)} />
                                     </label>
-                                    {
+                                    {/*
                                         (!currentPosition || openPositionForAnotherWallet || !setupInfo.free) &&
                                             <label className="PrestoSelector">
                                                 <span>From ETH</span>
                                                 <input name={`inputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="add-eth" checked={inputType === "add-eth"} onChange={(e) => onInputTypeChange(e)} />
                                             </label>
-                                    }
+                                    */}
                                     <label className="PrestoSelector">
                                         <span>From LP Token</span>
                                         <input name={`inputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="add-lp" checked={inputType === "add-lp"} onChange={(e) => onInputTypeChange(e)} />
