@@ -236,6 +236,7 @@ const SetupComponent = (props) => {
             if (blockNumber < parseInt(farmSetup.endBlock)) {
                 freeReward += (parseInt(farmSetup.rewardPerBlock) * (parseInt(position.liquidityPoolTokenAmount) / parseInt(farmSetup.totalSupply)))
             }
+            console.log(`free reward is ${freeReward}`);
             freeReward = freeReward.toString().split('.')[0];
             setFreeAvailableRewards(freeReward);
             setManageStatus({ free, creationBlock, positionSetupIndex, liquidityPoolAmount: liquidityPoolTokenAmount, mainTokenAmount, tokensAmounts: amounts['tokensAmounts'], tokens })
@@ -402,8 +403,6 @@ const SetupComponent = (props) => {
                 positionOwner: openPositionForAnotherWallet ? uniqueOwner : dfoCore.voidEthereumAddress,
             };
 
-            console.log(stake);
-
             let ethTokenIndex = null;
             let ethTokenValue = 0;
             let mainTokenIndex = 0;
@@ -422,6 +421,8 @@ const SetupComponent = (props) => {
             ethTokenValue = localTokensAmounts[ethTokenIndex];
 
             var value = setupInfo.involvingETH && !stake.amountIsLiquidityPool ? ethTokenValue : 0;
+
+            console.log(stake, value);
 
             if (setupInfo.free) {
                 if (!currentPosition || openPositionForAnotherWallet) {
@@ -936,8 +937,8 @@ const SetupComponent = (props) => {
                     {
                         currentPosition && 
                         <div className="Farmed">
-                            <p><b>{rewardTokenInfo.symbol}/Day</b>: {window.formatMoney(dfoCore.toDecimals(((parseInt(setup.rewardPerBlock) * 6400) * (parseInt(manageStatus.liquidityPoolAmount)/parseInt(setup.totalSupply))).toString().split('.')[0], rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>
-                            <p><b>Available</b>: {window.formatMoney(window.fromDecimals(freeAvailableRewards, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>
+                            <p><b>{rewardTokenInfo.symbol}/Day</b>: {window.formatMoney(dfoCore.toDecimals((parseInt(setup.rewardPerBlock) * 6400 * parseInt(manageStatus.liquidityPoolAmount)/parseInt(setup.totalSupply)).toString().split('.')[0], rewardTokenInfo.decimals), 9)} {rewardTokenInfo.symbol}</p>
+                            <p><b>Available</b>: {window.formatMoney(dfoCore.toDecimals(freeAvailableRewards, rewardTokenInfo.decimals), 9)} {rewardTokenInfo.symbol}</p>
                             {
                                 !showFreeTransfer ? <a onClick={() => setShowFreeTransfer(true)} className="web2ActionBTN">Transfer</a> : <a onClick={() => setShowFreeTransfer(false)} className="backActionBTN">Close</a>
                             }
