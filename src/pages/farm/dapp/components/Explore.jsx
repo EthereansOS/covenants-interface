@@ -125,14 +125,14 @@ const Explore = (props) => {
             }));
         }
         switch (value) {
-            case "":
+            case "0":
                 setFarmingContracts(filteredFarmingContracts);
                 break;
             case "1":
-                setFarmingContracts(filteredFarmingContracts.sort((a, b) => parseInt(b.metadata.rewardPerBlock) - parseInt(a.metadata.rewardPerBlock)));
+                setFarmingContracts(filteredFarmingContracts.sort((a, b) => parseFloat(b.metadata.rewardPerBlock) - parseFloat(a.metadata.rewardPerBlock)));
                 break;
             case "2":
-                setFarmingContracts(filteredFarmingContracts.sort((a, b) => parseInt(a.metadata.rewardPerBlock) - parseInt(b.metadata.rewardPerBlock)));
+                setFarmingContracts(filteredFarmingContracts.sort((a, b) => parseFloat(a.metadata.rewardPerBlock) - parseFloat(b.metadata.rewardPerBlock)));
                 break;
             case "5":
                 setFarmingContracts(filteredFarmingContracts.sort((a, b) => parseInt(b.metadata.freeSetups.length + b.metadata.lockedSetups.length) - parseInt(a.metadata.freeSetups.length + a.metadata.lockedSetups.length)));
@@ -151,7 +151,7 @@ const Explore = (props) => {
                 <input type="text" className="TextRegular" placeholder="Sort by token address.." value={tokenFilter} onChange={(e) => onChangeTokenFilter(e.target.value)} />
                 <div className="SortOptions">
                     <select className="SelectRegular" value={selectFilter} onChange={(e) => onChangeSelectFilter(e.target.value)}>
-                        <option value="">Sort by..</option>
+                        <option value="0">Sort by..</option>
                         <option value="1">Higher Rewards per day</option>
                         <option value="2">Lower Rewards per day</option>
                         {

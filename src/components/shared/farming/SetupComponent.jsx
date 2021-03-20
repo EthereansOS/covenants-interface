@@ -424,6 +424,7 @@ const SetupComponent = (props) => {
     const activateSetup = async () => {
         setActivateLoading(true);
         try {
+            // const expectedBalance = parseInt(setup.rewardPerBlock) * parseInt(setup.blockDuration);
             const gas = await lmContract.methods.activateSetup(setupIndex).estimateGas({ from: props.dfoCore.address });
             const result = await lmContract.methods.activateSetup(setupIndex).send({ from: props.dfoCore.address, gas });
             props.addTransaction(result);
