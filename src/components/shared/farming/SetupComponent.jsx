@@ -69,8 +69,6 @@ const SetupComponent = (props) => {
     useEffect(() => {
         getSetupMetadata();
         return () => {
-            console.log(`interval id is ${intervalId.current}`);
-            console.log('clearing interval.');
             clearInterval(intervalId.current)
         }
     }, []);
@@ -82,12 +80,10 @@ const SetupComponent = (props) => {
             setSetup(farmSetup);
             setSetupInfo(farmSetupInfo);
             await loadData(farmSetup, farmSetupInfo, true);
-            console.log(`interval id current value is ${intervalId.current}`)
             if (!intervalId.current) {
                 intervalId.current = setInterval(async () => {
                     await loadData(farmSetup, farmSetupInfo);
                 }, 5000);
-                console.log(intervalId.current);
             }
         } catch (error) {
             console.error(error);
@@ -97,7 +93,6 @@ const SetupComponent = (props) => {
     }
 
     const loadData = async (farmSetup, farmSetupInfo, reset) => {
-        console.log(`start loading data for setup ${setupIndex}..`);
         let position = null;
         let lockPositions = [];
         let positionIds = [];
@@ -266,7 +261,6 @@ const SetupComponent = (props) => {
         }
         // calculate APY
         setApy(await calculateApy(farmSetup, rewardTokenAddress, rewardTokenDecimals, tokens));
-        console.log(`finished loading data for setup ${setupIndex}..`);
     }
 
     const calculateApy = async (setup, rewardTokenAddress, rewardTokenDecimals, setupTokens) => {
@@ -432,7 +426,7 @@ const SetupComponent = (props) => {
                     const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value});
                     const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value});
                     props.addTransaction(result);
-                } else {
+                } else if (currentPosition) {
                     const gasLimit = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).estimateGas({ from: dfoCore.address, value});
                     const result = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).send({ from: dfoCore.address, gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value});
                     props.addTransaction(result);
