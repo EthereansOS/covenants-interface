@@ -22,6 +22,7 @@ const ExploreFarmingContract = (props) => {
     const [extension, setExtension] = useState(null);
     const [setupsLoading, setSetupsLoading] = useState(false);
     const [token, setToken] = useState(null);
+    const [showOldSetups, setShowOldSetups] = useState(false);
     const [newFarmingSetups, setNewFarmingSetups] = useState([]);
 
     useEffect(() => {
@@ -64,7 +65,7 @@ const ExploreFarmingContract = (props) => {
                 }
                 if (setup.rewardPerBlock !== "0") {
                     setupInfo.free ? totalFreeSetups += 1 : totalLockedSetups += 1;
-                    res.push({...setup, setupInfo, rewardTokenAddress, setupIndex: i })
+                    res.push({...setup, setupInfo, rewardTokenAddress, setupIndex: i, finished: (parseInt(blockNumber) > parseInt(setup.endBlock) && parseInt(setup.endBlock) !== 0) || (parseInt(setup.endBlock) === 0 && parseInt(setupInfo.renewTimes) === 0) })
                 }
                 if (setup.active && (parseInt(setup.endBlock) > blockNumber)) {
                     setupInfo.free ? freeSetups.push(setup) : lockedSetups.push(setup);
@@ -186,8 +187,9 @@ const ExploreFarmingContract = (props) => {
         );
     }
 
-    const lockedSetups = farmingSetups.filter((s) => !s.setupInfo.free);
-    const freeSetups = farmingSetups.filter((s) => s.setupInfo.free);
+    const lockedSetups = farmingSetups.filter((s) => !s.setupInfo.free && !s.finished);
+    const freeSetups = farmingSetups.filter((s) => s.setupInfo.free && !s.finished);
+    const finishedSetups = farmingSetups.filter((s) => s.finished);
 
     return (
         <div className="ListOfThings">
@@ -207,17 +209,26 @@ const ExploreFarmingContract = (props) => {
                     (!isAdd && farmingSetups.length > 0) && <div>
                         { freeSetups.length > 0 && <h3>Free setups</h3> }
                         {
-                            freeSetups.map((farmingSetup, setupIndex) => {
+                            freeSetups.map((farmingSetup) => {
                                 return (
-                                    <SetupComponent key={setupIndex} className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
+                                    <SetupComponent key={farmingSetup.setupIndex} className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
                                 )
                             })
                         }
                         { lockedSetups.length > 0 && <h3>Locked setups</h3> }
                         { 
-                            lockedSetups.map((farmingSetup, setupIndex) => {
+                            lockedSetups.map((farmingSetup) => {
                                 return (
-                                    <SetupComponent key={setupIndex} className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
+                                    <SetupComponent key={farmingSetup.setupIndex} className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
+                                )
+                            })
+                        }
+                        { finishedSetups.length > 0 && <a className="web2ActionBTN my-4" onClick={() => setShowOldSetups(!showOldSetups)}>{`${showOldSetups ? 'Hide' : 'Show'} old setups`}</a> }
+                        { (finishedSetups.length > 0 && showOldSetups) && <h3>Old setups</h3> }
+                        {
+                            showOldSetups && finishedSetups.map((farmingSetup) => {
+                                return (
+                                    <SetupComponent key={farmingSetup.setupIndex} className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
                                 )
                             })
                         }
