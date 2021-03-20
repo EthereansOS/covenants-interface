@@ -402,6 +402,8 @@ const SetupComponent = (props) => {
                 positionOwner: openPositionForAnotherWallet ? uniqueOwner : dfoCore.voidEthereumAddress,
             };
 
+            console.log(stake);
+
             let ethTokenIndex = null;
             let ethTokenValue = 0;
             let mainTokenIndex = 0;
