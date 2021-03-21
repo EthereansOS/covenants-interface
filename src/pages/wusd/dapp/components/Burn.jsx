@@ -243,7 +243,7 @@ const Burn = (props) => {
             var res;
             if(outputType !== 'eth') {
                 const gasLimit = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusdAmount], collectionData).estimateGas({ from: props.dfoCore.address });
-                res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusdAmount], collectionData).send({ from: props.dfoCore.address, gasLimit: props.dfoCore.applyGasMultiplier(gasLimit, tokens) });
+                res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [wusdAmount], collectionData).send({ from: props.dfoCore.address, gasLimit: props.dfoCore.applyGasMultiplier(gasLimit, tokens), gas: props.dfoCore.applyGasMultiplier(gasLimit, tokens) });
             } else {
                 var operations = [{
                     inputTokenAddress : token0Contract.options.address,
@@ -270,6 +270,7 @@ const Burn = (props) => {
                 var sendingOptions = {from : props.dfoCore.address};
                 var method = wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdPresto.options.address, [wusdObjectId], [wusdAmount], payload);
                 sendingOptions.gasLimit = props.dfoCore.applyGasMultiplier(await method.estimateGas(sendingOptions), tokens);
+                sendingOptions.gas = sendingOptions.gasLimit;
                 res = await method.send(sendingOptions);
             }
 

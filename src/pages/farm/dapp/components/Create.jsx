@@ -191,7 +191,7 @@ const Create = (props) => {
             } else {
                 const { abi, bytecode } = deployContract;
                 const gasLimit = await new props.dfoCore.web3.eth.Contract(abi).deploy({ data: bytecode }).estimateGas({ from: props.dfoCore.address });
-                const extension = await new props.dfoCore.web3.eth.Contract(abi).deploy({ data: bytecode }).send({ from: props.dfoCore.address, gasLimit });
+                const extension = await new props.dfoCore.web3.eth.Contract(abi).deploy({ data: bytecode }).send({ from: props.dfoCore.address, gasLimit, gas: gasLimit });
                 console.log(extension.options.address);
                 setDeployData({ ...deployData, extensionAddress: extension.options.address });
             }

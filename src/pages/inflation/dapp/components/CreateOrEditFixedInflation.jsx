@@ -124,6 +124,7 @@ const CreateOrEditFixedInflation = (props) => {
             var method = fixedInflationFactory.methods.cloneFixedInflationDefaultExtension();
             var gasLimit = await method.estimateGas(sendingOptions);
             sendingOptions.gasLimit = gasLimit;
+            sendingOptions.gas = gasLimit;
             var transaction = await method.send(sendingOptions);
             var receipt = await window.web3.eth.getTransactionReceipt(transaction.transactionHash);
             var fixedInflationExtensionAddress = window.web3.eth.abi.decodeParameter("address", receipt.logs.filter(it => it.topics[0] === window.web3.utils.sha3('ExtensionCloned(address)'))[0].topics[1]);
@@ -142,6 +143,7 @@ const CreateOrEditFixedInflation = (props) => {
             var sendingOptions = {from : props.dfoCore.address};
             var method = new props.dfoCore.web3.eth.Contract(customExtensionData.abi).deploy({data : customExtensionData.bytecode});
             sendingOptions.gasLimit = await method.estimateGas(sendingOptions);
+            sendingOptions.gas = sendingOptions.gasLimit;
             var customFixedInflationExtension = await method.send(sendingOptions);
             setExtensionAddress(customFixedInflationExtension.options.address);
             await deployMethodologies.deployedContract(customFixedInflationExtension.options.address);
@@ -161,6 +163,7 @@ const CreateOrEditFixedInflation = (props) => {
             var method = fixedInflationFactory.methods.deploy(data);
             var gasLimit = await method.estimateGas(sendingOptions);
             sendingOptions.gasLimit = gasLimit;
+            sendingOptions.gas = sendingOptions.gasLimit;
             var transaction = await method.send(sendingOptions);
             var receipt = await window.web3.eth.getTransactionReceipt(transaction.transactionHash);
             var fixedInflationAddress = window.web3.eth.abi.decodeParameter("address", receipt.logs.filter(it => it.topics[0] === window.web3.utils.sha3('FixedInflationDeployed(address,address,bytes)'))[0].topics[1]);
@@ -173,6 +176,7 @@ const CreateOrEditFixedInflation = (props) => {
             method = extension.methods.setActive(true);
             gasLimit = await method.estimateGas(sendingOptions);
             sendingOptions.gasLimit = gasLimit;
+            sendingOptions.gas = gasLimit;
             transaction = await method.send(sendingOptions);
 
             setFixedInflationAddress(fixedInflationAddress);
@@ -315,6 +319,7 @@ const CreateOrEditFixedInflation = (props) => {
             var method = fixedInflationExtension.methods.setEntry(elaboratedEntry, elaboratedEntry.operations);
             var gasLimit = await method.estimateGas(sendingOptions);
             sendingOptions.gasLimit = gasLimit;
+            sendingOptions.gas = gasLimit;
             await method.send(sendingOptions);
             setFixedInflationAddress(fixedInflationContractAddress);
         } catch (e) {

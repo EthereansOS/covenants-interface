@@ -172,7 +172,7 @@ const Stats = (props) => {
         setLoading(true);
         try {
             const gasLimit = await wusdExtensionController.methods.rebalanceByCredit().estimateGas({ from: props.dfoCore.address });
-            await wusdExtensionController.methods.rebalanceByCredit().send({ from: props.dfoCore.address, gasLimit });
+            await wusdExtensionController.methods.rebalanceByCredit().send({ from: props.dfoCore.address, gasLimit, gas: gasLimit });
             await getStats();
         } catch (error) {
             console.error(error);
@@ -207,7 +207,7 @@ const Stats = (props) => {
             const amount = props.dfoCore.web3.utils.toBN(props.dfoCore.toFixed(usdRebalanceByDebit.full)).toString();
             
             const gasLimit = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [amount], abi.encode(["bytes[]"], [[data]])).estimateGas({ from: props.dfoCore.address});
-            const res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [amount], abi.encode(["bytes[]"], [[data]])).send({ from: props.dfoCore.address, gasLimit });
+            const res = await wusdCollection.methods.safeBatchTransferFrom(props.dfoCore.address, wusdExtensionController.options.address, [wusdObjectId], [amount], abi.encode(["bytes[]"], [[data]])).send({ from: props.dfoCore.address, gasLimit, gas: gasLimit });
             await getStats();
         } catch (error) {
             console.error(error);

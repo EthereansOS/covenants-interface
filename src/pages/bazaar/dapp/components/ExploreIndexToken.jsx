@@ -185,7 +185,7 @@ const ExploreIndexToken = (props) => {
             if (!mintByEth) {
                 console.log(`minting ${props.dfoCore.toFixed(parseFloat(mintValue) * 10 ** metadata.indexDecimals).toString()}`)
                 const gas = await metadata.indexContract.methods.mint(metadata.objectId, props.dfoCore.toFixed(parseFloat(mintValue) * 10 ** metadata.indexDecimals).toString(), props.dfoCore.address).estimateGas({ from: props.dfoCore.address });
-                const result = await metadata.indexContract.methods.mint(metadata.objectId, props.dfoCore.toFixed(parseFloat(mintValue) * 10 ** metadata.indexDecimals).toString(), props.dfoCore.address).send({ from: props.dfoCore.address, gasLimit: props.dfoCore.applyGasMultiplier(gas, metadata.info._tokens) })
+                const result = await metadata.indexContract.methods.mint(metadata.objectId, props.dfoCore.toFixed(parseFloat(mintValue) * 10 ** metadata.indexDecimals).toString(), props.dfoCore.address).send({ from: props.dfoCore.address, gasLimit: props.dfoCore.applyGasMultiplier(gas, metadata.info._tokens), gas: props.dfoCore.applyGasMultiplier(gas, metadata.info._tokens) })
                 props.addTransaction(result);
             } else {
                 var ethValue = "0";
@@ -217,6 +217,7 @@ const ExploreIndexToken = (props) => {
                     props.dfoCore.address
                 );
                 sendingOptions.gasLimit = props.dfoCore.applyGasMultiplier(await method.estimateGas(sendingOptions), metadata.info._tokens);
+                sendingOptions.gas = sendingOptions.gasLimit;
                 var result = await method.send(sendingOptions);
                 props.addTransaction(result);
                 setShowPrestoError(false);
@@ -357,6 +358,7 @@ const ExploreIndexToken = (props) => {
             var sendingOptions = { from: props.dfoCore.address };
             var method = indexCollection.methods.safeBatchTransferFrom(props.dfoCore.address, indexAddress, [metadata.objectId], [value], payload);
             sendingOptions.gasLimit = props.dfoCore.applyGasMultiplier(await method.estimateGas({ from: props.dfoCore.address }), metadata.info._tokens);
+            sendingOptions.gas = sendingOptions.gasLimit;
             const result = await method.send(sendingOptions);
             props.addTransaction(result);
         } catch (error) {

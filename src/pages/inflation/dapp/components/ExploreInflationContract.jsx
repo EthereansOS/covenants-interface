@@ -108,6 +108,7 @@ const ExploreInflationContract = (props) => {
             var method = contract.methods.execute(earnByInput);
             var gasLimit = await method.estimateGas(sendingOptions);
             sendingOptions.gasLimit = gasLimit;
+            sendingOptions.gas = gasLimit;
             var transactionResult = await method.send(sendingOptions);
             transactionResult = await window.web3.eth.getTransactionReceipt(transactionResult.transactionHash);
             var Executed = window.web3.eth.abi.decodeParameter("bool", transactionResult.logs.filter(it => it.topics[0] === window.web3.utils.sha3('Executed(bool)'))[0].data);

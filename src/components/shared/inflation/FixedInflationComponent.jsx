@@ -57,6 +57,7 @@ const FixedInflationComponent = (props) => {
             var method = contract.methods.execute([entry.id], [earnByInput]);
             var gasLimit = await method.estimateGas(sendingOptions);
             sendingOptions.gasLimit = gasLimit;
+            sendingOptions.gas = gasLimit;
             await method.send(sendingOptions);
         } catch(e) {
             error = e;

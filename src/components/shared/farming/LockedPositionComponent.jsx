@@ -41,7 +41,7 @@ const LockedPositionComponent = (props) => {
         setTransferLoading(true);
         try {
             const gasLimit = await lmContract.methods.transferPosition(transferAddress, position.positionId).estimateGas({ from: dfoCore.address });
-            const result = await lmContract.methods.transferPosition(transferAddress, position.positionId).send({ from: dfoCore.address, gasLimit });
+            const result = await lmContract.methods.transferPosition(transferAddress, position.positionId).send({ from: dfoCore.address, gasLimit, gas: gasLimit });
             onComplete(result);
         } catch (error) {
             console.error(error);
@@ -55,7 +55,7 @@ const LockedPositionComponent = (props) => {
         setUnlockLoading(true);
         try {
             const gasLimit = await lmContract.methods.unlock(position.positionId, false).estimateGas({ from: dfoCore.address });
-            const result = await lmContract.methods.unlock(position.positionId, false).send({ from: dfoCore.address, gasLimit });
+            const result = await lmContract.methods.unlock(position.positionId, false).send({ from: dfoCore.address, gasLimit, gas: gasLimit });
             onComplete(result);
         } catch (error) {
             console.error(error);
@@ -68,7 +68,7 @@ const LockedPositionComponent = (props) => {
         setClaimLoading(true);
         try {
             const gasLimit = await lmContract.methods.withdrawReward(position.positionId).estimateGas({ from: dfoCore.address });
-            const result = await lmContract.methods.withdrawReward(position.positionId).send({ from: dfoCore.address, gasLimit });
+            const result = await lmContract.methods.withdrawReward(position.positionId).send({ from: dfoCore.address, gasLimit, gas: gasLimit });
             onComplete(result);
         } catch (error) {
             console.error(error);

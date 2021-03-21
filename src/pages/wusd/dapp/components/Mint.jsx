@@ -209,7 +209,7 @@ const Mint = (props) => {
                 var result;
                 if (inputType !== 'eth' && !onlyByToken0 && !onlyByToken1) {
                     const gasLimit = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), inputType === 'lp').estimateGas({ from: props.dfoCore.address });
-                    result = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), inputType === 'lp').send({ from: props.dfoCore.address, gasLimit: props.dfoCore.applyGasMultiplier(gasLimit, tokens) });
+                    result = await wusdExtensionController.methods.addLiquidity(ammIndex, lpIndex, lpTokenAmount.full.toString(), inputType === 'lp').send({ from: props.dfoCore.address, gasLimit: props.dfoCore.applyGasMultiplier(gasLimit, tokens), gas: props.dfoCore.applyGasMultiplier(gasLimit, tokens) });
                 } else {
                     var value = '0';
                     var operations = [];
@@ -274,7 +274,7 @@ const Mint = (props) => {
                         lpIndex
                     );
                     sendingOptions.gasLimit = await method.estimateGas(sendingOptions);
-                    result = await method.send({ ...sendingOptions, gasLimit: props.dfoCore.applyGasMultiplier(sendingOptions.gasLimit, tokens) });
+                    result = await method.send({ ...sendingOptions, gasLimit: props.dfoCore.applyGasMultiplier(sendingOptions.gasLimit, tokens), gas: props.dfoCore.applyGasMultiplier(sendingOptions.gasLimit, tokens) });
                 }
                 setShowPrestoError(false);
                 props.addTransaction(result);

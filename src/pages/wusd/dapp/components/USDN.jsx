@@ -120,7 +120,7 @@ const USDN = (props) => {
             console.log(`object id ${objectId}`);
             console.log(`amount ${amount}`);
             const gasLimit = await x2USDCollection.methods.safeBatchTransferFrom(from, to, [objectId], [amount], "0x").estimateGas({ from: props.dfoCore.address});
-            const result = await x2USDCollection.methods.safeBatchTransferFrom(from, to, [objectId], [amount], "0x").send({ from: props.dfoCore.address, gasLimit });
+            const result = await x2USDCollection.methods.safeBatchTransferFrom(from, to, [objectId], [amount], "0x").send({ from: props.dfoCore.address, gasLimit, gas: gasLimit });
             props.addTransaction(result);
             await getData();
         } catch (error) {
@@ -145,7 +145,7 @@ const USDN = (props) => {
             console.log(`object id ${objectId}`);
             console.log(`amount ${amount}`);
             const gasLimit = await x5USDCollection.methods.safeBatchTransferFrom(from, to, [objectId], [amount], "0x").estimateGas({ from: props.dfoCore.address })
-            const result = await x5USDCollection.methods.safeBatchTransferFrom(from, to, [objectId], [amount], "0x").send({ from: props.dfoCore.address, gasLimit });
+            const result = await x5USDCollection.methods.safeBatchTransferFrom(from, to, [objectId], [amount], "0x").send({ from: props.dfoCore.address, gasLimit, gas: gasLimit });
             props.addTransaction(result);
             await getData();
         } catch (error) {

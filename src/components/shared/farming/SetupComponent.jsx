@@ -482,24 +482,24 @@ const SetupComponent = (props) => {
                 var sendingOptions = {from : dfoCore.address, value : prestoData.ethValue, gasLimit : 9999999};
                 sendingOptions.gasLimit = await prestoData.transaction.estimateGas(sendingOptions);
                 sendingOptions.gasLimit = parseInt(sendingOptions.gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1));
-                delete sendingOptions.gas;
+                sendingOptions.gas = sendingOptions.gasLimit;
                 var result = await prestoData.transaction.send(sendingOptions)
                 props.addTransaction(result);
             } else {
                 if (setupInfo.free) {
                     if (!currentPosition || openPositionForAnotherWallet) {
                         const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value});
-                        const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value});
+                        const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gas: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value});
                         props.addTransaction(result);
                     } else if (currentPosition) {
                         const gasLimit = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).estimateGas({ from: dfoCore.address, value});
-                        const result = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).send({ from: dfoCore.address, gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value});
+                        const result = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).send({ from: dfoCore.address, gas: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value});
                         props.addTransaction(result);
                     }
                 } else  {
                     // opening position
                     const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value});
-                    const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value});
+                    const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gas: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value});
                     props.addTransaction(result);
                 }
             }
@@ -521,11 +521,11 @@ const SetupComponent = (props) => {
             if (setupInfo.free) {
                 const removedLiquidity = removalAmount === 100 ? manageStatus.liquidityPoolAmount : props.dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString().split('.')[0];
                 const gasLimit = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, 0, outputType === 'to-pair', removedLiquidity).estimateGas({ from: dfoCore.address });
-                const result = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, 0, outputType === 'to-pair', removedLiquidity).send({ from: dfoCore.address, gasLimit });
+                const result = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, 0, outputType === 'to-pair', removedLiquidity).send({ from: dfoCore.address, gasLimit, gas: gasLimit });
                 props.addTransaction(result);
             } else {
                 const gasLimit = await lmContract.methods.withdrawLiquidity(0, setup.objectId, outputType === 'to-pair', farmTokenBalance).estimateGas({ from: dfoCore.address });
-                const result = await lmContract.methods.withdrawLiquidity(0, setup.objectId, outputType === 'to-pair', farmTokenBalance).send({ from: dfoCore.address, gasLimit });
+                const result = await lmContract.methods.withdrawLiquidity(0, setup.objectId, outputType === 'to-pair', farmTokenBalance).send({ from: dfoCore.address, gasLimit, gas: gasLimit });
                 props.addTransaction(result);
             }
             await getSetupMetadata();
@@ -540,7 +540,7 @@ const SetupComponent = (props) => {
         setClaimLoading(true);
         try {
             const gasLimit = await lmContract.methods.withdrawReward(currentPosition.positionId).estimateGas({ from: dfoCore.address });
-            const result = await lmContract.methods.withdrawReward(currentPosition.positionId).send({ from: dfoCore.address, gasLimit });
+            const result = await lmContract.methods.withdrawReward(currentPosition.positionId).send({ from: dfoCore.address, gasLimit, gas: gasLimit });
             props.addTransaction(result);
             await getSetupMetadata();
         } catch (error) {
@@ -556,7 +556,7 @@ const SetupComponent = (props) => {
             setTransferLoading(true);
             try {
                 const gasLimit = await lmContract.methods.transferPosition(freeTransferAddress, positionId).estimateGas({ from: dfoCore.address });
-                const result = await lmContract.methods.transferPosition(freeTransferAddress, positionId).send({ from: dfoCore.address, gasLimit });
+                const result = await lmContract.methods.transferPosition(freeTransferAddress, positionId).send({ from: dfoCore.address, gasLimit, gas: gasLimit });
                 props.addTransaction(result);
                 await getSetupMetadata();
             } catch (error) {
@@ -588,7 +588,7 @@ const SetupComponent = (props) => {
             };
             const updatedSetupConfiguration = { add: false, disable: false, index: parseInt(setupIndex), info: updatedSetup };
             const gasLimit = await extensionContract.methods.setFarmingSetups([updatedSetupConfiguration]).estimateGas({ from: dfoCore.address });
-            const result = await extensionContract.methods.setFarmingSetups([updatedSetupConfiguration]).send({ from: dfoCore.address, gasLimit });
+            const result = await extensionContract.methods.setFarmingSetups([updatedSetupConfiguration]).send({ from: dfoCore.address, gasLimit, gas: gasLimit });
             await getSetupMetadata();
         } catch (error) {
             console.error(error);
@@ -618,7 +618,7 @@ const SetupComponent = (props) => {
             };
             const updatedSetupConfiguration = { add: false, disable: true, index: parseInt(setupIndex), info: updatedSetup };
             const gasLimit = await extensionContract.methods.setFarmingSetups([updatedSetupConfiguration]).estimateGas({ from: dfoCore.address });
-            const result = await extensionContract.methods.setFarmingSetups([updatedSetupConfiguration]).send({ from: dfoCore.address, gasLimit });
+            const result = await extensionContract.methods.setFarmingSetups([updatedSetupConfiguration]).send({ from: dfoCore.address, gasLimit, gas: gasLimit });
             await getSetupMetadata();
         } catch (error) {
             console.error(error);

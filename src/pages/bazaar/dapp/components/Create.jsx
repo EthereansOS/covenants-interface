@@ -83,7 +83,7 @@ const Create = (props) => {
             const indexContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("IndexABI"), props.dfoCore.getContextElement("indexAddress"));
 
             const gas = await indexContract.methods.mint(title, symbol, metadataURI, tokens.map((token) => token.address), tokens.map((token) => props.dfoCore.toFixed(token.amount * 10**token.decimals).toString()), 0, props.dfoCore.voidEthereumAddress).estimateGas({ from: props.dfoCore.address });
-            const result = await indexContract.methods.mint(title, symbol, metadataURI, tokens.map((token) => token.address), tokens.map((token) => props.dfoCore.toFixed(token.amount * 10**token.decimals).toString()), 0, props.dfoCore.voidEthereumAddress).send({ from: props.dfoCore.address, gasLimit: props.dfoCore.applyGasMultiplier(gas, tokens.map((token) => token.address)) });
+            const result = await indexContract.methods.mint(title, symbol, metadataURI, tokens.map((token) => token.address), tokens.map((token) => props.dfoCore.toFixed(token.amount * 10**token.decimals).toString()), 0, props.dfoCore.voidEthereumAddress).send({ from: props.dfoCore.address, gas: props.dfoCore.applyGasMultiplier(gas, tokens.map((token) => token.address)), gasLimit: props.dfoCore.applyGasMultiplier(gas, tokens.map((token) => token.address)) });
             const receipt = await props.dfoCore.web3.eth.getTransactionReceipt(result.transactionHash);
             const indexTokenAddress = props.dfoCore.web3.eth.abi.decodeParameter("address", receipt.logs.filter(it => it.topics[0] === props.dfoCore.web3.utils.sha3('NewIndex(uint256,address,address,uint256)'))[0].topics[1]);
             props.addTransaction(result);
