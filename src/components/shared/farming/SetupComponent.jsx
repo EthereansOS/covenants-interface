@@ -411,34 +411,38 @@ const SetupComponent = (props) => {
         }
     }
 
-    const onUpdateLpTokenAmount = async (value, index) => {
+    const onUpdateLpTokenAmount = async (value, index, isFull) => {
         if (!value || value === 'NaN') {
             setLockedEstimatedReward(0);
             setFreeEstimatedReward(0);
             // setLpTokenAmount("0");
             return;
         }
-        const fullValue = props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(lpTokenInfo.decimals)));
-        const result = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, fullValue).call();
-        const ams = result.tokensAmounts;
-        setLpTokenAmount(result.liquidityPoolAmount)
-        setTokensAmount(tokensAmounts.map((old, i) => i === index ? fullValue : ams[i]));
-        if (!setupInfo.free) {
-            let mainTokenIndex = 0;
-            setupTokens.forEach((t, i) => {
-                if (t.address === setupInfo.mainTokenAddress) {
-                    mainTokenIndex = i;
+        try {
+            const fullValue = isFull ? value : props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(lpTokenInfo.decimals)));
+            setLpTokenAmount(fullValue)
+            const result = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, fullValue).call();
+            const ams = result.tokensAmounts;
+            setTokensAmount(tokensAmounts.map((old, i) => i === index ? fullValue : ams[i]));
+            if (!setupInfo.free) {
+                let mainTokenIndex = 0;
+                await setupTokens.map((t, i) => {
+                    if (t.address === setupInfo.mainTokenAddress) {
+                        mainTokenIndex = i;
+                    }
+                })
+                if (parseInt(ams[mainTokenIndex]) > 0) {
+                    const reward = await lmContract.methods.calculateLockedFarmingReward(setupIndex, ams[mainTokenIndex], false, 0).call();
+                    setLockedEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(parseInt(reward.relativeRewardPerBlock) * (parseInt(setup.endBlock) - blockNumber)), rewardTokenInfo.decimals));
                 }
-            })
-            if (parseInt(ams[mainTokenIndex]) > 0) {
-                const reward = await lmContract.methods.calculateLockedFarmingReward(setupIndex, ams[mainTokenIndex], false, 0).call();
-                setLockedEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(parseInt(reward.relativeRewardPerBlock) * (parseInt(setup.endBlock) - blockNumber)), rewardTokenInfo.decimals));
+            } else {
+                const val = parseInt(props.dfoCore.fromDecimals(value, parseInt(lpTokenInfo.decimals))) * 6400 * parseInt(setup.rewardPerBlock) / (parseInt(setup.totalSupply) + parseInt(props.dfoCore.fromDecimals(value, parseInt(lpTokenInfo.decimals))));
+                if (!isNaN(val)) {
+                    setFreeEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(lpTokenInfo.decimals))), rewardTokenInfo.decimals))
+                }
             }
-        } else {
-            const val = parseInt(props.dfoCore.fromDecimals(value, parseInt(lpTokenInfo.decimals))) * 6400 * parseInt(setup.rewardPerBlock) / (parseInt(setup.totalSupply) + parseInt(props.dfoCore.fromDecimals(value, parseInt(lpTokenInfo.decimals))));
-            if (!isNaN(val)) {
-                setFreeEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(lpTokenInfo.decimals))), rewardTokenInfo.decimals))
-            }
+        } catch (error) {
+            console.error(error);
         }
         // setFreeEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(parseInt(props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(lpTokenInfo.decimals)))) * 6400 * parseInt(setup.rewardPerBlock) / (parseInt(setup.totalSupply) + parseInt(value))), rewardTokenInfo.decimals))
     }
@@ -943,6 +947,13 @@ const SetupComponent = (props) => {
                         </div>
                     })
                 }
+                {
+                    parseFloat(lpTokenAmount) > 0 && <div className="DiffWallet">
+                        <p className="BreefRecap"><b>LP tokens</b>: 
+                            <span> {window.formatMoney(dfoCore.toDecimals(lpTokenAmount, lpTokenInfo.decimals), lpTokenInfo.decimals)} {lpTokenInfo.symbol}</span>
+                        </p>
+                    </div>
+                }
                 <label className="OptionalThingsFarmers" htmlFor="openPositionWallet1">
                     <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => {
                         if (!e.target.checked) {
@@ -1038,7 +1049,6 @@ const SetupComponent = (props) => {
                     <Input showMax={true} address={dfoCore.voidEthereumAddress} value={ethAmount} balance={dfoCore.toDecimals(ethBalanceOf, 18)} min={0} onChange={e => updateEthAmount(e.target.value)} showCoin={true} showBalance={true} name={"ETH"} />
                 </div>
                 <div className="DiffWallet">
-                    <p>On:</p>
                     {false && amms.length > 0 && <select className="SelectRegular" value={selectedAmmIndex.toString()} onChange={e => setSelectedAmmIndex(e.target.value)}>
                         {amms.map((it, i) => <option key={it.address} value={i}>{it.info[0]}</option>)}
                     </select>}
