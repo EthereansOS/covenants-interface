@@ -199,10 +199,15 @@ const Burn = (props) => {
 
         var token0WUSD = props.dfoCore.normalizeValue(token0Amount, token0decimals);
         var token1WUSD = props.dfoCore.normalizeValue(token1Amount, token1decimals);
-
+        var amountAsString = amount.toString();
+        var splittedAmount = amountAsString.split('.');
+        console.log(amountAsString);
+        if (splittedAmount.length > 1 && splittedAmount[1].length > token1decimals) {
+            amountAsString = `${splittedAmount[0]}.${splittedAmount[1].substring(0, token1decimals)}`;
+        }
         var sum = window.web3.utils.toBN(token0WUSD).add(window.web3.utils.toBN(token1WUSD));
         if(sum.gt(window.web3.utils.toBN(window.toDecimals(amount, 18)))) {
-            token1Amount = window.toDecimals(amount.toString(), token1decimals);
+            token1Amount = window.toDecimals(amountAsString, token1decimals);
             token1Amount = window.web3.utils.toBN(token1Amount).div(window.web3.utils.toBN(2)).toString();
             byTokenValue = await ammContract.methods.byTokenAmount(liquidityPool, liquidityPoolTokens[1], token1Amount).call();
             token0Amount = byTokenValue[1][0];

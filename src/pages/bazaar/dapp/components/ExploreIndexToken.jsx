@@ -219,13 +219,13 @@ const ExploreIndexToken = (props) => {
                 sendingOptions.gasLimit = props.dfoCore.applyGasMultiplier(await method.estimateGas(sendingOptions), metadata.info._tokens);
                 var result = await method.send(sendingOptions);
                 props.addTransaction(result);
-                showPrestoError(false);
+                setShowPrestoError(false);
             }
             await getContractMetadata();
         } catch (error) {
             console.error(error)
             if (mintByEth) {
-                showPrestoError(true);
+                setShowPrestoError(true);
             }
         } finally {
             setMintLoading(false);
