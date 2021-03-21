@@ -28,6 +28,7 @@ const SetupComponent = (props) => {
     const [showFreeTransfer, setShowFreeTransfer] = useState(false);
     const [canActivateSetup, setCanActivateSetup] = useState(false);
     const [setupReady, setSetupReady] = useState(false);
+    const [showPrestoError, setShowPrestoError] = useState(false);
     // amm data
     const [AMM, setAMM] = useState({ name: "", version: "" });
     const [ammContract, setAmmContract] = useState(null);
@@ -111,6 +112,7 @@ const SetupComponent = (props) => {
             const { '0': farmSetup, '1': farmSetupInfo } = await lmContract.methods.setup(setupIndex).call();
             setSetup(farmSetup);
             setSetupInfo(farmSetupInfo);
+            showPrestoError(false);
             await loadData(farmSetup, farmSetupInfo, true);
             if (!intervalId.current) {
                 intervalId.current = setInterval(async () => {
@@ -486,6 +488,9 @@ const SetupComponent = (props) => {
             await getSetupMetadata();
         } catch (error) {
             console.error(error);
+            if (inputType === 'add-eth') {
+                setShowPrestoError(true);
+            }
         } finally {
             setAddLoading(false);
         }
@@ -628,6 +633,7 @@ const SetupComponent = (props) => {
         const ethBalance = await props.dfoCore.web3.eth.getBalance(props.dfoCore.address);
         setEthBalanceOf(ethBalance);
         setPrestoData(null);
+        setShowPrestoError(false);
         setEthAmount(0);
         if (e.target.value === 'add-eth') {
             setLpTokenAmount(0);
@@ -994,7 +1000,6 @@ const SetupComponent = (props) => {
                 </div>
             </> : 
              inputType === 'add-eth' ? <>
-                <div className="BetaAllert"><p className="BreefRecap"><b>The Presto "From ETH" feature is in beta. You might received a failed transaction. Use it at your own risk!</b></p></div>
                 <div className="InputTokenRegular">
                     <Input showMax={true} address={dfoCore.voidEthereumAddress} value={ethAmount} balance={dfoCore.toDecimals(ethBalanceOf, 18)} min={0} onChange={e => updateEthAmount(e.target.value)} showCoin={true} showBalance={true} name={"ETH"} />
                 </div>
@@ -1039,6 +1044,9 @@ const SetupComponent = (props) => {
                     </a> :  <a className="Web3ActionBTN" onClick={() => addLiquidity()} disabled={parseFloat(ethAmount) === 0}>Add Liquidity</a>
                 }
              </div>
+             {
+                (showPrestoError && inputType === 'add-eth') && <div className="BetaAllert"><p className="BreefRecap"><b>The Presto "From ETH" feature is in beta. You might received a failed transaction. Use it at your own risk!</b></p></div>
+             }
          </> : <></>
         }
         </div>

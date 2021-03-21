@@ -34,6 +34,7 @@ const Mint = (props) => {
     const [selectedAmmIndex, setSelectedAmmIndex] = useState(null);
     const [mintByEthLoading, setMintByEthLoading] = useState(false);
     const [wusdPresto, setWusdPresto] = useState(null);
+    const [showPrestoError, setShowPrestoError] = useState(false);
 
     useEffect(() => {
         getController();
@@ -275,7 +276,7 @@ const Mint = (props) => {
                     sendingOptions.gasLimit = await method.estimateGas(sendingOptions);
                     result = await method.send({ ...sendingOptions, gasLimit: props.dfoCore.applyGasMultiplier(sendingOptions.gasLimit, tokens) });
                 }
-
+                showPrestoError(false);
                 props.addTransaction(result);
                 const balance0 = await token0Contract.methods.balanceOf(props.dfoCore.address).call();
                 const balance1 = await token1Contract.methods.balanceOf(props.dfoCore.address).call();
@@ -289,6 +290,9 @@ const Mint = (props) => {
             setLpTokenAmount({ value: 0, full: 0 });
         } catch (error) {
             console.error(error);
+            if (inputType == 'eth') {
+                setShowPrestoError(true);
+            }
         } finally {
             setMintLoading(false);
         }
@@ -517,6 +521,7 @@ const Mint = (props) => {
     }
 
     const onInputTypeChange = (e) => {
+        setShowPrestoError(false);
         setInputType(e.target.value);
         clear();
     }
@@ -613,6 +618,9 @@ const Mint = (props) => {
                         :
                         <a className="Web3ActionBTN" onClick={() => mintWUSD()} disabled={((!firstAmount.value || !secondAmount.value) && !lpTokenAmount.value) || !firstTokenApproved || !secondTokenApproved}>Mint</a>
                 }
+                {
+                    ( showPrestoError && inputType === 'eth') && <div className="BetaAllert"><p className="BreefRecap"><b>The Presto "From ETH" feature is in beta. You might received a failed transaction. Use it at your own risk!</b></p></div>
+                }
             </div>
         )
     }
@@ -657,9 +665,6 @@ const Mint = (props) => {
                     </div>
                 }
             </div>
-            {
-                inputType === "eth" && <div className="BetaAllert"><p className="BreefRecap"><b>The Presto "From ETH" feature is in beta. You might received a failed transaction. Use it at your own risk!</b></p></div>
-            }
             {
                 !isHealthyPair && <div className="DisclamerRegular">
                     <p><b>This pair is not healthy at the moment!</b> <br></br> Select a different pair or try again at another time.</p>

@@ -31,6 +31,7 @@ const ExploreIndexToken = (props) => {
     const [mintByEthLoading, setMintByEthLoading] = useState(false);
     const [mintByEthError, setMintByEthError] = useState(false);
     const [indexPresto, setIndexPresto] = useState(null);
+    const [showPrestoError, setShowPrestoError] = useState(false);
 
     useEffect(() => {
         getContractMetadata();
@@ -218,10 +219,14 @@ const ExploreIndexToken = (props) => {
                 sendingOptions.gasLimit = props.dfoCore.applyGasMultiplier(await method.estimateGas(sendingOptions), metadata.info._tokens);
                 var result = await method.send(sendingOptions);
                 props.addTransaction(result);
+                showPrestoError(false);
             }
             await getContractMetadata();
         } catch (error) {
             console.error(error)
+            if (mintByEth) {
+                showPrestoError(true);
+            }
         } finally {
             setMintLoading(false);
         }
@@ -229,6 +234,7 @@ const ExploreIndexToken = (props) => {
 
     const onByEth = (e) => {
         setMintByEth(e.target.checked);
+        !e.target.checked && setShowPrestoError(false);
         e.target.checked && onMintUpdate(mintValue || 0);
         e.target.checked && calculateByEth(selectedAmmIndex);
     }
@@ -298,9 +304,6 @@ const ExploreIndexToken = (props) => {
                 <input type="checkbox" checked={mintByEth} onChange={onByEth} />
             </label>
             </div>
-            {
-                mintByEth && <div className="BetaAllert"><p className="BreefRecap"><b>The Presto "From ETH" feature is in beta. You might received a failed transaction. Use it at your own risk!</b></p></div>
-            }
             {mintByEth && <div className="QuestionRegular">
                 {amms.length > 0 && <select className="SelectRegular" value={selectedAmmIndex.toString()} onChange={onAmmChange}>
                     {amms.map((it, i) => <option key={it.address} value={i}>{it.info[0]}</option>)}
@@ -332,6 +335,9 @@ const ExploreIndexToken = (props) => {
                     mintLoading ? <a className="Web3ActionBTN" disabled={mintLoading}>
                         <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                     </a> : <a className="Web3ActionBTN" disabled={!mintByEth && (mintValue === 0 || unapproved.length > 0)} onClick={() => mint()}>Mint</a>
+                }
+                {
+                    (showPrestoError && mintByEth) && <div className="BetaAllert"><p className="BreefRecap"><b>The Presto "From ETH" feature is in beta. You might received a failed transaction. Use it at your own risk!</b></p></div>
                 }
             </div>
         </div>
