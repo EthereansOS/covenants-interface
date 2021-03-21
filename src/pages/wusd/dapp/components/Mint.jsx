@@ -647,7 +647,7 @@ const Mint = (props) => {
                             <input name="inputType" type="radio" value="pair" checked={inputType === "pair"} onChange={onInputTypeChange} disabled={!pair} />
                         </label>
                         <label className="PrestoSelector">
-                            <span>From ETH</span>
+                            <span>From ETH (BETA)</span>
                             <input name="inputType" type="radio" value="eth" checked={inputType === "eth"} onChange={onInputTypeChange} disabled={!pair} />
                         </label>
                         <label className="PrestoSelector">
@@ -657,6 +657,9 @@ const Mint = (props) => {
                     </div>
                 }
             </div>
+            {
+                inputType === "eth" && <div className="BetaAllert"><p className="BreefRecap"><b>The Presto "From ETH" feature is in beta. You might received a failed transaction. Use it at your own risk!</b></p></div>
+            }
             {
                 !isHealthyPair && <div className="DisclamerRegular">
                     <p><b>This pair is not healthy at the moment!</b> <br></br> Select a different pair or try again at another time.</p>

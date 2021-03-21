@@ -294,10 +294,13 @@ const ExploreIndexToken = (props) => {
             </div>
             <div className="QuestionRegular">
             <label className="PrestoSelector">
-            <span>From ETH</span>
+            <span>From ETH (BETA)</span>
                 <input type="checkbox" checked={mintByEth} onChange={onByEth} />
             </label>
             </div>
+            {
+                mintByEth && <div className="BetaAllert"><p className="BreefRecap"><b>The Presto "From ETH" feature is in beta. You might received a failed transaction. Use it at your own risk!</b></p></div>
+            }
             {mintByEth && <div className="QuestionRegular">
                 {amms.length > 0 && <select className="SelectRegular" value={selectedAmmIndex.toString()} onChange={onAmmChange}>
                     {amms.map((it, i) => <option key={it.address} value={i}>{it.info[0]}</option>)}
