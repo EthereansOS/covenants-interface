@@ -112,7 +112,7 @@ const SetupComponent = (props) => {
             const { '0': farmSetup, '1': farmSetupInfo } = await lmContract.methods.setup(setupIndex).call();
             setSetup(farmSetup);
             setSetupInfo(farmSetupInfo);
-            showPrestoError(false);
+            setShowPrestoError(false);
             await loadData(farmSetup, farmSetupInfo, true);
             if (!intervalId.current) {
                 intervalId.current = setInterval(async () => {

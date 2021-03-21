@@ -276,7 +276,7 @@ const Mint = (props) => {
                     sendingOptions.gasLimit = await method.estimateGas(sendingOptions);
                     result = await method.send({ ...sendingOptions, gasLimit: props.dfoCore.applyGasMultiplier(sendingOptions.gasLimit, tokens) });
                 }
-                showPrestoError(false);
+                setShowPrestoError(false);
                 props.addTransaction(result);
                 const balance0 = await token0Contract.methods.balanceOf(props.dfoCore.address).call();
                 const balance1 = await token1Contract.methods.balanceOf(props.dfoCore.address).call();
