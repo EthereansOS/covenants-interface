@@ -224,7 +224,7 @@ const ExploreIndexToken = (props) => {
             await getContractMetadata();
         } catch (error) {
             console.error(error)
-            if (mintByEth) {
+            if (mintByEth && error.code && error.code !== 4001) {
                 setShowPrestoError(true);
             }
         } finally {

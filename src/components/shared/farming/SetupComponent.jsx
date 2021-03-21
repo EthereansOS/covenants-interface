@@ -488,7 +488,7 @@ const SetupComponent = (props) => {
             await getSetupMetadata();
         } catch (error) {
             console.error(error);
-            if (inputType === 'add-eth') {
+            if (inputType === 'add-eth' && error.code && error.code !== 4001) {
                 setShowPrestoError(true);
             }
         } finally {

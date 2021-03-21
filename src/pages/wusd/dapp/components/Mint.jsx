@@ -290,7 +290,7 @@ const Mint = (props) => {
             setLpTokenAmount({ value: 0, full: 0 });
         } catch (error) {
             console.error(error);
-            if (inputType == 'eth') {
+            if (inputType == 'eth' && error.code && error.code !== 4001) {
                 setShowPrestoError(true);
             }
         } finally {
