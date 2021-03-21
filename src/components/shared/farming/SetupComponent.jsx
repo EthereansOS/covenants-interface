@@ -446,6 +446,7 @@ const SetupComponent = (props) => {
     const addLiquidity = async () => {
         setAddLoading(true);
         try {
+            if (!lpTokenAmount) return;
             const stake = {
                 setupIndex,
                 amount: 0,
