@@ -201,7 +201,6 @@ const Burn = (props) => {
         var token1WUSD = props.dfoCore.normalizeValue(token1Amount, token1decimals);
         var amountAsString = amount.toString();
         var splittedAmount = amountAsString.split('.');
-        console.log(amountAsString);
         if (splittedAmount.length > 1 && splittedAmount[1].length > token1decimals) {
             amountAsString = `${splittedAmount[0]}.${splittedAmount[1].substring(0, token1decimals)}`;
         }
