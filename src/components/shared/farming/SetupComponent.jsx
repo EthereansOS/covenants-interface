@@ -2,7 +2,7 @@ import Coin from '../coin/Coin';
 import { useEffect, useState } from 'react';
 import { Input, ApproveButton } from '..';
 import { connect } from 'react-redux';
-import { addTransaction } from '../../../store/actions';
+import { addTransaction, removeInflationSetup } from '../../../store/actions';
 import axios from 'axios';
 import LockedPositionComponent from './LockedPositionComponent';
 import metamaskLogo from "../../../assets/images/metamask-fox.svg";
@@ -657,12 +657,7 @@ const SetupComponent = (props) => {
             };
             var value = window.toDecimals(window.numberToString(amount), 18);
 
-            var slippageAttenuation = 1 - (props.dfoCore.getContextElement("farmingSingleCoinSlippageAttenuation") * parseFloat(amount));
-
             var halfValue = props.dfoCore.web3.utils.toBN(value).div(props.dfoCore.web3.utils.toBN(2)).toString();
-            console.log(halfValue);
-            halfValue = window.numberToString(parseInt(halfValue) * slippageAttenuation);
-            console.log(halfValue);
             var ammEthereumAddress = (await ammContract.methods.data().call())[0];
 
             var info = setupInfo;
@@ -677,24 +672,49 @@ const SetupComponent = (props) => {
 
             var mainTokenIndex = tokens[2].indexOf(info.mainTokenAddress);
 
-            var amm = amms[selectedAmmIndex].contract;
+            var amm = ammContract;//amms[selectedAmmIndex].contract;
 
             var ethereumAddress = (await amm.methods.data().call())[0];
 
-            async function calculateBestLP(firstToken, secondToken, firstDecimals, secondDecimals) {
+            async function calculateBestLP(firstToken, secondToken, firstDecimals, secondDecimals, hf) {
 
-                var liquidityPoolAddress = (await amm.methods.byTokens([ethereumAddress, firstToken]).call())[2];
+                var data = (await amm.methods.byTokens([ethereumAddress, firstToken]).call());
+
+                var liquidityPoolAddress = data[2];
 
                 if (liquidityPoolAddress === window.voidEthereumAddress) {
                     return {};
                 }
 
+                var mainTokenIndex = data[3].indexOf(firstToken);
+                var middleTokenIndex = data[3].indexOf(ethereumAddress);
+
+                var mainAmount = window.formatNumber(window.normalizeValue(data[1][mainTokenIndex], firstDecimals));
+                var middleTokenAmount = window.formatNumber(window.normalizeValue(data[1][middleTokenIndex], 18));
+
+                var constant = mainAmount * middleTokenAmount;
+
+                var newMiddleTokenAmount = middleTokenAmount + window.formatNumber(window.normalizeValue(halfValue, 18));
+
+                var newMainAmount = constant / newMiddleTokenAmount;
+
+                var mainReceived = mainAmount - newMainAmount;
+
                 var firstTokenEthLiquidityPoolAddress = liquidityPoolAddress;
-                var token0Value = (await amm.methods.getSwapOutput(ethereumAddress, halfValue, [liquidityPoolAddress], [firstToken]).call())[1];
+                var token0Value = (await amm.methods.getSwapOutput(ethereumAddress, hf || halfValue, [liquidityPoolAddress], [firstToken]).call())[1];
+
+                var ratio = newMainAmount / mainAmount;
+
+                if(!hf) {
+                    return await calculateBestLP(firstToken, secondToken, firstDecimals, secondDecimals, halfValue = window.numberToString(window.formatNumber(halfValue) * ratio).split('.')[0])
+                }
 
                 var token1Value = (await ammContract.methods.byTokenAmount(liquidityPool, firstToken, token0Value).call());
                 var lpAmount = token1Value[0];
                 token1Value = token1Value[1][token1Value[2].indexOf(secondToken)];
+
+                lpAmount = window.numberToString(parseInt(lpAmount) / ratio).split('.')[0];
+                token1Value = window.numberToString(parseInt(token1Value) / ratio).split('.')[0];
 
                 const updatedFirstTokenAmount = window.formatNumber(window.normalizeValue(token0Value, firstDecimals));
                 const updatedSecondTokenAmount = window.formatNumber(window.normalizeValue(token1Value, secondDecimals));
@@ -1005,7 +1025,7 @@ const SetupComponent = (props) => {
                 </div>
                 <div className="DiffWallet">
                     <p>On:</p>
-                    {amms.length > 0 && <select className="SelectRegular" value={selectedAmmIndex.toString()} onChange={e => setSelectedAmmIndex(e.target.value)}>
+                    {false && amms.length > 0 && <select className="SelectRegular" value={selectedAmmIndex.toString()} onChange={e => setSelectedAmmIndex(e.target.value)}>
                         {amms.map((it, i) => <option key={it.address} value={i}>{it.info[0]}</option>)}
                     </select>}
                     {loadingPrestoData && <Loading/>}
