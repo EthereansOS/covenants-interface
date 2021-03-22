@@ -50,8 +50,8 @@ export default class DFOCore {
                     const prov = await web3Modal.connect();
                     this.web3 = new Web3(prov);
                 } else {
+                    await window.ethereum.request({method : 'eth_requestAccounts'});
                     this.web3 = new Web3(window.ethereum);
-                    window.ethereum.enable();
                 }
                 // retrieve the provider
                 const provider = this.web3.currentProvider;
@@ -94,7 +94,7 @@ export default class DFOCore {
         }
     }
 
-    tryLoadCustomWeb3 = async () => {
+    tryLoadCustomWeb3 = async() => {
         window.context = {};
         var localContext;
         try {
@@ -112,8 +112,8 @@ export default class DFOCore {
                     total_accounts: 15,
                     default_balance_ether: 9999999999999999999,
                     fork: window.context.blockchainConnectionString,
-                    asyncRequestProcessing : true,
-                    db : window.MemDOWN(),
+                    asyncRequestProcessing: true,
+                    db: window.MemDOWN(),
                     gasLimit: window.gasLimit = parseInt((await new Web3(window.context.blockchainConnectionString).eth.getBlock("latest")).gasLimit)
                 }) : window.context.blockchainConnectionString;
                 var web3 = new Web3(window.provider, null, { transactionConfirmationBlocks: 1 });
@@ -138,43 +138,41 @@ export default class DFOCore {
             !localContext && console.clear();
         }
     }
-    
+
     addTokenToMetamask = (address, symbol, decimals, image) => {
         try {
             if (this.web3.currentProvider) {
                 this.web3.currentProvider.request({
-                        method: 'wallet_watchAsset',
-                        params: {
-                            type: "ERC20",
-                            options: {
-                                address,
-                                symbol,
-                                decimals,
-                                image,
-                            },
+                    method: 'wallet_watchAsset',
+                    params: {
+                        type: "ERC20",
+                        options: {
+                            address,
+                            symbol,
+                            decimals,
+                            image,
                         },
-                        id: Math.round(Math.random() * 100000),
-                    }, (err, added) => {
-                        console.log('provider returned', err, added)
-                    }
-                )
+                    },
+                    id: Math.round(Math.random() * 100000),
+                }, (err, added) => {
+                    console.log('provider returned', err, added)
+                })
             } else if (window.web3.currentProvider) {
                 window.web3.currentProvider.request({
-                        method: 'wallet_watchAsset',
-                        params: {
-                            type: "ERC20",
-                            options: {
-                                address,
-                                symbol,
-                                decimals,
-                                image,
-                            },
+                    method: 'wallet_watchAsset',
+                    params: {
+                        type: "ERC20",
+                        options: {
+                            address,
+                            symbol,
+                            decimals,
+                            image,
                         },
-                        id: Math.round(Math.random() * 100000),
-                    }, (err, added) => {
-                        console.log('provider returned', err, added)
-                    }
-                )
+                    },
+                    id: Math.round(Math.random() * 100000),
+                }, (err, added) => {
+                    console.log('provider returned', err, added)
+                })
             }
         } catch (error) {
             console.error(error);
@@ -248,7 +246,7 @@ export default class DFOCore {
     formatNumber = (value) => {
         return parseFloat(this.numberToString(value).split(',').join(''));
     }
-    
+
     /**
      * returns the sending options for the given method and value.
      * if no params are used, the {from: address, gas: '99999999'} object is returned.
@@ -296,29 +294,28 @@ export default class DFOCore {
         try {
             if (!factoryAddress) factoryAddress = this.getContextElement("farmFactoryAddress");
             const deployedFarmingContracts = [];
-            const events = await this.web3.eth.getPastLogs({
+            const events = await window.getLogs({
                 address: factoryAddress,
                 topics: [
                     this.web3.utils.sha3('FarmMainDeployed(address,address,bytes)')
                 ],
                 fromBlock: this.getContextElement('deploySearchStart'),
-                toBlock: 'latest'
+                toBlock : 'latest'
             });
             for (let i = 0; i < events.length; i++) {
                 const event = events[i];
                 const farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
-                try {
-                    const contract = new this.web3.eth.Contract(this.getContextElement("FarmMainABI"), farmMainAddress);
-                    const extensionAddress = await contract.methods._extension().call();
-                    const extensionContract = new this.web3.eth.Contract(this.getContextElement("FarmExtensionABI"), extensionAddress);
-                    const { host } = await extensionContract.methods.data().call();
-                    deployedFarmingContracts.push({ address: farmMainAddress, sender: host });
-                } catch (error) {
-                    console.error(error);
-                }
+                const contract = await this.getContract(this.getContextElement("FarmMainABI"), farmMainAddress);
+                const extensionAddress = await contract.methods._extension().call();
+                const extensionContract = await this.getContract(this.getContextElement("FarmExtensionABI"), extensionAddress);
+                const { host } = await extensionContract.methods.data().call();
+                deployedFarmingContracts.push({ address: farmMainAddress, sender: host });
             }
             return deployedFarmingContracts;
         } catch (error) {
+            if ((error.message || error).indexOf("header not found") !== -1) {
+                return await this.loadDeployedFarmingContracts(factoryAddress);
+            }
             console.error(error);
             return [];
         }
@@ -327,21 +324,29 @@ export default class DFOCore {
     loadDeployedFixedInflationContracts = async(factoryAddress) => {
         try {
             if (!factoryAddress) factoryAddress = this.getContextElement("fixedInflationFactoryAddress");
-            const factoryContract = new this.web3.eth.Contract(this.getContextElement("FixedInflationFactoryABI"), factoryAddress);
-            const events = await factoryContract.getPastEvents('FixedInflationDeployed', { fromBlock: 0 });
+            const factoryContract = await this.getContract(this.getContextElement("FixedInflationFactoryABI"), factoryAddress);
+            const events = await window.getLogs({
+                address: factoryAddress,
+                topics: [
+                    this.web3.utils.sha3('FixedInflationDeployed(address,address,bytes)')
+                ],
+                fromBlock: 0,
+                toBlock: 'latest'
+            });
             this.deployedFixedInflationContracts = [];
-            await Promise.all(events.map(async(event) => {
-                try {
-                    const contract = new this.web3.eth.Contract(this.getContextElement("FixedInflationABI"), event.returnValues.fixedInflationAddress);
-                    const extensionAddress = await contract.methods.extension().call();
-                    const extensionContract = new this.web3.eth.Contract(this.getContextElement("FixedInflationExtensionABI"), extensionAddress);
-                    const { host } = await extensionContract.methods.data().call();
-                    this.deployedFixedInflationContracts.push({ address: event.returnValues.fixedInflationAddress, sender: host });
-                } catch (error) {
-                    console.error(error);
-                }
-            }));
+            for (let i = 0; i < events.length; i++) {
+                const event = events[i];
+                const fixedInflationAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
+                const contract = await this.getContract(this.getContextElement("FixedInflationABI"), fixedInflationAddress);
+                const extensionAddress = await contract.methods.extension().call();
+                const extensionContract = await this.getContract(this.getContextElement("FixedInflationExtensionABI"), extensionAddress);
+                const { host } = await extensionContract.methods.data().call();
+                this.deployedFixedInflationContracts.push({ address: fixedInflationAddress, sender: host });
+            }
         } catch (error) {
+            if ((error.message || error).indexOf("header not found") !== -1) {
+                return await this.loadDeployedFixedInflationContracts(factoryAddress);
+            }
             this.deployedFixedInflationContracts = [];
         }
     };
@@ -349,29 +354,36 @@ export default class DFOCore {
     loadIndexTokens = async(indexAddress) => {
         try {
             if (!indexAddress) indexAddress = this.getContextElement("indexAddress");
-            const indexContract = new this.web3.eth.Contract(this.getContextElement("IndexABI"), indexAddress);
-            const events = await indexContract.getPastEvents('NewIndex', { fromBlock: 11806961 });
-            this.indexTokens = [];
-            await Promise.all(events.map(async(event) => {
-                try {
-                    const exists = this.indexTokens.filter((indexToken) => indexToken.address.toLowerCase() === event.returnValues.interoperableInterfaceAddress.toLowerCase()).length > 0;
-                    if (!exists) {
-                        this.indexTokens.push({ address: event.returnValues.interoperableInterfaceAddress, objectId: event.returnValues.id });
-                    }
-                } catch (error) {
-                    console.error(error);
-                }
-            }));
+            const indexContract = await this.getContract(this.getContextElement("IndexABI"), indexAddress);
+            const events = await window.getLogs({
+                address: indexAddress,
+                topics: [
+                    this.web3.utils.sha3('NewIndex(uint256,address,address,uint256)')
+                ],
+                fromBlock: 11806961,
+                toBlock : 'latest'
+            });
+            var map = {};
+            for (let i = 0; i < events.length; i++) {
+                const event = events[i];
+                const objectId = window.web3.eth.abi.decodeParameter("uint256", event.topics[1]);
+                const address = window.web3.eth.abi.decodeParameter("address", event.topics[2]);
+                map[objectId] = map[objectId] || { address, objectId };
+            }
+            this.indexTokens = Object.values(map);
         } catch (error) {
-            this.indexTokens = [];
+            if ((error.message || error).indexOf("header not found") !== -1) {
+                return await this.loadIndexTokens(indexAddress);
+            }
+            this.indexTokens = this.indexTokens || [];
         }
     }
 
-    getHostedFarmingContracts = async (factoryAddress) => {
+    getHostedFarmingContracts = async(factoryAddress) => {
         try {
             if (!factoryAddress) factoryAddress = this.getContextElement("farmFactoryAddress");
             const deployedFarmingContracts = [];
-            const events = await this.web3.eth.getPastLogs({
+            const events = await window.getLogs({
                 address: factoryAddress,
                 topics: [
                     this.web3.utils.sha3('FarmMainDeployed(address,address,bytes)')
@@ -382,18 +394,17 @@ export default class DFOCore {
             for (let i = 0; i < events.length; i++) {
                 const event = events[i];
                 const farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
-                try {
-                    const contract = new this.web3.eth.Contract(this.getContextElement("FarmMainABI"), farmMainAddress);
-                    const extensionAddress = await contract.methods._extension().call();
-                    const extensionContract = new this.web3.eth.Contract(this.getContextElement("FarmExtensionABI"), extensionAddress);
-                    const { host } = await extensionContract.methods.data().call();
-                    deployedFarmingContracts.push({ address: farmMainAddress, sender: host });
-                } catch (error) {
-                    console.error(error);
-                }
+                const contract = await this.getContract(this.getContextElement("FarmMainABI"), farmMainAddress);
+                const extensionAddress = await contract.methods._extension().call();
+                const extensionContract = await this.getContract(this.getContextElement("FarmExtensionABI"), extensionAddress);
+                const { host } = await extensionContract.methods.data().call();
+                deployedFarmingContracts.push({ address: farmMainAddress, sender: host });
             }
             return deployedFarmingContracts.filter((item) => item.sender.toLowerCase() === this.address.toLowerCase());
         } catch (error) {
+            if ((error.message || error).indexOf("header not found") !== -1) {
+                return await this.getHostedFarmingContracts(factoryAddress);
+            }
             console.error(error);
             return [];
         }
@@ -409,12 +420,12 @@ export default class DFOCore {
         return hasGasMultiplierToken ? parseInt(gasLimit) * parseFloat(this.getContextElement("gasMultiplier")) : gasLimit;
     }
 
-    loadPositions = async (factoryAddress) => {
+    loadPositions = async(factoryAddress) => {
         try {
 
             if (!factoryAddress) factoryAddress = this.getContextElement("farmFactoryAddress");
             const deployedFarmingContracts = [];
-            const events = await this.web3.eth.getPastLogs({
+            const events = await window.getLogs({
                 address: factoryAddress,
                 topics: [
                     this.web3.utils.sha3('FarmMainDeployed(address,address,bytes)')
@@ -426,9 +437,9 @@ export default class DFOCore {
                 const event = events[i];
                 const farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
                 try {
-                    const contract = new this.web3.eth.Contract(this.getContextElement("FarmMainABI"), farmMainAddress);
+                    const contract = await this.getContract(this.getContextElement("FarmMainABI"), farmMainAddress);
                     const extensionAddress = await contract.methods._extension().call();
-                    const extensionContract = new this.web3.eth.Contract(this.getContextElement("FarmExtensionABI"), extensionAddress);
+                    const extensionContract = await this.getContract(this.getContextElement("FarmExtensionABI"), extensionAddress);
                     const { host } = await extensionContract.methods.data().call();
                     deployedFarmingContracts.push({ address: farmMainAddress, sender: host });
                 } catch (error) {
@@ -437,19 +448,19 @@ export default class DFOCore {
             }
             this.positions = [];
             await Promise.all(deployedFarmingContracts.map(async(c) => {
-                const contract = new this.web3.eth.Contract(this.getContextElement("FarmMainABI"), c.address);
+                const contract = await this.getContract(this.getContextElement("FarmMainABI"), c.address);
                 const farmTokenCollectionAddress = await contract.methods._farmTokenCollection().call();
                 let farmTokenCollection = null;
                 if (farmTokenCollectionAddress !== this.voidEthereumAddress) {
                     farmTokenCollection = await this.getContract(this.getContextElement("INativeV1ABI"), farmTokenCollectionAddress);
                 }
                 const events = await window.getLogs({
-                    address : c.address,
-                    topics : [
+                    address: c.address,
+                    topics: [
                         window.web3.utils.sha3("Transfer(uint256,address,address)")
                     ],
                     fromBlock: this.getContextElement('deploySearchStart'),
-                    toBlock: await window.web3ForLogs.eth.getBlockNumber(),
+                    toBlock: 'latest'
                 });
                 const found = [];
                 for (let i = 0; i < events.length; i++) {
@@ -461,7 +472,7 @@ export default class DFOCore {
                         const pos = await contract.methods.position(positionId).call();
                         if (!found.includes(pos.setupIndex)) {
                             try {
-                                const {'0': setup, '1': setupInfo} = await contract.methods.setup(pos.setupIndex).call();
+                                const { '0': setup, '1': setupInfo } = await contract.methods.setup(pos.setupIndex).call();
                                 if (this.isValidPosition(pos) && !this.positions.includes({...setup, contract, setupInfo, setupIndex: pos.setupIndex })) {
                                     this.positions.push({...setup, contract, setupInfo, setupIndex: pos.setupIndex });
                                     found.push(pos.setupIndex);
@@ -476,11 +487,11 @@ export default class DFOCore {
                     const farmTokenEvents = await contract.getPastEvents('FarmToken', { fromBlock: this.getContextElement('deploySearchStart') });
                     for (let i = 0; i < farmTokenEvents.length; i++) {
                         try {
-                            const farmTokenEvent = farmTokenEvents[i]; 
+                            const farmTokenEvent = farmTokenEvents[i];
                             const { returnValues } = farmTokenEvent;
                             const { objectId, setupIndex } = returnValues;
                             if (!found.includes(setupIndex)) {
-                                const {'0': setup, '1': setupInfo} = await contract.methods.setup(setupIndex).call();
+                                const { '0': setup, '1': setupInfo } = await contract.methods.setup(setupIndex).call();
                                 const balance = await farmTokenCollection.methods.balanceOf(this.address, objectId).call();
                                 if (parseInt(balance) > 0) {
                                     this.positions.push({...setup, contract, setupInfo, setupIndex })
