@@ -38,10 +38,7 @@ const CreateOrEditFarmingSetups = (props) => {
                     <p style={{fontSize: 14}}>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quaerat animi ipsam nemo at nobis odit temporibus autem possimus quae vel, ratione numquam modi rem accusamus, veniam neque voluptates necessitatibus enim!</p>
                 </div>
                 <div className="row justify-content-center">
-                    <a className="backActionBTN mr-2" onClick={() => {
-                        //farmingSetups.forEach((_, index) => onRemoveFarmingSetup(index));
-                        onCancel();
-                    }}>Back</a>
+                    <a className="backActionBTN mr-2" onClick={onCancel}>Back</a>
                     <a onClick={() => selectedFarmingType && setCurrentStep(1)} disabled={!selectedFarmingType} className="web2ActionBTN ml-2">Next</a>
                 </div>
                 {farmingSetups.length === 0 && <div className="row mt-4 justify-content-center">

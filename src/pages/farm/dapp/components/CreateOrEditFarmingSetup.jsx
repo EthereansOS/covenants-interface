@@ -28,7 +28,7 @@ const CreateOrEditFarmingSetup = (props) => {
     const [currentStep, setCurrentStep] = useState(0);
 
     useEffect(() => {
-        if(editSetup && (editSetup.liquidityPoolTokenAddress || (editSetup.liquidityPoolToken && editSetup.liquidityPoolToken.address))) {
+        if (editSetup && (editSetup.liquidityPoolTokenAddress || (editSetup.liquidityPoolToken && editSetup.liquidityPoolToken.address))) {
             onSelectLiquidityPoolToken(editSetup.liquidityPoolTokenAddress || editSetup.liquidityPoolToken.address).then(() => editSetup.mainToken && setMainToken(editSetup.mainToken));
         }
     }, []);
@@ -66,8 +66,8 @@ const CreateOrEditFarmingSetup = (props) => {
             const lpTokenContract = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), address);
             const decimals = await lpTokenContract.methods.decimals().call();
             if (!ethTokenFound) setEthSelectData(null);
-            setLiquidityPoolToken({ 
-                address, 
+            setLiquidityPoolToken({
+                address,
                 name,
                 tokens,
                 decimals,
@@ -145,11 +145,11 @@ const CreateOrEditFarmingSetup = (props) => {
                     <div className="spinner-border text-secondary" role="status">
                         <span className="visually-hidden"></span>
                     </div>
-                </div> :  <>
+                </div> : <>
                     <div className="row mb-4">
-                        { (liquidityPoolToken && liquidityPoolToken.tokens.length > 0) && <div className="col-12">
-                                <b>{liquidityPoolToken.name} | {liquidityPoolToken.tokens.map((token) => <>{!token.isEth ? token.symbol : involvingEth ? 'ETH' : token.symbol} </>)}</b> {liquidityPoolToken.tokens.map((token) => <Coin address={!token.isEth ? token.address : involvingEth ? props.dfoCore.voidEthereumAddress : token.address} className="mr-2" /> )}
-                            </div>
+                        {(liquidityPoolToken && liquidityPoolToken.tokens.length > 0) && <div className="col-12">
+                            <b>{liquidityPoolToken.name} | {liquidityPoolToken.tokens.map((token) => <>{!token.isEth ? token.symbol : involvingEth ? 'ETH' : token.symbol} </>)}</b> {liquidityPoolToken.tokens.map((token) => <Coin address={!token.isEth ? token.address : involvingEth ? props.dfoCore.voidEthereumAddress : token.address} className="mr-2" />)}
+                        </div>
                         }
                     </div>
                     {
@@ -166,18 +166,18 @@ const CreateOrEditFarmingSetup = (props) => {
                             }
                             {
                                 selectedFarmingType === 'locked' && <>
-                                <select className="SelectRegular" value={mainTokenIndex} onChange={(e) => { setMainTokenIndex(e.target.value); setMainToken(liquidityPoolToken.tokens[e.target.value]); }}>
-                                    {
-                                        liquidityPoolToken.tokens.map((tk, index) => {
-                                            return <option key={tk.address} value={index}>{!tk.isEth ? tk.symbol : involvingEth ? 'ETH' : tk.symbol}</option>
-                                        })
-                                    }
-                                </select>
-                                <div className="row justify-content-center mt-4 mb-4">
-                                    <div className="col-6">
-                                        <Input label={"Max stakeable"} min={0} showCoin={true} address={(mainToken.isEth && involvingEth) ? props.dfoCore.voidEthereumAddress : mainToken.address} value={maxStakeable} name={(mainToken.isEth && involvingEth) ? 'ETH' : mainToken.symbol} onChange={(e) => setMaxStakeable(e.target.value)} />
+                                    <select className="SelectRegular" value={mainTokenIndex} onChange={(e) => { setMainTokenIndex(e.target.value); setMainToken(liquidityPoolToken.tokens[e.target.value]); }}>
+                                        {
+                                            liquidityPoolToken.tokens.map((tk, index) => {
+                                                return <option key={tk.address} value={index}>{!tk.isEth ? tk.symbol : involvingEth ? 'ETH' : tk.symbol}</option>
+                                            })
+                                        }
+                                    </select>
+                                    <div className="row justify-content-center mt-4 mb-4">
+                                        <div className="col-6">
+                                            <Input label={"Max stakeable"} min={0} showCoin={true} address={(mainToken.isEth && involvingEth) ? props.dfoCore.voidEthereumAddress : mainToken.address} value={maxStakeable} name={(mainToken.isEth && involvingEth) ? 'ETH' : mainToken.symbol} onChange={(e) => setMaxStakeable(e.target.value)} />
+                                        </div>
                                     </div>
-                                </div>
                                 </>
                             }
                             <div className="row justify-content-center my-4">
@@ -186,16 +186,17 @@ const CreateOrEditFarmingSetup = (props) => {
                                 </div>
                             </div>
                             {
-                                selectedFarmingType === 'free' ? <div className="row justify-content-center align-items-center flex-column mb-2">
-                                    <p className="text-center"><b>Total reward ({`${blockDuration}`} blocks): {rewardPerBlock * blockDuration} {rewardToken.symbol}</b></p>
-                                </div> : <div className="row justify-content-center align-items-center flex-column mb-2">
-                                    <p className="text-center"><b>Reward/block per {(mainToken.isEth && involvingEth) ? 'ETH': mainToken.symbol}: {!maxStakeable ? 0 : window.numberToString((rewardPerBlock * (1 / maxStakeable)))} {rewardToken.symbol}</b></p>
+                                selectedFarmingType !== 'free' && <div className="row justify-content-center align-items-center flex-column mb-2">
+                                    <p className="text-center"><b>Reward/block per {(mainToken.isEth && involvingEth) ? 'ETH' : mainToken.symbol}: {!maxStakeable ? 0 : window.numberToString((rewardPerBlock * (1 / maxStakeable)))} {rewardToken.symbol}</b></p>
                                 </div>
                             }
+                            <div className="row justify-content-center align-items-center flex-column mb-2">
+                                <p className="text-center"><b>Total reward ({`${blockDuration}`} blocks): {rewardPerBlock * blockDuration} {rewardToken.symbol}</b></p>
+                            </div>
                         </>
                     }
                     <div className="row justify-content-center mb-4">
-                        <a onClick={() => onCancel() } className="backActionBTN mr-4">Back</a>
+                        <a onClick={() => onCancel()} className="backActionBTN mr-4">Back</a>
                         <a onClick={() => setCurrentStep(1)} className="web2ActionBTN ml-4">Next</a>
                     </div>
                 </>
@@ -220,14 +221,14 @@ const CreateOrEditFarmingSetup = (props) => {
                             <Input min={0} showCoin={true} address={(!mainToken?.isEth && !liquidityPoolToken.tokens[mainTokenIndex].isEth) ? `${mainToken?.address || liquidityPoolToken.tokens[mainTokenIndex].address}` : involvingEth ? props.dfoCore.voidEthereumAddress : `${mainToken?.address || liquidityPoolToken.tokens[mainTokenIndex].address}`} value={minStakeable} name={(!mainToken?.isEth && !liquidityPoolToken.tokens[mainTokenIndex].isEth) ? `${mainToken?.symbol || liquidityPoolToken.tokens[mainTokenIndex].symbol}` : involvingEth ? 'ETH' : `${mainToken?.symbol || liquidityPoolToken.tokens[mainTokenIndex].symbol}`} onChange={(e) => setMinSteakeable(e.target.value)} />
                         </div>
                         {
-                            selectedFarmingType === 'free' &&  <div className="col-12 mt-4">
-                                { parseFloat(minStakeable) > 0 && <select className="SelectRegular" value={mainTokenIndex} onChange={(e) => { setMainTokenIndex(e.target.value); setMainToken(liquidityPoolToken.tokens[e.target.value]); }}>
-                                        {
-                                            liquidityPoolToken.tokens.map((tk, index) => {
-                                                return <option key={tk.address} value={index}>{!tk.isEth ? tk.symbol : involvingEth ? 'ETH' : tk.symbol}</option>
-                                            })
-                                        }
-                                    </select>
+                            selectedFarmingType === 'free' && <div className="col-12 mt-4">
+                                {parseFloat(minStakeable) > 0 && <select className="SelectRegular" value={mainTokenIndex} onChange={(e) => { setMainTokenIndex(e.target.value); setMainToken(liquidityPoolToken.tokens[e.target.value]); }}>
+                                    {
+                                        liquidityPoolToken.tokens.map((tk, index) => {
+                                            return <option key={tk.address} value={index}>{!tk.isEth ? tk.symbol : involvingEth ? 'ETH' : tk.symbol}</option>
+                                        })
+                                    }
+                                </select>
                                 }
                             </div>
                         }
@@ -251,7 +252,7 @@ const CreateOrEditFarmingSetup = (props) => {
                                 <div className="col-md-6 col-12 flex justify-content-center">
                                     <div className="SpecialInputPerch">
                                         <aside>%</aside>
-                                        <input type="number" min={0} max={100} value={penaltyFee} onChange={(e) => onUpdatePenaltyFee(e.target.value)} className="TextRegular"  />
+                                        <input type="number" min={0} max={100} value={penaltyFee} onChange={(e) => onUpdatePenaltyFee(e.target.value)} className="TextRegular" />
                                     </div>
                                 </div>
                             </div>
@@ -263,7 +264,7 @@ const CreateOrEditFarmingSetup = (props) => {
                 }
                 <div className="row justify-content-center">
                     <div className="form-check my-4">
-                        <input className="form-check-input" type="checkbox" checked={isRenewable} onChange={(e) => { 
+                        <input className="form-check-input" type="checkbox" checked={isRenewable} onChange={(e) => {
                             setRenewTimes(0);
                             setIsRenewable(e.target.checked);
                         }} id="repeat" />
@@ -283,14 +284,14 @@ const CreateOrEditFarmingSetup = (props) => {
                     <p className="text-center text-small">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Omnis delectus incidunt laudantium distinctio velit reprehenderit quaerat, deserunt sint fugit ex consectetur voluptas suscipit numquam. Officiis maiores quaerat quod necessitatibus perspiciatis!</p>
                 </div>
                 <div className="row justify-content-center mb-4">
-                    <a onClick={() => setCurrentStep(0) } className="backActionBTN mr-4">Back</a>
+                    <a onClick={() => setCurrentStep(0)} className="backActionBTN mr-4">Back</a>
                     <a onClick={() => addSetup()} className="web2ActionBTN ml-4">{editSetup ? 'Edit' : 'Add'}</a>
                 </div>
             </div>
         )
     }
-    
-    return currentStep === 0 ? getFirstStep() : currentStep === 1 ? getSecondStep() : <div/>
+
+    return currentStep === 0 ? getFirstStep() : currentStep === 1 ? getSecondStep() : <div />
 
 }
 

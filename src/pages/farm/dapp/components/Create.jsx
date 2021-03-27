@@ -37,6 +37,8 @@ const Create = (props) => {
     const [farmingExtensionTemplateCode, setFarmingExtensionTemplateCode] = useState("");
 
     const [hasTreasuryAddress, setHasTreasuryAddress] = useState(false);
+    const [farmingContract, setFarmingContract] = useState("");
+    const [totalRewardToSend, setTotalRewardToSend] = useState(0);
 
     useEffect(async () => {
         setFarmingExtensionTemplateCode(await (await fetch(FarmingExtensionTemplateLocation)).text());
@@ -86,13 +88,19 @@ const Create = (props) => {
     const initializeDeployData = async () => {
         setDeployLoading(true);
         try {
-            const host = selectedHost === 'wallet' ? hostWalletAddress : hostDeployedContract;
+            const host = props.dfoCore.web3.utils.toChecksumAddress(selectedHost === 'wallet' ? hostWalletAddress : hostDeployedContract);
             const hasExtension = (selectedHost === "custom-extension" && hostDeployedContract && !deployContract);
             const data = { setups: [], rewardTokenAddress: selectedRewardToken.address, byMint, deployContract, host, hasExtension, extensionInitData: extensionPayload || '' };
             const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
             console.log(farmingSetups);
+            var calculatedTotalToSend = "0";
             for (let i = 0; i < farmingSetups.length; i++) {
                 const setup = farmingSetups[i];
+                calculatedTotalToSend = 
+                    props.dfoCore.web3.utils.toBN(calculatedTotalToSend).add(
+                        props.dfoCore.web3.utils.toBN(window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.rewardPerBlock), selectedRewardToken.decimals)),
+                        ).mul(props.dfoCore.web3.utils.toBN(window.numberToString(setup.blockDuration)))
+                    ).toString();
                 const isFree = setup.free;
                 const result = await ammAggregator.methods.findByLiquidityPool(setup.liquidityPoolToken.address).call();
                 const { amm } = result;
@@ -121,6 +129,7 @@ const Create = (props) => {
             }
             console.log(data);
             setDeployData(data);
+            setTotalRewardToSend(calculatedTotalToSend);
         } catch (error) {
             console.error(error);
             setDeployData(null);
@@ -146,7 +155,7 @@ const Create = (props) => {
             ];
             console.log(deployData);
             const encodedSetups = abi.encode(["tuple(bool,uint256,uint256,uint256,uint256,uint256,address,address,address,address,bool,uint256,uint256,uint256)[]"], [setups]);
-            const params = [extensionAddress ? extensionAddress : hostDeployedContract, extensionPayload || extensionInitData || "0x", props.dfoCore.getContextElement("ethItemOrchestratorAddress"), rewardTokenAddress, encodedSetups || 0];
+            const params = [props.dfoCore.web3.utils.toChecksumAddress(extensionAddress ? extensionAddress : hostDeployedContract), extensionPayload || extensionInitData || "0x", props.dfoCore.getContextElement("ethItemOrchestratorAddress"), rewardTokenAddress, encodedSetups || 0];
             console.log(params)
             console.log(extensionInitData);
             console.log(extensionPayload);
@@ -154,10 +163,10 @@ const Create = (props) => {
             const payload = props.dfoCore.web3.utils.sha3(`init(${types.join(',')})`).substring(0, 10) + (props.dfoCore.web3.eth.abi.encodeParameters(types, params).substring(2));
             console.log(payload);
             const gas = await farmFactory.methods.deploy(payload).estimateGas({ from: props.dfoCore.address });
-            // const gas = 8000000;
-            //console.log(gas);
             deployTransaction = await farmFactory.methods.deploy(payload).send({ from: props.dfoCore.address, gas });
-            console.log(deployTransaction);
+            deployTransaction = await props.dfoCore.web3.eth.getTransactionReceipt(deployTransaction.transactionHash);
+            var farmMainContractAddress = props.dfoCore.web3.eth.abi.decodeParameter("address", deployTransaction.logs.filter(it => it.topics[0] === props.dfoCore.web3.utils.sha3("FarmMainDeployed(address,address,bytes)"))[0].topics[1]);
+            setFarmingContract(farmMainContractAddress);
         } catch (error) {
             console.error(error);
             error = true;
@@ -168,8 +177,6 @@ const Create = (props) => {
                     removeFarmingSetup(i);
                 }));
                 props.setFarmingContractStep(0);
-                setSelectedRewardToken(null);
-                setByMint(false);
                 setDeployStep(deployStep + 1);
             }
             setDeployLoading(false);
@@ -335,7 +342,7 @@ const Create = (props) => {
                     <h6><b>Deploy Farming Contract</b></h6>
                 </div>
                 <div className="row">
-                    <a onClick={() => setDeployStep(1)} className="backActionBTN mr-4">Back</a>
+                    <a onClick={() => setDeployStep(hostDeployedContract ? 0 : 1)} className="backActionBTN mr-4">Back</a>
                     <a onClick={() => deploy()} className="Web3ActionBTN">Deploy contract</a>
                 </div>
             </div>
@@ -418,7 +425,7 @@ const Create = (props) => {
                             return;
                         }
                         initializeDeployData();
-                        setDeployStep((selectedHost === 'custom-extension' && hostDeployedContract && !deployContract) ? 2 : 1);
+                        setDeployStep(hostDeployedContract ? 2 : 1);
                     }} className="web2ActionBTN ml-4" disabled={!canDeploy()}>Deploy</a>
                 </div>
             </div>
@@ -444,6 +451,17 @@ const Create = (props) => {
         )
     }
 
+    if(farmingContract) {
+        return (
+            <div>
+                <h3>Congratulations!</h3>
+                <p>You can find the new farming contract at the address <a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + farmingContract} target="_blank">{farmingContract}</a></p>
+                {!byMint && <p>In order to be able to activate all the setups you created, you must send {window.fromDecimals(totalRewardToSend, selectedRewardToken.decimals, true)} {selectedRewardToken.symbol} <Coin address={selectedRewardToken.address}/> to its extension, having address <a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + deployData.extensionAddress} target="_blank">{deployData.extensionAddress}</a></p>}
+                {byMint && <p>In order to be able to activate all the setups you created, be sure to grant the permission to mint at least {window.fromDecimals(totalRewardToSend, selectedRewardToken.decimals, true)} {selectedRewardToken.symbol} <Coin address={selectedRewardToken.address}/> for the extension <a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + deployData.extensionAddress} target="_blank">{deployData.extensionAddress}</a> </p>}
+            </div>
+        );
+    }
+
     if (isDeploy) {
         return (
             <div className="create-component">
@@ -456,8 +474,11 @@ const Create = (props) => {
 
     return (
         <div>
-            { !props.farmingContract && getCreationComponent()}
-            { props.farmingContract && getFarmingContractStatus()}
+            {/* @locked for upcoming release 
+            { !props.farmingContract && getCreationComponent() }
+            { props.farmingContract && getFarmingContractStatus() }
+            */}
+            <h3>Coming soon</h3>
         </div>
     )
 }
