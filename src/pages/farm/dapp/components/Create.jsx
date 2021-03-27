@@ -231,6 +231,36 @@ const Create = (props) => {
         setTreasuryAddress(window.isEthereumAddress(addr) ? addr : "");
     }
 
+    function onHostSelection(e) {
+        setSelectedHost(e.target.value);
+        setHostWalletAddress("");
+        setHostDeployedContract("");
+        setExtensionPayload("");
+        setUseDeployedContract(false);
+        setTreasuryAddress("");
+        setHasTreasuryAddress(false);
+        setDeployContract(null);
+    }
+
+    function canDeploy() {
+        if(!selectedHost) {
+            return false;
+        }
+        if(selectedHost === 'wallet') {
+            if(hasTreasuryAddress && !window.isEthereumAddress(treasuryAddress)) {
+                return false;
+            }
+            return window.isEthereumAddress(hostWalletAddress);
+        }
+        if(selectedHost === 'custom-extension') {
+            if(useDeployedContract) {
+                return window.isEthereumAddress(hostDeployedContract);
+            }
+            return deployContract !== undefined && deployContract !== null && deployContract.contract !== undefined && deployContract.contract !== null;
+        }
+        return window.isEthereumAddress(hostDeployedContract);
+    }
+
     const getCreationComponent = () => {
         return <div className="col-12">
             <div className="row justify-content-center mb-4">
@@ -327,10 +357,11 @@ const Create = (props) => {
                 </div>
                 <div className="row mb-4">
                     <div className="col-12 p-0">
-                        <select className="SelectRegular" value={selectedHost} onChange={(e) => setSelectedHost(e.target.value)}>
+                        <select className="SelectRegular" value={selectedHost} onChange={onHostSelection}>
                             <option value="">Choose an host..</option>
-                            <option value="custom-extension">Contract</option>
                             <option value="wallet">Wallet</option>
+                            <option value="custom-extension">Custom Contract</option>
+                            <option value="deployed-contract">Already deployed Contract</option>
                         </select>
                     </div>
                 </div>
@@ -345,13 +376,13 @@ const Create = (props) => {
                         <div className="row mb-4 justify-content-center">
                             <label>
                                 Set separated treasury
-                                    <input type="checkbox" value={hasTreasuryAddress} onChange={onHasTreasuryAddress} />
+                                <input type="checkbox" checked={hasTreasuryAddress} onChange={onHasTreasuryAddress} />
                             </label>
                             {hasTreasuryAddress && <input type="text" className="TextRegular" value={treasuryAddress || ""} onChange={onTreasuryAddressChange} placeholder={"Treasury address"} aria-label={"Treasury address"} />}
                         </div>
                     </> : selectedHost === 'custom-extension' ? <>
                         <div className="form-check my-4">
-                            <input className="form-check-input" type="checkbox" value={useDeployedContract} onChange={(e) => setUseDeployedContract(e.target.checked)} id="setIsDeploy" />
+                            <input className="form-check-input" type="checkbox" checked={useDeployedContract} onChange={(e) => setUseDeployedContract(e.target.checked)} id="setIsDeploy" />
                             <label className="form-check-label" htmlFor="setIsDeploy">
                                 Use deployed contract
                             </label>
@@ -367,6 +398,14 @@ const Create = (props) => {
                             <h6><b>Extension payload</b></h6>
                             <input type="text" className="TextRegular" value={extensionPayload || ""} onChange={(e) => setExtensionPayload(e.target.value.toString())} placeholder={"Payload"} aria-label={"Payload"} />
                         </div>
+                    </> : selectedHost === 'deployed-contract' ? <>
+                        <div className="row mb-2">
+                            <input type="text" className="TextRegular" value={hostDeployedContract} onChange={(e) => setHostDeployedContract(e.target.value.toString())} placeholder={"Deployed contract address"} aria-label={"Deployed contract address"} />
+                        </div>
+                        <div>
+                            <h6><b>Extension payload</b></h6>
+                            <input type="text" className="TextRegular" value={extensionPayload || ""} onChange={(e) => setExtensionPayload(e.target.value.toString())} placeholder={"Payload"} aria-label={"Payload"} />
+                        </div>
                     </> : <div />
                 }
                 <div className="row justify-content-center my-4">
@@ -375,9 +414,12 @@ const Create = (props) => {
                         setIsDeploy(false);
                     }} className="backActionBTN mr-4">Back</a>
                     <a onClick={() => {
+                        if(!canDeploy()) {
+                            return;
+                        }
                         initializeDeployData();
                         setDeployStep((selectedHost === 'custom-extension' && hostDeployedContract && !deployContract) ? 2 : 1);
-                    }} className="web2ActionBTN ml-4" disabled={!selectedHost || (selectedHost === 'wallet' && !hostWalletAddress) || (selectedHost === 'custom-extension' && ((!useDeployedContract && (!deployContract || !deployContract.contract)) || (useDeployedContract && !hostDeployedContract)))}>Deploy</a>
+                    }} className="web2ActionBTN ml-4" disabled={!canDeploy()}>Deploy</a>
                 </div>
             </div>
         )
