@@ -20,7 +20,7 @@ const Hosted = (props) => {
         try {
             const hostedContracts = await dfoCore.getHostedFarmingContracts();
             const mappedContracts = await Promise.all(
-                hostedContracts.map(async (c) => { 
+                hostedContracts.map(async (c) => {
                     try {
                         const contract = await dfoCore.getContract(dfoCore.getContextElement('FarmMainABI'), c.address)
                         const rewardTokenAddress = await contract.methods._rewardTokenAddress().call();
@@ -36,11 +36,11 @@ const Hosted = (props) => {
                         const lockedSetups = [];
                         let totalFreeSetups = 0;
                         let totalLockedSetups = 0;
-                
+
                         let rewardPerBlock = 0;
                         let canActivateSetup = false;
                         await Promise.all(setups.map(async (setup, i) => {
-                            const {'0': s, '1': setupInfo} = await contract.methods.setup(i).call();
+                            const { '0': s, '1': setupInfo } = await contract.methods.setup(i).call();
                             if (!canActivateSetup) {
                                 canActivateSetup = parseInt(setupInfo.renewTimes) > 0 && !setup.active && parseInt(setupInfo.lastSetupIndex) === parseInt(i);
                             }
@@ -52,7 +52,7 @@ const Hosted = (props) => {
                                 setupInfo.free ? totalFreeSetups += 1 : totalLockedSetups += 1;
                             }
                         }))
-                
+
                         const metadata = {
                             name: `Farm ${symbol}`,
                             contractAddress: contract.options.address,
@@ -113,34 +113,32 @@ const Hosted = (props) => {
 
     return (
         <div className="MainExploration">
-            {/*
+
             <h6><b>Reward token address</b></h6>
             <input type="text" className="TextRegular" placeholder="Reward token address.." value={tokenFilter} onChange={(e) => onChangeTokenFilter(e.target.value)} />
             {
-                loading ? 
-                <div className="row mt-4">
-                    <div className="col-12 justify-content-center">
-                        <div className="spinner-border text-secondary" role="status">
-                            <span className="visually-hidden"></span>
+                loading ?
+                    <div className="row mt-4">
+                        <div className="col-12 justify-content-center">
+                            <div className="spinner-border text-secondary" role="status">
+                                <span className="visually-hidden"></span>
+                            </div>
                         </div>
+                    </div> : <div className="ListOfThings">
+                        {
+                            farmingContracts.length === 0 && <div className="col-12 text-left">
+                                <h6><b>No farming contract available!</b></h6>
+                            </div>
+                        }
+                        {
+                            farmingContracts.length > 0 && farmingContracts.map((farmingContract) => {
+                                return (
+                                    <FarmingComponent key={farmingContract.contract.options.address} className="FarmContract" dfoCore={dfoCore} metadata={farmingContract.metadata} hostedBy={true} hasBorder />
+                                )
+                            })
+                        }
                     </div>
-                </div> : <div className="ListOfThings">
-                    {
-                        farmingContracts.length === 0 && <div className="col-12 text-left">
-                            <h6><b>No farming contract available!</b></h6>
-                        </div>
-                    }
-                    {
-                        farmingContracts.length > 0 && farmingContracts.map((farmingContract) => {
-                            return (
-                                <FarmingComponent key={farmingContract.contract.options.address} className="FarmContract" dfoCore={dfoCore} metadata={farmingContract.metadata} hostedBy={true} hasBorder />
-                            )
-                        })
-                    }
-                </div>
             }
-            */}
-                <h3>Coming soon</h3>
         </div>
     )
 }

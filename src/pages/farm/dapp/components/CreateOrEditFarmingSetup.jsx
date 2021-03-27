@@ -46,6 +46,7 @@ const CreateOrEditFarmingSetup = (props) => {
             const lpInfo = await ammContract.methods.byLiquidityPool(address).call();
             const tokens = [];
             let ethTokenFound = false;
+            setInvolvingEth(false);
             await Promise.all(lpInfo[2].map(async (tkAddress) => {
                 if (tkAddress.toLowerCase() === ammData[0].toLowerCase()) {
                     setInvolvingEth(true);

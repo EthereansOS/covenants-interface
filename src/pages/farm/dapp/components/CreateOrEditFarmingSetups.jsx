@@ -41,7 +41,7 @@ const CreateOrEditFarmingSetups = (props) => {
                     <a className="backActionBTN mr-2" onClick={onCancel}>Back</a>
                     <a onClick={() => selectedFarmingType && setCurrentStep(1)} disabled={!selectedFarmingType} className="web2ActionBTN ml-2">Next</a>
                 </div>
-                {farmingSetups.length === 0 && <div className="row mt-4 justify-content-center">
+                {farmingSetups.length === 0 && !props.forEdit && <div className="row mt-4 justify-content-center">
                     <a className="web2ActionBTN" onClick={onFinish}>Deploy without setups</a>
                 </div>}
             </div>
@@ -72,7 +72,7 @@ const CreateOrEditFarmingSetups = (props) => {
                     <a onClick={() => {
                         farmingSetups.forEach((_, index) => onRemoveFarmingSetup(index));
                         onCancel();
-                    }} className="backActionBTN mr-4">Back</a> <a onClick={() => onFinish()} className="web2ActionBTN ml-4">Next</a>
+                    }} className="backActionBTN mr-4">Back</a> {props.finishButton || <a onClick={() => onFinish()} className="web2ActionBTN ml-4">Next</a>}
                 </div>
             </div>
         </div>

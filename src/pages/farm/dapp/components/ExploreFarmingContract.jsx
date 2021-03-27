@@ -4,7 +4,8 @@ import { useParams } from 'react-router';
 import { FarmingComponent, SetupComponent } from '../../../../components';
 import Create from './Create';
 import CreateOrEditFarmingSetups from './CreateOrEditFarmingSetups';
-
+import { Coin } from '../../../../components/shared';
+import Loading from '../../../../components/shared/Loading'
 
 const ExploreFarmingContract = (props) => {
     const { dfoCore, farmAddress, withoutBack } = props;
@@ -17,13 +18,13 @@ const ExploreFarmingContract = (props) => {
     const [metadata, setMetadata] = useState(null);
     const [isHost, setIsHost] = useState(false);
     const [isAdd, setIsAdd] = useState(false);
-    const [isFinished, setIsFinished] = useState(false);
     const [loading, setLoading] = useState(true);
     const [extension, setExtension] = useState(null);
     const [setupsLoading, setSetupsLoading] = useState(false);
     const [token, setToken] = useState(null);
     const [showOldSetups, setShowOldSetups] = useState(false);
     const [newFarmingSetups, setNewFarmingSetups] = useState([]);
+    const [totalRewardToSend, setTotalRewardToSend] = useState(0);
 
     useEffect(() => {
         if (dfoCore) {
@@ -31,7 +32,7 @@ const ExploreFarmingContract = (props) => {
         }
     }, []);
 
-   
+
     const getContractMetadata = async () => {
         setLoading(true);
         try {
@@ -65,7 +66,7 @@ const ExploreFarmingContract = (props) => {
                 }
                 if (setup.rewardPerBlock !== "0") {
                     setupInfo.free ? totalFreeSetups += 1 : totalLockedSetups += 1;
-                    res.push({...setup, setupInfo, rewardTokenAddress, setupIndex: i, finished: (parseInt(blockNumber) > parseInt(setup.endBlock) && parseInt(setup.endBlock) !== 0) || (parseInt(setup.endBlock) === 0 && parseInt(setupInfo.renewTimes) === 0) })
+                    res.push({ ...setup, setupInfo, rewardTokenAddress, setupIndex: i, finished: (parseInt(blockNumber) > parseInt(setup.endBlock) && parseInt(setup.endBlock) !== 0) || (parseInt(setup.endBlock) === 0 && parseInt(setupInfo.renewTimes) === 0) })
                 }
                 if (setup.active && (parseInt(setup.endBlock) > blockNumber)) {
                     setupInfo.free ? freeSetups.push(setup) : lockedSetups.push(setup);
@@ -74,7 +75,7 @@ const ExploreFarmingContract = (props) => {
             }
             const sortedRes = res.sort((a, b) => b.active - a.active);
             setFarmingSetups(sortedRes);
-    
+
             const metadata = {
                 name: `Farm ${rewardTokenSymbol}`,
                 contractAddress: lmContract.options.address,
@@ -103,7 +104,7 @@ const ExploreFarmingContract = (props) => {
     const isWeth = (address) => {
         return (address.toLowerCase() === dfoCore.getContextElement('wethTokenAddress').toLowerCase()) || (address === dfoCore.voidEthereumAddress);
     }
-    
+
     const addFarmingSetup = (setup) => {
         setNewFarmingSetups(newFarmingSetups.concat(setup));
     }
@@ -126,41 +127,49 @@ const ExploreFarmingContract = (props) => {
         try {
             const newSetupsInfo = [];
             const ammAggregator = await dfoCore.getContract(dfoCore.getContextElement('AMMAggregatorABI'), dfoCore.getContextElement('ammAggregatorAddress'));
-            await Promise.all(newFarmingSetups.map(async (_, i) => {
+            var calculatedTotalToSend = "0";
+            for (var i in newFarmingSetups) {
                 const setup = newFarmingSetups[i];
-                const isFree = !setup.maxLiquidity;
-                const result = await ammAggregator.methods.findByLiquidityPool(isFree ? setup.data.address : setup.secondaryToken.address).call();
+                calculatedTotalToSend =
+                    props.dfoCore.web3.utils.toBN(calculatedTotalToSend).add(
+                        props.dfoCore.web3.utils.toBN(window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.rewardPerBlock), token.decimals)),
+                        ).mul(props.dfoCore.web3.utils.toBN(window.numberToString(setup.blockDuration)))
+                    ).toString();
+                const isFree = setup.free;
+                const result = await ammAggregator.methods.findByLiquidityPool(setup.liquidityPoolToken.address).call();
                 const { amm } = result;
-                const ammContract = await dfoCore.getContract(dfoCore.getContextElement('AMMABI'), amm);
-                const res = await ammContract.methods.byLiquidityPool(isFree ? setup.data.address : setup.secondaryToken.address).call();
-                const involvingETH = res['2'].filter((address) => isWeth(address)).length > 0;
-                const setupInfo = 
+                var mainTokenAddress = isFree ? setup.liquidityPoolToken.tokens[0].address : setup.mainToken.address;
+                const mainTokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), mainTokenAddress);
+                const mainTokenDecimals = mainTokenAddress === window.voidEthereumAddress ? 18 : await mainTokenContract.methods.decimals().call();
+                const setupInfo =
                 {
                     add: true,
                     disable: false,
                     index: 0,
                     info: {
                         free: isFree,
-                        blockDuration: parseInt(setup.period),
-                        originalRewardPerBlock: dfoCore.fromDecimals(setup.rewardPerBlock),
-                        minStakeable: dfoCore.fromDecimals(setup.minStakeable),
-                        maxStakeable: !isFree ? dfoCore.fromDecimals(setup.maxLiquidity) : 0,
+                        blockDuration: parseInt(setup.blockDuration),
+                        originalRewardPerBlock: window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.rewardPerBlock), token.decimals)),
+                        minStakeable: window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.minStakeable), mainTokenDecimals)),
+                        maxStakeable : !isFree ? window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.maxStakeable)), mainTokenDecimals) : 0,
                         renewTimes: setup.renewTimes,
-                        ammPlugin:  amm,
-                        liquidityPoolTokenAddress: isFree ? setup.data.address : setup.secondaryToken.address,
-                        mainTokenAddress: result[2][0],
+                        ammPlugin: amm,
+                        liquidityPoolTokenAddress: setup.liquidityPoolToken.address,
+                        mainTokenAddress,
                         ethereumAddress: dfoCore.voidEthereumAddress,
-                        involvingETH,
-                        penaltyFee: isFree ? 0 : dfoCore.fromDecimals(parseFloat(parseFloat(setup.penaltyFee) / 100).toString()),
+                        involvingETH: setup.involvingEth,
+                        penaltyFee: isFree ? 0 : props.dfoCore.fromDecimals(window.numberToString(parseFloat(setup.penaltyFee) / 100)),
                         setupsCount: 0,
-                        lastSetupIndex: 0,
+                        lastSetupIndex: 0
                     }
                 };
                 newSetupsInfo.push(setupInfo);
-            }));
+            }
+            console.log(newSetupsInfo);
             const gas = await extension.methods.setFarmingSetups(newSetupsInfo).estimateGas({ from: dfoCore.address });
             console.log(`gas ${gas}`);
             const result = await extension.methods.setFarmingSetups(newSetupsInfo).send({ from: dfoCore.address, gas });
+            setTotalRewardToSend(calculatedTotalToSend);
         } catch (error) {
             console.error(error);
         } finally {
@@ -173,40 +182,40 @@ const ExploreFarmingContract = (props) => {
 
 
     if (loading) {
-        return (
-            <div className="ListOfThings">
-                <div className="row">
-                    <div className="col-12 justify-content-center">
-                        <div className="spinner-border text-secondary" role="status">
-                            <span className="visually-hidden"></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
+        return (<Loading/>);
     }
 
     const lockedSetups = farmingSetups.filter((s) => !s.setupInfo.free && !s.finished);
     const freeSetups = farmingSetups.filter((s) => s.setupInfo.free && !s.finished);
     const finishedSetups = farmingSetups.filter((s) => s.finished);
 
+    if(totalRewardToSend) {
+        return (
+            <div>
+                <h3>Congratulations!</h3>
+                <p>In order to be able to activate the new setups you created, {metadata.metadata.byMint ? "be sure to grant the permission to mint at least" : "you must send"} <b>{window.fromDecimals(totalRewardToSend, token.decimals, true)}</b> {token.symbol} <Coin address={token.address}/> {metadata.metadata.byMint ? "for the extension" : "to its extension, having address"} <a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + metadata.metadata.fullExtension} target="_blank">{metadata.metadata.fullExtension}</a></p>
+                <a href="javascript:;" onClick={() => setTotalRewardToSend("")}>Got it</a>
+            </div>
+        );
+    }
+
     return (
         <div className="ListOfThings">
             {
-                (contract && metadata) ? 
-                <div className="row">
-                    <FarmingComponent className="FarmContractOpen" dfoCore={dfoCore} contract={metadata.contract} metadata={metadata.metadata} goBack={true} withoutBack={withoutBack} hostedBy={isHost} />
-                </div> : <div/>
+                (contract && metadata) ?
+                    <div className="row">
+                        <FarmingComponent className="FarmContractOpen" dfoCore={dfoCore} contract={metadata.contract} metadata={metadata.metadata} goBack={true} withoutBack={withoutBack} hostedBy={isHost} />
+                    </div> : <div />
             }
             {
                 isHost && <>
-                    { !isAdd && <button className="btn btn-primary" onClick={() => setIsAdd(true)}>Add new setups</button> }
+                    { !isAdd && <button className="btn btn-primary" onClick={() => setIsAdd(true)}>Add new setups</button>}
                 </>
             }
             <div className="ListOfThings">
                 {
                     (!isAdd && farmingSetups.length > 0) && <div>
-                        { freeSetups.length > 0 && <h3>Free setups</h3> }
+                        {freeSetups.length > 0 && <h3>Free setups</h3>}
                         {
                             freeSetups.map((farmingSetup) => {
                                 return (
@@ -214,16 +223,16 @@ const ExploreFarmingContract = (props) => {
                                 )
                             })
                         }
-                        { lockedSetups.length > 0 && <h3>Locked setups</h3> }
-                        { 
+                        {lockedSetups.length > 0 && <h3>Locked setups</h3>}
+                        {
                             lockedSetups.map((farmingSetup) => {
                                 return (
                                     <SetupComponent key={farmingSetup.setupIndex} className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
                                 )
                             })
                         }
-                        { finishedSetups.length > 0 && <a className="web2ActionBTN my-4" onClick={() => setShowOldSetups(!showOldSetups)}>{`${showOldSetups ? 'Hide' : 'Show'} old setups`}</a> }
-                        { (finishedSetups.length > 0 && showOldSetups) && <h3>Old setups</h3> }
+                        {finishedSetups.length > 0 && <a className="web2ActionBTN my-4" onClick={() => setShowOldSetups(!showOldSetups)}>{`${showOldSetups ? 'Hide' : 'Show'} old setups`}</a>}
+                        {(finishedSetups.length > 0 && showOldSetups) && <h3>Old setups</h3>}
                         {
                             showOldSetups && finishedSetups.map((farmingSetup) => {
                                 return (
@@ -234,21 +243,17 @@ const ExploreFarmingContract = (props) => {
                     </div>
                 }
                 {
-                    (isAdd && !isFinished) && <CreateOrEditFarmingSetups 
-                        rewardToken={token} 
-                        farmingSetups={newFarmingSetups} 
-                        onAddFarmingSetup={(setup) => addFarmingSetup(setup)} 
-                        onRemoveFarmingSetup={(i) => removeFarmingSetup(i)} 
-                        onEditFarmingSetup={(setup, i) => editFarmingSetup(setup, i)} 
-                        onCancel={() => { setNewFarmingSetups([]); setIsAdd(false);}} 
-                        onFinish={() => setIsFinished(true)} 
+                    isAdd && <CreateOrEditFarmingSetups
+                        rewardToken={token}
+                        farmingSetups={newFarmingSetups}
+                        onAddFarmingSetup={(setup) => addFarmingSetup(setup)}
+                        onRemoveFarmingSetup={(i) => removeFarmingSetup(i)}
+                        onEditFarmingSetup={(setup, i) => editFarmingSetup(setup, i)}
+                        onCancel={() => { setNewFarmingSetups([]); setIsAdd(false); }}
+                        onFinish={() => {}}
+                        finishButton={setupsLoading ? <Loading/> : <button className="btn btn-primary" onClick={() => updateSetups()}>Update setups</button>}
+                        forEdit={true}
                     />
-                }
-                {
-                    (isAdd && isFinished && !setupsLoading) && <button className="btn btn-primary" onClick={() => updateSetups()}>Update setups</button>
-                }
-                {
-                    (isAdd && isFinished && setupsLoading) && <button className="btn btn-primary" disabled={setupsLoading}><span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span></button>
                 }
             </div>
         </div>

@@ -456,8 +456,7 @@ const Create = (props) => {
             <div>
                 <h3>Congratulations!</h3>
                 <p>You can find the new farming contract at the address <a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + farmingContract} target="_blank">{farmingContract}</a></p>
-                {!byMint && <p>In order to be able to activate all the setups you created, you must send {window.fromDecimals(totalRewardToSend, selectedRewardToken.decimals, true)} {selectedRewardToken.symbol} <Coin address={selectedRewardToken.address}/> to its extension, having address <a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + deployData.extensionAddress} target="_blank">{deployData.extensionAddress}</a></p>}
-                {byMint && <p>In order to be able to activate all the setups you created, be sure to grant the permission to mint at least {window.fromDecimals(totalRewardToSend, selectedRewardToken.decimals, true)} {selectedRewardToken.symbol} <Coin address={selectedRewardToken.address}/> for the extension <a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + deployData.extensionAddress} target="_blank">{deployData.extensionAddress}</a> </p>}
+                <p>In order to be able to activate all the setups you created, {byMint ? "be sure to grant the permission to mint at least" : "you must send"} <b>{window.fromDecimals(totalRewardToSend, selectedRewardToken.decimals, true)}</b> {selectedRewardToken.symbol} <Coin address={selectedRewardToken.address}/> {byMint ? "for the extension" : "to its extension, having address"} <a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + deployData.extensionAddress} target="_blank">{deployData.extensionAddress}</a></p>
             </div>
         );
     }
