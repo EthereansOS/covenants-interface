@@ -1,13 +1,15 @@
+import { useEffect } from 'react';
 import { useState } from 'react';
 import { connect } from 'react-redux';
 import { Coin, Input, TokenInput } from '../../../../components/shared';
 
 const CreateOrEditFarmingSetup = (props) => {
-    const { rewardToken, onAddFarmingSetup, editSetup, onEditFarmingSetup, selectedFarmingType, dfoCore, onCancel } = props;
+    const { rewardToken, onAddFarmingSetup, editSetup, onEditFarmingSetup, dfoCore, onCancel } = props;
+    const selectedFarmingType = editSetup ? (editSetup.free ? "free" : "locked") : props.selectedFarmingType;
     // general purpose
     const [loading, setLoading] = useState(false);
-    const [blockDuration, setBlockDuration] = useState((editSetup && editSetup.period) ? editSetup.period : 0);
-    const [hasMinStakeable, setHasMinStakeable] = useState(editSetup ? editSetup.hasMinStakeable : false);
+    const [blockDuration, setBlockDuration] = useState((editSetup && editSetup.blockDuration) ? editSetup.blockDuration : 0);
+    const [hasMinStakeable, setHasMinStakeable] = useState((editSetup && editSetup.minStakeable) ? editSetup.minStakeable : false);
     const [minStakeable, setMinSteakeable] = useState((editSetup && editSetup.minStakeable) ? editSetup.minStakeable : 0);
     const [isRenewable, setIsRenewable] = useState((editSetup && editSetup.renewTimes) ? editSetup.renewTimes > 0 : false);
     const [renewTimes, setRenewTimes] = useState((editSetup && editSetup.renewTimes) ? editSetup.renewTimes : 0);
@@ -18,12 +20,18 @@ const CreateOrEditFarmingSetup = (props) => {
     const [mainTokenIndex, setMainTokenIndex] = useState((editSetup && editSetup.mainTokenIndex) ? editSetup.mainTokenIndex : 0);
     const [mainToken, setMainToken] = useState((editSetup && editSetup.mainToken) ? editSetup.mainToken : null);
     const [rewardPerBlock, setRewardPerBlock] = useState((editSetup && editSetup.rewardPerBlock) ? editSetup.rewardPerBlock : 0);
-    const [maxStakeable, setMaxStakeable] = useState((editSetup && editSetup.maxLiquidity) ? editSetup.maxLiquidity : 0);
+    const [maxStakeable, setMaxStakeable] = useState((editSetup && editSetup.maxStakeable) ? editSetup.maxStakeable : 0);
     const [hasPenaltyFee, setHasPenaltyFee] = useState((editSetup && editSetup.penaltyFee) ? editSetup.penaltyFee > 0 : false);
     const [penaltyFee, setPenaltyFee] = useState((editSetup && editSetup.penaltyFee) ? editSetup.penaltyFee : 0);
     const [ethAddress, setEthAddress] = useState((editSetup && editSetup.ethAddress) ? editSetup.ethAddress : "");
     // current step
     const [currentStep, setCurrentStep] = useState(0);
+
+    useEffect(() => {
+        if(editSetup && (editSetup.liquidityPoolTokenAddress || (editSetup.liquidityPoolToken && editSetup.liquidityPoolToken.address))) {
+            onSelectLiquidityPoolToken(editSetup.liquidityPoolTokenAddress || editSetup.liquidityPoolToken.address).then(() => editSetup.mainToken && setMainToken(editSetup.mainToken));
+        }
+    }, []);
 
     const onSelectLiquidityPoolToken = async (address) => {
         if (!address) return;
@@ -76,13 +84,13 @@ const CreateOrEditFarmingSetup = (props) => {
     }
 
     const onUpdateHasMinStakeable = (value) => {
-        if (!value) setHasMinStakeable(false);
         setHasMinStakeable(value);
+        setMinSteakeable(0);
     }
 
     const onUpdateHasPenaltyFee = (value) => {
-        if (!value) setPenaltyFee(0);
         setHasPenaltyFee(value);
+        setPenaltyFee(0)
     }
 
     const onUpdatePenaltyFee = (value) => {
@@ -110,7 +118,7 @@ const CreateOrEditFarmingSetup = (props) => {
             penaltyFee,
             ethAddress
         };
-        editSetup ? onEditFarmingSetup(setup) : onAddFarmingSetup(setup);
+        editSetup ? onEditFarmingSetup(setup, props.editSetupIndex) : onAddFarmingSetup(setup);
     }
 
     const getFirstStep = () => {
@@ -129,7 +137,7 @@ const CreateOrEditFarmingSetup = (props) => {
             </div>
             <div className="row justify-content-center mb-4">
                 <div className="col-9">
-                    <TokenInput label={"Liquidity pool address"} placeholder={"Liquidity pool address"} width={60} onClick={(address) => onSelectLiquidityPoolToken(address)} text={"Load"} />
+                    <TokenInput label={"Liquidity pool address"} placeholder={"Liquidity pool address"} tokenAddress={(editSetup && (editSetup.liquidityPoolTokenAddress || (editSetup.liquidityPoolToken && editSetup.liquidityPoolToken.address))) || ""} width={60} onClick={onSelectLiquidityPoolToken} text={"Load"} />
                 </div>
             </div>
             {
@@ -147,7 +155,7 @@ const CreateOrEditFarmingSetup = (props) => {
                     {
                         liquidityPoolToken && <>
                             {
-                                ethSelectData && <div className="row justify-content-center mb-4">
+                                false && ethSelectData && <div className="row justify-content-center mb-4">
                                     <div className="form-check">
                                         <input className="form-check-input" type="checkbox" checked={involvingEth} onChange={(e) => setInvolvingEth(e.target.checked)} id="involvingEth" />
                                         <label className="form-check-label" htmlFor="involvingEth">
@@ -181,7 +189,7 @@ const CreateOrEditFarmingSetup = (props) => {
                                 selectedFarmingType === 'free' ? <div className="row justify-content-center align-items-center flex-column mb-2">
                                     <p className="text-center"><b>Total reward ({`${blockDuration}`} blocks): {rewardPerBlock * blockDuration} {rewardToken.symbol}</b></p>
                                 </div> : <div className="row justify-content-center align-items-center flex-column mb-2">
-                                    <p className="text-center"><b>Reward/block per {(mainToken.isEth && involvingEth) ? 'ETH': mainToken.symbol}: {!maxStakeable ? 0 : parseFloat((rewardPerBlock * (1 / maxStakeable)).toPrecision(4))} {rewardToken.symbol}</b></p>
+                                    <p className="text-center"><b>Reward/block per {(mainToken.isEth && involvingEth) ? 'ETH': mainToken.symbol}: {!maxStakeable ? 0 : window.numberToString((rewardPerBlock * (1 / maxStakeable)))} {rewardToken.symbol}</b></p>
                                 </div>
                             }
                         </>
@@ -256,7 +264,7 @@ const CreateOrEditFarmingSetup = (props) => {
                 <div className="row justify-content-center">
                     <div className="form-check my-4">
                         <input className="form-check-input" type="checkbox" checked={isRenewable} onChange={(e) => { 
-                            if (!e.target.checked) setRenewTimes(0);
+                            setRenewTimes(0);
                             setIsRenewable(e.target.checked);
                         }} id="repeat" />
                         <label className="form-check-label" htmlFor="repeat">

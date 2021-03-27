@@ -39,11 +39,14 @@ const CreateOrEditFarmingSetups = (props) => {
                 </div>
                 <div className="row justify-content-center">
                     <a className="backActionBTN mr-2" onClick={() => {
-                        farmingSetups.forEach((_, index) => onRemoveFarmingSetup(index));
+                        //farmingSetups.forEach((_, index) => onRemoveFarmingSetup(index));
                         onCancel();
                     }}>Back</a>
                     <a onClick={() => selectedFarmingType && setCurrentStep(1)} disabled={!selectedFarmingType} className="web2ActionBTN ml-2">Next</a>
                 </div>
+                {farmingSetups.length === 0 && <div className="row mt-4 justify-content-center">
+                    <a className="web2ActionBTN" onClick={onFinish}>Deploy without setups</a>
+                </div>}
             </div>
         );
     }
