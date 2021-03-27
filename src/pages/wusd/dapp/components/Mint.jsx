@@ -306,7 +306,7 @@ const Mint = (props) => {
             };
             const chosenPair = pairs[pair];
             const { ammContract, liquidityPool, token0, token0decimals, token1decimals, decimalsLp } = chosenPair;
-            const updatedFirstAmount = { value: amount, full: props.dfoCore.toFixed(props.dfoCore.fromDecimals(parseFloat(amount).toString() || "0", token0decimals)).toString() };
+            const updatedFirstAmount = { value: amount, full: window.toDecimals(amount || "0", token0decimals) };
             setFirstAmount(updatedFirstAmount);
 
             const res = await ammContract.methods.byTokenAmount(liquidityPool, token0, updatedFirstAmount.full.toString()).call();
@@ -327,7 +327,7 @@ const Mint = (props) => {
             };
             const chosenPair = pairs[pair];
             const { ammContract, liquidityPool, token1, token0decimals, token1decimals, decimalsLp } = chosenPair;
-            const updatedSecondAmount = { value: amount, full: props.dfoCore.toFixed(props.dfoCore.fromDecimals(parseFloat(amount).toString() || "0", token1decimals)).toString() };
+            const updatedSecondAmount = { value: amount, full: window.toDecimals(amount || "0", token1decimals) };
 
             setSecondAmount(updatedSecondAmount);
             console.log(updatedSecondAmount);
@@ -350,7 +350,7 @@ const Mint = (props) => {
             };
             const chosenPair = pairs[pair];
             const { ammContract, liquidityPool, token0decimals, token1decimals, decimalsLp } = chosenPair;
-            const updatedLpAmount = { value: amount, full: props.dfoCore.toFixed(props.dfoCore.fromDecimals(parseFloat(amount).toString() || "0", decimalsLp).toString()) };
+            const updatedLpAmount = { value: amount, full: window.toDecimals(amount || "0", decimalsLp) };
             setLpTokenAmount(updatedLpAmount);
 
             const res = await ammContract.methods.byLiquidityPoolAmount(liquidityPool, updatedLpAmount.full).call();
@@ -436,7 +436,7 @@ const Mint = (props) => {
 
     const onSingleTokenAmount = async (e) => {
         setSingleTokenAmount(e.target.value);
-        var value = parseFloat(e.target.value);
+        var value = e.target.value;
 
         const { ammContract, liquidityPool, token0decimals, token1decimals, decimalsLp } = pairs[pair];
 
@@ -535,7 +535,7 @@ const Mint = (props) => {
         return <>
             <div className="InputTokensRegular">
                 <div className="InputTokenRegular">
-                    <Input showMax={true} step={0.0001} address={window.voidEthereumAddress} value={ethValue} balance={ethBalance} min={0} onChange={(e) => updateEthAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name="ETH" />
+                    <Input showMax={true} step={0.0001} address={window.voidEthereumAddress} value={ethValue} balance={ethBalance} min={0} onChange={(e) => updateEthAmount(e.target.value)} showCoin={true} showBalance={true} name="ETH" />
                 </div>
             </div>
             {mintByEthLoading && <Loading/>}
@@ -554,7 +554,7 @@ const Mint = (props) => {
         return (
             <div className="InputTokensRegular">
                 <div className="InputTokenRegular">
-                    <Input showMax={true} step={0.0001} address={chosenPair.lpContract.options.address} value={lpTokenAmount.value} balance={lpTokenBalance} min={0} onChange={(e) => updateLpAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={`${chosenPair.symbol0}/${chosenPair.symbol1}`} />
+                    <Input showMax={true} step={0.0001} address={chosenPair.lpContract.options.address} value={lpTokenAmount.value} balance={lpTokenBalance} min={0} onChange={(e) => updateLpAmount(e.target.value)} showCoin={true} showBalance={true} name={`${chosenPair.symbol0}/${chosenPair.symbol1}`} />
                 </div>
             </div>
         )
@@ -572,7 +572,7 @@ const Mint = (props) => {
                         <input type="checkbox" onChange={e => onSingleTokenChange(e, "token0")} checked={onlyByToken0} />
                     </label>}
                     {onlyByToken0 && <Input showMax={true} step={0.0001} value={singleTokenAmount} address={pairs[pair].token0} balance={firstTokenBalance} min={0} onChange={onSingleTokenAmount} showCoin={true} showBalance={true} name={pairs[pair].symbol0} />}
-                    {!onlyByToken0 && !onlyByToken1 && <Input showMax={true} step={0.0001} value={firstAmount.value} address={pairs[pair].token0} balance={firstTokenBalance} min={0} onChange={(e) => updateFirstAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol0} />}
+                    {!onlyByToken0 && !onlyByToken1 && <Input showMax={true} step={0.0001} value={firstAmount.value} address={pairs[pair].token0} balance={firstTokenBalance} min={0} onChange={(e) => updateFirstAmount(e.target.value)} showCoin={true} showBalance={true} name={pairs[pair].symbol0} />}
                 </div>
                 {!onlyByToken0 && !onlyByToken1 && <p>And</p>}
                 <div className="InputTokenRegular InputTokenRegularS">
@@ -581,7 +581,7 @@ const Mint = (props) => {
                         <input type="checkbox" onChange={e => onSingleTokenChange(e, "token1")} checked={onlyByToken1} />
                     </label>}
                     {onlyByToken1 && <Input showMax={true} step={0.0001} value={singleTokenAmount} address={pairs[pair].token1} balance={secondTokenBalance} min={0} onChange={onSingleTokenAmount} showCoin={true} showBalance={true} name={pairs[pair].symbol1} />}
-                    {!onlyByToken0 && !onlyByToken1 && <Input showMax={true} step={0.0001} value={secondAmount.value} address={pairs[pair].token1} balance={secondTokenBalance} min={0} onChange={(e) => updateSecondAmount(parseFloat(e.target.value))} showCoin={true} showBalance={true} name={pairs[pair].symbol1} />}
+                    {!onlyByToken0 && !onlyByToken1 && <Input showMax={true} step={0.0001} value={secondAmount.value} address={pairs[pair].token1} balance={secondTokenBalance} min={0} onChange={(e) => updateSecondAmount(e.target.value)} showCoin={true} showBalance={true} name={pairs[pair].symbol1} />}
                 </div>
             </div>
             {(onlyByToken0 || onlyByToken1) && <div className="FromETHPrestoDesc">
