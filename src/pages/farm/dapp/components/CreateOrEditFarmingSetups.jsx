@@ -26,23 +26,20 @@ const CreateOrEditFarmingSetups = (props) => {
 
     if (farmingSetups.length === 0 || isAdd) {
         return (
-            <div className="col-12">
-                <div className="row justify-content-center mb-4">
-                    <h6><b>Select farming type</b></h6>
-                </div>
-                <div className="row justify-content-center mb-4">
-                    <a onClick={() => setSelectedFarmingType(selectedFarmingType !== 'free' ? 'free' : null)} className={`${selectedFarmingType === 'free' ? "web2ActionBTN" : "backActionBTN"} mr-4`}>Free Farming</a>
+            <div className="CheckboxQuestions">
+                    <h6><b>Create Setup by</b></h6>
+                <div className="Web2ActionsBTNs">
+                    <a onClick={() => setSelectedFarmingType(selectedFarmingType !== 'free' ? 'free' : null)} className={`${selectedFarmingType === 'free' ? "web2ActionBTN" : "backActionBTN"} mr-4`}>Free</a>
                     <a onClick={() => setSelectedFarmingType(selectedFarmingType !== 'locked' ? 'locked' : null)} className={`${selectedFarmingType === 'locked' ? "web2ActionBTN" : "backActionBTN"}`}>Locked</a>
                 </div>
-                <div className="row mb-4">
-                    <p style={{fontSize: 14}}>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quaerat animi ipsam nemo at nobis odit temporibus autem possimus quae vel, ratione numquam modi rem accusamus, veniam neque voluptates necessitatibus enim!</p>
-                </div>
-                <div className="row justify-content-center">
-                    <a className="backActionBTN mr-2" onClick={onCancel}>Back</a>
+                <p className="BreefRecapB">Farming setups can be either Free or Locked. In free farming, Farmers can stake / un-stake liquidity anytime, but the reward/block is shared btween them. In Locked setups Farmers lock the liquidity until it ends, but reawards are fixed.</p>
+                <div className="Web2ActionsBTNs">
+                    <a className="backActionBTN" onClick={onCancel}>Back</a>
                     <a onClick={() => selectedFarmingType && setCurrentStep(1)} disabled={!selectedFarmingType} className="web2ActionBTN ml-2">Next</a>
                 </div>
-                {farmingSetups.length === 0 && !props.forEdit && <div className="row mt-4 justify-content-center">
-                    <a className="web2ActionBTN" onClick={onFinish}>Deploy without setups</a>
+                <br></br>
+                {farmingSetups.length === 0 && !props.forEdit && <div className="Web2ActionsBTNs">
+                    <a className="hiddenLink" onClick={onFinish}>Deploy without setups</a>
                 </div>}
             </div>
         );

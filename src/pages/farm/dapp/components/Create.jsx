@@ -269,39 +269,39 @@ const Create = (props) => {
     }
 
     const getCreationComponent = () => {
-        return <div className="col-12">
-            <div className="row justify-content-center mb-4">
-                <div className="col-9">
+        return <div className="CheckboxQuestions">
+            
                     <TokenInput placeholder={"Reward token"} label={"Reward token address"} onClick={onSelectRewardToken} tokenAddress={(selectedRewardToken && selectedRewardToken.address) || ""} text={"Load"} />
-                </div>
-            </div>
+                    <p className="BreefRecapB">The reward token is the token choosen to reward farmers and can be one per contract.</p>
+                
             {
                 loading ? <div className="row justify-content-center">
                     <div className="spinner-border text-secondary" role="status">
                         <span className="visually-hidden"></span>
                     </div>
                 </div> : <>
-                    <div className="row mb-4">
-                        {selectedRewardToken && <div className="col-12">
-                            <Coin address={selectedRewardToken.address} /> {selectedRewardToken.symbol}
+                        {selectedRewardToken && <div className="CheckboxQuestions">
+                            <p><Coin address={selectedRewardToken.address} /> {selectedRewardToken.symbol}</p>
+                            {/*@todoM add logic to the select - OLD code at line 297*/}
+                            <select  className="SelectRegular">
+                                <option value="">Select method</option>
+                                {/*!enterInETH &&*/ <option value="mint">By mint</option>}
+                                <option value="reserve">By reserve</option>
+                            </select>
+                            <p className="BreefRecapB">If “by reserve” is selected, the input token will be sent from a wallet. If “by mint” is selected, it will be minted and then sent. The logic of this action must be carefully coded into the extension! To learn more, read the Documentation <a>Documentation (coming Soon)</a></p>
                         </div>
                         }
-                    </div>
-                    {
-                        selectedRewardToken && <div className="col-12">
-                            <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quaerat animi ipsam nemo at nobis odit temporibus autem possimus quae vel, ratione numquam modi rem accusamus, veniam neque voluptates necessitatibus enim!</p>
-                        </div>
-                    }
-                    {
-                        selectedRewardToken && <div className="form-check my-4">
+                    {<>
+
+                        {/* OLD CODE @todo Select logic (like in the top) for experience dynamics = to Inflation > Create
+                            selectedRewardToken && <div className="form-check my-4">
                             <input className="form-check-input" type="checkbox" checked={byMint} onChange={(e) => setByMint(e.target.checked)} id="setByMint" />
                             <label className="form-check-label" htmlFor="setByMint">
                                 By mint
-                        </label>
-                        </div>
-                    }
+                        </label>*/}
+                    </>}
                     {
-                        selectedRewardToken && <div className="col-12">
+                        selectedRewardToken && <div className="Web2ActionsBTNs">
                             <a className="web2ActionBTN" onClick={() => {
                                 props.updateFarmingContract({ rewardToken: { ...selectedRewardToken, byMint } });
                                 setDeployStep(0);
@@ -473,11 +473,8 @@ const Create = (props) => {
 
     return (
         <div>
-            {/* @locked for upcoming release 
             { !props.farmingContract && getCreationComponent() }
             { props.farmingContract && getFarmingContractStatus() }
-            */}
-            <h3>Coming soon</h3>
         </div>
     )
 }
