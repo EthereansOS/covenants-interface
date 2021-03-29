@@ -348,14 +348,14 @@ const Create = (props) => {
             <div className="CheckboxQuestions">
                 <h6>Host</h6>
                 <p className="BreefRecapB">The host is the Contract, Wallet, DAO, or DFO with permissions to manage and add new setups in this contract. The host permissions are set into the extension contract. If you choose "Standard Extension (Address, wallet)," the extension must have all of the tokens needed to fill every setup rewards. You can also program extension permissions by your Organization, DFO to mint or transfer directly from the treasury, using the DFOhub website or a custom contract (more info in the Documentation).</p>
-                        <select className="SelectRegular" value={selectedHost} onChange={onHostSelection}>
-                            <option value="">Choose an host..</option>
-                            <option value="wallet">Standard Extension (Address, wallet)</option>
-                            <option value="custom-extension">Custom Extension (Deployed Contract)</option>
-                            <option value="deployed-contract">Custom Extension (Deploy Contract)</option>
-                        </select>
+                <select className="SelectRegular" value={selectedHost} onChange={onHostSelection}>
+                    <option value="">Choose the host type</option>
+                    <option value="address">Standard Extension (Address, wallet)</option>
+                    <option value="deployedContract">Custom Extension (Deployed Contract)</option>
+                    <option value="fromSourceCode">Custom Extension (Deploy Contract)</option>
+                </select>
                 {
-                    selectedHost === 'wallet' ? <>
+                    selectedHost === 'address' ? <>
                         <div className="InputTokensRegular InputRegularB">
                             <input type="text" className="TextRegular" value={hostWalletAddress || ""} onChange={(e) => setHostWalletAddress(e.target.value.toString())} placeholder={"Wallet address"} aria-label={"Host address"} />
                             <div className="CheckboxQuestions">
@@ -364,14 +364,7 @@ const Create = (props) => {
                             <p className="BreefRecapB">[Optional] Separate the Extension to the treasury used to send tokens to the Farm contract to activate setups.</p>
                             </div>
                         </div>
-                    </> : selectedHost === 'custom-extension' ? <>
-                        <div className="form-check my-4">
-                            <input className="form-check-input" type="checkbox" checked={useDeployedContract} onChange={(e) => setUseDeployedContract(e.target.checked)} id="setIsDeploy" />
-                            <label className="form-check-label" htmlFor="setIsDeploy">
-                                Use deployed contract
-                            </label>
-                        </div>
-                        
+                    </> : selectedHost === 'fromSourceCode' ? <>
                         {
                             !useDeployedContract ? <ContractEditor filterDeployedContract={filterDeployedContract} dfoCore={props.dfoCore} onContract={setDeployContract} templateCode={farmingExtensionTemplateCode} /> : <>
                                 <div className="row mb-2">
@@ -383,7 +376,7 @@ const Create = (props) => {
                             <h6><b>Extension payload</b></h6>
                             <input type="text" className="TextRegular" value={extensionPayload || ""} onChange={(e) => setExtensionPayload(e.target.value.toString())} placeholder={"Payload"} aria-label={"Payload"} />
                         </div>
-                    </> : selectedHost === 'deployed-contract' ? <>
+                    </> : selectedHost === 'deployedContract' ? <>
                         <div className="row mb-2">
                             <input type="text" className="TextRegular" value={hostDeployedContract} onChange={(e) => setHostDeployedContract(e.target.value.toString())} placeholder={"Deployed contract address"} aria-label={"Deployed contract address"} />
                         </div>
