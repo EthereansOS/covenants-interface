@@ -124,18 +124,17 @@ const CreateOrEditFarmingSetup = (props) => {
 
     const getFirstStep = () => {
         return <div className="CheckboxQuestions">
-                    <select className="SelectRegular" value={blockDuration} onChange={(e) => setBlockDuration(e.target.value)}>
-                        <option value={0}>Choose setup duration</option>
-                        {
-                            Object.keys(props.dfoCore.getContextElement("blockIntervals")).map((key, index) => {
-                                return <option key={key} value={props.dfoCore.getContextElement("blockIntervals")[key]}>{key}</option>
-                            })
-                        }
-                    </select>
-                    <p className="BreefRecapB">Select the duration of the setup. The selected timeband will determinate the end block once activated</p>
-            
-                    <TokenInput placeholder={"Liquidity pool address"} tokenAddress={(editSetup && (editSetup.liquidityPoolTokenAddress || (editSetup.liquidityPoolToken && editSetup.liquidityPoolToken.address))) || ""} onClick={onSelectLiquidityPoolToken} text={"Load"} />
-                    <p className="BreefRecapB">Load the Pool you want to reward for this setup by its Ethereum address.</p>
+            <select className="SelectRegular" value={blockDuration} onChange={(e) => setBlockDuration(e.target.value)}>
+                <option value={0}>Choose setup duration</option>
+                {
+                    Object.keys(props.dfoCore.getContextElement("blockIntervals")).map((key, index) => {
+                        return <option key={key} value={props.dfoCore.getContextElement("blockIntervals")[key]}>{key}</option>
+                    })
+                }
+            </select>
+            <p className="BreefRecapB">Select the duration of the setup. The selected timeband will determinate the end block once activated</p>
+            <TokenInput placeholder={"Liquidity pool address"} tokenAddress={(editSetup && (editSetup.liquidityPoolTokenAddress || (editSetup.liquidityPoolToken && editSetup.liquidityPoolToken.address))) || ""} onClick={onSelectLiquidityPoolToken} text={"Load"} />
+            <p className="BreefRecapB">Load the Pool you want to reward for this setup by its Ethereum address.</p>
             {
                 loading ? <div className="row justify-content-center">
                     <div className="spinner-border text-secondary" role="status">
@@ -143,24 +142,22 @@ const CreateOrEditFarmingSetup = (props) => {
                     </div>
                 </div> : <>
                     <div className="row mb-4">
-                        {(liquidityPoolToken && liquidityPoolToken.tokens.length > 0) && 
-                        <div className="col-12">
-                            <b>{liquidityPoolToken.name} | {liquidityPoolToken.tokens.map((token) => <>{!token.isEth ? token.symbol : involvingEth ? 'ETH' : token.symbol} </>)}</b> {liquidityPoolToken.tokens.map((token) => <Coin address={!token.isEth ? token.address : involvingEth ? props.dfoCore.voidEthereumAddress : token.address} className="mr-2" />)}
-                        </div>
+                        {(liquidityPoolToken && liquidityPoolToken.tokens.length > 0) &&
+                            <div className="col-12">
+                                <b>{liquidityPoolToken.name} | {liquidityPoolToken.tokens.map((token) => <>{!token.isEth ? token.symbol : involvingEth ? 'ETH' : token.symbol} </>)}</b> {liquidityPoolToken.tokens.map((token) => <Coin address={!token.isEth ? token.address : involvingEth ? props.dfoCore.voidEthereumAddress : token.address} className="mr-2" />)}
+                            </div>
                         }
                     </div>
                     {
                         liquidityPoolToken && <>
                             {
                                 false && ethSelectData && <div className="row justify-content-center mb-4">
-                                    {/*
-                                    @todo remove from the logic
                                     <div className="form-check">
                                         <input className="form-check-input" type="checkbox" checked={involvingEth} onChange={(e) => setInvolvingEth(e.target.checked)} id="involvingEth" />
                                         <label className="form-check-label" htmlFor="involvingEth">
                                             Use {ethSelectData.symbol} as ETH
                                         </label>
-                                    </div>*/}
+                                    </div>
                                 </div>
                             }
                             {

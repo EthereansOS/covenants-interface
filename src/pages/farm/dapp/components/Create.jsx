@@ -54,6 +54,10 @@ const Create = (props) => {
         }
     }, []);
 
+    useEffect(() => {
+        setByMint(false);
+    }, [selectedRewardToken]);
+
     const addFarmingSetup = (setup) => {
         setFarmingSetups(farmingSetups.concat(setup));
     }
@@ -96,7 +100,7 @@ const Create = (props) => {
             var calculatedTotalToSend = "0";
             for (let i = 0; i < farmingSetups.length; i++) {
                 const setup = farmingSetups[i];
-                calculatedTotalToSend = 
+                calculatedTotalToSend =
                     props.dfoCore.web3.utils.toBN(calculatedTotalToSend).add(
                         props.dfoCore.web3.utils.toBN(window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.rewardPerBlock), selectedRewardToken.decimals)),
                         ).mul(props.dfoCore.web3.utils.toBN(window.numberToString(setup.blockDuration)))
@@ -250,17 +254,17 @@ const Create = (props) => {
     }
 
     function canDeploy() {
-        if(!selectedHost) {
+        if (!selectedHost) {
             return false;
         }
-        if(selectedHost === 'wallet') {
-            if(hasTreasuryAddress && !window.isEthereumAddress(treasuryAddress)) {
+        if (selectedHost === 'wallet') {
+            if (hasTreasuryAddress && !window.isEthereumAddress(treasuryAddress)) {
                 return false;
             }
             return window.isEthereumAddress(hostWalletAddress);
         }
-        if(selectedHost === 'custom-extension') {
-            if(useDeployedContract) {
+        if (selectedHost === 'custom-extension') {
+            if (useDeployedContract) {
                 return window.isEthereumAddress(hostDeployedContract);
             }
             return deployContract !== undefined && deployContract !== null && deployContract.contract !== undefined && deployContract.contract !== null;
@@ -270,44 +274,29 @@ const Create = (props) => {
 
     const getCreationComponent = () => {
         return <div className="CheckboxQuestions">
-            
-                    <TokenInput placeholder={"Reward token"} label={"Reward token address"} onClick={onSelectRewardToken} tokenAddress={(selectedRewardToken && selectedRewardToken.address) || ""} text={"Load"} />
-                    <p className="BreefRecapB">The reward token is the token choosen to reward farmers and can be one per contract.</p>
-                
+            <TokenInput placeholder={"Reward token"} label={"Reward token address"} onClick={onSelectRewardToken} tokenAddress={(selectedRewardToken && selectedRewardToken.address) || ""} text={"Load"} />
+            <p className="BreefRecapB">The reward token is the token choosen to reward farmers and can be one per contract.</p>
             {
                 loading ? <div className="row justify-content-center">
                     <div className="spinner-border text-secondary" role="status">
                         <span className="visually-hidden"></span>
                     </div>
                 </div> : <>
-                        {selectedRewardToken && <div className="CheckboxQuestions">
-                            <p><Coin address={selectedRewardToken.address} /> {selectedRewardToken.symbol}</p>
-                            {/*@todoM add logic to the select - OLD code at line 297*/}
-                            <select  className="SelectRegular">
-                                <option value="">Select method</option>
-                                {/*!enterInETH &&*/ <option value="mint">By mint</option>}
-                                <option value="reserve">By reserve</option>
-                            </select>
-                            <p className="BreefRecapB">If “by reserve” is selected, the input token will be sent from a wallet. If “by mint” is selected, it will be minted and then sent. The logic of this action must be carefully coded into the extension! To learn more, read the Documentation <a>Documentation (coming Soon)</a></p>
-                        </div>
-                        }
-                    {<>
-
-                        {/* OLD CODE @todo Select logic (like in the top) for experience dynamics = to Inflation > Create
-                            selectedRewardToken && <div className="form-check my-4">
-                            <input className="form-check-input" type="checkbox" checked={byMint} onChange={(e) => setByMint(e.target.checked)} id="setByMint" />
-                            <label className="form-check-label" htmlFor="setByMint">
-                                By mint
-                        </label>*/}
-                    </>}
-                    {
-                        selectedRewardToken && <div className="Web2ActionsBTNs">
-                            <a className="web2ActionBTN" onClick={() => {
-                                props.updateFarmingContract({ rewardToken: { ...selectedRewardToken, byMint } });
-                                setDeployStep(0);
-                            }}>Start</a>
-                        </div>
-                    }
+                    {selectedRewardToken && <div className="CheckboxQuestions">
+                        <p><Coin address={selectedRewardToken.address} /> {selectedRewardToken.symbol}</p>
+                        <select value={byMint === true ? "true" : "false"} onChange={e => setByMint(e.target.value === 'true')} className="SelectRegular">
+                            <option value="">Select method</option>
+                            {/*!enterInETH &&*/ <option value="true">By mint</option>}
+                            <option value="false">By reserve</option>
+                        </select>
+                        <p className="BreefRecapB">If “by reserve” is selected, the input token will be sent from a wallet. If “by mint” is selected, it will be minted and then sent. The logic of this action must be carefully coded into the extension! To learn more, read the Documentation <a>Documentation (coming Soon)</a></p>
+                    </div>}
+                    {selectedRewardToken && <div className="Web2ActionsBTNs">
+                        <a className="web2ActionBTN" onClick={() => {
+                            props.updateFarmingContract({ rewardToken: { ...selectedRewardToken, byMint } });
+                            setDeployStep(0);
+                        }}>Start</a>
+                    </div>}
                 </>
             }
 
@@ -421,7 +410,7 @@ const Create = (props) => {
                         setIsDeploy(false);
                     }} className="backActionBTN mr-4">Back</a>
                     <a onClick={() => {
-                        if(!canDeploy()) {
+                        if (!canDeploy()) {
                             return;
                         }
                         initializeDeployData();
@@ -451,12 +440,12 @@ const Create = (props) => {
         )
     }
 
-    if(farmingContract) {
+    if (farmingContract) {
         return (
             <div>
                 <h3>Congratulations!</h3>
                 <p>You can find the new farming contract at the address <a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + farmingContract} target="_blank">{farmingContract}</a></p>
-                <p>In order to be able to activate all the setups you created, {byMint ? "be sure to grant the permission to mint at least" : "you must send"} <b>{window.fromDecimals(totalRewardToSend, selectedRewardToken.decimals, true)}</b> {selectedRewardToken.symbol} <Coin address={selectedRewardToken.address}/> {byMint ? "for the extension" : "to its extension, having address"} <a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + deployData.extensionAddress} target="_blank">{deployData.extensionAddress}</a></p>
+                <p>In order to be able to activate all the setups you created, {byMint ? "be sure to grant the permission to mint at least" : "you must send"} <b>{window.fromDecimals(totalRewardToSend, selectedRewardToken.decimals, true)}</b> {selectedRewardToken.symbol} <Coin address={selectedRewardToken.address} /> {byMint ? "for the extension" : "to its extension, having address"} <a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + deployData.extensionAddress} target="_blank">{deployData.extensionAddress}</a></p>
             </div>
         );
     }
@@ -473,8 +462,8 @@ const Create = (props) => {
 
     return (
         <div>
-            { !props.farmingContract && getCreationComponent() }
-            { props.farmingContract && getFarmingContractStatus() }
+            { !props.farmingContract && getCreationComponent()}
+            { props.farmingContract && getFarmingContractStatus()}
         </div>
     )
 }
