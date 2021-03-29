@@ -437,8 +437,11 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .InputTokenRegularS .PrestoSelector {padding: 2px 5px; position: absolute; left: -80px; top: 2px;}
 .OnlyMobileVersion {display: none !important;}
 .HIDEO {display: none !important;}
-.SetupListITEM {}
-
+.SetupListITEM {padding: 20px; display: block; margin: 10px auto; border: 1px solid #7474F7; border-radius: 12px;}
+.SetupListITEM p {font-size: 14px;vertical-align: middle;margin-block-start: 0em;margin-block-end: 0em;margin-inline-start: 0px; margin-inline-end: 0px;margin-bottom: 0rem; text-align: left;}
+.SetupListITEMINFO {width: 62%; display: inline-block; margin-right: 8%; vertical-align: middle;}
+.SetupListITEMACTIONS {width: 30%;display: inline-block;vertical-align: middle;}
+.SetupListITEMACTIONS .web2ActionBTN {display: block; width: 100%; text-align: center; font-size: 12px; padding: 4px 6px; margin: 5px auto;}
 
 @media only screen and (max-device-width: 750px) {
    .IndexRegularText iframe {display: none;}
