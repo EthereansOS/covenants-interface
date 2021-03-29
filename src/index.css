@@ -356,6 +356,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .TokenSelectedB {padding: 10px; border: 1px solid #7474f7; display: inline-block;width: auto;border-radius: 12px;}
 
 
+
 .fantasy {background-color: #4d4c4a !important;}
 .fantasy .LogoM {background-position: 0 -50px;}
 .fantasy .page-container {background-image: url(./assets/images/index.jpg) !important;box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px, rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px;}
@@ -425,7 +426,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .magic .IndexSinglePerchBar span {color: #ffffff;}
 .magic .YourFarmingPositions {border-color: #bdbdbd;}
 .magic .BLKEMD {color: #000000 !important;}
-
+.InputRegularB .form-control, .InputRegularB .form-control:focus {border-right: 1px solid #9e6915;}
 
 .PrestoSelector {padding: 5px; margin: 2px 3px; border-radius: 8px; border: 1px solid #9e6915;}
 .PrestoSelector span {font-size: 14px; margin: auto 5px auto auto; display: inline-block; vertical-align: middle;}
