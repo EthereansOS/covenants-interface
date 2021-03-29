@@ -272,7 +272,7 @@ const Create = (props) => {
         return <div className="CheckboxQuestions">
                     <h6>Reward token address</h6>
                     <p className="BreefRecapB">The reward token is the token chosen to reward farmers and can be one per contract.</p>
-                    <TokenInput placeholder={"Reward token"} onClick={onSelectRewardToken} tokenAddress={(selectedRewardToken && selectedRewardToken.address) || ""} text={"Load"} />
+                    <TokenInput placeholder={"Reward token"} onClick={onSelectRewardToken} tokenAddress={(selectedRewardToken && selectedRewardToken.address) || ""} text={"Load"} /> 
                 
             {
                 loading ? <div className="row justify-content-center">
