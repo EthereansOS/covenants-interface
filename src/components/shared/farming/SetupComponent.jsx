@@ -268,12 +268,13 @@ const SetupComponent = (props) => {
             const liquidityPoolTokenAmount = position['liquidityPoolTokenAmount'];
             const mainTokenAmount = position['mainTokenAmount'];
             const amounts = await ammContract.methods.byLiquidityPoolAmount(farmSetupInfo.liquidityPoolTokenAddress, liquidityPoolTokenAmount).call();
+            console.log(position.positionId);
             const availableReward = await lmContract.methods.calculateFreeFarmingReward(position.positionId, true).call();
             let freeReward = parseInt(availableReward);
             if (blockNumber < parseInt(farmSetup.endBlock)) {
                 freeReward += (parseInt(farmSetup.rewardPerBlock) * (parseInt(position.liquidityPoolTokenAmount) / parseInt(farmSetup.totalSupply)))
             }
-            freeReward = freeReward.toString().split('.')[0];
+            freeReward = window.numberToString(freeReward).split('.')[0];
             setFreeAvailableRewards(freeReward);
             setManageStatus({ free, creationBlock, positionSetupIndex, liquidityPoolAmount: liquidityPoolTokenAmount, mainTokenAmount, tokensAmounts: amounts['tokensAmounts'], tokens })
         } else if (lockPositions.length > 0) {
@@ -1201,7 +1202,7 @@ const SetupComponent = (props) => {
                             currentPosition &&
                             <div className="Farmed">
                                 <p><b>Daily Earnings</b>: {window.formatMoney(dfoCore.toDecimals((parseInt(setup.rewardPerBlock) * 6400 * parseInt(manageStatus.liquidityPoolAmount) / parseInt(setup.totalSupply)).toString().split('.')[0], rewardTokenInfo.decimals), 9)} {rewardTokenInfo.symbol}</p>
-                                <p><b>Available</b>: {window.formatMoney(dfoCore.toDecimals(freeAvailableRewards, rewardTokenInfo.decimals), 9)} {rewardTokenInfo.symbol}</p>
+                                <p><b>Available</b>: {window.fromDecimals(freeAvailableRewards, rewardTokenInfo.decimals, true)} {rewardTokenInfo.symbol}</p>
                                 {
                                     !showFreeTransfer ? <a onClick={() => setShowFreeTransfer(true)} className="web2ActionBTN">Transfer</a> : <a onClick={() => setShowFreeTransfer(false)} className="backActionBTN">Close</a>
                                 }

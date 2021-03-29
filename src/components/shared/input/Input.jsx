@@ -17,7 +17,7 @@ const Input = (props) => {
     }
 
     const onDetectedChange = (value, sendBalance) => {
-        if (sendBalance) return { target: { value: balance }};
+        if (sendBalance) return { target: { value: window.numberToString(window.formatNumber(balance)) }};
         if (!value) return { target: { value: 0 }};
         return { target: { value } };
     } 
@@ -26,10 +26,10 @@ const Input = (props) => {
         <>
             { label && <h6><b>{label}</b></h6> }
             <div className="input-group" tabIndex={0}>
-                <input disabled={props.disabled} type="number" lang="en-US" step="any" className={`form-control ${parseFloat(val) > parseFloat(balance) ? 'is-invalid' : ''}`} value={val} min={min} max={max || balance} onChange={(e) => onRealChange(e.target.value)}/>
+                <input disabled={props.disabled} type="number" lang="en-US" step="any" className={`form-control ${parseFloat(val) > window.formatNumber(balance) ? 'is-invalid' : ''}`} value={val} min={min} max={max || balance} onChange={(e) => onRealChange(e.target.value)}/>
                 {
                     showCoin && <div className={`input-group-append`}>
-                        <span className={`input-group-text ${parseFloat(val) > parseFloat(balance) ? 'is-invalid' : ''}`} id=""><Coin address={address} forcedImage={tokenImage} /> {name}</span>
+                        <span className={`input-group-text ${parseFloat(val) > window.formatNumber(balance) ? 'is-invalid' : ''}`} id=""><Coin address={address} forcedImage={tokenImage} /> {name}</span>
                     </div>
                 }
             </div>
