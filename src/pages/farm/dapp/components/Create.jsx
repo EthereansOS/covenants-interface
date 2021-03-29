@@ -357,18 +357,12 @@ const Create = (props) => {
                 {
                     selectedHost === 'wallet' ? <>
                         <div className="InputTokensRegular InputRegularB">
-                            <input type="text" className="TextRegular" value={hostWalletAddress || ""} onChange={(e) => setHostWalletAddress(e.target.value.toString())} placeholder={"Wallet address"} aria-label={"Wallet address"} />
-
-                        <div className="row mb-4">
-                            <p className="text-left text-small">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Omnis delectus incidunt laudantium distinctio velit reprehenderit quaerat, deserunt sint fugit ex consectetur voluptas suscipit numquam. Officiis maiores quaerat quod necessitatibus perspiciatis!</p>
-                        </div>
-                        <div className="row mb-4 justify-content-center">
-                            <label>
-                                Set separated treasury
-                                <input type="checkbox" checked={hasTreasuryAddress} onChange={onHasTreasuryAddress} />
-                            </label>
+                            <input type="text" className="TextRegular" value={hostWalletAddress || ""} onChange={(e) => setHostWalletAddress(e.target.value.toString())} placeholder={"Wallet address"} aria-label={"Host address"} />
+                            <div className="CheckboxQuestions">
+                            <h6><input type="checkbox" checked={hasTreasuryAddress} onChange={onHasTreasuryAddress} /> External Treasury</h6>
                             {hasTreasuryAddress && <input type="text" className="TextRegular" value={treasuryAddress || ""} onChange={onTreasuryAddressChange} placeholder={"Treasury address"} aria-label={"Treasury address"} />}
-                        </div>
+                            <p className="BreefRecapB">[Optional] Separate the Extension to the treasury used to send tokens to the Farm contract to activate setups.</p>
+                            </div>
                         </div>
                     </> : selectedHost === 'custom-extension' ? <>
                         <div className="form-check my-4">
