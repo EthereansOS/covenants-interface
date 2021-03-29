@@ -436,6 +436,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .InputTokenRegularS {position: relative;}
 .InputTokenRegularS .PrestoSelector {padding: 2px 5px; position: absolute; left: -80px; top: 2px;}
 .OnlyMobileVersion {display: none !important;}
+.HIDEO {display: none !important;}
 
 
 @media only screen and (max-device-width: 750px) {

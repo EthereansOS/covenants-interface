@@ -142,7 +142,7 @@ const CreateOrEditFarmingSetup = (props) => {
                         liquidityPoolToken && <>
                             {
                                 false && ethSelectData && 
-                                    <div className="form-check">
+                                    <div className="form-check HIDEO">
                                         <input className="form-check-input" type="checkbox" checked={involvingEth} onChange={(e) => setInvolvingEth(e.target.checked)} id="involvingEth" />
                                         <label className="form-check-label" htmlFor="involvingEth">
                                             Use {ethSelectData.symbol} as ETH
