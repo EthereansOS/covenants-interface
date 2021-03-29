@@ -65,7 +65,7 @@ const CreateOrEditFarmingSetups = (props) => {
                 <div className="col-12 flex justify-content-start mb-4">
                     <a onClick={() => setIsAdd(true)} className="web2ActionBTN">Add setup</a>
                 </div>
-                <div className="col-12 mt-4">
+                <div className="Web2ActionsBTNs">
                     <a onClick={() => {
                         farmingSetups.forEach((_, index) => onRemoveFarmingSetup(index));
                         onCancel();

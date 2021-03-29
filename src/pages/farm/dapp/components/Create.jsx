@@ -270,9 +270,9 @@ const Create = (props) => {
 
     const getCreationComponent = () => {
         return <div className="CheckboxQuestions">
-            
-                    <TokenInput placeholder={"Reward token"} label={"Reward token address"} onClick={onSelectRewardToken} tokenAddress={(selectedRewardToken && selectedRewardToken.address) || ""} text={"Load"} />
-                    <p className="BreefRecapB">The reward token is the token choosen to reward farmers and can be one per contract.</p>
+                    <h6>Reward token address</h6>
+                    <p className="BreefRecapB">The reward token is the token chosen to reward farmers and can be one per contract.</p>
+                    <TokenInput placeholder={"Reward token"} onClick={onSelectRewardToken} tokenAddress={(selectedRewardToken && selectedRewardToken.address) || ""} text={"Load"} />
                 
             {
                 loading ? <div className="row justify-content-center">
@@ -283,12 +283,12 @@ const Create = (props) => {
                         {selectedRewardToken && <div className="CheckboxQuestions">
                             <p><Coin address={selectedRewardToken.address} /> {selectedRewardToken.symbol}</p>
                             {/*@todoM add logic to the select - OLD code at line 297*/}
+                            <p className="BreefRecapB">If “by reserve” is selected, the input token will be sent from a wallet. If “by mint” is selected, it will be minted and then sent. The logic of this action must be carefully coded into the extension! To learn more, read the Documentation <a>Documentation (coming Soon)</a></p>
                             <select  className="SelectRegular">
                                 <option value="">Select method</option>
                                 {/*!enterInETH &&*/ <option value="mint">By mint</option>}
                                 <option value="reserve">By reserve</option>
                             </select>
-                            <p className="BreefRecapB">If “by reserve” is selected, the input token will be sent from a wallet. If “by mint” is selected, it will be minted and then sent. The logic of this action must be carefully coded into the extension! To learn more, read the Documentation <a>Documentation (coming Soon)</a></p>
                         </div>
                         }
                     {<>
