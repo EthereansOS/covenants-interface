@@ -124,8 +124,17 @@ const CreateOrEditFarmingSetup = (props) => {
 
     const getFirstStep = () => {
         return <div className="CheckboxQuestions">
-                    <p className="BreefRecapB">Load the Pool you want to reward for this setup by its Ethereum address.</p>
-                    <TokenInput placeholder={"Liquidity pool address"} tokenAddress={(editSetup && (editSetup.liquidityPoolTokenAddress || (editSetup.liquidityPoolToken && editSetup.liquidityPoolToken.address))) || ""} onClick={onSelectLiquidityPoolToken} text={"Load"} />
+            <p className="BreefRecapB">Load the Pool you want to reward for this setup by its Ethereum address.</p>
+            <TokenInput placeholder={"Liquidity pool address"} tokenAddress={(editSetup && (editSetup.liquidityPoolTokenAddress || (editSetup.liquidityPoolToken && editSetup.liquidityPoolToken.address))) || ""} onClick={onSelectLiquidityPoolToken} text={"Load"} />
+            <select className="SelectRegular" value={blockDuration} onChange={(e) => setBlockDuration(e.target.value)}>
+                <option value={0}>Choose setup duration</option>
+                {
+                    Object.keys(props.dfoCore.getContextElement("blockIntervals")).map((key, index) => {
+                        return <option key={key} value={props.dfoCore.getContextElement("blockIntervals")[key]}>{key}</option>
+                    })
+                }
+            </select>
+            <p className="BreefRecapB">Select the duration of the setup. The selected timeband will determinate the end block once activated</p>
             {
                 loading ? <div className="row justify-content-center">
                     <div className="spinner-border text-secondary" role="status">
@@ -133,23 +142,21 @@ const CreateOrEditFarmingSetup = (props) => {
                     </div>
                 </div> : <>
                     <div className="CheckboxQuestions">
-                        {(liquidityPoolToken && liquidityPoolToken.tokens.length > 0) && 
+                        {(liquidityPoolToken && liquidityPoolToken.tokens.length > 0) &&
                             <h6 className="TokenSelectedB"><b>{liquidityPoolToken.name} | {liquidityPoolToken.tokens.map((token) => <>{!token.isEth ? token.symbol : involvingEth ? 'ETH' : token.symbol} </>)}</b> {liquidityPoolToken.tokens.map((token) => <Coin address={!token.isEth ? token.address : involvingEth ? props.dfoCore.voidEthereumAddress : token.address} />)}</h6>
                         }
                     </div>
                     {
                         liquidityPoolToken && <>
                             {
-                                false && ethSelectData && {/* <div className="row justify-content-center mb-4">
-                                    {/*
-                                    @todo remove from the logic
+                                false && ethSelectData && <div className="row justify-content-center mb-4">
                                     <div className="form-check">
                                         <input className="form-check-input" type="checkbox" checked={involvingEth} onChange={(e) => setInvolvingEth(e.target.checked)} id="involvingEth" />
                                         <label className="form-check-label" htmlFor="involvingEth">
                                             Use {ethSelectData.symbol} as ETH
                                         </label>
                                     </div>
-                                </div>*/}
+                                </div>
                             }
                             {
                                 selectedFarmingType === 'locked' && <>
@@ -168,18 +175,18 @@ const CreateOrEditFarmingSetup = (props) => {
                                 </>
                             }
                             <div className="InputTokensRegular">
-                                    <h6>Reward per block</h6>
-                                    <p className="BreefRecapB">The total amount of tokens per block to reward farmers.</p>
-                                    <Input min={dfoCore.fromDecimals(rewardToken, rewardToken.decimals)} showCoin={true} address={rewardToken.address} value={rewardPerBlock} name={rewardToken.symbol} onChange={(e) => onFreeRewardPerBlockUpdate(e.target.value)} />
+                                <h6>Reward per block</h6>
+                                <p className="BreefRecapB">The total amount of tokens per block to reward farmers.</p>
+                                <Input min={dfoCore.fromDecimals(rewardToken, rewardToken.decimals)} showCoin={true} address={rewardToken.address} value={rewardPerBlock} name={rewardToken.symbol} onChange={(e) => onFreeRewardPerBlockUpdate(e.target.value)} />
                             </div>
                             <p className="BreefRecapB">Select the duration of the setup. The selected timeband will determinate the end block once activated</p>
                             <select className="SelectRegular" value={blockDuration} onChange={(e) => setBlockDuration(e.target.value)}>
                                 <option value={0}>Choose setup duration</option>
-                                    {
-                                        Object.keys(props.dfoCore.getContextElement("blockIntervals")).map((key, index) => {
-                                            return <option key={key} value={props.dfoCore.getContextElement("blockIntervals")[key]}>{key}</option>
-                                        })
-                                    }
+                                {
+                                    Object.keys(props.dfoCore.getContextElement("blockIntervals")).map((key, index) => {
+                                        return <option key={key} value={props.dfoCore.getContextElement("blockIntervals")[key]}>{key}</option>
+                                    })
+                                }
                             </select>
                             <p className="BreefRecapB"><b>Total reward ({`${blockDuration}`} blocks): {rewardPerBlock * blockDuration} {rewardToken.symbol}</b></p>
                         </>
@@ -196,58 +203,51 @@ const CreateOrEditFarmingSetup = (props) => {
     const getSecondStep = () => {
         return (
             <div className="CheckboxQuestions">
-
-                        <h6><input type="checkbox" checked={hasMinStakeable} onChange={(e) => onUpdateHasMinStakeable(e.target.checked)} id="minStakeable" /> Min stakeable</h6>
-                    
+                <h6><input type="checkbox" checked={hasMinStakeable} onChange={(e) => onUpdateHasMinStakeable(e.target.checked)} id="minStakeable" /> Min stakeable</h6>
                 {
                     hasMinStakeable && <div className="InputTokensRegular">
                         {
-                            /* @todo doen't show up in free */
                             selectedFarmingType === 'free' && <>
-                                {parseFloat(minStakeable) > 0 && <select className="SelectRegular" value={mainTokenIndex} onChange={(e) => { setMainTokenIndex(e.target.value); setMainToken(liquidityPoolToken.tokens[e.target.value]); }}>
+                                <select className="SelectRegular" value={mainTokenIndex} onChange={(e) => { setMainTokenIndex(e.target.value); setMainToken(liquidityPoolToken.tokens[e.target.value]); }}>
                                     {
                                         liquidityPoolToken.tokens.map((tk, index) => {
                                             return <option key={tk.address} value={index}>{!tk.isEth ? tk.symbol : involvingEth ? 'ETH' : tk.symbol}</option>
                                         })
                                     }
                                 </select>
-                                }
                             </>
                         }
                         <div>
                             <Input min={0} showCoin={true} address={(!mainToken?.isEth && !liquidityPoolToken.tokens[mainTokenIndex].isEth) ? `${mainToken?.address || liquidityPoolToken.tokens[mainTokenIndex].address}` : involvingEth ? props.dfoCore.voidEthereumAddress : `${mainToken?.address || liquidityPoolToken.tokens[mainTokenIndex].address}`} value={minStakeable} name={(!mainToken?.isEth && !liquidityPoolToken.tokens[mainTokenIndex].isEth) ? `${mainToken?.symbol || liquidityPoolToken.tokens[mainTokenIndex].symbol}` : involvingEth ? 'ETH' : `${mainToken?.symbol || liquidityPoolToken.tokens[mainTokenIndex].symbol}`} onChange={(e) => setMinSteakeable(e.target.value)} />
                         </div>
-                        
                     </div>
                 }
-                    <p className="BreefRecapB">[Optional] A minimum amount of main tokens to stake to open a position</p>
+                <p className="BreefRecapB">[Optional] A minimum amount of main tokens to stake to open a position</p>
                 {
                     selectedFarmingType === 'locked' && <>
-                                <h6><input type="checkbox" checked={hasPenaltyFee} onChange={(e) => onUpdateHasPenaltyFee(e.target.checked)} id="penaltyFee" /> Penalty fee </h6>
+                        <h6><input type="checkbox" checked={hasPenaltyFee} onChange={(e) => onUpdateHasPenaltyFee(e.target.checked)} id="penaltyFee" /> Penalty fee </h6>
                         {
                             hasPenaltyFee && <>
-                                    <div className="SpecialInputPerch">
-                                        <aside>%</aside>
-                                        <input placeholder="Penalty Fee" type="number" min={0} max={100} value={penaltyFee} onChange={(e) => onUpdatePenaltyFee(e.target.value)} className="TextRegular" />
-                                    </div>
-                                    <p className="BreefRecapB">Main Token: {rewardToken.symbol}</p>
-                                    </>
+                                <div className="SpecialInputPerch">
+                                    <aside>%</aside>
+                                    <input placeholder="Penalty Fee" type="number" min={0} max={100} value={penaltyFee} onChange={(e) => onUpdatePenaltyFee(e.target.value)} className="TextRegular" />
+                                </div>
+                                <p className="BreefRecapB">Main Token: {rewardToken.symbol}</p>
+                            </>
                         }
                         <p className="BreefRecapB">[Optional] The penalty fee is a perchentange of the total reward of a position that must be paid to close it before the end block.</p>
                     </>
                 }
-                
-                        <h6><input className="form-check-input" type="checkbox" checked={isRenewable} onChange={(e) => {
-                            setRenewTimes(0);
-                            setIsRenewable(e.target.checked);
-                        }} id="repeat" /> Repeat</h6>
-
+                <h6><input className="form-check-input" type="checkbox" checked={isRenewable} onChange={(e) => {
+                    setRenewTimes(0);
+                    setIsRenewable(e.target.checked);
+                }} id="repeat" /> Repeat</h6>
                 {
                     isRenewable && <div className="InputTokensRegular">
-                            <Input min={0} value={renewTimes} onChange={(e) => setRenewTimes(e.target.value)} />
-                        </div>
+                        <Input min={0} value={renewTimes} onChange={(e) => setRenewTimes(e.target.value)} />
+                    </div>
                 }
-                    <p className="BreefRecapB">[Optional] Repete this setup automatically after the block-end.</p>
+                <p className="BreefRecapB">[Optional] Repete this setup automatically after the block-end.</p>
                 <div className="Web2ActionsBTNs">
                     <a onClick={() => setCurrentStep(0)} className="backActionBTN">Back</a>
                     <a onClick={() => addSetup()} className="web2ActionBTN">{editSetup ? 'Edit' : 'Add'}</a>
