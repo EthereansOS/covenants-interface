@@ -345,28 +345,20 @@ const Create = (props) => {
         }
 
         return (
-            <div className="col-12">
-                <div className="row">
-                    <h6><b>Host</b></h6>
-                </div>
-                <div className="row mb-2">
-                    <p className="text-left text-small">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Omnis delectus incidunt laudantium distinctio velit reprehenderit quaerat, deserunt sint fugit ex consectetur voluptas suscipit numquam. Officiis maiores quaerat quod necessitatibus perspiciatis!</p>
-                </div>
-                <div className="row mb-4">
-                    <div className="col-12 p-0">
+            <div className="CheckboxQuestions">
+                <h6>Host</h6>
+                <p className="BreefRecapB">The host is the Contract, Wallet, DAO, or DFO with permissions to manage and add new setups in this contract. The host permissions are set into the extension contract. If you choose "Standard Extension (Address, wallet)," the extension must have all of the tokens needed to fill every setup rewards. You can also program extension permissions by your Organization, DFO to mint or transfer directly from the treasury, using the DFOhub website or a custom contract (more info in the Documentation).</p>
                         <select className="SelectRegular" value={selectedHost} onChange={onHostSelection}>
                             <option value="">Choose an host..</option>
-                            <option value="wallet">Wallet</option>
-                            <option value="custom-extension">Custom Contract</option>
-                            <option value="deployed-contract">Already deployed Contract</option>
+                            <option value="wallet">Standard Extension (Address, wallet)</option>
+                            <option value="custom-extension">Custom Extension (Deployed Contract)</option>
+                            <option value="deployed-contract">Custom Extension (Deploy Contract)</option>
                         </select>
-                    </div>
-                </div>
                 {
                     selectedHost === 'wallet' ? <>
-                        <div className="row mb-2 justify-content-center">
+                        <div className="InputTokensRegular InputRegularB">
                             <input type="text" className="TextRegular" value={hostWalletAddress || ""} onChange={(e) => setHostWalletAddress(e.target.value.toString())} placeholder={"Wallet address"} aria-label={"Wallet address"} />
-                        </div>
+
                         <div className="row mb-4">
                             <p className="text-left text-small">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Omnis delectus incidunt laudantium distinctio velit reprehenderit quaerat, deserunt sint fugit ex consectetur voluptas suscipit numquam. Officiis maiores quaerat quod necessitatibus perspiciatis!</p>
                         </div>
@@ -377,6 +369,7 @@ const Create = (props) => {
                             </label>
                             {hasTreasuryAddress && <input type="text" className="TextRegular" value={treasuryAddress || ""} onChange={onTreasuryAddressChange} placeholder={"Treasury address"} aria-label={"Treasury address"} />}
                         </div>
+                        </div>
                     </> : selectedHost === 'custom-extension' ? <>
                         <div className="form-check my-4">
                             <input className="form-check-input" type="checkbox" checked={useDeployedContract} onChange={(e) => setUseDeployedContract(e.target.checked)} id="setIsDeploy" />
@@ -384,6 +377,7 @@ const Create = (props) => {
                                 Use deployed contract
                             </label>
                         </div>
+                        
                         {
                             !useDeployedContract ? <ContractEditor filterDeployedContract={filterDeployedContract} dfoCore={props.dfoCore} onContract={setDeployContract} templateCode={farmingExtensionTemplateCode} /> : <>
                                 <div className="row mb-2">

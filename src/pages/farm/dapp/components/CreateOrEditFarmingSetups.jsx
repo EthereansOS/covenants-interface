@@ -46,7 +46,7 @@ const CreateOrEditFarmingSetups = (props) => {
     }
 
     return (
-        <div className="col-12 p-0">
+        <div className="CheckboxQuestions">
             {
                 farmingSetups.map((setup, i) => {
                     return (

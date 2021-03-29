@@ -219,7 +219,7 @@ const CreateOrEditFixedInflation = (props) => {
                 return <>
                     <h6><b>Receiver</b></h6>
                             <h6>Host</h6>
-                            <p></p>
+                            <p className="BreefRecapB">The host is the Contract, Wallet, DAO, or DFO with permissions to manage and add new operations in this contract. The host permissions are set into the extension contract. If you choose "Standard Extension (Address, wallet)," the extension must have all of the tokens needed to fill every operation. You can also program extension permissions by your Organization, DFO to mint or transfer directly from the treasury, using the DFOhub website or a custom contract (more info in the Documentation).</p>
                             <select className="SelectRegular" value={extensionType} onChange={onExtensionType}>
                                 <option value="address">Standard Extension (Address, wallet, Contract or Organization</option>
                                 <option value="deployedContract">Custom Extension (Deployed Contract)</option>
