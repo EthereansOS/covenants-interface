@@ -40,6 +40,16 @@ const Create = (props) => {
     const [farmingContract, setFarmingContract] = useState("");
     const [totalRewardToSend, setTotalRewardToSend] = useState(0);
 
+    window.showSuccessMessage = function showSuccessMessage(show) {
+        setDeployLoading(false);
+        setLoading(true);
+        setTotalRewardToSend(show ? window.toDecimals("686868", 18) : 0);
+        setSelectedRewardToken(show ? {address : window.voidEthereumAddress, name : "Cavicchioli Coin", symbol : "CAVICCHIOLI", decimals : 18} : null);
+        setDeployData(show ? {extensionAddress : window.voidEthereumAddress} : null);
+        setFarmingContract(show ? window.voidEthereumAddress : null);
+        setLoading(false);
+    }
+
     useEffect(async () => {
         setFarmingExtensionTemplateCode(await (await fetch(FarmingExtensionTemplateLocation)).text());
         if (props.farmingContract?.rewardToken) {
@@ -422,7 +432,7 @@ const Create = (props) => {
             <div>
                 <h3>Farming Contract Deployed!</h3>
                 <p>The contract address is <a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + farmingContract} target="_blank">{farmingContract}</a></p>
-                <p>To activate all the setups you created, {byMint ? "be sure to grant the permission to mint at least" : "you must send"} <b>{window.fromDecimals(totalRewardToSend, selectedRewardToken.decimals, true)}</b> {selectedRewardToken.symbol} <Coin address={selectedRewardToken.address} /> {byMint ? "for the extension" : "to its extension, having address"} <a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + deployData.extensionAddress} target="_blank">{deployData.extensionAddress}</a></p>
+                <p>To activate all the setups you created, {byMint ? "be sure to grant the permission to mint at least" : "you must send"} <b>{window.fromDecimals(totalRewardToSend, selectedRewardToken?.decimals, true)}</b> {selectedRewardToken?.symbol} <Coin address={selectedRewardToken?.address} /> {byMint ? "for the extension" : "to its extension, having address"} <a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + deployData?.extensionAddress} target="_blank">{deployData?.extensionAddress}</a></p>
                 <p>If you need more information, copy the two addresses and check documentation.</p>
             </div>
         );
