@@ -168,7 +168,7 @@ const CreateOrEditFarmingSetup = (props) => {
                             <div className="InputTokensRegular">
                                 <h6>Reward per block</h6>
                                 <p className="BreefRecapB">The total amount of tokens per block to reward farmers.</p>
-                                <Input min={dfoCore.fromDecimals(rewardToken, rewardToken.decimals)} showCoin={true} address={rewardToken.address} value={rewardPerBlock} name={rewardToken.symbol} onChange={(e) => onFreeRewardPerBlockUpdate(e.target.value)} />
+                                <Input min={0} showCoin={true} address={rewardToken.address} value={rewardPerBlock} name={rewardToken.symbol} onChange={(e) => onFreeRewardPerBlockUpdate(e.target.value)} />
                             </div>
                             <p className="BreefRecapB">Select the duration of the setup. The selected timeband will determinate the end block once activated</p>
                             <select className="SelectRegular" value={blockDuration} onChange={(e) => setBlockDuration(e.target.value)}>

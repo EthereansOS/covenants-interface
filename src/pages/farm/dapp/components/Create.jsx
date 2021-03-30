@@ -102,8 +102,8 @@ const Create = (props) => {
     const initializeDeployData = async () => {
         setDeployLoading(true);
         try {
-            const host = props.dfoCore.web3.utils.toChecksumAddress(selectedHost === 'wallet' ? hostWalletAddress : hostDeployedContract);
-            const hasExtension = (selectedHost === "custom-extension" && hostDeployedContract && !deployContract);
+            const host = props.dfoCore.web3.utils.toChecksumAddress(selectedHost === 'address' ? hostWalletAddress : hostDeployedContract);
+            const hasExtension = (selectedHost === "deployedContract" && hostDeployedContract && !deployContract);
             const data = { setups: [], rewardTokenAddress: selectedRewardToken.address, byMint, deployContract, host, hasExtension, extensionInitData: extensionPayload || '' };
             const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
             console.log(farmingSetups);
@@ -267,13 +267,13 @@ const Create = (props) => {
         if (!selectedHost) {
             return false;
         }
-        if (selectedHost === 'wallet') {
+        if (selectedHost === 'address') {
             if (hasTreasuryAddress && !window.isEthereumAddress(treasuryAddress)) {
                 return false;
             }
             return window.isEthereumAddress(hostWalletAddress);
         }
-        if (selectedHost === 'custom-extension') {
+        if (selectedHost === 'deployedContract') {
             if (useDeployedContract) {
                 return window.isEthereumAddress(hostDeployedContract);
             }
