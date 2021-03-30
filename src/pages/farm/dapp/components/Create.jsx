@@ -358,46 +358,41 @@ const Create = (props) => {
                     selectedHost === 'address' ? <>
                         <div className="InputTokensRegular InputRegularB">
                             <input type="text" className="TextRegular" value={hostWalletAddress || ""} onChange={(e) => setHostWalletAddress(e.target.value.toString())} placeholder={"Wallet address"} aria-label={"Host address"} />
-                            <div className="CheckboxQuestions">
+                        </div>
+                        <div className="CheckboxQuestions">
                             <h6><input type="checkbox" checked={hasTreasuryAddress} onChange={onHasTreasuryAddress} /> External Treasury</h6>
                             {hasTreasuryAddress && <input type="text" className="TextRegular" value={treasuryAddress || ""} onChange={onTreasuryAddressChange} placeholder={"Treasury address"} aria-label={"Treasury address"} />}
                             <p className="BreefRecapB">[Optional] Separate the Extension to the treasury used to send tokens to the Farm contract to activate setups.</p>
-                            </div>
                         </div>
                     </> : selectedHost === 'fromSourceCode' ? <>
-                        {
-                            !useDeployedContract ? <ContractEditor filterDeployedContract={filterDeployedContract} dfoCore={props.dfoCore} onContract={setDeployContract} templateCode={farmingExtensionTemplateCode} /> : <>
-                                <div className="row mb-2">
-                                    <input type="text" className="TextRegular" value={hostDeployedContract} onChange={(e) => setHostDeployedContract(e.target.value.toString())} placeholder={"Deployed contract address"} aria-label={"Deployed contract address"} />
-                                </div>
-                            </>
-                        }
-                        <div>
-                            <h6><b>Extension payload</b></h6>
-                            <input type="text" className="TextRegular" value={extensionPayload || ""} onChange={(e) => setExtensionPayload(e.target.value.toString())} placeholder={"Payload"} aria-label={"Payload"} />
-                        </div>
+                            <p className="BreefRecapB">Deploy a custom extension contract. In the IDE, we loaded a simple extension contract, and you can use it as a guide. Before building a custom contract, we kindly recommend reading the Covenants Documentation. Do it at your own risk.</p>
+                            <ContractEditor filterDeployedContract={filterDeployedContract} dfoCore={props.dfoCore} onContract={setDeployContract} templateCode={farmingExtensionTemplateCode} />
+                            <h6>Extension payload</h6>
+                            <div className="InputTokensRegular InputRegularB">
+                                <input type="text" className="TextRegular" value={extensionPayload || ""} onChange={(e) => setExtensionPayload(e.target.value.toString())} placeholder={"Payload"} aria-label={"Payload"} />
+                            </div>
                     </> : selectedHost === 'deployedContract' ? <>
-                        <div className="row mb-2">
-                            <input type="text" className="TextRegular" value={hostDeployedContract} onChange={(e) => setHostDeployedContract(e.target.value.toString())} placeholder={"Deployed contract address"} aria-label={"Deployed contract address"} />
+                        <div className="InputTokensRegular InputRegularB">
+                            <input type="text" className="TextRegular" value={hostDeployedContract} onChange={(e) => setHostDeployedContract(e.target.value.toString())} placeholder="Insert extension address" aria-label={"Deployed contract address"} />
                         </div>
-                        <div>
-                            <h6><b>Extension payload</b></h6>
+                        <h6>[Optional] Extension payload</h6>
+                        <div className="InputTokensRegular InputRegularB">
                             <input type="text" className="TextRegular" value={extensionPayload || ""} onChange={(e) => setExtensionPayload(e.target.value.toString())} placeholder={"Payload"} aria-label={"Payload"} />
                         </div>
-                    </> : <div />
+                    </> : <></>
                 }
-                <div className="row justify-content-center my-4">
+                <div className="Web2ActionsBTNs">
                     <a onClick={() => {
                         setSelectedHost(null);
                         setIsDeploy(false);
-                    }} className="backActionBTN mr-4">Back</a>
+                    }} className="backActionBTN">Back</a>
                     <a onClick={() => {
                         if (!canDeploy()) {
                             return;
                         }
                         initializeDeployData();
                         setDeployStep(hostDeployedContract ? 2 : 1);
-                    }} className="web2ActionBTN ml-4" disabled={!canDeploy()}>Deploy</a>
+                    }} className="web2ActionBTN" disabled={!canDeploy()}>Deploy</a>
                 </div>
             </div>
         )
@@ -425,9 +420,10 @@ const Create = (props) => {
     if (farmingContract) {
         return (
             <div>
-                <h3>Congratulations!</h3>
-                <p>You can find the new farming contract at the address <a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + farmingContract} target="_blank">{farmingContract}</a></p>
-                <p>In order to be able to activate all the setups you created, {byMint ? "be sure to grant the permission to mint at least" : "you must send"} <b>{window.fromDecimals(totalRewardToSend, selectedRewardToken.decimals, true)}</b> {selectedRewardToken.symbol} <Coin address={selectedRewardToken.address} /> {byMint ? "for the extension" : "to its extension, having address"} <a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + deployData.extensionAddress} target="_blank">{deployData.extensionAddress}</a></p>
+                <h3>Farming Contract Deployed!</h3>
+                <p>The contract address is <a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + farmingContract} target="_blank">{farmingContract}</a></p>
+                <p>To activate all the setups you created, {byMint ? "be sure to grant the permission to mint at least" : "you must send"} <b>{window.fromDecimals(totalRewardToSend, selectedRewardToken.decimals, true)}</b> {selectedRewardToken.symbol} <Coin address={selectedRewardToken.address} /> {byMint ? "for the extension" : "to its extension, having address"} <a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + deployData.extensionAddress} target="_blank">{deployData.extensionAddress}</a></p>
+                <p>If you need more information, copy the two addresses and check documentation.</p>
             </div>
         );
     }
