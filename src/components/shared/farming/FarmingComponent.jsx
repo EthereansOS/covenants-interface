@@ -11,7 +11,7 @@ const FarmingComponent = (props) => {
                 metadata ? <>
                 <div className="FarmTitle">
                     <figure>
-                        { metadata.rewardTokenAddress !== dfoCore.voidEthereumAddress ? <a target="_blank" href={`https://etherscan.io/token/${metadata.rewardTokenAddress}`} ><Coin height={45} address={metadata.rewardTokenAddress} /></a> : <Coin height={45} address={metadata.rewardTokenAddress} />}
+                        { metadata.rewardTokenAddress !== dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${metadata.rewardTokenAddress}`} ><Coin height={45} address={metadata.rewardTokenAddress} /></a> : <Coin height={45} address={metadata.rewardTokenAddress} />}
                     </figure>
                     <aside>
                         <h6><b>{metadata.name}</b> {(metadata.freeSetups.length + metadata.lockedSetups.length === 0 && !metadata.canActivateSetup) ? <span className="text-danger"><b>(inactive)</b></span> : <></> }</h6>
@@ -23,9 +23,9 @@ const FarmingComponent = (props) => {
                         {/*<p><b>APY</b>: 20%</p> If 0 (no coingecko Info) insert "Not Available"*/}
                         <p><b>Active Setups</b>: {metadata.freeSetups.length + metadata.lockedSetups.length} </p>
                         <div className="StatsLink">
-                            <a target="_blank" href={`https://etherscan.io/address/${metadata.contractAddress}`}>Contract</a>
-                            <a target="_blank" href={`https://etherscan.io/address/${metadata.fullhost}`}>Host</a>
-                            <a target="_blank" href={`https://etherscan.io/address/${metadata.fullExtension}`}>Extension</a>
+                            <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${metadata.contractAddress}`}>Contract</a>
+                            <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${metadata.fullhost}`}>Host</a>
+                            <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${metadata.fullExtension}`}>Extension</a>
                         </div>
                         {/*(Deprecated)<p><b>Setups</b>: {metadata.totalFreeSetups} free | {metadata.totalLockedSetups} locked</p>*/}
                         {/*<p><b>Host</b>: <a target="_blank" href={"https://etherscan.io/address/" + metadata.fullhost}>{metadata.host}</a></p>*/}
