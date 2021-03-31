@@ -17,7 +17,7 @@ const Input = (props) => {
     }
 
     const onDetectedChange = (value, sendBalance) => {
-        if (sendBalance) return { target: { value: window.numberToString(window.formatNumber(balance)) }};
+        if (sendBalance) return { target: { value: balance }};
         if (!value) return { target: { value: 0 }};
         return { target: { value } };
     } 
