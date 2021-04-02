@@ -40,13 +40,16 @@ const Create = (props) => {
     const [farmingContract, setFarmingContract] = useState("");
     const [totalRewardToSend, setTotalRewardToSend] = useState(0);
 
-    window.showSuccessMessage = function showSuccessMessage(show) {
+    window.showSuccessMessage = function showSuccessMessage(show, selectedHost, hasTreasuryAddress) {
         setDeployLoading(false);
         setLoading(true);
         setTotalRewardToSend(show ? window.toDecimals("686868", 18) : 0);
-        setSelectedRewardToken(show ? {address : window.voidEthereumAddress, name : "Cavicchioli Coin", symbol : "CAVICCHIOLI", decimals : 18} : null);
-        setDeployData(show ? {extensionAddress : window.voidEthereumAddress} : null);
+        setSelectedRewardToken(show ? { address: window.voidEthereumAddress, name: "Cavicchioli Coin", symbol: "CAVICCHIOLI", decimals: 18 } : null);
+        setDeployData(show ? { extensionAddress: window.voidEthereumAddress } : null);
         setFarmingContract(show ? window.voidEthereumAddress : null);
+        setSelectedHost(!show ? null : selectedHost || "wallet");
+        setHasTreasuryAddress(show && hasTreasuryAddress);
+        show && hasTreasuryAddress && setTreasuryAddress(window.voidEthereumAddress);
         setLoading(false);
     }
 
@@ -114,7 +117,7 @@ const Create = (props) => {
                     props.dfoCore.web3.utils.toBN(calculatedTotalToSend).add(
                         props.dfoCore.web3.utils.toBN(window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.rewardPerBlock), selectedRewardToken.decimals)),
                         ).mul(props.dfoCore.web3.utils.toBN(window.numberToString(setup.blockDuration)))
-                    ).toString();
+                    ).mul(props.dfoCore.web3.utils.toBN(window.numberToString(window.formatNumber(setup.renewTimes || '0') === 0 ? 1 : setup.renewTimes))).toString();
                 const isFree = setup.free;
                 const result = await ammAggregator.methods.findByLiquidityPool(setup.liquidityPoolToken.address).call();
                 const { amm } = result;
@@ -375,12 +378,12 @@ const Create = (props) => {
                             <p className="BreefRecapB">[Optional] Separate the Extension to the treasury used to send tokens to the Farm contract to activate setups.</p>
                         </div>
                     </> : selectedHost === 'fromSourceCode' ? <>
-                            <p className="BreefRecapB">Deploy a custom extension contract. In the IDE, we loaded a simple extension contract, and you can use it as a guide. Before building a custom contract, we kindly recommend reading the Covenants Documentation. Do it at your own risk.</p>
-                            <ContractEditor filterDeployedContract={filterDeployedContract} dfoCore={props.dfoCore} onContract={setDeployContract} templateCode={farmingExtensionTemplateCode} />
-                            <h6>Extension payload</h6>
-                            <div className="InputTokensRegular InputRegularB">
-                                <input type="text" className="TextRegular" value={extensionPayload || ""} onChange={(e) => setExtensionPayload(e.target.value.toString())} placeholder={"Payload"} aria-label={"Payload"} />
-                            </div>
+                        <p className="BreefRecapB">Deploy a custom extension contract. In the IDE, we loaded a simple extension contract, and you can use it as a guide. Before building a custom contract, we kindly recommend reading the Covenants Documentation. Do it at your own risk.</p>
+                        <ContractEditor filterDeployedContract={filterDeployedContract} dfoCore={props.dfoCore} onContract={setDeployContract} templateCode={farmingExtensionTemplateCode} />
+                        <h6>Extension payload</h6>
+                        <div className="InputTokensRegular InputRegularB">
+                            <input type="text" className="TextRegular" value={extensionPayload || ""} onChange={(e) => setExtensionPayload(e.target.value.toString())} placeholder={"Payload"} aria-label={"Payload"} />
+                        </div>
                     </> : selectedHost === 'deployedContract' ? <>
                         <div className="InputTokensRegular InputRegularB">
                             <input type="text" className="TextRegular" value={hostDeployedContract} onChange={(e) => setHostDeployedContract(e.target.value.toString())} placeholder="Insert extension address" aria-label={"Deployed contract address"} />
@@ -432,35 +435,33 @@ const Create = (props) => {
             <div className="youDIDit">
                 <h3 className="SuccessText">Farming Contract Deployed!</h3>
                 <p className="SuccessTextNow">And Now?</p>
-                
-                
-                
-                {/*Todo If choosen by wallet*/}
-                <p>Before attempting to activate setups, <b>remember to send at least {window.fromDecimals(totalRewardToSend, selectedRewardToken?.decimals, true)} {selectedRewardToken?.symbol}</b> to the extension contract:</p>
-                <p className="SuccessTextLink"><a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + deployData?.extensionAddress} target="_blank">{deployData?.extensionAddress}</a></p>
-                
-                {/*Calculate total needed taking into acount repet in setups*/}
-                <p>The total amount of tokens needed taking into acount all of the Repetable Setups are {window.fromDecimals(totalRewardToSend, selectedRewardToken?.decimals, true)} {selectedRewardToken?.symbol} </p>
-                    
-                    {/*Todo If choosen by wallet and the treasury is the Extension*/}
-                    <p>Unissued reward tokens will be transferred automagically to the Extension Contract once every farmed positions will withdraw their liquidity at the ending of the setup.</p>
-                    
-                    {/*Todo If choosen by wallet and the treasury is an address*/}
-                    <p>Unissued reward tokens will be transferred automagically to the Selected Treasury Address once every farmed positions will withdraw their liquidity at the ending of the setup.</p>
-                    <p>Treasury Address:</p>
-                    {/*Todo Adding the treasury address instead of the Extension Address*/}
+
+                {/*If choosen by wallet*/}
+                {selectedHost === 'wallet' ? <>
+                    <p>Before attempting to activate setups, <b>remember to send at least {window.fromDecimals(totalRewardToSend, selectedRewardToken?.decimals, true)} {selectedRewardToken?.symbol}</b> to the extension contract:</p>
                     <p className="SuccessTextLink"><a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + deployData?.extensionAddress} target="_blank">{deployData?.extensionAddress}</a></p>
-                
-                
-                
-                
-                {/*Todo If not choosen by wallet (custom extension contract)*/}
-                <p>Before attempting to activate setups, <b>remember to do every action needed to send at least {window.fromDecimals(totalRewardToSend, selectedRewardToken?.decimals, true)} {selectedRewardToken?.symbol}</b> to the extension contract:</p>
-                <p className="SuccessTextLink"><a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + deployData?.extensionAddress} target="_blank">{deployData?.extensionAddress}</a></p>
-                <p>If you rule the Extension via a DFO or a DAO, be sure to vote to garant permissions from its Treasury.</p>
-                <p className="Disclamerfinish">If you have set the "Repeat" functions in Setups, don't forget to track and fill the reward tokens before the end block. Suppose the Extension can't transfer the number of reward tokens needed to the Farming contract to reactivate a Setup (reward/Block from the new activation to the end block). In that case, the Setup'll fail its activation and automatically becomes Disactive. For more info, read the Documentation.</p>
+                    {/*Calculate total needed taking into acount repet in setups*/}
+                    <p>The total amount of tokens needed taking into acount all of the Repetable Setups are {window.fromDecimals(totalRewardToSend, selectedRewardToken?.decimals, true)} {selectedRewardToken?.symbol} </p>
+
+                    {/*If choosen by wallet and the treasury is the Extension*/}
+                    {!hasTreasuryAddress && <p>Unissued reward tokens will be transferred automagically to the Extension Contract once every farmed positions will withdraw their liquidity at the ending of the setup.</p>}
+
+                    {/*If choosen by wallet and the treasury is an address*/}
+                    {hasTreasuryAddress && <>
+                        <p>Unissued reward tokens will be transferred automagically to the Selected Treasury Address once every farmed positions will withdraw their liquidity at the ending of the setup.</p>
+                        <p>Treasury Address:</p>
+                        <p className="SuccessTextLink"><a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + treasuryAddress} target="_blank">{treasuryAddress}</a></p>
+                    </>}
+                </> : <>
+                    {/*If not choosen by wallet (custom extension contract)*/}
+                    <p>Before attempting to activate setups, <b>remember to do every action needed to send at least {window.fromDecimals(totalRewardToSend, selectedRewardToken?.decimals, true)} {selectedRewardToken?.symbol}</b> to the extension contract:</p>
+                    <p className="SuccessTextLink"><a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + deployData?.extensionAddress} target="_blank">{deployData?.extensionAddress}</a></p>
+                    <p>If you rule the Extension via a DFO or a DAO, be sure to vote to grant permissions from its Treasury.</p>
+                    <p className="Disclamerfinish">If you have set the "Repeat" functions in Setups, don't forget to track and fill the reward tokens before the end block. Suppose the Extension can't transfer the number of reward tokens needed to the Farming contract to reactivate a Setup (reward/Block from the new activation to the end block). In that case, the Setup'll fail its activation and automatically becomes Disactive. For more info, read the Documentation.</p>
+                </>}
+
                 <p>Yor Farming Contract is available via this link: </p>
-                <p className="SuccessTextLink"><a href={"https://covenants.eth.link/farm/dapp/" + farmingContract} target="_blank">{"https://covenants.eth.link/farm/dapp/" + farmingContract}</a></p>
+                <p className="SuccessTextLink"><a href={"https://covenants.eth.link/#/farm/dapp/" + farmingContract} target="_blank">{"https://covenants.eth.link/#/farm/dapp/" + farmingContract}</a></p>
             </div>
         );
     }

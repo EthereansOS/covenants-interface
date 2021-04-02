@@ -134,7 +134,7 @@ const ExploreFarmingContract = (props) => {
                     props.dfoCore.web3.utils.toBN(calculatedTotalToSend).add(
                         props.dfoCore.web3.utils.toBN(window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.rewardPerBlock), token.decimals)),
                         ).mul(props.dfoCore.web3.utils.toBN(window.numberToString(setup.blockDuration)))
-                    ).toString();
+                    ).mul(props.dfoCore.web3.utils.toBN(window.numberToString(window.formatNumber(setup.renewTimes || '0') === 0 ? 1 : setup.renewTimes))).toString();
                 const isFree = setup.free;
                 const result = await ammAggregator.methods.findByLiquidityPool(setup.liquidityPoolToken.address).call();
                 const { amm } = result;
@@ -151,7 +151,7 @@ const ExploreFarmingContract = (props) => {
                         blockDuration: parseInt(setup.blockDuration),
                         originalRewardPerBlock: window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.rewardPerBlock), token.decimals)),
                         minStakeable: window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.minStakeable), mainTokenDecimals)),
-                        maxStakeable : !isFree ? window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.maxStakeable)), mainTokenDecimals) : 0,
+                        maxStakeable: !isFree ? window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.maxStakeable)), mainTokenDecimals) : 0,
                         renewTimes: setup.renewTimes,
                         ammPlugin: amm,
                         liquidityPoolTokenAddress: setup.liquidityPoolToken.address,
@@ -182,19 +182,27 @@ const ExploreFarmingContract = (props) => {
 
 
     if (loading) {
-        return (<Loading/>);
+        return (<Loading />);
     }
 
     const lockedSetups = farmingSetups.filter((s) => !s.setupInfo.free && !s.finished);
     const freeSetups = farmingSetups.filter((s) => s.setupInfo.free && !s.finished);
     const finishedSetups = farmingSetups.filter((s) => s.finished);
 
-    if(totalRewardToSend) {
+    if (totalRewardToSend) {
         return (
-            <div>
-                <h3>Congratulations!</h3>
-                <p>In order to be able to activate the new setups you created, {metadata.metadata.byMint ? "be sure to grant the permission to mint at least" : "you must send"} <b>{window.fromDecimals(totalRewardToSend, token.decimals, true)}</b> {token.symbol} <Coin address={token.address}/> {metadata.metadata.byMint ? "for the extension" : "to its extension, having address"} <a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + metadata.metadata.fullExtension} target="_blank">{metadata.metadata.fullExtension}</a></p>
-                <a href="javascript:;" onClick={() => setTotalRewardToSend("")}>Got it</a>
+            <div className="youDIDit">
+                <h3 className="SuccessText">New Setups created!</h3>
+                <p className="SuccessTextNow">And Now?</p>
+
+                <p>Before attempting to activate setups, <b>remember to do every action needed to send at least {window.fromDecimals(totalRewardToSend, token.decimals, true)} {token.symbol}</b> to the extension contract:</p>
+                <p className="SuccessTextLink"><a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + metadata.metadata.fullExtension} target="_blank">{metadata.metadata.fullExtension}</a></p>
+                <p>If you rule the Extension via a DFO or a DAO, be sure to vote to grant permissions from its Treasury.</p>
+                <p className="Disclamerfinish">If you have set the "Repeat" functions in Setups, don't forget to track and fill the reward tokens before the end block. Suppose the Extension can't transfer the number of reward tokens needed to the Farming contract to reactivate a Setup (reward/Block from the new activation to the end block). In that case, the Setup'll fail its activation and automatically becomes Disactive. For more info, read the Documentation.</p>
+                <p>
+                    <br/>
+                    <a href="javascript:;" onClick={() => setTotalRewardToSend("")}>Got it</a>
+                </p>
             </div>
         );
     }
@@ -250,8 +258,8 @@ const ExploreFarmingContract = (props) => {
                         onRemoveFarmingSetup={(i) => removeFarmingSetup(i)}
                         onEditFarmingSetup={(setup, i) => editFarmingSetup(setup, i)}
                         onCancel={() => { setNewFarmingSetups([]); setIsAdd(false); }}
-                        onFinish={() => {}}
-                        finishButton={setupsLoading ? <Loading/> : <button className="btn btn-primary" onClick={() => updateSetups()}>Update setups</button>}
+                        onFinish={() => { }}
+                        finishButton={setupsLoading ? <Loading /> : <button className="btn btn-primary" onClick={() => updateSetups()}>Update setups</button>}
                         forEdit={true}
                     />
                 }
