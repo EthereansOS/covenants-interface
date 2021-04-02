@@ -432,14 +432,13 @@ const Create = (props) => {
             <div className="youDIDit">
                 <h3 className="SuccessText">Farming Contract Deployed!</h3>
                 <p className="SuccessTextNow">And Now?</p>
-                <p>Yor contract is available via this link: </p>
-                <p className="SuccessTextLink"><a href={"https://covenants.eth.link/farm/dapp/" + farmingContract} target="_blank">{"https://covenants.eth.link/farm/dapp/" + farmingContract}</a></p>
                 
                 
                 
                 {/*Todo If choosen by wallet*/}
                 <p>Before attempting to activate setups, <b>remember to send at least {window.fromDecimals(totalRewardToSend, selectedRewardToken?.decimals, true)} {selectedRewardToken?.symbol}</b> to the extension contract:</p>
                 <p className="SuccessTextLink"><a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + deployData?.extensionAddress} target="_blank">{deployData?.extensionAddress}</a></p>
+                
                 {/*Calculate total needed taking into acount repet in setups*/}
                 <p>The total amount of tokens needed taking into acount all of the Repetable Setups are {window.fromDecimals(totalRewardToSend, selectedRewardToken?.decimals, true)} {selectedRewardToken?.symbol} </p>
                     
@@ -460,6 +459,8 @@ const Create = (props) => {
                 <p className="SuccessTextLink"><a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + deployData?.extensionAddress} target="_blank">{deployData?.extensionAddress}</a></p>
                 <p>If you rule the Extension via a DFO or a DAO, be sure to vote to garant permissions from its Treasury.</p>
                 <p className="Disclamerfinish">If you have set the "Repeat" functions in Setups, don't forget to track and fill the reward tokens before the end block. Suppose the Extension can't transfer the number of reward tokens needed to the Farming contract to reactivate a Setup (reward/Block from the new activation to the end block). In that case, the Setup'll fail its activation and automatically becomes Disactive. For more info, read the Documentation.</p>
+                <p>Yor Farming Contract is available via this link: </p>
+                <p className="SuccessTextLink"><a href={"https://covenants.eth.link/farm/dapp/" + farmingContract} target="_blank">{"https://covenants.eth.link/farm/dapp/" + farmingContract}</a></p>
             </div>
         );
     }
