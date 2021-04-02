@@ -442,6 +442,13 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .SetupListITEMINFO {width: 62%; display: inline-block; margin-right: 8%; vertical-align: middle;}
 .SetupListITEMACTIONS {width: 30%;display: inline-block;vertical-align: middle;}
 .SetupListITEMACTIONS .web2ActionBTN {display: block; width: 100%; text-align: center; font-size: 12px; padding: 4px 6px; margin: 5px auto;}
+.youDIDit {width: 80%; display: block; margin: 5px auto;}
+.youDIDit p {font-size: 13px; text-align: left;}
+.youDIDit .SuccessText {font-size: 20px; text-align: center; margin: 10px auto;}
+.youDIDit .SuccessTextNow {font-size: 25px; text-align: center; margin: 10px auto; color: #7474F7; font-weight: bold;}
+.youDIDit .SuccessTextLink {font-size: 11px; padding: 5px 8px; border: 1px solid #9e6915; color: #ffffff !important; display: inline-block; background-color: #9e6915; border-radius: 6px;}
+.youDIDit .SuccessTextLink a {color: #ffffff !important; text-decoration: none !important; font-weight: bold;font-size: 11px;}
+.Disclamerfinish {font-size: 10px !important; text-align: left; margin: 10px auto; background-color: #7474F7; font-weight: bold; padding: 12px 20px; border-radius: 12px; color: #ffffff !important;}
 
 @media only screen and (max-device-width: 750px) {
    .IndexRegularText iframe {display: none;}
