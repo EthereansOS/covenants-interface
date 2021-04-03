@@ -25,6 +25,7 @@ const ExploreFarmingContract = (props) => {
     const [showOldSetups, setShowOldSetups] = useState(false);
     const [newFarmingSetups, setNewFarmingSetups] = useState([]);
     const [totalRewardToSend, setTotalRewardToSend] = useState(0);
+    const [cumulativeRewardToSend, setCumulativeRewardToSend] = useState(0);
 
     useEffect(() => {
         if (dfoCore) {
@@ -128,13 +129,13 @@ const ExploreFarmingContract = (props) => {
             const newSetupsInfo = [];
             const ammAggregator = await dfoCore.getContract(dfoCore.getContextElement('AMMAggregatorABI'), dfoCore.getContextElement('ammAggregatorAddress'));
             var calculatedTotalToSend = "0";
+            var cumulativeTotalToSend = "0";
             for (var i in newFarmingSetups) {
                 const setup = newFarmingSetups[i];
-                calculatedTotalToSend =
-                    props.dfoCore.web3.utils.toBN(calculatedTotalToSend).add(
-                        props.dfoCore.web3.utils.toBN(window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.rewardPerBlock), token.decimals)),
-                        ).mul(props.dfoCore.web3.utils.toBN(window.numberToString(setup.blockDuration)))
-                    ).mul(props.dfoCore.web3.utils.toBN(window.numberToString(window.formatNumber(setup.renewTimes || '0') === 0 ? 1 : setup.renewTimes))).toString();
+                var amountToSend = props.dfoCore.web3.utils.toBN(window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.rewardPerBlock), token.decimals)),
+                ).mul(props.dfoCore.web3.utils.toBN(window.numberToString(setup.blockDuration))).toString();
+                calculatedTotalToSend = props.dfoCore.web3.utils.toBN(calculatedTotalToSend).add(props.dfoCore.web3.utils.toBN(amountToSend)).toString();
+                cumulativeTotalToSend = props.dfoCore.web3.utils.toBN(cumulativeTotalToSend).add(props.dfoCore.web3.utils.toBN(amountToSend).mul(props.dfoCore.web3.utils.toBN(window.numberToString(window.formatNumber(setup.renewTimes || '0') === 0 ? 1 : setup.renewTimes)))).toString();
                 const isFree = setup.free;
                 const result = await ammAggregator.methods.findByLiquidityPool(setup.liquidityPoolToken.address).call();
                 const { amm } = result;
@@ -170,6 +171,7 @@ const ExploreFarmingContract = (props) => {
             console.log(`gas ${gas}`);
             const result = await extension.methods.setFarmingSetups(newSetupsInfo).send({ from: dfoCore.address, gas });
             setTotalRewardToSend(calculatedTotalToSend);
+            setCumulativeRewardToSend(calculatedTotalToSend);
         } catch (error) {
             console.error(error);
         } finally {
@@ -197,6 +199,8 @@ const ExploreFarmingContract = (props) => {
 
                 <p>Before attempting to activate setups, <b>remember to do every action needed to send at least {window.fromDecimals(totalRewardToSend, token.decimals, true)} {token.symbol}</b> to the extension contract:</p>
                 <p className="SuccessTextLink"><a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + metadata.metadata.fullExtension} target="_blank">{metadata.metadata.fullExtension}</a></p>
+                <p>The total amount of tokens needed taking into acount all of the Repetable Setups are {window.fromDecimals(cumulativeRewardToSend, token.decimals, true)} {token.symbol} </p>
+
                 <p>If you rule the Extension via a DFO or a DAO, be sure to vote to grant permissions from its Treasury.</p>
                 <p className="Disclamerfinish">If you have set the "Repeat" functions in Setups, don't forget to track and fill the reward tokens before the end block. Suppose the Extension can't transfer the number of reward tokens needed to the Farming contract to reactivate a Setup (reward/Block from the new activation to the end block). In that case, the Setup'll fail its activation and automatically becomes Disactive. For more info, read the Documentation.</p>
                 <p>

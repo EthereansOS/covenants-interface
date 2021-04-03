@@ -39,11 +39,13 @@ const Create = (props) => {
     const [hasTreasuryAddress, setHasTreasuryAddress] = useState(false);
     const [farmingContract, setFarmingContract] = useState("");
     const [totalRewardToSend, setTotalRewardToSend] = useState(0);
+    const [cumulativeRewardToSend, setCumulativeRewardToSend] = useState(0);
 
     window.showSuccessMessage = function showSuccessMessage(show, selectedHost, hasTreasuryAddress) {
         setDeployLoading(false);
         setLoading(true);
         setTotalRewardToSend(show ? window.toDecimals("686868", 18) : 0);
+        setCumulativeRewardToSend(show ? window.toDecimals("686868", 18) : 0);
         setSelectedRewardToken(show ? { address: window.voidEthereumAddress, name: "Cavicchioli Coin", symbol: "CAVICCHIOLI", decimals: 18 } : null);
         setDeployData(show ? { extensionAddress: window.voidEthereumAddress } : null);
         setFarmingContract(show ? window.voidEthereumAddress : null);
@@ -111,13 +113,13 @@ const Create = (props) => {
             const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
             console.log(farmingSetups);
             var calculatedTotalToSend = "0";
+            var cumulativeTotalToSend = "0";
             for (let i = 0; i < farmingSetups.length; i++) {
                 const setup = farmingSetups[i];
-                calculatedTotalToSend =
-                    props.dfoCore.web3.utils.toBN(calculatedTotalToSend).add(
-                        props.dfoCore.web3.utils.toBN(window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.rewardPerBlock), selectedRewardToken.decimals)),
-                        ).mul(props.dfoCore.web3.utils.toBN(window.numberToString(setup.blockDuration)))
-                    ).mul(props.dfoCore.web3.utils.toBN(window.numberToString(window.formatNumber(setup.renewTimes || '0') === 0 ? 1 : setup.renewTimes))).toString();
+                var amountToSend = props.dfoCore.web3.utils.toBN(window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.rewardPerBlock), selectedRewardToken.decimals)),
+                ).mul(props.dfoCore.web3.utils.toBN(window.numberToString(setup.blockDuration))).toString();
+                calculatedTotalToSend = props.dfoCore.web3.utils.toBN(calculatedTotalToSend).add(props.dfoCore.web3.utils.toBN(amountToSend)).toString();
+                cumulativeTotalToSend = props.dfoCore.web3.utils.toBN(cumulativeTotalToSend).add(props.dfoCore.web3.utils.toBN(amountToSend).mul(props.dfoCore.web3.utils.toBN(window.numberToString(window.formatNumber(setup.renewTimes || '0') === 0 ? 1 : setup.renewTimes)))).toString();
                 const isFree = setup.free;
                 const result = await ammAggregator.methods.findByLiquidityPool(setup.liquidityPoolToken.address).call();
                 const { amm } = result;
@@ -147,6 +149,7 @@ const Create = (props) => {
             console.log(data);
             setDeployData(data);
             setTotalRewardToSend(calculatedTotalToSend);
+            setCumulativeRewardToSend(calculatedTotalToSend);
         } catch (error) {
             console.error(error);
             setDeployData(null);
@@ -441,7 +444,7 @@ const Create = (props) => {
                     <p>Before attempting to activate setups, <b>remember to send at least {window.fromDecimals(totalRewardToSend, selectedRewardToken?.decimals, true)} {selectedRewardToken?.symbol}</b> to the extension contract:</p>
                     <p className="SuccessTextLink"><a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + deployData?.extensionAddress} target="_blank">{deployData?.extensionAddress}</a></p>
                     {/*Calculate total needed taking into acount repet in setups*/}
-                    <p>The total amount of tokens needed taking into acount all of the Repetable Setups are {window.fromDecimals(totalRewardToSend, selectedRewardToken?.decimals, true)} {selectedRewardToken?.symbol} </p>
+                    <p>The total amount of tokens needed taking into acount all of the Repetable Setups are {window.fromDecimals(cumulativeRewardToSend, selectedRewardToken?.decimals, true)} {selectedRewardToken?.symbol} </p>
 
                     {/*If choosen by wallet and the treasury is the Extension*/}
                     {!hasTreasuryAddress && <p>Unissued reward tokens will be transferred automagically to the Extension Contract once every farmed positions will withdraw their liquidity at the ending of the setup.</p>}
