@@ -100,11 +100,11 @@ export default {
           }
       }
     },
-    "indexesURL": "https://raw.githubusercontent.com/b-u-i-d-l/bazar-tokens-list/master/dist/indexes.json",
-    "decentralizedFlexibleOrganizationsURL": "https://raw.githubusercontent.com/b-u-i-d-l/bazar-tokens-list/master/dist/decentralizedFlexibleOrganizations.json",
-    "decentralizedFlexibleOrganizationsURLRopsten": "https://raw.githubusercontent.com/b-u-i-d-l/bazar-tokens-list/master/dist/programmableEquities.json",
-    "uniswapTokensURL": "https://raw.githubusercontent.com/b-u-i-d-l/bazar-tokens-list/master/dist/uniswapTokens.json",
-    "itemsListURL" : "https://raw.githubusercontent.com/b-u-i-d-l/ITEMswap/master/src/constants/ethItemLists/dist/tokensList.json",
+    "indexesURL": "https://raw.githubusercontent.com/EthereansOS/Organizations-Interface/master/bazar-tokens-list/dist/indexes.json",
+    "decentralizedFlexibleOrganizationsURL": "https://raw.githubusercontent.com/EthereansOS/Organizations-Interface/master/bazar-tokens-list/dist/decentralizedFlexibleOrganizations.json",
+    "decentralizedFlexibleOrganizationsURLRopsten": "https://raw.githubusercontent.com/EthereansOS/Organizations-Interface/master/bazar-tokens-list/dist/programmableEquities.json",
+    "uniswapTokensURL": "https://raw.githubusercontent.com/EthereansOS/Organizations-Interface/master/bazar-tokens-list/dist/uniswapTokens.json",
+    "itemsListURL" : "https://raw.githubusercontent.com/EthereansOS/ITEMS-Swap/master/src/constants/ethItemLists/dist/tokensList.json",
     "blockIntervals" : {
       "6 Hours" : 1600,
       "12 Hours" : 3200,
