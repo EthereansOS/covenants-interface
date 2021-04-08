@@ -36,7 +36,7 @@ export default {
     "ipfsUrlBase": "https://ipfs.io/ipfs",
     "deploySearchStart": 12071533,
     "deploySearchStartRopsten": 9851551,
-    "blockSearchSection": 9000000,
+    "blockSearchSection": 0,
     "transactionConfirmations": 0,
     "transactionConfirmationsTimeoutMillis": 7000,
     "farmGasMultiplier": 1.05,
