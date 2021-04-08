@@ -39,7 +39,7 @@ const BazaarComponent = (props) => {
                     const decimal = await tokenContract.methods.decimals().call();
                     try {
                         const res = await axios.get(props.dfoCore.getContextElement('coingeckoCoinPriceURL') + token);
-                        const { data } = res;
+                        const { data } = await window.window.elaboratePrices(res, token);
                         const tokenPrice = data[token.toLowerCase()].usd;
                         const value = parseFloat(props.dfoCore.toDecimals(amount, decimal)) * tokenPrice;
                         total += value;
@@ -61,7 +61,7 @@ const BazaarComponent = (props) => {
                     const amountDecimals = props.dfoCore.toDecimals(amount.toString(), decimal);
                     try {
                         const res = await axios.get(props.dfoCore.getContextElement('coingeckoCoinPriceURL') + token);
-                        const { data } = res;
+                        const { data } = await window.window.elaboratePrices(res, token);
                         const tokenPrice = data[token.toLowerCase()].usd;
                         percentages[token] = ((parseFloat(amountDecimals) * tokenPrice) / parseInt(total)) * 100;
                     } catch (error) {

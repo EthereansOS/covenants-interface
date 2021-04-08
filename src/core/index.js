@@ -25,6 +25,7 @@ export default class DFOCore {
     constructor(context) {
         this.context = context;
         typeof window !== 'undefined' && (window.dfoCore = this);
+        typeof window !== 'undefined' && (window.context = this.context);
     }
 
     /**
@@ -95,7 +96,9 @@ export default class DFOCore {
     }
 
     tryLoadCustomWeb3 = async() => {
-        window.context = {};
+        if(typeof window === 'undefined') {
+            return;
+        }
         var localContext;
         try {
             localContext = await (await fetch('assets/data/context.local.json')).json();
