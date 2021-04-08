@@ -21,7 +21,8 @@ const PageContainer = (props) => {
                         </Link>
                     </div> : !props.hideButton ?
                     <div className="IndexRegularBTN">
-                        <button className="btn btn-Fantasy" disabled={!props.buttonEnabled} onClick={() => props.onClick ? props.onClick() : console.log('Coming soon.')}>{ props.buttonText}</button>
+                        {props.link && <a href={props.link} target="_blank" className="btn btn-Fantasy">{props.buttonText}</a>}
+                        {!props.link && <button className="btn btn-Fantasy" disabled={!props.buttonEnabled} onClick={() => props.onClick ? props.onClick() : console.log('Coming soon.')}>{ props.buttonText}</button>}
                     </div> : <div/>
                 }
                 <div className="FooterP">
