@@ -114,7 +114,7 @@ window.getLogs = async function getLogs(a, endOnFirstResult) {
         logs.push(...(await window.web3ForLogs.eth.getPastLogs(args)));
         args.toBlock = window.numberToString(parseInt(args.fromBlock) - 1);
         args.fromBlock = window.numberToString(parseInt(args.toBlock) - (window.context.blockSearchSection || 0));
-        if (parseInt(args.fromBlock) >= parseInt(args.toBlock)) {
+        if (parseInt(args.fromBlock) <= 0 || parseInt(args.toBlock) <= 0 || parseInt(args.fromBlock) >= parseInt(args.toBlock)) {
             if (logs.length > 0 && endOnFirstResult === true) {
                 return await fillWithWeb3Logs(logs, args);
             }
@@ -2180,10 +2180,24 @@ window.getTokenPriceInDollarsOnUniswap = async function getTokenPriceInDollarsOn
     try {
         ethereumValue = (await window.blockchainCall(uniswapV2Router.methods.getAmountsOut, amount, path))[1];
     } catch (e) {}
-    ethereumValue = parseFloat(window.fromDecimals(ethereumValue, decimals));
+    ethereumValue = parseFloat(window.fromDecimals(ethereumValue, decimals, true));
     ethereumValue *= ethereumPrice;
     return ethereumValue;
 };
+
+window.elaboratePrices = async function elaboratePrices(res, tokens) {
+    var response = {
+        data : {}
+    };
+    Object.entries(res.data).forEach(entry => response.data[entry[0]] = entry[1]);
+    tokens = (!(tokens instanceof Array) ? (tokens = tokens.split(',')) : tokens).map(it => it.toLowerCase()).filter(it => it && it !== window.voidEthereumAddress && !response.data[it]);
+    for(var token of tokens) {
+        response.data[token] = {
+            usd : await window.getTokenPriceInDollarsOnUniswap(token, await window.blockchainCall(window.newContract(window.context.ERC20ABI, token).methods.decimals))
+        };
+    }
+    return response;
+}
 
 window.getTokenPriceInDollarsOnOpenSea = async function getTokenPriceInDollarsOnOpenSea(asset_contract_address, token_id) {
     if (window.networkId !== 1) {

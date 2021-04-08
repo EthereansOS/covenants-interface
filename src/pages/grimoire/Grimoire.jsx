@@ -23,7 +23,7 @@ const Grimoire = () => {
 
     return (
         <>
-            <PageContainer image={homeInflationImage} buttonEnabled={true} onClick={() => setShowGrimoire(!showGrimoire)} imageHeight={300} text={lorem} title={"Grimoire"}  buttonText={!showGrimoire ? "Read" : "Hide"} />
+            <PageContainer image={homeInflationImage} buttonEnabled={true} onClick={() => setShowGrimoire(!showGrimoire)} imageHeight={300} text={lorem} title={"Grimoire"} link="https://docs.ethos.wiki/covenants" buttonText={!showGrimoire ? "Read" : "Hide"} />
             {
                 showGrimoire && <div className="grimoireBox">
                     <article className="grimoireAll">

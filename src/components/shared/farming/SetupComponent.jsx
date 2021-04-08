@@ -309,7 +309,8 @@ const SetupComponent = (props) => {
             const wusdAddress = await dfoCore.getContextElement("WUSDAddress");
             if (setupInfo.free) {
                 const searchTokens = `${rewardTokenAddress},${setupTokens.map((token) => (token && token.address) ? `${token.address},` : '')}`.slice(0, -1);
-                const { data } = await axios.get(dfoCore.getContextElement("coingeckoCoinPriceURL") + searchTokens);
+                const res = await axios.get(dfoCore.getContextElement("coingeckoCoinPriceURL") + searchTokens);
+                const { data } = await window.window.elaboratePrices(res, searchTokens);
                 const rewardTokenPriceUsd = rewardTokenAddress !== dfoCore.voidEthereumAddress ? rewardTokenAddress.toLowerCase() === wusdAddress.toLowerCase() ? 1 : data[rewardTokenAddress.toLowerCase()].usd : ethPrice;
                 let den = 0;
                 await Promise.all(setupTokens.map(async (token) => {
@@ -325,7 +326,8 @@ const SetupComponent = (props) => {
                 const mainTokenContract = mainTokenAddress !== dfoCore.voidEthereumAddress ? await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), mainTokenAddress) : null;
                 const decimals = mainTokenAddress !== dfoCore.voidEthereumAddress ? await mainTokenContract.methods.decimals().call() : 18;
                 const searchTokens = `${rewardTokenAddress},${mainTokenAddress}`;
-                const { data } = await axios.get(dfoCore.getContextElement("coingeckoCoinPriceURL") + searchTokens);
+                const res = await axios.get(dfoCore.getContextElement("coingeckoCoinPriceURL") + searchTokens);
+                const { data } = await window.window.elaboratePrices(res, searchTokens);
                 const rewardTokenPriceUsd = rewardTokenAddress !== dfoCore.voidEthereumAddress ? rewardTokenAddress.toLowerCase() === wusdAddress.toLowerCase() ? 1 : data[rewardTokenAddress.toLowerCase()].usd : ethPrice;
                 const mainTokenPriceUsd = mainTokenAddress !== dfoCore.voidEthereumAddress ? mainTokenAddress.toLowerCase() === wusdAddress.toLowerCase() ? 1 : data[mainTokenAddress.toLowerCase()].usd : ethPrice;
                 const num = (parseInt(setup.rewardPerBlock) * 10 ** (18 - rewardTokenDecimals) * yearlyBlocks) * rewardTokenPriceUsd * 100;
