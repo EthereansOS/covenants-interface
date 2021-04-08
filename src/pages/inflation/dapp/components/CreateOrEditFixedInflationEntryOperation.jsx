@@ -187,7 +187,7 @@ const CreateOrEditFixedInflationEntryOperation = (props) => {
     const getFirstStep = () => {
         var disabled = !actionType;
         return <div className="InputForm">
-            <h6><b>Add new Operation by:</b></h6>
+            <h6><b>Operation Type:</b></h6>
             <select className="SelectRegular" value={actionType} onChange={e => setActionType(e.target.value)}>
                 <option value="">Operation type</option>
                 <option value="transfer">Transfer</option>
@@ -208,7 +208,7 @@ const CreateOrEditFixedInflationEntryOperation = (props) => {
         return <div className="InputForm">
             <select className="SelectRegular" value={(enterInETH && enterInETH.toString()) || "false"} onChange={changeEnterInETH}>
                 <option value="false" >Token or Item</option>
-                <option value="true">Ethereum</option>
+                <option value="true">ETH</option>
             </select>
             {!enterInETH && <div className="CreateList CreateListS">
                 <TokenInput placeholder={"Token address"} tokenAddress={inputToken ? inputToken.address : ''} label={"Input token"} placeholder={"Input token address"} width={60} onClick={(address) => onSelectInputToken(address)} text={"Load"} />
@@ -226,9 +226,9 @@ const CreateOrEditFixedInflationEntryOperation = (props) => {
                         <select value={inputTokenMethod} onChange={(e) => setInputTokenMethod(e.target.value)} className="SelectRegular">
                             <option value="">Select method</option>
                             {!enterInETH && <option value="mint">By mint</option>}
-                            <option value="reserve">By reserve</option>
+                            <option value="reserve">By Reserve</option>
                         </select>
-                        <p>If “by reserve” is selected, the input token will be sent from a wallet. If “by mint” is selected, it will be minted and then sent. The logic of this action must be carefully coded into the extension! To learn more, read the Documentation <a>Documentation (coming Soon)</a></p>
+                        <p>If “by reserve” is selected, the tokens will be transferred from a wallet. If “by mint” is selected, they will be minted and then sent. The logic of this action must be carefully coded into the extension! To learn more, read the <a target="_blank" href="https://docs.ethos.wiki/covenants/">Documentation</a></p>
                     </>
             }
             <div className="Web2ActionsBTNs">
@@ -252,7 +252,7 @@ const CreateOrEditFixedInflationEntryOperation = (props) => {
                         <div className="SpecialInputPerch">
                             <aside>%</aside>
                             <input type="number" min={0} max={100} value={percentage} onChange={(e) => setPercentage(e.target.value)} className="TextRegular"  />
-                            <p>Of {inputToken.symbol} Existing Supply</p>
+                            <p>Of {inputToken.symbol}'s existing supply</p>
                         </div>
                         :
                         <div className="InputTokensRegular">
@@ -332,7 +332,7 @@ const CreateOrEditFixedInflationEntryOperation = (props) => {
                         <div className="SpecialInputPerch">
                             <aside>%</aside>
                             <input type="number" min={0} max={100} value={percentage} onChange={(e) => setPercentage(e.target.value)} className="TextRegular"  />
-                            <p>Of {inputToken.symbol} Existing Supply</p>
+                            <p>Of {inputToken.symbol}'s existing supply</p>
                         </div>
                             :
                             <div className="InputTokensRegular">

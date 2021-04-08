@@ -76,7 +76,7 @@ const CreateOrEditFixedInflationEntry = (props) => {
                     <select className="SelectRegular" onChange={e => setBlockInterval(e.currentTarget.value)} value={blockInterval}>
                         {Object.entries(props.dfoCore.getContextElement("blockIntervals")).map(it => <option key={it[0]} value={it[1]}>{it[0]}</option>)}
                     </select>
-                    <p>The amount of time between every execution</p>
+                    <p>The minimum amount of time that must pass between each execution</p>
                 </div>
             </>
         },
@@ -89,13 +89,13 @@ const CreateOrEditFixedInflationEntry = (props) => {
                     <label>
                         <h5>Start Block</h5>
                         <input type="checkbox" checked={hasLastBlock} onChange={onHasLastBlockChange} />
-                        <p>The first operation of the inflation contract will become executable immediately after the preset block ends. If this function is not used, the operation will be executable immediately after the contract’s deployment block ends.</p>
+                        <p>If selected, the first operation of the inflation contract will become executable immediately after the chosen block ends. If not, the operation will become executable immediately after the contract’s deployment block ends.</p>
                     </label>
                     {hasLastBlock && <input type="number" className="TextRegular" placeholder="Start Block" label="Start Block:" min="0" onChange={e => setLastBlock(parseInt(e.target.value))} value={lastBlock} />}
                     <label>
                         <h5>Executor Reward</h5>
                         <input type="checkbox" checked={hasCallerRewardPercentage} onChange={onHasCallerRewardPercentageChange} />
-                        <p>Anyone can execute an operation, and a % of the tokens involved can be given as a reward.</p>
+                        <p>Anyone can execute an operation, and a % of either token involved can be earned a reward.</p>
                     </label>
                     {hasCallerRewardPercentage &&
                         <div className="SpecialInputPerch">
