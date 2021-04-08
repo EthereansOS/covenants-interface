@@ -71,8 +71,8 @@ const ExploreIndexToken = (props) => {
                     const tokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), token);
                     const decimal = await tokenContract.methods.decimals().call();
                     try {
-                        const res = await axios.get(props.dfoCore.getContextElement('coingeckoCoinPriceURL') + token);
-                        const { data } = await window.window.elaboratePrices(res, token);
+                        const res = await window.getTokenPricesInDollarsOnCoingecko(token);
+                        const { data } = res;
                         const tokenPrice = data[token.toLowerCase()].usd;
                         let value = parseFloat(props.dfoCore.toDecimals(amount, decimal)) * tokenPrice;
                         total += value;
@@ -102,8 +102,8 @@ const ExploreIndexToken = (props) => {
                     const balance = await tokenContract.methods.balanceOf(props.dfoCore.address).call();
                     const amountDecimals = props.dfoCore.toDecimals(amount.toString(), decimal);
                     try {
-                        const res = await axios.get(props.dfoCore.getContextElement('coingeckoCoinPriceURL') + token);
-                        const { data } = await window.window.elaboratePrices(res, token);
+                        const res = await window.getTokenPricesInDollarsOnCoingecko(token);
+                        const { data } = res;
                         const tokenPrice = data[token.toLowerCase()].usd;
                         percentages[token] = ((parseFloat(amountDecimals) * tokenPrice) / parseInt(total)) * 100;
                     } catch (error) {

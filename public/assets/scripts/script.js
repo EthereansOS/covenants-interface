@@ -1905,10 +1905,10 @@ window.uploadToIPFS = async function uploadToIPFS(files) {
     var hashes = [];
     window.api = window.api || new IpfsHttpClient(window.context.ipfsHost);
     var i = 0;
-    for await (var upload of window.api.add(list, { pin : true, wrapWithDirectory: list.length > 1 })) {
+    for await (var upload of window.api.add(list, { pin: true, wrapWithDirectory: list.length > 1 })) {
         console.log(upload);
         var hash = upload.path || upload.cid.string;
-        if(list.length === 1 || i === list.length) {
+        if (list.length === 1 || i === list.length) {
             hashes.push(window.context.ipfsUrlTemplates[0] + hash);
         }
         i++;
@@ -2154,7 +2154,7 @@ window.tryRetrieveMetadata = async function tryRetrieveMetadata(item) {
                     item.name = item.item_name || item.name;
                     item.description = item.description && item.description.split('\n\n').join(' ');
                 }
-            } catch(e) {
+            } catch (e) {
                 delete item.image;
                 item.image = window.getElementImage(item);
                 item.metadataMessage = `Could not retrieve metadata, maybe due to CORS restriction policies for the link (<a href="${item.metadataLink}" target="_blank">${item.metadataLink}</a>), check it on <a href="${item.collection ? window.context.openSeaItemLinkTemplate.format(item.collection.address, item.objectId) : window.context.openSeaCollectionLinkTemplate.format(item.address)}" target="_blank">Opensea</a>`
@@ -2187,14 +2187,63 @@ window.getTokenPriceInDollarsOnUniswap = async function getTokenPriceInDollarsOn
 
 window.elaboratePrices = async function elaboratePrices(res, tokens) {
     var response = {
-        data : {}
+        data: {}
     };
     Object.entries(res.data).forEach(entry => response.data[entry[0]] = entry[1]);
     tokens = (!(tokens instanceof Array) ? (tokens = tokens.split(',')) : tokens).map(it => it.toLowerCase()).filter(it => it && it !== window.voidEthereumAddress && !response.data[it]);
-    for(var token of tokens) {
+    for (var token of tokens) {
         response.data[token] = {
-            usd : await window.getTokenPriceInDollarsOnUniswap(token, await window.blockchainCall(window.newContract(window.context.ERC20ABI, token).methods.decimals))
+            usd: await window.getTokenPriceInDollarsOnUniswap(token, await window.blockchainCall(window.newContract(window.context.ERC20ABI, token).methods.decimals))
         };
+    }
+    return response;
+}
+
+window.getTokenPricesInDollarsOnCoingecko = async function getTokenPricesInDollarsOnCoingecko(t) {
+    var tokens = (!(t instanceof Array) ? (t = t.split(',')) : t).map(it => it.toLowerCase());
+    var response = {
+        data: {}
+    };
+    window.tokenPrices = window.tokenPrices || {};
+    window.tokenPricesPromises = window.tokenPricesPromises || {};
+    var tkns = [];
+    for (var token of tokens) {
+        if (!token || token === window.voidEthereumAddress) {
+            response.data[token] = await window.getEthereumPrice();
+            continue;
+        }
+        if (window.tokenPrices[token] && window.tokenPrices[token].requestExpires > new Date().getTime() && window.tokenPrices[token].price !== 0) {
+            response.data[token] = { usd: window.tokenPrices[token].price }
+        } else if (window.tokenPricesPromises[token]) {
+            response.data[token] = { usd: (await window.tokenPricesPromises[token]).data[token].usd }
+        } else {
+            tkns.push(token);
+        }
+    }
+    var prom = async function(t1, t2) {
+        var res = {
+            data: {}
+        }
+        try {
+            t1.length > 0 && (res.data = await window.AJAXRequest(window.context.coingeckoCoinPriceURL + t1.join(',')));
+        } catch (e) {}
+        return await window.elaboratePrices(res, t2);
+    };
+    prom = prom(tkns, t);
+    for (var token of tkns) {
+        window.tokenPricesPromises[token] = prom;
+    }
+    prom = await prom;
+    Object.entries(prom.data).forEach(it => response.data[it[0]] = it[1]);
+    for (var token of tkns) {
+        window.tokenPrices[token] = {
+            requestExpires: new Date().getTime() + window.context.coingeckoEthereumPriceRequestInterval,
+            price: response.data[token].usd
+        }
+    }
+
+    for (var token of tokens) {
+        delete window.tokenPricesPromises[token];
     }
     return response;
 }
@@ -2285,28 +2334,24 @@ window.loadItemData = async function loadItemData(item, collection, view) {
     }
     try {
         item.sourceName = item.sourceName || await window.blockchainCall(window.newContract(window.context.IERC1155ABI, item.collection.sourceAddress).methods.name, item.objectId);
-    } catch(e) {
-    }
+    } catch (e) {}
     try {
         item.sourceSymbol = item.sourceSymbol || await window.blockchainCall(window.newContract(window.context.IERC1155ABI, item.collection.sourceAddress).methods.symbol, item.objectId);
-    } catch(e) {
-    }
+    } catch (e) {}
     try {
         item.sourceName = item.sourceName || await window.blockchainCall(window.newContract(window.context.IERC20ABI, item.sourceAddress).methods.name);
-    } catch(e) {
-    }
+    } catch (e) {}
     try {
         item.sourceSymbol = item.sourceSymbol || await window.blockchainCall(window.newContract(window.context.IERC20ABI, item.sourceAddress).methods.symbol);
-    } catch(e) {
-    }
+    } catch (e) {}
     try {
         item.sourceName = item.sourceName || window.web3.utils.toChecksumAddress(item.sourceAddress && item.sourceAddress !== 'blank' ? item.sourceAddress : item.collection.sourceAddress);
-    } catch(e) {
+    } catch (e) {
         item.sourceName = 'blank';
     }
     try {
         item.sourceSymbol = item.sourceSymbol || window.web3.utils.toChecksumAddress(item.sourceAddress && item.sourceAddress !== 'blank' ? item.sourceAddress : item.collection.sourceAddress);
-    } catch(e) {
+    } catch (e) {
         item.sourceSymbol = 'blank';
     }
     var metadataPromise = window.tryRetrieveMetadata(item);
@@ -2321,8 +2366,9 @@ window.loadItemData = async function loadItemData(item, collection, view) {
     }
     item.decimals = item.decimals || await window.blockchainCall(item.token.methods.decimals);
     item.collectionDecimals = item.collectionDecimals || await window.blockchainCall(item.collection.contract.methods.decimals, item.objectId);
-    view && view.setState({ item }/*, () => window.updateItemDynamicData(item, view)*/);
-    /*!view && */return await window.updateItemDynamicData(item, view);
+    view && view.setState({ item } /*, () => window.updateItemDynamicData(item, view)*/ );
+    /*!view && */
+    return await window.updateItemDynamicData(item, view);
     //return item;
 };
 
@@ -2416,7 +2462,7 @@ window.checkMetadataLink = async function checkMetadataLink(metadataLink, item) 
     } catch (e) {
         throw "Error loading metadata";
     }
-    return true;//await window[`checkMetadataValuesFor${item ? "Item" : "Collection"}`](metadata);
+    return true; //await window[`checkMetadataValuesFor${item ? "Item" : "Collection"}`](metadata);
 };
 
 window.checkMetadataValuesForCollection = async function checkMetadataValuesForCollection(metadata) {
@@ -2595,7 +2641,7 @@ window.loadSingleCollection = async function loadSingleCollection(collectionAddr
     try {
         var modelAddress = window.web3.eth.abi.decodeParameter("address", logs[0].topics[1]);
         var collection = await window.refreshSingleCollection(window.packCollection(collectionAddress, map[logs[0].topics[0]], modelAddress));
-        if(full) {
+        if (full) {
             try {
                 var promises = [];
                 collection.items = collection.items || {};
@@ -2607,11 +2653,10 @@ window.loadSingleCollection = async function loadSingleCollection(collectionAddr
                     }, collection));
                 }
                 await Promise.all(promises);
-            } catch (e) {
-            }
+            } catch (e) {}
         }
         return collection;
-    } catch(e) {
+    } catch (e) {
         return null;
     }
 };
@@ -2669,7 +2714,7 @@ window.refreshSingleCollection = async function refreshSingleCollection(collecti
             collection.interoperableInterfaceModel = (await window.blockchainCall((window.newContract(window.context.OldNativeABI, collection.address)).methods.erc20NFTWrapperModel));
             collection.interoperableInterfaceModelAddress = collection.interoperableInterfaceModelAddress || collection.interoperableInterfaceModel[0];
             collection.interoperableInterfaceModelVersion = collection.interoperableInterfaceModelVersion || collection.interoperableInterfaceModel[1];
-        } catch(e) {
+        } catch (e) {
             collection.interoperableInterfaceModelAddress = collection.interoperableInterfaceModelAddress || collection.address;
             collection.interoperableInterfaceModelVersion = collection.interoperableInterfaceModelVersion || 1;
         }

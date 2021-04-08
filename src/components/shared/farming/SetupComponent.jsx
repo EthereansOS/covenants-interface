@@ -305,17 +305,17 @@ const SetupComponent = (props) => {
         if (parseInt(setup.totalSupply) === 0) return -1;
         const yearlyBlocks = 2304000;
         try {
-            const ethPrice = await axios.get(dfoCore.getContextElement("coingeckoEthereumPriceURL"));
+            const ethPrice = await window.getEthereumPrice();
             const wusdAddress = await dfoCore.getContextElement("WUSDAddress");
             if (setupInfo.free) {
                 const searchTokens = `${rewardTokenAddress},${setupTokens.map((token) => (token && token.address) ? `${token.address},` : '')}`.slice(0, -1);
-                const res = await axios.get(dfoCore.getContextElement("coingeckoCoinPriceURL") + searchTokens);
-                const { data } = await window.window.elaboratePrices(res, searchTokens);
+                const res = await window.getTokenPricesInDollarsOnCoingecko(searchTokens);
+                const { data } = res;
                 const rewardTokenPriceUsd = rewardTokenAddress !== dfoCore.voidEthereumAddress ? rewardTokenAddress.toLowerCase() === wusdAddress.toLowerCase() ? 1 : data[rewardTokenAddress.toLowerCase()].usd : ethPrice;
                 let den = 0;
                 await Promise.all(setupTokens.map(async (token) => {
                     if (token && token.address) {
-                        const tokenPrice = token.address !== dfoCore.voidEthereumAddress ? token.address.toLowerCase() === wusdAddress.toLowerCase() ? 1 : data[token.address.toLowerCase()].usd : ethPrice.data[0].current_price;
+                        const tokenPrice = token.address !== dfoCore.voidEthereumAddress ? token.address.toLowerCase() === wusdAddress.toLowerCase() ? 1 : data[token.address.toLowerCase()].usd : ethPrice;
                         den += (tokenPrice * token.liquidity * 10 ** (18 - token.decimals));
                     }
                 }))
@@ -326,8 +326,8 @@ const SetupComponent = (props) => {
                 const mainTokenContract = mainTokenAddress !== dfoCore.voidEthereumAddress ? await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), mainTokenAddress) : null;
                 const decimals = mainTokenAddress !== dfoCore.voidEthereumAddress ? await mainTokenContract.methods.decimals().call() : 18;
                 const searchTokens = `${rewardTokenAddress},${mainTokenAddress}`;
-                const res = await axios.get(dfoCore.getContextElement("coingeckoCoinPriceURL") + searchTokens);
-                const { data } = await window.window.elaboratePrices(res, searchTokens);
+                const res = await window.getTokenPricesInDollarsOnCoingecko(searchTokens);
+                const { data } = res;
                 const rewardTokenPriceUsd = rewardTokenAddress !== dfoCore.voidEthereumAddress ? rewardTokenAddress.toLowerCase() === wusdAddress.toLowerCase() ? 1 : data[rewardTokenAddress.toLowerCase()].usd : ethPrice;
                 const mainTokenPriceUsd = mainTokenAddress !== dfoCore.voidEthereumAddress ? mainTokenAddress.toLowerCase() === wusdAddress.toLowerCase() ? 1 : data[mainTokenAddress.toLowerCase()].usd : ethPrice;
                 const num = (parseInt(setup.rewardPerBlock) * 10 ** (18 - rewardTokenDecimals) * yearlyBlocks) * rewardTokenPriceUsd * 100;
