@@ -26,17 +26,17 @@ const Covenants = () => {
                     <a target="blank" href="https://dapp.dfohub.com/?addr=0xeFAa6370A2ebdC47B12DBfB5a07F91A3182B5684">Covenants DFO</a>
                     <a target="blank" href="https://etherscan.io/tokenHoldings?a=0x7ab2263e529A3D06745b32Dc35a22391d7e9f9B7">Covenants Treasury</a>
                     <a target="blank" href="https://etherscan.io/token/0x9E78b8274e1D6a76a0dBbf90418894DF27cBCEb5">UniFi Token</a>
-                    <a target="blank">Farm UniFi</a>
-                    <a target="blank">UniFi Inflation</a>
+                    <a target="blank" href="https://covenants.eth.link/#/farm/dapp/0x37Bc927d6aa94F1d3E4441CF7368e4C3df72241B">Farm UniFi</a>
+                    <a target="blank" href="https://covenants.eth.link/#/inflation/dapp/0xBCc4b93914142891b20568B3c50ed050570C5124">UniFi Inflation</a>
                     <h5>More</h5>
                     <a target="blank" href="https://ethereansos.eth.link">EthOS</a>
                     <a target="blank" href="https://ethereansos.eth.link/organizations.html">On-Chain Organizations</a>
                     <a target="blank" href="https://ethereansos.eth.link/equities.html">Programmable Equities</a>
-                    <a target="blank" href="https://github.com/b-u-i-d-l">Github</a>
-                    <a target="blank">Farm Factory</a>
-                    <a target="blank">Inflation Factory</a>
+                    <a target="blank" href="https://github.com/ethereansos">Github</a>
+                    <a target="blank" href="https://etherscan.io/address/0x6bc8530fecc0001b9fc0bf5daa17873e847616ed">Farm Factory</a>
+                    <a target="blank" href="https://etherscan.io/address/0x285427916a9d2e991039A8F1611F575D0a6cf237">Inflation Factory</a>
                     <a target="blank" href="https://etherscan.io/address/0xc6749132243dA6B174BF502E7a85f5cEdD74A753">WUSD Factory</a>
-                    <a target="blank">Index Factory</a>
+                    <a target="blank" href="https://etherscan.io/address/0x3a6a5fcce56fa57eeb4b24aeb8d13a2e3197b333">Index Factory</a>
                     <a target="blank" href="https://etherscan.io/address/0x81391d117a03A6368005e447197739D06550D4CD">Aggregator Factory</a>
                 </div>
             </div>

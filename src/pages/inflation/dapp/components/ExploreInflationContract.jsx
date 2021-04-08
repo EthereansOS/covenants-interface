@@ -166,7 +166,7 @@ const ExploreInflationContract = (props) => {
             </Fragment>
         })}
         <div className="TokenOperationExecute">
-            {metadata.executorReward !== 0 && <h5> {window.formatMoney(metadata.executorReward)}% reward by</h5>}
+            {metadata.executorReward !== 0 && <h5> {window.formatMoney(metadata.executorReward)}% execution reward</h5>}
             {metadata.executable && !executing && <select className="SelectRegular" value={earnByInput} onChange={e => setEarnByInput(e.currentTarget.value === 'true')}>
                 <option value="true">Input</option>
                 <option value="false">Output</option>

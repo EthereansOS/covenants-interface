@@ -301,7 +301,7 @@ const Create = (props) => {
                 </div> : <>
                     {selectedRewardToken && <div className="CheckboxQuestions">
                         <p><Coin address={selectedRewardToken.address} /> {selectedRewardToken.symbol}</p>
-                        <p className="BreefRecapB">If “by reserve” is selected, the input token will be sent from a wallet. If “by mint” is selected, it will be minted and then sent. The logic of this action must be carefully coded into the extension! To learn more, read the Documentation <a>Documentation (coming Soon)</a></p>
+                        <p className="BreefRecapB"> If “by reserve” is selected, the input token will be sent from a wallet. If “by mint” is selected, it will be minted and then sent. The logic of this action must be carefully coded into the extension! To learn more, read the <a target="_blank" href="https://docs.ethos.wiki/covenants/">Documentation</a></p>
                         <select value={byMint === true ? "true" : "false"} onChange={e => setByMint(e.target.value === 'true')} className="SelectRegular">
                             <option value="">Select method</option>
                             {/*!enterInETH &&*/ <option value="true">By mint</option>}
@@ -363,7 +363,7 @@ const Create = (props) => {
         return (
             <div className="CheckboxQuestions">
                 <h6>Host</h6>
-                <p className="BreefRecapB">The host is the Contract, Wallet, DAO, or DFO with permissions to manage and add new setups in this contract. The host permissions are set into the extension contract. If you choose "Standard Extension (Address, wallet)," the extension must have all of the tokens needed to fill every setup rewards. You can also program extension permissions by your Organization, DFO to mint or transfer directly from the treasury, using the DFOhub website or a custom contract (more info in the Documentation).</p>
+                <p className="BreefRecapB">The host is the wallet, contract, dApp, DAO or DFO with permission to manage and add new setups in the contract. Permissions are set in the extension. If you choose "Standard Extension (address, wallet)," the extension must hold all of the tokens needed to reward every setup. You can also program extension permissions via your DFO to mint reward tokens or transfer them from its treasury, using the DFOhub site or a custom contract. For more info on this, see the <a target="_blank" href="https://docs.ethos.wiki/covenants/">Documentation</a>.</p>
                 <select className="SelectRegular" value={selectedHost} onChange={onHostSelection}>
                     <option value="">Choose the host type</option>
                     <option value="address">Standard Extension (Address, wallet)</option>
@@ -378,7 +378,7 @@ const Create = (props) => {
                         <div className="CheckboxQuestions">
                             <h6><input type="checkbox" checked={hasTreasuryAddress} onChange={onHasTreasuryAddress} /> External Treasury</h6>
                             {hasTreasuryAddress && <input type="text" className="TextRegular" value={treasuryAddress || ""} onChange={onTreasuryAddressChange} placeholder={"Treasury address"} aria-label={"Treasury address"} />}
-                            <p className="BreefRecapB">[Optional] Separate the Extension to the treasury used to send tokens to the Farm contract to activate setups.</p>
+                            <p className="BreefRecapB">[Optional] You can choose a treasury other than the extension to which unissued tokens are returned to at the end of the setups.</p>
                         </div>
                     </> : selectedHost === 'fromSourceCode' ? <>
                         <p className="BreefRecapB">Deploy a custom extension contract. In the IDE, we loaded a simple extension contract, and you can use it as a guide. Before building a custom contract, we kindly recommend reading the Covenants Documentation. Do it at your own risk.</p>
@@ -441,30 +441,30 @@ const Create = (props) => {
 
                 {/*If choosen by wallet*/}
                 {selectedHost === 'wallet' ? <>
-                    <p>Before attempting to activate setups, <b>remember to send at least {window.fromDecimals(totalRewardToSend, selectedRewardToken?.decimals, true)} {selectedRewardToken?.symbol}</b> to the extension contract:</p>
+                    <p>Before attempting to activate the contract’s setups, <b>remember to send at least {window.fromDecimals(totalRewardToSend, selectedRewardToken?.decimals, true)} {selectedRewardToken?.symbol}</b> to the extension contract:</p>
                     <p className="SuccessTextLink"><a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + deployData?.extensionAddress} target="_blank">{deployData?.extensionAddress}</a></p>
                     {/*Calculate total needed taking into acount repet in setups*/}
-                    <p>The total amount of tokens needed taking into acount all of the Repetable Setups are {window.fromDecimals(cumulativeRewardToSend, selectedRewardToken?.decimals, true)} {selectedRewardToken?.symbol} </p>
+                    <p>Taking into account all of the Renewable Setups, the total amount of tokens needed, is {window.fromDecimals(cumulativeRewardToSend, selectedRewardToken?.decimals, true)} {selectedRewardToken?.symbol} </p>
 
                     {/*If choosen by wallet and the treasury is the Extension*/}
-                    {!hasTreasuryAddress && <p>Unissued reward tokens will be transferred automagically to the Extension Contract once every farmed positions will withdraw their liquidity at the ending of the setup.</p>}
+                    {!hasTreasuryAddress && <p>Unissued reward tokens will be transferred automagically to the Extension Contract once every farmed position withdraws their liquidity at the end of the setup.</p>}
 
                     {/*If choosen by wallet and the treasury is an address*/}
                     {hasTreasuryAddress && <>
-                        <p>Unissued reward tokens will be transferred automagically to the Selected Treasury Address once every farmed positions will withdraw their liquidity at the ending of the setup.</p>
+                        <p>Unissued reward tokens will be transferred automagically to the selected treasury address once every farmed position withdraws their liquidity at the end of the setup.</p>
                         <p>Treasury Address:</p>
                         <p className="SuccessTextLink"><a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + treasuryAddress} target="_blank">{treasuryAddress}</a></p>
                     </>}
                 </> : <>
                     {/*If not choosen by wallet (custom extension contract)*/}
-                    <p>Before attempting to activate setups, <b>remember to do every action needed to send at least {window.fromDecimals(totalRewardToSend, selectedRewardToken?.decimals, true)} {selectedRewardToken?.symbol}</b> to the extension contract:</p>
+                    <p>Before attempting to activate the contract’s setups, <b>you first need to do do all of the actions needed to send at least {window.fromDecimals(totalRewardToSend, selectedRewardToken?.decimals, true)} {selectedRewardToken?.symbol}</b> to the extension contract:</p>
                     <p className="SuccessTextLink"><a href={props.dfoCore.getContextElement("etherscanURL") + "address/" + deployData?.extensionAddress} target="_blank">{deployData?.extensionAddress}</a></p>
-                    <p>If you rule the Extension via a DFO or a DAO, be sure to vote to grant permissions from its Treasury.</p>
-                    <p className="Disclamerfinish">If you have set the "Repeat" functions in Setups, don't forget to track and fill the reward tokens before the end block. Suppose the Extension can't transfer the number of reward tokens needed to the Farming contract to reactivate a Setup (reward/Block from the new activation to the end block). In that case, the Setup'll fail its activation and automatically becomes Disactive. For more info, read the Documentation.</p>
+                    <p>If you rule the extension via a DFO or a DAO, be sure to vote to grant permissions from its Treasury.</p>
                 </>}
 
                 <p>Yor Farming Contract is available via this link: </p>
                 <p className="SuccessTextLink"><a href={"https://covenants.eth.link/#/farm/dapp/" + farmingContract} target="_blank">{"https://covenants.eth.link/#/farm/dapp/" + farmingContract}</a></p>
+                <p className="Disclamerfinish">If you have selected the “Repeat” function for a setup, don’t forget to keep track of how many tokens are in the extension. If one cycle ends and the extension doesn’t have the required amount of tokens for the next, it won’t be able to send them to the contract, and the setup will not repeat and instead deactivate. For more information on this, read the <a target="_blank" href="https://docs.ethos.wiki/covenants/">Documentation</a>.</p>
             </div>
         );
     }

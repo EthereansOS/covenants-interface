@@ -179,7 +179,7 @@ const CreateOrEditFarmingSetup = (props) => {
                             }
                             <div className="InputTokensRegular">
                                 <h6>Reward per block</h6>
-                                <p className="BreefRecapB">The total amount of tokens per block to reward farmers.</p>
+                                <p className="BreefRecapB">Select the duration of the setup. The selected timeband will determine the end block once the setup begins.</p>
                                 <Input min={0} showCoin={true} address={rewardToken.address} value={rewardPerBlock} name={rewardToken.symbol} onChange={(e) => onFreeRewardPerBlockUpdate(e.target.value)} />
                             </div>
                             <p className="BreefRecapB">Select the duration of the setup. The selected timeband will determinate the end block once activated</p>
@@ -225,7 +225,7 @@ const CreateOrEditFarmingSetup = (props) => {
                         }
                     </div>
                 }
-                <p className="BreefRecapB">[Optional] A minimum amount of main tokens to stake to open a position</p>
+                <p className="BreefRecapB">[Optional] You can set a floor for the minimum amount of main tokens required to stake a position.</p>
                 {
                     selectedFarmingType === 'locked' && <>
                         <h6><input type="checkbox" checked={hasPenaltyFee} onChange={(e) => onUpdateHasPenaltyFee(e.target.checked)} id="penaltyFee" /> Penalty fee </h6>
@@ -238,7 +238,7 @@ const CreateOrEditFarmingSetup = (props) => {
                                 <p className="BreefRecapB">Main Token: {rewardToken.symbol}</p>
                             </>
                         }
-                        <p className="BreefRecapB">[Optional] The penalty fee is a perchentange of the total reward of a position that must be paid to close it before the end block.</p>
+                        <p className="BreefRecapB">[Optional] You can set a penalty fee as a percentage of the total rewards for a locked position that must be paid to close it before the end block.</p>
                     </>
                 }
                 <h6><input type="checkbox" checked={isRenewable} onChange={(e) => {
@@ -250,7 +250,7 @@ const CreateOrEditFarmingSetup = (props) => {
                         <Input min={0} value={renewTimes} onChange={(e) => setRenewTimes(e.target.value)} />
                     </div>
                 }
-                <p className="BreefRecapB">[Optional] Select the amount of time to automatically repete this setup after the block-end.</p>
+                <p className="BreefRecapB">[Optional] You can customize a setup to automatically repeat itself after the end block.</p>
                 <div className="Web2ActionsBTNs">
                     <a onClick={() => setCurrentStep(0)} className="backActionBTN">Back</a>
                     <a onClick={() => addSetup()} className="web2ActionBTN">{editSetup ? 'Edit' : 'Add'}</a>
