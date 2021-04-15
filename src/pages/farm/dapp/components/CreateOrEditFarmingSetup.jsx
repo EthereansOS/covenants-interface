@@ -218,7 +218,7 @@ const CreateOrEditFarmingSetup = (props) => {
                         <Input min={0} value={startBlock} onChange={(e) => setStartBlock(e.target.value)} />
                     </div>
                 }
-                <p className="BreefRecapB">[Optional <b>&#128171; Recommended</b>] Set a start block for this setup. Farmers will be able to activate it after that. This feature helps by giving the host the time needed to send reward tokens to the contract or vote via a DFO/DAO for more complex functionalities. more info in the grimoire<a></a></p>
+                <p className="BreefRecapB">[Optional <b>&#128171; Recommended</b>] Set a start block for this setup. Farmers will be able to activate it after that. This feature helps by giving the host the time needed to send reward tokens to the contract or vote via a DFO/DAO for more complex functionalities. more info in the <a href="https://docs.ethos.wiki/covenants/protocols/farm/manage-farming-setups/activate-disactivate-farming-setup">Grimoire</a></p>
                 <h6><input type="checkbox" checked={hasMinStakeable} onChange={(e) => onUpdateHasMinStakeable(e.target.checked)} id="minStakeable" /> Min stakeable</h6>
                 {
                     hasMinStakeable && <div className="InputTokensRegular">
