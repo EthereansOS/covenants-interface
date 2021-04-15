@@ -1189,7 +1189,7 @@ const SetupComponent = (props) => {
                                 </>
                             }
                             {delayedBlock !== 0 && <div>
-                                Can be activated after block <a className="Web3ActionBTN" href={`${props.dfoCore.getContextElement("etherscanURL")}block/${delayedBlock}`} target="_blank">#{delayedBlock}</a>
+                                <p><b>Start Block: <a href={`${props.dfoCore.getContextElement("etherscanURL")}block/${delayedBlock}`} target="_blank">#{delayedBlock}</a></b></p>
                             </div>}
                             {
                                 (hostedBy && extensionContract && !edit && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex) && hostedBy) &&
