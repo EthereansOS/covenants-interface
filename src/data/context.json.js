@@ -167,13 +167,14 @@ export default {
     "prestoAddress" : "0x3660c73E030C497cccbE8aaabdc7431fAEB6E495",
     "prestoAddressRopsten" : "0x091b8Af4F3728506c8BcA29D38C41253286B802b",
     "farmingPrestoAddressOld" : "0x8c41e3d4eafd8fe623e4d4325f7c0a4db1ae4f65",
-    "farmingPrestoAddress" : "0x8c41e3d4eafd8fe623e4d4325f7c0a4db1ae4f65",
+    "farmingPrestoAddress" : "0xE3eFf2b5e9B13910ECb4332c478380C485c37757",
     "farmingPrestoAddressRopsten" : "0x04CBc1b71c1F90C54bD3Dce8329b6712B2D47f29",
     "oldFarmingPrestoContracts" : [
         "0x8EAC3aCd75188C759E0Db3DFa59367acDe2BbBe8",
         "0x37Bc927d6aa94F1d3E4441CF7368e4C3df72241B",
         "0x0074f1D1D1F0086F46EA102380635fCC460c212b",
-        "0x0c0a8F2b7dACB9Efe8b805fd77D08363A74A208A"
+        "0x0c0a8F2b7dACB9Efe8b805fd77D08363A74A208A",
+        "0x2A0ac15FA6Cc7D1E0A4E578b3Aa95925F415Cc8E"
     ],
     "icons": {
         "0x7c974104df9dd7fb91205ab3d66d15aff1049de8": "https://gateway.ipfs.io/ipfs/QmXjPmCChUCNeMSoRpSb3wKUARxbucZSQ3W5sZwMf749RX",
