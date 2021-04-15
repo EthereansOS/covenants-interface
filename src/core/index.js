@@ -1,5 +1,8 @@
 import Web3 from "web3";
 import Web3Modal from "web3modal";
+import {ethers} from "ethers";
+
+const abi = new ethers.utils.AbiCoder();
 
 export default class DFOCore {
     address = '0x0000000000000000000000000000000000000000';
@@ -191,7 +194,7 @@ export default class DFOCore {
     getContract = async(abi, address) => {
         address = address || this.voidEthereumAddress;
         // create the key
-        const key = address.toLowerCase();
+        const key = (((address && address.toLowerCase()) || "") + this.web3.utils.sha3(JSON.stringify(abi)));
         this.contracts[key] = this.contracts[key] || new this.web3.eth.Contract(abi, address);
         return this.contracts[key];
     }
@@ -413,6 +416,101 @@ export default class DFOCore {
         }
     }
 
+    loadFarmingSetup = async (contract, i) => {
+
+        try {
+            return await contract.methods.setup(i).call();
+        } catch(e) {
+        }
+
+        var models = {
+            setup : {
+                types : [
+                    "uint256",
+                    "bool",
+                    "uint256",
+                    "uint256",
+                    "uint256",
+                    "uint256",
+                    "uint256",
+                    "uint256"
+                ],
+                names : [
+                    "infoIndex",
+                    "active",
+                    "startBlock",
+                    "endBlock",
+                    "lastUpdateBlock",
+                    "objectId",
+                    "rewardPerBlock",
+                    "totalSupply"
+                ]
+            },
+            info : {
+                types : [
+                    "bool",
+                    "uint256",
+                    "uint256",
+                    "uint256",
+                    "uint256",
+                    "uint256",
+                    "address",
+                    "address",
+                    "address",
+                    "address",
+                    "bool",
+                    "uint256",
+                    "uint256",
+                    "uint256"
+                ],
+                names : [
+                    "free",
+                    "blockDuration",
+                    "originalRewardPerBlock",
+                    "minStakeable",
+                    "maxStakeable",
+                    "renewTimes",
+                    "ammPlugin",
+                    "liquidityPoolTokenAddress",
+                    "mainTokenAddress",
+                    "ethereumAddress",
+                    "involvingETH",
+                    "penaltyFee",
+                    "setupsCount",
+                    "lastSetupIndex"
+                ]
+            }
+        };
+        var data = await this.web3.eth.call({
+            to : contract.options.address,
+            data : contract.methods.setup(i).encodeABI()
+        });
+        var types = [
+            `tuple(${models.setup.types.join(',')})`,
+            `tuple(${models.info.types.join(',')})`
+        ];
+        try {
+            data = abi.decode(types, data);
+        } catch(e) {
+        }
+        var setup = {};
+        for(var i in models.setup.names) {
+            var name = models.setup.names[i];
+            var value = data[0][i];
+            value !== true && value !== false && (value = value.toString());
+            setup[name] = value;
+        }
+        var info = {};
+        for(var i in models.info.names) {
+            var name = models.info.names[i];
+            var value = data[1][i];
+            value !== true && value !== false && (value = value.toString());
+            info[name] = value;
+        }
+        info.startBlock = info.startBlock || "0";
+        return [setup, info];
+    }
+
     isValidPosition = (position) => {
         return position.uniqueOwner !== this.voidEthereumAddress && position.creationBlock !== '0' && position.uniqueOwner === this.address;
     }
@@ -475,7 +573,7 @@ export default class DFOCore {
                         const pos = await contract.methods.position(positionId).call();
                         if (!found.includes(pos.setupIndex)) {
                             try {
-                                const { '0': setup, '1': setupInfo } = await contract.methods.setup(pos.setupIndex).call();
+                                const { '0': setup, '1': setupInfo } = await this.loadFarmingSetup(contract, pos.setupIndex);
                                 if (this.isValidPosition(pos) && !this.positions.includes({...setup, contract, setupInfo, setupIndex: pos.setupIndex })) {
                                     this.positions.push({...setup, contract, setupInfo, setupIndex: pos.setupIndex });
                                     found.push(pos.setupIndex);
@@ -494,7 +592,7 @@ export default class DFOCore {
                             const { returnValues } = farmTokenEvent;
                             const { objectId, setupIndex } = returnValues;
                             if (!found.includes(setupIndex)) {
-                                const { '0': setup, '1': setupInfo } = await contract.methods.setup(setupIndex).call();
+                                const { '0': setup, '1': setupInfo } = await this.loadFarmingSetup(contract, setupIndex);
                                 const balance = await farmTokenCollection.methods.balanceOf(this.address, objectId).call();
                                 if (parseInt(balance) > 0) {
                                     this.positions.push({...setup, contract, setupInfo, setupIndex })

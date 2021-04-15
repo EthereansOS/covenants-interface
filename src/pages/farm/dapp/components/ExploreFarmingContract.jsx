@@ -61,7 +61,7 @@ const ExploreFarmingContract = (props) => {
 
             const res = [];
             for (let i = 0; i < setups.length; i++) {
-                const { '0': setup, '1': setupInfo } = await lmContract.methods.setup(i).call();
+                const { '0': setup, '1': setupInfo } = await props.dfoCore.loadFarmingSetup(lmContract, i);
                 if (!canActivateSetup) {
                     canActivateSetup = parseInt(setupInfo.renewTimes) > 0 && !setup.active && parseInt(setupInfo.lastSetupIndex) === parseInt(i);
                 }
@@ -150,6 +150,7 @@ const ExploreFarmingContract = (props) => {
                     info: {
                         free: isFree,
                         blockDuration: parseInt(setup.blockDuration),
+                        startBlock: parseInt(setup.startBlock),
                         originalRewardPerBlock: window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.rewardPerBlock), token.decimals)),
                         minStakeable: window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.minStakeable), mainTokenDecimals)),
                         maxStakeable: !isFree ? window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.maxStakeable)), mainTokenDecimals) : 0,
