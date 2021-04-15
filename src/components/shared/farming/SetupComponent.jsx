@@ -1136,7 +1136,6 @@ const SetupComponent = (props) => {
         <div className={className}>
             <div className="FarmSetupMain">
                 {!delayedBlock && <h5><b>{setupInfo.free ? "Free Farming" : "Locked Farming"} {(!setup.active && canActivateSetup) ? <span className="text-secondary">{setupReady ? "(new)" : "(soon)"}</span> : (!setup.active) ? <span className="text-danger">(inactive)</span> : <></>} {(parseInt(setup.endBlock) <= blockNumber && parseInt(setup.endBlock) !== 0) && <span>(ended)</span>}</b> <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${setupInfo.liquidityPoolTokenAddress}`}>{AMM.name}</a></h5>}
-                {delayedBlock && <h5><b>Can be activated after block <a href={`${props.dfoCore.getContextElement("etherscanURL")}block/${delayedBlock}`} target="_blank">#{delayedBlock}</a></b></h5>}
                 <aside>
                     {parseInt(setup.endBlock) > 0 ? <p><b>block end</b>: <a className="BLKEMD" target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}block/${setup.endBlock}`}>{setup.endBlock}</a></p> : <p><b>Duration</b>: {getPeriodFromDuration(setupInfo.blockDuration)}</p>}
                     {!setupInfo.free && <>
@@ -1172,7 +1171,7 @@ const SetupComponent = (props) => {
                                 </>
                             }
                             {
-                                canActivateSetup && <>
+                                !delayedBlock && canActivateSetup && <>
                                     {
                                         setupReady && <>
                                             {
@@ -1189,6 +1188,9 @@ const SetupComponent = (props) => {
                                     }
                                 </>
                             }
+                            {delayedBlock !== 0 && <div>
+                                Can be activated after block <a className="Web3ActionBTN" href={`${props.dfoCore.getContextElement("etherscanURL")}block/${delayedBlock}`} target="_blank">#{delayedBlock}</a>
+                            </div>}
                             {
                                 (hostedBy && extensionContract && !edit && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex) && hostedBy) &&
                                 <a className="web2ActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(true) }}>Edit</a>
