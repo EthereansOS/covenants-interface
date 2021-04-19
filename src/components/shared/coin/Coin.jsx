@@ -13,7 +13,7 @@ const Coin = (props) => {
     isItem && console.log(address, "is item");
 
     useEffect(() => {
-        props.dfoCore.isItem(address).then(setIsItem);
+        window.dfoCore.isItem(address).then(setIsItem);
     }, [address]);
 
     var imageLink = props.address === window.voidEthereumAddress ? ethereumLogoImage : image;

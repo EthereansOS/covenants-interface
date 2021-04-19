@@ -204,11 +204,18 @@ export default class DFOCore {
                 this.contracts[key].isItem = true;
             } catch(e) {}
         }
+        this.isItemDictionary = this.isItemDictionary || {};
+        this.isItemDictionary[address] = this.contracts[key].isItem;
         return this.contracts[key];
     }
 
     isItem = async address => {
         return (await this.getContract(this.getContextElement("ERC20ABI"), address)).isItem;
+    }
+
+    isItemSync = address => {
+        var toChecksumAddress = this.web3.utils.toChecksumAddress;
+        return window.dfoCore.itemsTokens.filter(it => toChecksumAddress(it.address) === toChecksumAddress(address)).length > 0;
     }
 
     /**
