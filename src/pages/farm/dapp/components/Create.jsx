@@ -280,7 +280,7 @@ const Create = (props) => {
             }
             return window.isEthereumAddress(hostWalletAddress);
         }
-        if (selectedHost === 'deployedContract') {
+        if (selectedHost === 'fromSourceCode') {
             if (useDeployedContract) {
                 return window.isEthereumAddress(hostDeployedContract);
             }
