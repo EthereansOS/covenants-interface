@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 const FarmingComponent = (props) => {
     const { className, goBack, metadata, dfoCore, withoutBack } = props;
     const symbol = metadata.name.replace("Farm ", "");
-    const symbol = metadata.name.replace("Farm ", "");
 
     return (
         <div className={className}>
