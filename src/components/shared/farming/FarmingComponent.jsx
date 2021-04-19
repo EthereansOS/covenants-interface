@@ -12,10 +12,10 @@ const FarmingComponent = (props) => {
                 metadata ? <>
                 <div className="FarmTitle">
                     <figure>
-                        { metadata.rewardTokenAddress !== dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${metadata.rewardTokenAddress}`} ><Coin height={45} address={metadata.rewardTokenAddress} /></a> : <Coin height={45} address={metadata.rewardTokenAddress} />}
+                        { metadata.rewardTokenAddress !== dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${metadata.rewardTokenAddress}`} ><Coin address={metadata.rewardTokenAddress} /></a> : <Coin address={metadata.rewardTokenAddress} />}
                     </figure>
                     <aside>
-                        <h6>{window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <b> {metadata.contractAddress}</b>} {!window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <b> {metadata.name}</b>} {(metadata.freeSetups.length + metadata.lockedSetups.length === 0 && !metadata.canActivateSetup) ? <span className="text-danger"><b>(inactive)</b></span> : <></> }</h6>
+                        <h6>{window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <b>Farm {metadata.name}</b>} {!window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <b>Farm {metadata.symbol}</b>} {(metadata.freeSetups.length + metadata.lockedSetups.length === 0 && !metadata.canActivateSetup) ? <span className="text-danger"><b>(inactive)</b></span> : <></> }</h6>
                         { !withoutBack && <Link to={ goBack ? `/farm/dapp/` : `/farm/dapp/${metadata.contractAddress}`} className={ goBack ? "backActionBTN" : "web2ActionBTN" }>{ goBack ? "Back" : "Open" }</Link>}
                     </aside>
                 </div>
