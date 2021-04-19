@@ -713,6 +713,8 @@ const SetupComponent = (props) => {
             var token0decimals = tokens[2][0] === window.voidEthereumAddress ? 18 : await token0.methods.decimals().call();
             var token1decimals = tokens[2][1] === window.voidEthereumAddress ? 18 : await token1.methods.decimals().call();
 
+            var lpDecimals = await new window.web3.eth.Contract(props.dfoCore.getContextElement("ERC20ABI"), liquidityPool).methods.decimals().call();
+
             var mainTokenIndex = tokens[2].indexOf(info.mainTokenAddress);
 
             var amm = ammContract;//amms[selectedAmmIndex].contract;
@@ -860,6 +862,8 @@ const SetupComponent = (props) => {
                 token0Symbol: info.involvingETH && token0.options.address === ammEthereumAddress ? "ETH" : await token0.methods.symbol().call(),
                 token1Symbol: info.involvingETH && token1.options.address === ammEthereumAddress ? "ETH" : await token1.methods.symbol().call()
             });
+
+            setLpTokenAmount({full : lpAmount, value : window.fromDecimals(lpAmount, lpDecimals)});
         } catch (error) {
             console.error(error);
         }
