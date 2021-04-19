@@ -136,7 +136,7 @@ const ExploreInflationContract = (props) => {
                     <h6>Operation {(i + 1)}</h6>
                     <div className="TokenOperationLinks">
                         {operation.ammPlugin !== window.voidEthereumAddress &&
-                            <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${operation.ammPlugin}`}>{operation.amm.info[0]}</a>
+                            <a className="specialAMMlink" target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${operation.ammPlugin}`}>{operation.amm.info[0]}</a>
                         }
                         {operation.receivers.map((it, i) => {
                             var percentage = i === operation.receiversPercentages.length ? metadata.oneHundred : operation.receiversPercentages[i];

@@ -290,7 +290,7 @@ const Create = (props) => {
     }
 
     const getCreationComponent = () => {
-        return <div className="CheckboxQuestions">
+        return <div className="CheckboxQuestions uuuuTokenLoad">
             <h6>Reward token address</h6>
             <p className="BreefRecapB">The reward token is the token chosen to reward farmers and can be one per contract.</p>
             <TokenInput placeholder={"Reward token"} onClick={onSelectRewardToken} tokenAddress={(selectedRewardToken && selectedRewardToken.address) || ""} text={"Load"} />
@@ -300,7 +300,7 @@ const Create = (props) => {
                         <span className="visually-hidden"></span>
                     </div>
                 </div> : <>
-                    {selectedRewardToken && <div className="CheckboxQuestions">
+                    {selectedRewardToken && <div className="CheckboxQuestions uuuuTokenLoad">
                         <p><Coin address={selectedRewardToken.address} /> {selectedRewardToken.symbol}</p>
                         <p className="BreefRecapB"> If “by reserve” is selected, the input token will be sent from a wallet. If “by mint” is selected, it will be minted and then sent. The logic of this action must be carefully coded into the extension! To learn more, read the <a target="_blank" href="https://docs.ethos.wiki/covenants/">Documentation</a></p>
                         <select value={byMint === true ? "true" : "false"} onChange={e => setByMint(e.target.value === 'true')} className="SelectRegular">
@@ -482,8 +482,11 @@ const Create = (props) => {
 
     return (
         <div>
+            <p className="OnlyMobileVersion">Use a Desktop or a tablet to build Farming Contracts</p>
+            <div className="NUUUMobileVersion">
             { !props.farmingContract && getCreationComponent()}
             { props.farmingContract && getFarmingContractStatus()}
+            </div>
         </div>
     )
 }

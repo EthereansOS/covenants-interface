@@ -110,6 +110,8 @@ const Create = (props) => {
     if (step == 0) {
         return (
             <div className="CreateList">
+                <p className="OnlyMobileVersion">Use a Desktop or a tablet to build Index Tokens</p>
+                <div className="NUUUMobileVersion">
                     <h6><b>New Index</b></h6>
                     <div className="InputForm">
                         <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="TextRegular" placeholder="Title" />
@@ -124,6 +126,7 @@ const Create = (props) => {
                 <div className="Web2ActionsBTNs">
                     <a onClick={() => onCancel()} className="backActionBTN">Cancel</a>
                     <a onClick={() => (!title || !description || !symbol || !icon) ? console.log('missing parameters') : setStep(1)} className="web2ActionBTN" disabled={!title || !description || !symbol || !icon}>Next</a>
+                </div>
                 </div>
             </div>
         )

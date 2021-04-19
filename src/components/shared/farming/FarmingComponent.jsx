@@ -23,10 +23,13 @@ const FarmingComponent = (props) => {
                         <p><b>Daily Rate</b>: {metadata.rewardPerBlock * 6400} {symbol}</p>
                         <p><b>Active Setups</b>: {metadata.freeSetups.length + metadata.lockedSetups.length} </p>
                         <div className="StatsLink">
-                            {window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <a className="specialITEMlink" target="_blank" href={props.dfoCore.getContextElement("itemURLTemplate").format(metadata.rewardTokenAddress)}> ITEM</a> }
+                            {window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <a className="specialITEMlink" target="_blank" href={props.dfoCore.getContextElement("itemURLTemplate").format(metadata.rewardTokenAddress)}> ITEM</a>}
+                            {!window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <a className="specialERC20link" target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${metadata.rewardTokenAddress}`}> ERC20</a>}
                             <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${metadata.contractAddress}`}>Contract</a>
                             <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${metadata.fullhost}`}>Host</a>
                             <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${metadata.fullExtension}`}>Extension</a>
+                            {goBack && !window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <a className="specialMETAlink" onClick={() => props.dfoCore.addTokenToMetamask(metadata.rewardTokenAddress, metadata.symbol, "18", props.dfoCore.getContextElement('trustwalletImgURLTemplate').split('{0}').join(metadata.rewardTokenAddress))}>Add to Metamask</a>}
+                            {goBack && window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <a className="specialMETAlink" onClick={() => props.dfoCore.addTokenToMetamask(metadata.rewardTokenAddress, metadata.symbol, "18", metadata.rewardTokenAddress.logoURI)}>Add to Metamask</a>} {/*@todo ITEM logo link + reward token decimals */}
                         </div>
                 </div>
                 {goBack && <>

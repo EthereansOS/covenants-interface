@@ -1142,7 +1142,7 @@ const SetupComponent = (props) => {
     return (
         <div className={className}>
             <div className="FarmSetupMain">
-                <h5><b>{setupInfo.free ? "Free Farming" : "Locked Farming"} {!delayedBlock && <> {(!setup.active && canActivateSetup) ? <span className="text-secondary">{setupReady ? "(new)" : "(Soon)"}</span> : (!setup.active) ? <span className="text-danger">(inactive)</span> : <></>} {(parseInt(setup.endBlock) <= blockNumber && parseInt(setup.endBlock) !== 0) && <span>(ended)</span>}</>}{delayedBlock !== 0 && <span className="text-secondary">(Soon)</span>}</b><a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${setupInfo.liquidityPoolTokenAddress}`}>{AMM.name}</a></h5>
+                <h5><b>{setupInfo.free ? "Free Farming" : "Locked Farming"} {!delayedBlock && <> {(!setup.active && canActivateSetup) ? <span className="text-secondary">{setupReady ? "(new)" : "(Soon)"}</span> : (!setup.active) ? <span>(Inactive)</span> : <></>} {(parseInt(setup.endBlock) <= blockNumber && parseInt(setup.endBlock) !== 0) && <span> - Ended</span>}</>}{delayedBlock !== 0 && <span className="text-secondary">(Soon)</span>}</b><a className="specialAMMlink" target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${setupInfo.liquidityPoolTokenAddress}`}>{AMM.name}</a></h5>
                 <aside>
                     {parseInt(setup.endBlock) > 0 ? <p><b>block end</b>: <a className="BLKEMD" target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}block/${setup.endBlock}`}>{setup.endBlock}</a></p> : <p><b>Duration</b>: {getPeriodFromDuration(setupInfo.blockDuration)}</p>}
                     {!setupInfo.free && <>
@@ -1251,9 +1251,8 @@ const SetupComponent = (props) => {
                             parseInt(farmTokenBalance) > 0 && <div className="LockedFarmTokensPosition">
                                 <p><b>Your Farm ITEM (fLP) Balance</b>:</p>
                                 <p>{window.formatMoney(window.fromDecimals(farmTokenBalance, farmTokenDecimals, true), 9)} ({setupTokens.map((setupToken, i) => `${parseInt(farmTokenBalance) === 0 ? 0 : window.formatMoney(window.fromDecimals(farmTokenRes[i], setupToken.decimals, true), 3)} ${setupToken.symbol}${i !== setupTokens.length - 1 ? ' - ' : ''}`)})
-                            <a className="MetamaskAddButton" onClick={() => props.dfoCore.addTokenToMetamask(farmTokenERC20Address, /* farmTokenSymbol */"fLP", farmTokenDecimals)}>
-                                        <img height={14} src={metamaskLogo} alt="Metamask" className="mb-1" /> Add {/* farmTokenSymbol */ "fLP"}
-                                    </a>
+                                <a className="MetamaskAddButton specialITEMlink" target="_blank" href={props.dfoCore.getContextElement("itemURLTemplate").format(farmTokenERC20Address)}>ITEM</a>
+                                <a className="MetamaskAddButton specialMETAlink" onClick={() => props.dfoCore.addTokenToMetamask(farmTokenERC20Address, "fLP", farmTokenDecimals, "https://ipfs.io/ipfs/Qmec5J1qui78ui9exoJmGdkYeyvvc8F45y86Wz2TfaXzhS")}>Add to Metamask</a>
                                 </p>
                             </div>
                         }

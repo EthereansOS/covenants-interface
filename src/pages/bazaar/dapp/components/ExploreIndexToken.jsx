@@ -409,8 +409,8 @@ const ExploreIndexToken = (props) => {
                         <h3><b>{metadata.name} ({metadata.symbol})</b></h3>
                         <p>{metadata.ipfsInfo.description}</p>
                         <div className="StatsLink">
-                            <a target="_blank" href={`https://etherscan.io/token/${metadata.mainInterface}`}>Etherscan</a>
-                            <a target="_blank" href={`https://ethitem.com/?interoperable=${address}`}>ITEM</a>
+                            <a className="specialITEMlink" target="_blank" href={`https://item.eth.link/?interoperable=${address}`}>ITEM</a>
+                            <a className="specialMETAlink" onClick={() => props.dfoCore.addTokenToMetamask(address, metadata.symbol, "18", metadata.ipfsInfo.image)}>Add to Metamask</a>
                             <a target="_blank" href={`https://info.uniswap.org/token/${address}`}>Uniswap</a>
                             <a target="_blank" href={`https://mooniswap.info/token/${address}`}>Mooniswap</a>
                             <a target="_blank" href={`https://sushiswap.fi/token/${address}`}>Sushiswap</a>
