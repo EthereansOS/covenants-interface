@@ -1,13 +1,20 @@
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import defaultLogoImage from '../../../assets/images/default-logo.png';
 import ethereumLogoImage from '../../../assets/images/eth.png';
 import { connect } from 'react-redux';
 
 const Coin = (props) => {
-    const { forcedImage, height } = props;
+    const { forcedImage, height, address } = props;
     const [image, setImage] = useState(props.dfoCore.getContextElement('trustwalletImgURLTemplate').split('{0}').join(window.web3.utils.toChecksumAddress(props.address)));
     const { icons } = require('../../../data/context.json').default;
+    const [isItem, setIsItem] = useState(false);
+
+    isItem && console.log(address, "is item");
+
+    useEffect(() => {
+        props.dfoCore.isItem(address).then(setIsItem);
+    }, [address]);
 
     var imageLink = props.address === window.voidEthereumAddress ? ethereumLogoImage : image;
 

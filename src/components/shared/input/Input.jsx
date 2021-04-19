@@ -5,6 +5,13 @@ import { useState, useEffect } from 'react';
 const Input = (props) => {
     const { label, min, max, value, onChange, showBalance, balance, showMax, showCoin, address, name, tokenImage, extra } = props;
     const [val, setVal] = useState(value);
+    const [isItem, setIsItem] = useState(false);
+
+    isItem && console.log(address, "is item");
+
+    useEffect(() => {
+        props.dfoCore.isItem(address).then(setIsItem);
+    }, [address]);
 
     useEffect(() => {
         setVal(value);

@@ -196,7 +196,19 @@ export default class DFOCore {
         // create the key
         const key = (((address && address.toLowerCase()) || "") + this.web3.utils.sha3(JSON.stringify(abi)));
         this.contracts[key] = this.contracts[key] || new this.web3.eth.Contract(abi, address);
+        if(abi === this.getContextElement("ERC20ABI") || abi === this.getContextElement("IERC20ABI") && this.contracts[key].isItem === undefined) {
+            this.contracts[key].isItem = false;
+            try {
+                var interoperable = await this.getContract(this.getContextElement("IEthItemInteroperableInterfaceABI"), address);
+                this.contracts[key].mainInterface = await interoperable.methods.mainInterface().call();
+                this.contracts[key].isItem = true;
+            } catch(e) {}
+        }
         return this.contracts[key];
+    }
+
+    isItem = async address => {
+        return (await this.getContract(this.getContextElement("ERC20ABI"), address)).isItem;
     }
 
     /**
