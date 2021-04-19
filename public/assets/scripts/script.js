@@ -2180,7 +2180,7 @@ window.getTokenPriceInDollarsOnUniswap = async function getTokenPriceInDollarsOn
     try {
         ethereumValue = (await window.blockchainCall(uniswapV2Router.methods.getAmountsOut, amount, path))[1];
     } catch (e) {}
-    ethereumValue = parseFloat(window.fromDecimals(ethereumValue, decimals, true));
+    ethereumValue = parseFloat(window.fromDecimals(ethereumValue, 18, true));
     ethereumValue *= ethereumPrice;
     return ethereumValue;
 };
