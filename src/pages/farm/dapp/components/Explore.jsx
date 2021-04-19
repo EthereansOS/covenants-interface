@@ -28,6 +28,7 @@ const Explore = (props) => {
                         const rewardTokenAddress = await contract.methods._rewardTokenAddress().call();
                         const rewardTokenIsEth = rewardTokenAddress === dfoCore.voidEthereumAddress; 
                         const rewardToken = !rewardTokenIsEth ? await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), rewardTokenAddress) : null;
+                        const name = !rewardTokenIsEth ? await rewardToken.methods.name().call() : 'Ethereum';
                         const symbol = !rewardTokenIsEth ? await rewardToken.methods.symbol().call() : 'ETH';
                         const decimals = !rewardTokenIsEth ? await rewardToken.methods.decimals().call() : 18;
                         const extensionAddress = await contract.methods._extension().call();
@@ -74,9 +75,10 @@ const Explore = (props) => {
                                 setupInfo.free ? totalFreeSetups += 1 : totalLockedSetups += 1;
                             }
                         }))
-                
+
                         const metadata = {
-                            name: `Farm ${symbol}`,
+                            name,
+                            symbol,
                             contractAddress: contract.options.address,
                             rewardTokenAddress: rewardToken.options.address,
                             rewardPerBlock: dfoCore.toDecimals(dfoCore.toFixed(rewardPerBlock).toString(), decimals),
