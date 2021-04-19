@@ -72,6 +72,7 @@ const SetupComponent = (props) => {
     const [amms, setAmms] = useState(0);
     const [loadingPrestoData, setLoadingPrestoData] = useState(false);
     const [delayedBlock, setDelayedBlock] = useState(0);
+    const [endBlockReached, setEndBlockReached] = useState(false);
 
     function getFarmingPrestoAddress() {
         var prestoAddress = props.dfoCore.getContextElement("farmingPrestoAddress");
@@ -221,6 +222,8 @@ const SetupComponent = (props) => {
         setCanActivateSetup(activateSetup);
         var startBlock = window.formatNumber(farmSetupInfo.startBlock || 0);
         setDelayedBlock(bNumber > startBlock ? 0 : startBlock);
+
+        setEndBlockReached(bNumber > window.formatNumber(farmSetup.endBlock));
 
         const { host, byMint } = await extContract.methods.data().call();
         let isSetupReady = false;
@@ -1145,15 +1148,15 @@ const SetupComponent = (props) => {
                     {setupInfo.minStakeable > 0 && <p><b>Min to Farm</b>: {window.formatMoney(window.fromDecimals(setupInfo.minStakeable, mainTokenInfo.decimals, true), 6)} {mainTokenInfo.symbol}</p>}
                 </aside>
                 <div className="SetupFarmingInstructions">
-                    <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />} </figure>)} = <b>APY</b>: {apy < 0 ? "(Insufficient Liquidity)" : apy === 0 ? "(Missing Price Feed)" : `${window.formatMoney(apy, 3)}%`}</p>
+                    <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />} </figure>)} {!endBlockReached && <> = <b>APY</b>: {apy < 0 ? "(Insufficient Liquidity)" : apy === 0 ? "(Missing Price Feed)" : `${window.formatMoney(apy, 3)}%`}</>}</p>
                 </div>
                 <div className="SetupFarmingOthers">
                     {
                         setupInfo.free ? <>
-                            <p><b>Daily Rate</b>: {props.dfoCore.toDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals, 6)} {rewardTokenInfo.symbol} <span>(Shared)</span></p>
+                            {!endBlockReached && <p><b>Daily Rate</b>: {props.dfoCore.toDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals, 6)} {rewardTokenInfo.symbol} <span>(Shared)</span></p>}
                             <p><b>Total Deposited</b>: {props.dfoCore.toDecimals(parseInt(setup.totalSupply), lpTokenInfo.decimals, 6)} LP ({setupTokens.map((token, index) => <span key={token.address}>{props.dfoCore.toDecimals(token.liquidity, token.decimals, 6)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span>)})</p>
                         </> : <>
-                            <p><b>Available to Farm</b>: {window.fromDecimals(parseInt(setupInfo.maxStakeable) - parseInt(setup.totalSupply), mainTokenInfo.decimals)} {mainTokenInfo.symbol}</p>
+                            {!endBlockReached && <p><b>Available to Farm</b>: {window.fromDecimals(parseInt(setupInfo.maxStakeable) - parseInt(setup.totalSupply), mainTokenInfo.decimals)} {mainTokenInfo.symbol}</p>}
                             <p><b>Rate</b>: {calculateLockedFixedValue()} {rewardTokenInfo.symbol} (fixed) (for every {mainTokenInfo.symbol} locked until the end block)</p>
                         </>
                     }
@@ -1217,7 +1220,7 @@ const SetupComponent = (props) => {
                         {
                             currentPosition &&
                             <div className="Farmed">
-                                <p><b>Daily Earnings</b>: {window.formatMoney(dfoCore.toDecimals((parseInt(setup.rewardPerBlock) * 6400 * parseInt(manageStatus.liquidityPoolAmount) / parseInt(setup.totalSupply)).toString().split('.')[0], rewardTokenInfo.decimals), 9)} {rewardTokenInfo.symbol}</p>
+                                {!endBlockReached && <p><b>Daily Earnings</b>: {window.formatMoney(dfoCore.toDecimals((parseInt(setup.rewardPerBlock) * 6400 * parseInt(manageStatus.liquidityPoolAmount) / parseInt(setup.totalSupply)).toString().split('.')[0], rewardTokenInfo.decimals), 9)} {rewardTokenInfo.symbol}</p>}
                                 <p><b>Available</b>: {window.fromDecimals(freeAvailableRewards, rewardTokenInfo.decimals, true)} {rewardTokenInfo.symbol}</p>
                                 {
                                     !showFreeTransfer ? <a onClick={() => setShowFreeTransfer(true)} className="web2ActionBTN">Transfer</a> : <a onClick={() => setShowFreeTransfer(false)} className="backActionBTN">Close</a>
