@@ -449,6 +449,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .youDIDit .SuccessTextLink {font-size: 11px; padding: 5px 8px; border: 1px solid #9e6915; color: #ffffff !important; display: inline-block; background-color: #9e6915; border-radius: 6px;}
 .youDIDit .SuccessTextLink a {color: #ffffff !important; text-decoration: none !important; font-weight: bold;font-size: 11px;}
 .Disclamerfinish {font-size: 10px !important; text-align: left; margin: 10px auto; background-color: #7474F7; font-weight: bold; padding: 12px 20px; border-radius: 12px; color: #ffffff !important;}
+.specialITEMlink {border-color: #59b0fb !important; border-width: 2px !important; color: #59b0fb !important; font-weight: bold !important;}
 
 @media only screen and (max-device-width: 750px) {
    .IndexRegularText iframe {display: none;}
