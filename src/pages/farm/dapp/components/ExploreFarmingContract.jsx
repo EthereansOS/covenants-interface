@@ -41,9 +41,10 @@ const ExploreFarmingContract = (props) => {
             setContract(lmContract);
             const rewardTokenAddress = await lmContract.methods._rewardTokenAddress().call();
             const rewardToken = await dfoCore.getContract(dfoCore.getContextElement("ERC20ABI"), rewardTokenAddress);
+            const rewardTokenName = await rewardToken.methods.name().call();
             const rewardTokenSymbol = await rewardToken.methods.symbol().call();
             const rewardTokenDecimals = await rewardToken.methods.decimals().call();
-            setToken({ symbol: rewardTokenSymbol, address: rewardTokenAddress, decimals: rewardTokenDecimals });
+            setToken({ name: rewardTokenName, symbol: rewardTokenSymbol, address: rewardTokenAddress, decimals: rewardTokenDecimals });
             const extensionAddress = await lmContract.methods._extension().call();
             const extensionContract = await dfoCore.getContract(dfoCore.getContextElement('FarmExtensionABI'), extensionAddress);
             setExtension(extensionContract);
@@ -78,7 +79,8 @@ const ExploreFarmingContract = (props) => {
             setFarmingSetups(sortedRes);
 
             const metadata = {
-                name: `Farm ${rewardTokenSymbol}`,
+                name: rewardTokenName,
+                symbol: rewardTokenSymbol,
                 contractAddress: lmContract.options.address,
                 rewardTokenAddress: rewardToken.options.address,
                 rewardPerBlock: dfoCore.toDecimals(dfoCore.toFixed(rewardPerBlock).toString(), rewardTokenDecimals),
