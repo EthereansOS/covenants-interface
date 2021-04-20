@@ -5,6 +5,7 @@ const FarmingComponent = (props) => {
     const { className, goBack, metadata, dfoCore, withoutBack } = props;
     const symbol = metadata.symbol;
     const name = metadata.name;
+    const dailyReward = metadata.rewardPerBlock * 6400;
 
     return (
         <div className={className}>
@@ -15,12 +16,12 @@ const FarmingComponent = (props) => {
                         { metadata.rewardTokenAddress !== dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${metadata.rewardTokenAddress}`} ><Coin address={metadata.rewardTokenAddress} /></a> : <Coin address={metadata.rewardTokenAddress} />}
                     </figure>
                     <aside>
-                        <h6>{window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <b>Farm {metadata.name}</b>} {!window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <b>Farm {metadata.symbol}</b>} {(metadata.freeSetups.length + metadata.lockedSetups.length === 0 && !metadata.canActivateSetup) ? <span className="text-danger"><b>(inactive)</b></span> : <></> }</h6>
+                        <h6>{window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <b>Farm {metadata.name} {goBack && <span className="ITEMsymbolF"> ({metadata.symbol})</span>}</b>} {!window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <b>Farm {metadata.symbol}</b>} {(metadata.freeSetups.length + metadata.lockedSetups.length === 0 && !metadata.canActivateSetup) ? <span className="text-danger"><b>(inactive)</b></span> : <></> }</h6>
                         { !withoutBack && <Link to={ goBack ? `/farm/dapp/` : `/farm/dapp/${metadata.contractAddress}`} className={ goBack ? "backActionBTN" : "web2ActionBTN" }>{ goBack ? "Back" : "Open" }</Link>}
                     </aside>
                 </div>
                 <div className="FarmThings">
-                        <p><b>Daily Rate</b>: {metadata.rewardPerBlock * 6400} {symbol}</p>
+                        <p><b>Daily Rate</b>: {window.formatMoney(window.fromDecimals(dailyReward, true), 0)} {window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <>{metadata.name} <span className="ITEMsymbolF">({symbol})</span></>} {!window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <>{symbol} <span className="ITEMsymbolF">({metadata.name})</span></>}</p>
                         <p><b>Active Setups</b>: {metadata.freeSetups.length + metadata.lockedSetups.length} </p>
                         <div className="StatsLink">
                             {window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <a className="specialITEMlink" target="_blank" href={props.dfoCore.getContextElement("itemURLTemplate").format(metadata.rewardTokenAddress)}> ITEM</a>}
@@ -29,7 +30,7 @@ const FarmingComponent = (props) => {
                             <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${metadata.fullhost}`}>Host</a>
                             <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${metadata.fullExtension}`}>Extension</a>
                             {goBack && !window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <a className="specialMETAlink" onClick={() => props.dfoCore.addTokenToMetamask(metadata.rewardTokenAddress, metadata.symbol, "18", props.dfoCore.getContextElement('trustwalletImgURLTemplate').split('{0}').join(metadata.rewardTokenAddress))}>Add to Metamask</a>}
-                            {goBack && window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <a className="specialMETAlink" onClick={() => props.dfoCore.addTokenToMetamask(metadata.rewardTokenAddress, metadata.symbol, "18", metadata.rewardTokenAddress.logoURI)}>Add to Metamask</a>} {/*@todo ITEM logo link + reward token decimals */}
+                            {goBack && window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <a className="specialMETAlink" onClick={() => props.dfoCore.addTokenToMetamask(metadata.rewardTokenAddress, metadata.symbol, "18")}>Add to Metamask</a>} {/*@todo ITEM logo link + reward token decimals */}
                         </div>
                 </div>
                 {goBack && <>
