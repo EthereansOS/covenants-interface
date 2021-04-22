@@ -147,7 +147,7 @@ const SetupComponent = (props) => {
         const farmTokenCollection = await props.dfoCore.getContract(props.dfoCore.getContextElement('INativeV1ABI'), farmTokenCollectionAddress);
         const ammContract = await dfoCore.getContract(dfoCore.getContextElement('AMMABI'), farmSetupInfo.ammPlugin);
         setAmmContract(ammContract);
-        if (!farmSetup.free) {
+        if (!farmSetupInfo.free) {
             // retrieve farm token data
             const objectId = farmSetup.objectId;
             if (objectId !== "0") {
@@ -909,6 +909,17 @@ const SetupComponent = (props) => {
         </div>*/}
     }
 
+    function calculateDailyEarnings() {
+        var rewardPerBlock = window.formatNumber(window.fromDecimals(setup.rewardPerBlock, rewardTokenInfo.decimals, true));
+        var liquidityPoolAmount = window.formatNumber(window.fromDecimals(manageStatus.liquidityPoolAmount, rewardTokenInfo.decimals, true));
+        var totalSupply = window.formatNumber(window.fromDecimals(setup.totalSupply, rewardTokenInfo.decimals, true));
+        var dailyEarnings = (rewardPerBlock * 6400 * liquidityPoolAmount) / totalSupply;
+        dailyEarnings = window.numberToString(dailyEarnings);
+        dailyEarnings = window.formatMoney(dailyEarnings, 9);
+        return dailyEarnings;
+        //window.fromDecimals((parseInt(setup.rewardPerBlock) * 6400 * parseInt(manageStatus.liquidityPoolAmount) / parseInt(setup.totalSupply)).toString().split('.')[0], rewardTokenInfo.decimals, true)
+    }
+
     const getManageAdvanced = () => {
         if (withdrawOpen && currentPosition && setupInfo.free) {
             return (
@@ -1226,7 +1237,7 @@ const SetupComponent = (props) => {
                         {
                             currentPosition &&
                             <div className="Farmed">
-                                {!endBlockReached && <p><b>Daily Earnings</b>: {window.formatMoney(dfoCore.toDecimals((parseInt(setup.rewardPerBlock) * 6400 * parseInt(manageStatus.liquidityPoolAmount) / parseInt(setup.totalSupply)).toString().split('.')[0], rewardTokenInfo.decimals), 9)} {rewardTokenInfo.symbol}</p>}
+                                {!endBlockReached && <p><b>Daily Earnings</b>: {calculateDailyEarnings()} {rewardTokenInfo.symbol}</p>}
                                 <p><b>Available</b>: {window.fromDecimals(freeAvailableRewards, rewardTokenInfo.decimals, true)} {rewardTokenInfo.symbol}</p>
                                 {
                                     !showFreeTransfer ? <a onClick={() => setShowFreeTransfer(true)} className="web2ActionBTN">Transfer</a> : <a onClick={() => setShowFreeTransfer(false)} className="backActionBTN">Close</a>
