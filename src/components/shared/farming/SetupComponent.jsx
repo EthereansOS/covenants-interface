@@ -486,10 +486,12 @@ const SetupComponent = (props) => {
             let ethTokenIndex = null;
             let ethTokenValue = 0;
             let mainTokenIndex = 0;
+            var ethereumAddress = (await ammContract.methods.data().call())[0];
             await Promise.all(setupTokens.map(async (token, i) => {
-                if (setupInfo.involvingETH && token.address === props.dfoCore.voidEthereumAddress) {
+                if (setupInfo.involvingETH && token.address === window.voidEthereumAddress) {
                     ethTokenIndex = i;
-                } else if (token.address === setupInfo.mainTokenAddress) {
+                }
+                if (token.address === setupInfo.mainTokenAddress || setupInfo.involvingETH && token.address === window.voidEthereumAddress && setupInfo.mainTokenAddress === ethereumAddress) {
                     mainTokenIndex = i;
                 }
             }))
