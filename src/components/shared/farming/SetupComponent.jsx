@@ -1170,7 +1170,7 @@ const SetupComponent = (props) => {
                 <div className="SetupFarmingOthers">
                     {
                         setupInfo.free ? <>
-                            {!endBlockReached && <p><b>Daily Rate</b>: {props.dfoCore.toDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals, 6)} {rewardTokenInfo.symbol} <span>(Shared)</span></p>}
+                            {rewardTokenInfo && !endBlockReached && <p><b>Daily Rate</b>: {props.dfoCore.toDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals, 6)} {rewardTokenInfo.symbol} <span>(Shared)</span></p>}
                             <p><b>Total Deposited</b>: {props.dfoCore.toDecimals(parseInt(setup.totalSupply), lpTokenInfo.decimals, 6)} LP ({setupTokens.map((token, index) => <span key={token.address}>{props.dfoCore.toDecimals(token.liquidity, token.decimals, 6)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span>)})</p>
                         </> : <>
                             {!endBlockReached && <p><b>Available to Farm</b>: {window.fromDecimals(parseInt(setupInfo.maxStakeable) - parseInt(setup.totalSupply), mainTokenInfo.decimals)} {mainTokenInfo.symbol}</p>}
@@ -1184,7 +1184,7 @@ const SetupComponent = (props) => {
                     setupInfo.free ? <>
                         <div className="FarmYou">
                             {
-                                currentPosition && <>
+                                manageStatus && currentPosition && <>
                                     <p>
                                         <b>Your Deposit</b>: {window.formatMoney(window.fromDecimals(manageStatus.liquidityPoolAmount, lpTokenInfo.decimals, true), 6)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(window.fromDecimals(manageStatus.tokensAmounts[i], token.decimals, true), 6)} {token.symbol} </span>)}
                                     </p>

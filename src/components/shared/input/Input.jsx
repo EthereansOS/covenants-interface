@@ -10,7 +10,7 @@ const Input = (props) => {
     isItem && console.log(address, "is item");
 
     useEffect(() => {
-        window.dfoCore.isItem(address).then(setIsItem);
+        //window.dfoCore.isItem(address).then(setIsItem);
     }, [address]);
 
     useEffect(() => {
