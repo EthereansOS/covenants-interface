@@ -1,6 +1,6 @@
 import Web3 from "web3";
 import Web3Modal from "web3modal";
-import { ethers } from "ethers";
+import {ethers} from "ethers";
 
 const abi = new ethers.utils.AbiCoder();
 
@@ -40,9 +40,7 @@ export default class DFOCore {
      */
     init = async(web3, providerOptions = {}) => {
         // return if already initialized
-        if (this.initialized) {
-            return;
-        } 
+        if (this.initialized) return;
         this.itemsTokens = JSON.parse(await (await fetch(this.getContextElement("itemsListURL"))).text()).tokens;
         try {
             // retrieve the web3 passed in the function
@@ -56,8 +54,7 @@ export default class DFOCore {
                     const prov = await web3Modal.connect();
                     this.web3 = new Web3(prov);
                 } else {
-                    window.ethereum.autoRefreshOnNetworkChange = false;
-                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    await window.ethereum.request({method : 'eth_requestAccounts'});
                     this.web3 = new Web3(window.ethereum);
                 }
                 // retrieve the provider
@@ -102,7 +99,7 @@ export default class DFOCore {
     }
 
     tryLoadCustomWeb3 = async() => {
-        if (typeof window === 'undefined') {
+        if(typeof window === 'undefined') {
             return;
         }
         var localContext;
@@ -199,13 +196,13 @@ export default class DFOCore {
         // create the key
         const key = (((address && address.toLowerCase()) || "") + this.web3.utils.sha3(JSON.stringify(abi)));
         this.contracts[key] = this.contracts[key] || new this.web3.eth.Contract(abi, address);
-        if (abi === this.getContextElement("ERC20ABI") || abi === this.getContextElement("IERC20ABI") && this.contracts[key].isItem === undefined) {
+        if(abi === this.getContextElement("ERC20ABI") || abi === this.getContextElement("IERC20ABI") && this.contracts[key].isItem === undefined) {
             this.contracts[key].isItem = false;
             try {
                 var interoperable = await this.getContract(this.getContextElement("IEthItemInteroperableInterfaceABI"), address);
                 this.contracts[key].mainInterface = await interoperable.methods.mainInterface().call();
                 this.contracts[key].isItem = true;
-            } catch (e) {}
+            } catch(e) {}
         }
         this.isItemDictionary = this.isItemDictionary || {};
         this.isItemDictionary[address] = this.contracts[key].isItem;
@@ -328,7 +325,7 @@ export default class DFOCore {
                     this.web3.utils.sha3('FarmMainDeployed(address,address,bytes)')
                 ],
                 fromBlock: this.getContextElement('deploySearchStart'),
-                toBlock: 'latest'
+                toBlock : 'latest'
             });
             for (let i = 0; i < events.length; i++) {
                 const event = events[i];
@@ -389,7 +386,7 @@ export default class DFOCore {
                     this.web3.utils.sha3('NewIndex(uint256,address,address,uint256)')
                 ],
                 fromBlock: 11806961,
-                toBlock: 'latest'
+                toBlock : 'latest'
             });
             var map = {};
             for (let i = 0; i < events.length; i++) {
@@ -438,15 +435,16 @@ export default class DFOCore {
         }
     }
 
-    loadFarmingSetup = async(contract, i) => {
+    loadFarmingSetup = async (contract, i) => {
 
         try {
             return await contract.methods.setup(i).call();
-        } catch (e) {}
+        } catch(e) {
+        }
 
         var models = {
-            setup: {
-                types: [
+            setup : {
+                types : [
                     "uint256",
                     "bool",
                     "uint256",
@@ -456,7 +454,7 @@ export default class DFOCore {
                     "uint256",
                     "uint256"
                 ],
-                names: [
+                names : [
                     "infoIndex",
                     "active",
                     "startBlock",
@@ -467,8 +465,8 @@ export default class DFOCore {
                     "totalSupply"
                 ]
             },
-            info: {
-                types: [
+            info : {
+                types : [
                     "bool",
                     "uint256",
                     "uint256",
@@ -484,7 +482,7 @@ export default class DFOCore {
                     "uint256",
                     "uint256"
                 ],
-                names: [
+                names : [
                     "free",
                     "blockDuration",
                     "originalRewardPerBlock",
@@ -503,8 +501,8 @@ export default class DFOCore {
             }
         };
         var data = await this.web3.eth.call({
-            to: contract.options.address,
-            data: contract.methods.setup(i).encodeABI()
+            to : contract.options.address,
+            data : contract.methods.setup(i).encodeABI()
         });
         var types = [
             `tuple(${models.setup.types.join(',')})`,
@@ -512,16 +510,17 @@ export default class DFOCore {
         ];
         try {
             data = abi.decode(types, data);
-        } catch (e) {}
+        } catch(e) {
+        }
         var setup = {};
-        for (var i in models.setup.names) {
+        for(var i in models.setup.names) {
             var name = models.setup.names[i];
             var value = data[0][i];
             value !== true && value !== false && (value = value.toString());
             setup[name] = value;
         }
         var info = {};
-        for (var i in models.info.names) {
+        for(var i in models.info.names) {
             var name = models.info.names[i];
             var value = data[1][i];
             value !== true && value !== false && (value = value.toString());
@@ -546,7 +545,7 @@ export default class DFOCore {
 
             if (!factoryAddress) factoryAddress = this.getContextElement("farmFactoryAddress");
             const deployedFarmingContracts = [];
-            var events = await window.getLogs({
+            const events = await window.getLogs({
                 address: factoryAddress,
                 topics: [
                     this.web3.utils.sha3('FarmMainDeployed(address,address,bytes)')
@@ -568,41 +567,39 @@ export default class DFOCore {
                 }
             }
             this.positions = [];
-            var events = await window.getLogs({
-                address: deployedFarmingContracts.map(it => it.address),
-                topics: [
-                    window.web3.utils.sha3("Transfer(uint256,address,address)"), [],
-                    [],
-                    [this.address
-                    ].map(it => window.web3.eth.abi.encodeParameter("address", it))
-                ],
-                fromBlock: this.getContextElement('deploySearchStart'),
-                toBlock: 'latest'
-            });
-            await Promise.all(events.map(async(c) => {
+            await Promise.all(deployedFarmingContracts.map(async(c) => {
                 const contract = await this.getContract(this.getContextElement("FarmMainABI"), c.address);
                 const farmTokenCollectionAddress = await contract.methods._farmTokenCollection().call();
                 let farmTokenCollection = null;
                 if (farmTokenCollectionAddress !== this.voidEthereumAddress) {
                     farmTokenCollection = await this.getContract(this.getContextElement("INativeV1ABI"), farmTokenCollectionAddress);
                 }
-
+                const events = await window.getLogs({
+                    address: c.address,
+                    topics: [
+                        window.web3.utils.sha3("Transfer(uint256,address,address)")
+                    ],
+                    fromBlock: this.getContextElement('deploySearchStart'),
+                    toBlock: 'latest'
+                });
                 const found = [];
-                const event = c;
-                const { topics } = event;
-                var owner = this.web3.eth.abi.decodeParameter("address", topics[3]);
-                if (owner.toLowerCase() === this.address.toLowerCase()) {
-                    var positionId = this.web3.eth.abi.decodeParameter("uint256", topics[1]);
-                    const pos = await contract.methods.position(positionId).call();
-                    if (!found.includes(pos.setupIndex)) {
-                        try {
-                            const { '0': setup, '1': setupInfo } = await this.loadFarmingSetup(contract, pos.setupIndex);
-                            if (this.isValidPosition(pos) && !this.positions.includes({...setup, contract, setupInfo, setupIndex: pos.setupIndex })) {
-                                this.positions.push({...setup, contract, setupInfo, setupIndex: pos.setupIndex });
-                                found.push(pos.setupIndex);
+                for (let i = 0; i < events.length; i++) {
+                    const event = events[i];
+                    const { topics } = event;
+                    var owner = this.web3.eth.abi.decodeParameter("address", topics[3]);
+                    if (owner.toLowerCase() === this.address.toLowerCase()) {
+                        var positionId = this.web3.eth.abi.decodeParameter("uint256", topics[1]);
+                        const pos = await contract.methods.position(positionId).call();
+                        if (!found.includes(pos.setupIndex)) {
+                            try {
+                                const { '0': setup, '1': setupInfo } = await this.loadFarmingSetup(contract, pos.setupIndex);
+                                if (this.isValidPosition(pos) && !this.positions.includes({...setup, contract, setupInfo, setupIndex: pos.setupIndex })) {
+                                    this.positions.push({...setup, contract, setupInfo, setupIndex: pos.setupIndex });
+                                    found.push(pos.setupIndex);
+                                }
+                            } catch (error) {
+                                console.error(error);
                             }
-                        } catch (error) {
-                            console.error(error);
                         }
                     }
                 }
@@ -660,7 +657,7 @@ export default class DFOCore {
     }
 
     fromDecimals = (amount, decimals = 18) => {
-        return window.toDecimals(window.numberToString(amount), decimals);
+        return decimals === 18 ? this.web3.utils.toWei(toFixed(amount), 'ether') : parseFloat(toFixed(amount)) * 10 ** decimals;
     }
 
     toFixed = (amount) => {
