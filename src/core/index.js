@@ -786,7 +786,14 @@ export default class DFOCore {
         // TODO retrieve DFO
     }
 
-
+    tryRetrieveWellKnownTokenImage = function tryRetrieveWellKnownTokenImage(address) {
+        address = this.web3.utils.toChecksumAddress(address || this.voidEthereumAddress);
+        var wellKnownTokens = this.getContextElement("wellKnownTokens") || {};
+        var wellKnownTokensStart = JSON.parse(JSON.stringify(wellKnownTokens));
+        wellKnownTokens = {};
+        Object.entries(wellKnownTokensStart).forEach(it => wellKnownTokens[this.web3.utils.toChecksumAddress(it[0] || this.voidEthereumAddress)] = window.formatLink(it[1]));
+        return wellKnownTokens[address];
+    }
 
 }
 

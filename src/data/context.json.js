@@ -103,6 +103,9 @@ export default {
           }
       }
     },
+    "wellKnownTokens" : {
+        "0x0000000000000000000000000000000000000000" : "https://raw.githubusercontent.com/EthereansOS/covenants-interface/main/src/assets/images/eth.png"
+    },
     "indexesURL": "https://raw.githubusercontent.com/EthereansOS/Organizations-Interface/master/bazar-tokens-list/dist/indexes.json",
     "decentralizedFlexibleOrganizationsURL": "https://raw.githubusercontent.com/EthereansOS/Organizations-Interface/master/bazar-tokens-list/dist/decentralizedFlexibleOrganizations.json",
     "decentralizedFlexibleOrganizationsURLRopsten": "https://raw.githubusercontent.com/EthereansOS/Organizations-Interface/master/bazar-tokens-list/dist/programmableEquities.json",
