@@ -65,11 +65,12 @@ const CreateOrEditFixedInflationEntryOperation = (props) => {
     const isValidPercentage = () => {
         var hasIncoherent = false;
         for (var receiver of receivers) {
-            if (receiver.percentage <= 0 || receiver.percentage > 100) {
+            var percentage = window.formatNumber(receiver.percentage);
+            if (percentage <= 0 || percentage > 100) {
                 hasIncoherent = true;
             }
         }
-        const totalPercentage = receivers.map((receiver) => receiver.percentage).reduce((acc, num) => acc + num);
+        const totalPercentage = receivers.map(receiver => window.formatNumber(receiver.percentage)).reduce((acc, num) => acc + num);
         return totalPercentage == 100 && !hasIncoherent;
     }
 
