@@ -100,11 +100,7 @@ const BazaarComponent = (props) => {
                             <h6><b>{indexToken.name}</b></h6>
                             <div className="IndexTokens">
                                 <p> {
-                                    indexToken.info._tokens.map((token, index) => {
-                                        return (
-                                            <><p>{!hasPrice ? indexToken.amounts[token] : `${window.formatMoney(metadata.percentages[token], 1)}%`} <Coin address={token} /> { index !== indexToken.info._tokens.length - 1 && " " }</p></>
-                                        )
-                                    })
+                                    indexToken.info._tokens.map((token, index) => <p>{!hasPrice ? indexToken.amounts[token] : `${window.formatMoney(indexToken.percentages[token], 1)}%`} <Coin address={token} /> { index !== indexToken.info._tokens.length - 1 && " " }</p>)
                                 }</p>
                                 <div className="IndexContractBTN">
                                     <Link to={`/bazaar/dapp/${indexToken.address}`} className="web2ActionBTN">Open</Link>

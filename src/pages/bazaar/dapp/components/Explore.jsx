@@ -42,16 +42,16 @@ const Explore = (props) => {
                         name = "Item";
                     }
                     let total = 0;
-                    await Promise.all(info._amounts.map(async (amount) => total += parseInt(amount)));
-                    const percentages = {};
                     const amounts = {};
                     await Promise.all(info._tokens.map(async (token, index) => {
                         const amount = info._amounts[index];
                         const tokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), token);
                         const decimals = await tokenContract.methods.decimals().call();
-                        amounts[token] = props.dfoCore.toDecimals(amount, decimals);
-                        percentages[token] = (parseInt(amount) / parseInt(total)) * 100;
+                        total += window.formatNumber(amounts[token] = window.fromDecimals(amount, decimals, true));
                     }));
+                    total = window.formatNumber(window.toDecimals(total, 18));
+                    const percentages = {};
+                    info._tokens.forEach(token => percentages[token] = (window.formatNumber(window.toDecimals(amounts[token], 18)) / total) * 100);
                     tokens.push({ totalSupply, contract, amounts, ipfsInfo: res.data, address: indexToken.address, objectId: indexToken.objectId, info, percentages, name, uri });
                 } catch (error) {
                     console.error(error);

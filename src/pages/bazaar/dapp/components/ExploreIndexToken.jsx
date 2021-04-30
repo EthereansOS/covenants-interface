@@ -69,6 +69,16 @@ const ExploreIndexToken = (props) => {
                 symbol = "ITM";
             }
             let total = 0;
+            const amounts = {};
+            await Promise.all(info._tokens.map(async (token, index) => {
+                const amount = info._amounts[index];
+                const tokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), token);
+                const decimals = await tokenContract.methods.decimals().call();
+                total += window.formatNumber(amounts[token] = window.fromDecimals(amount, decimals, true));
+            }));
+            total = window.formatNumber(window.toDecimals(total, 18));
+            const percentages = {};
+            info._tokens.forEach(token => percentages[token] = (window.formatNumber(window.toDecimals(amounts[token], 18)) / total) * 100);
             let valueLocked = 0;
             await Promise.all(info._amounts.map(async (amount, index) => {
                 try {
@@ -80,18 +90,15 @@ const ExploreIndexToken = (props) => {
                         const { data } = res;
                         const tokenPrice = data[token.toLowerCase()].usd;
                         let value = parseFloat(props.dfoCore.toDecimals(amount, decimal)) * tokenPrice;
-                        total += value;
                         valueLocked += value * parseFloat(props.dfoCore.toDecimals(totalSupply, indexDecimals));
                     } catch (err) {
                         let val = parseFloat(props.dfoCore.toDecimals(amount, decimal));
-                        total += val;
                         valueLocked += val * parseFloat(props.dfoCore.toDecimals(totalSupply, indexDecimals));
                     }
                 } catch (error) {
                     console.error(error);
                 }
             }))
-            const percentages = {};
             const symbols = {};
             const decimals = {};
             const approvals = {};
@@ -110,10 +117,8 @@ const ExploreIndexToken = (props) => {
                         const res = await window.getTokenPricesInDollarsOnCoingecko(token);
                         const { data } = res;
                         const tokenPrice = data[token.toLowerCase()].usd;
-                        percentages[token] = ((parseFloat(amountDecimals) * tokenPrice) / parseInt(total)) * 100;
                     } catch (error) {
                         // percentages[token] = ((parseFloat(amountDecimals)) / parseInt(total)) * 100;
-                        percentages[token] = 0;
                     }
                     symbols[token] = symbol;
                     decimals[token] = decimal;
