@@ -111,6 +111,7 @@ export default {
     "decentralizedFlexibleOrganizationsURLRopsten": "https://raw.githubusercontent.com/EthereansOS/Organizations-Interface/master/bazar-tokens-list/dist/programmableEquities.json",
     "uniswapTokensURL": "https://raw.githubusercontent.com/EthereansOS/Organizations-Interface/master/bazar-tokens-list/dist/uniswapTokens.json",
     "itemsListURL" : "https://raw.githubusercontent.com/EthereansOS/ITEMS-Swap/master/src/constants/ethItemLists/dist/tokensList.json",
+    "itemsContextURL" : "https://raw.githubusercontent.com/EthereansOS/ITEMS-Interface/main/data/context.json",
     "blockIntervals" : {
       "6 Hours" : 1600,
       "12 Hours" : 3200,

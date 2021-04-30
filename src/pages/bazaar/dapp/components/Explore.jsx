@@ -28,14 +28,18 @@ const Explore = (props) => {
                     const mainInterface = await interoperableContract.methods.mainInterface().call();
                     const contract = await props.dfoCore.getContract(props.dfoCore.getContextElement('IEthItemABI'), mainInterface);
                     const info = await indexContract.methods.info(indexToken.objectId, 0).call();
-                    const name = await contract.methods.name(indexToken.objectId).call();
+                    var name = await contract.methods.name(indexToken.objectId).call();
                     const uri = await contract.methods.uri(indexToken.objectId).call();
                     const totalSupply = await interoperableContract.methods.totalSupply().call();
                     let res = { data: { description: '', image: '' } };
-                    try {
-                        res = await axios.get(uri);
-                    } catch (error) {
-                        console.log('error while reading metadata from ipfs..')
+                    if(window.context.pandorasBox.indexOf(props.dfoCore.web3.utils.toChecksumAddress(indexToken.address)) === -1) {
+                        try {
+                            res = await axios.get(uri);
+                        } catch (error) {
+                            console.log('error while reading metadata from ipfs..')
+                        }
+                    } else {
+                        name = "Item";
                     }
                     let total = 0;
                     await Promise.all(info._amounts.map(async (amount) => total += parseInt(amount)));

@@ -96,6 +96,14 @@ export default class DFOCore {
         } catch (error) {
             this.initialized = false;
         }
+        var itemsContext = JSON.parse(await (await fetch(this.getContextElement("itemsContextURL"))).text());
+        this.context.pandorasBox = itemsContext.pandorasBox;
+        this.context.pandorasBoxURL = itemsContext.pandorasBoxURL;
+        this.context.pandorasBox = (this.context.pandorasBox || []).map(it => this.web3.utils.toChecksumAddress(it));
+        try {
+            var pandorasBox = JSON.parse(await (await fetch(this.context.pandorasBoxURL)).text());
+            this.context.pandorasBox.push(...pandorasBox.map(it => this.web3.utils.toChecksumAddress(it)).filter(it => this.context.pandorasBox.indexOf(it) === -1));
+        } catch (e) {}
     }
 
     tryLoadCustomWeb3 = async() => {

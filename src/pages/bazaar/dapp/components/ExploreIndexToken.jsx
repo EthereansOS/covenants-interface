@@ -50,18 +50,23 @@ const ExploreIndexToken = (props) => {
             const mainInterface = await interoperableContract.methods.mainInterface().call();
             const contract = await props.dfoCore.getContract(props.dfoCore.getContextElement('IEthItemABI'), mainInterface);
             const info = await indexContract.methods.info(objectId, 0).call();
-            const name = await contract.methods.name(objectId).call();
-            const symbol = await contract.methods.symbol(objectId).call();
+            var name = await contract.methods.name(objectId).call();
+            var symbol = await contract.methods.symbol(objectId).call();
             const indexDecimals = await contract.methods.decimals(objectId).call();
             const balanceOf = await contract.methods.balanceOf(props.dfoCore.address, objectId).call();
             const totalSupply = await contract.methods.totalSupply(objectId).call();
             setBalance(window.formatMoney(props.dfoCore.toDecimals(balanceOf, indexDecimals), 4));
             const uri = await contract.methods.uri(objectId).call();
             let res = { data: { description: '', image: '' } };
-            try {
-                res = await axios.get(uri);
-            } catch (error) {
-                console.log('error while reading metadata from ipfs..')
+            if(window.context.pandorasBox.indexOf(props.dfoCore.web3.utils.toChecksumAddress(address)) === -1) {
+                try {
+                    res = await axios.get(uri);
+                } catch (error) {
+                    console.log('error while reading metadata from ipfs..')
+                }
+            } else {
+                name = "Item";
+                symbol = "ITM";
             }
             let total = 0;
             let valueLocked = 0;
