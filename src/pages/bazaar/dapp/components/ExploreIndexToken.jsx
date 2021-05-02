@@ -77,6 +77,7 @@ const ExploreIndexToken = (props) => {
                 total += window.formatNumber(amounts[token] = window.fromDecimals(amount, decimals, true));
             }));
             total = window.formatNumber(window.toDecimals(total, 18));
+            var totalSupplyPlain = window.formatNumber(window.fromDecimals(totalSupply, 18, true));
             const percentages = {};
             info._tokens.forEach(token => percentages[token] = (window.formatNumber(window.toDecimals(amounts[token], 18)) / total) * 100);
             let valueLocked = 0;
@@ -89,8 +90,9 @@ const ExploreIndexToken = (props) => {
                         const res = await window.getTokenPricesInDollarsOnCoingecko(token);
                         const { data } = res;
                         const tokenPrice = data[token.toLowerCase()].usd;
-                        let value = parseFloat(props.dfoCore.toDecimals(amount, decimal)) * tokenPrice;
-                        valueLocked += value * parseFloat(props.dfoCore.toDecimals(totalSupply, indexDecimals));
+                        var value = (totalSupplyPlain * percentages[token]) / 100;
+                        value = value * tokenPrice;
+                        valueLocked += value;
                     } catch (err) {
                         let val = parseFloat(props.dfoCore.toDecimals(amount, decimal));
                         valueLocked += val * parseFloat(props.dfoCore.toDecimals(totalSupply, indexDecimals));
