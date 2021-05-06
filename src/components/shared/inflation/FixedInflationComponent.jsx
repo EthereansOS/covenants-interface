@@ -22,7 +22,8 @@ const FixedInflationComponent = (props) => {
             const oneHundred = await contract.methods.ONE_HUNDRED().call();
             const executorReward = (entry.callerRewardPercentage / oneHundred) * 100;
             var blockNumber = parseInt(await window.web3.eth.getBlockNumber());
-            var nextBlock = parseInt(entry.lastBlock) + parseInt(entry.blockInterval);
+            var nextBlock = parseInt(entry.lastBlock);
+            nextBlock += nextBlock <= blockNumber ? parseInt(entry.blockInterval) : 0;
             var extensionContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("FixedInflationExtensionABI"), await contract.methods.extension().call());
             var extensionContractData = await extensionContract.methods.data().call();
             var active = true;
