@@ -5,6 +5,7 @@ import CreateOrEditFixedInflationEntry from './CreateOrEditFixedInflationEntry';
 import Loading from '../../../../components/shared/Loading';
 import ContractEditor from '../../../../components/editor/ContractEditor';
 import FixedInflationExtensionTemplateLocation from '../../../../data/FixedInflationExtensionTemplate.sol';
+import { Coin } from "../../../../components/shared";
 
 const CreateOrEditFixedInflation = (props) => {
 
@@ -23,6 +24,7 @@ const CreateOrEditFixedInflation = (props) => {
     const [extensionAddress, setExtensionAddress] = useState("");
     const [deployMessage, setDeployMessage] = useState("");
     const [fixedInflationAddress, setFixedInflationAddress] = useState("");
+    const [recap, setRecap] = useState("");
     const [notFirstTime, setNotFirstTime] = useState(false);
     const [fixedInflationExtensionTemplateCode, setFixedInflationExtensionTemplateCode] = useState("");
     const [customExtensionData, setCustomExtensionData] = useState(null);
@@ -140,8 +142,8 @@ const CreateOrEditFixedInflation = (props) => {
         },
         async fromSourceCode() {
             setDeployMessage("1/3 - Deploying Custom Extension...");
-            var sendingOptions = {from : props.dfoCore.address};
-            var method = new props.dfoCore.web3.eth.Contract(customExtensionData.abi).deploy({data : customExtensionData.bytecode});
+            var sendingOptions = { from: props.dfoCore.address };
+            var method = new props.dfoCore.web3.eth.Contract(customExtensionData.abi).deploy({ data: customExtensionData.bytecode });
             sendingOptions.gasLimit = await method.estimateGas(sendingOptions);
             sendingOptions.gas = sendingOptions.gasLimit;
             var customFixedInflationExtension = await method.send(sendingOptions);
@@ -179,9 +181,110 @@ const CreateOrEditFixedInflation = (props) => {
             sendingOptions.gas = gasLimit;
             transaction = await method.send(sendingOptions);
 
+            elaborateRecap(elaboratedEntry.blockInterval, elaboratedEntry.operations);
             setFixedInflationAddress(fixedInflationAddress);
         }
     }
+
+    async function elaborateRecap(blockInterval, operations) {
+        var blockIntervalLabel;
+        try {
+            blockIntervalLabel = Object.entries(props.dfoCore.getContextElement("blockIntervals")).filter(it => window.formatNumber(it[1]) === window.formatNumber(blockInterval))[0][0];
+        } catch (e) { }
+        var finalRecap = {
+            blockInterval: blockIntervalLabel || `${blockInterval} block${window.formatNumber(blockInterval) > 1 ? 's' : ''}`,
+            transfers: 0,
+            swaps: 0
+        };
+        for (var operation of operations) {
+            var address = props.dfoCore.web3.utils.toChecksumAddress(operation.inputTokenAddress);
+            var tokenData = finalRecap[address] = finalRecap[address] || {
+                address,
+                contract: await props.dfoCore.getContract(props.dfoCore.getContextElement("ERC20ABI"), address)
+            };
+            finalRecap.transfers += operation.ammPlugin === window.voidEthereumAddress ? 1 : 0;
+            finalRecap.swaps += operation.ammPlugin !== window.voidEthereumAddress ? 1 : 0;
+            tokenData.name = tokenData.name || (address === window.voidEthereumAddress ? 'Ethereum' : await tokenData.contract.methods.name().call());
+            tokenData.symbol = tokenData.symbol || (address === window.voidEthereumAddress ? 'ETH' : await tokenData.contract.methods.symbol().call());
+            tokenData.decimals = tokenData.decimals || (address === window.voidEthereumAddress ? '18' : await tokenData.contract.methods.decimals().call());
+            var key = operation.inputTokenAmountIsByMint ? 'mint' : 'transfer';
+            key += operation.inputTokenAmountIsPercentage ? 'Percentage' : 'Amount';
+            var value = tokenData[key] || '0';
+            value = window.web3.utils.toBN(value).add(window.web3.utils.toBN(operation.inputTokenAmount)).toString();
+            tokenData[key] = value;
+        }
+        for (var key of Object.keys(finalRecap)) {
+            var value = finalRecap[key];
+            if (!value.contract) {
+                continue;
+            }
+            value.mintPercentage && (value.mintPercentage = window.formatNumber(window.fromDecimals(value.mintPercentage, 18, true)) * 100);
+            value.transferPercentage && (value.transferPercentage = window.formatNumber(window.fromDecimals(value.transferPercentage, 18, true)) * 100);
+            value.mintAmount && (value.mintAmount = window.fromDecimals(value.mintAmount, value.decimals, true));
+            value.transferAmount && (value.transferAmount = window.fromDecimals(value.transferAmount, value.decimals, true));
+        }
+        setRecap(finalRecap);
+    }
+
+    window.setRecapDump = async function setRecapDump(set) {
+        setFixedInflationAddress("");
+        setExtensionAddress("");
+        setRecap(null);
+        if(!set) {
+            return;
+        }
+        await elaborateRecap("1600", [{
+            inputTokenAddress : window.voidEthereumAddress,
+            inputTokenAmount : window.toDecimals("0.13", 18),
+            inputTokenAmountIsPercentage : false,
+            inputTokenAmountIsByMint : false,
+            ammPlugin : window.voidEthereumAddress
+        }, {
+            inputTokenAddress : window.voidEthereumAddress,
+            inputTokenAmount : window.toDecimals("0.13", 18),
+            inputTokenAmountIsPercentage : false,
+            inputTokenAmountIsByMint : false,
+            ammPlugin : props.dfoCore.address
+        }, {
+            inputTokenAddress : "0x7b123f53421b1bf8533339bfbdc7c98aa94163db",
+            inputTokenAmount : window.toDecimals("50", 18),
+            inputTokenAmountIsPercentage : false,
+            inputTokenAmountIsByMint : true,
+            ammPlugin : props.dfoCore.address
+        }, {
+            inputTokenAddress : "0x7b123f53421b1bf8533339bfbdc7c98aa94163db",
+            inputTokenAmount : window.toDecimals("0.13", 18),
+            inputTokenAmountIsPercentage : false,
+            inputTokenAmountIsByMint : true,
+            ammPlugin : props.dfoCore.address
+        }, {
+            inputTokenAddress : "0x7b123f53421b1bf8533339bfbdc7c98aa94163db",
+            inputTokenAmount : window.toDecimals("0.13", 18),
+            inputTokenAmountIsPercentage : false,
+            inputTokenAmountIsByMint : false,
+            ammPlugin : props.dfoCore.address
+        }, {
+            inputTokenAddress : "0x9e78b8274e1d6a76a0dbbf90418894df27cbceb5",
+            inputTokenAmount : window.toDecimals("0.13", 18),
+            inputTokenAmountIsPercentage : false,
+            inputTokenAmountIsByMint : false,
+            ammPlugin : props.dfoCore.address
+        }, {
+            inputTokenAddress : "0x9e78b8274e1d6a76a0dbbf90418894df27cbceb5",
+            inputTokenAmount : window.toDecimals("0.05", 18),
+            inputTokenAmountIsPercentage : true,
+            inputTokenAmountIsByMint : false,
+            ammPlugin : props.dfoCore.address
+        }, {
+            inputTokenAddress : "0x9e78b8274e1d6a76a0dbbf90418894df27cbceb5",
+            inputTokenAmount : window.toDecimals("0.05", 18),
+            inputTokenAmountIsPercentage : true,
+            inputTokenAmountIsByMint : true,
+            ammPlugin : props.dfoCore.address
+        }]);
+        setExtensionAddress(window.voidEthereumAddress);
+        setFixedInflationAddress(window.voidEthereumAddress);
+    };
 
     function elaborateEntry(entry) {
         var elaboratedEntry = {
@@ -218,23 +321,23 @@ const CreateOrEditFixedInflation = (props) => {
             function () {
                 return <>
                     <h6><b>Receiver</b></h6>
-                            <h6>Host</h6>
-                            <p className="BreefRecapB">The host is the Contract, Wallet, DAO, or DFO with permissions to manage and add new operations in this contract. The host permissions are set into the extension contract. If you choose "Standard Extension (Address, wallet)," the extension must have all of the tokens needed to fill every operation. You can also program extension permissions by your Organization, DFO to mint or transfer directly from the treasury, using the DFOhub website or a custom contract (more info in the <a target="_blank" href="https://docs.ethos.wiki/covenants/">Documentation</a>.</p>
-                            <select className="SelectRegular" value={extensionType} onChange={onExtensionType}>
-                                <option value="address">Standard Extension (Address, wallet, Contract or Organization</option>
-                                <option value="deployedContract">Custom Extension (Deployed Contract)</option>
-                                {<option value="fromSourceCode">Custom Extension (Deploy Contract)</option>}
-                            </select>
-                        {(extensionType === 'address' || extensionType === 'deployedContract') && 
-                            <div className="InputForm">
-                                {extensionType === 'address' && <input className="imputCool" type="text" placeholder="Host address" defaultValue={walletAddress} onKeyUp={e => setWalletAddress(window.isEthereumAddress(e.currentTarget.value) ? e.currentTarget.value : "")} />}
-                                {extensionType === 'deployedContract' && <input className="imputCool" type="text" placeholder="Insert extension address" defaultValue={extensionAddress} onKeyUp={e => setExtensionAddress(window.isEthereumAddress(e.currentTarget.value) ? e.currentTarget.value : "")} />}
-                            </div>
-                        }
-                        {extensionType === 'fromSourceCode' && <ContractEditor filterDeployedContract={filterDeployedContract} dfoCore={props.dfoCore} onContract={setCustomExtensionData} templateCode={fixedInflationExtensionTemplateCode} />}
-                        {extensionType !== 'address' && <div className="InputForm">
-                                <input className="imputCool" placeholder="Optional init payload" type="text" defaultValue={payload} onKeyUp={e => setPayload(e.currentTarget.value)} />
-                        </div>}
+                    <h6>Host</h6>
+                    <p className="BreefRecapB">The host is the Contract, Wallet, DAO, or DFO with permissions to manage and add new operations in this contract. The host permissions are set into the extension contract. If you choose "Standard Extension (Address, wallet)," the extension must have all of the tokens needed to fill every operation. You can also program extension permissions by your Organization, DFO to mint or transfer directly from the treasury, using the DFOhub website or a custom contract (more info in the <a target="_blank" href="https://docs.ethos.wiki/covenants/">Documentation</a>.</p>
+                    <select className="SelectRegular" value={extensionType} onChange={onExtensionType}>
+                        <option value="address">Standard Extension (Address, wallet, Contract or Organization</option>
+                        <option value="deployedContract">Custom Extension (Deployed Contract)</option>
+                        {<option value="fromSourceCode">Custom Extension (Deploy Contract)</option>}
+                    </select>
+                    {(extensionType === 'address' || extensionType === 'deployedContract') &&
+                        <div className="InputForm">
+                            {extensionType === 'address' && <input className="imputCool" type="text" placeholder="Host address" defaultValue={walletAddress} onKeyUp={e => setWalletAddress(window.isEthereumAddress(e.currentTarget.value) ? e.currentTarget.value : "")} />}
+                            {extensionType === 'deployedContract' && <input className="imputCool" type="text" placeholder="Insert extension address" defaultValue={extensionAddress} onKeyUp={e => setExtensionAddress(window.isEthereumAddress(e.currentTarget.value) ? e.currentTarget.value : "")} />}
+                        </div>
+                    }
+                    {extensionType === 'fromSourceCode' && <ContractEditor filterDeployedContract={filterDeployedContract} dfoCore={props.dfoCore} onContract={setCustomExtensionData} templateCode={fixedInflationExtensionTemplateCode} />}
+                    {extensionType !== 'address' && <div className="InputForm">
+                        <input className="imputCool" placeholder="Optional init payload" type="text" defaultValue={payload} onKeyUp={e => setPayload(e.currentTarget.value)} />
+                    </div>}
                 </>
             },
             function () {
@@ -244,19 +347,19 @@ const CreateOrEditFixedInflation = (props) => {
 
     function filterDeployedContract(contractData) {
         var abi = contractData.abi;
-        if(abi.filter(abiEntry => abiEntry.type === 'constructor').length > 0) {
+        if (abi.filter(abiEntry => abiEntry.type === 'constructor').length > 0) {
             return false;
         }
-        if(abi.filter(abiEntry => abiEntry.type === 'function' && abiEntry.stateMutability === 'view' && abiEntry.name === 'active' && abiEntry.outputs && abiEntry.outputs.length === 1 && abiEntry.outputs[0].type === 'bool').length === 0) {
+        if (abi.filter(abiEntry => abiEntry.type === 'function' && abiEntry.stateMutability === 'view' && abiEntry.name === 'active' && abiEntry.outputs && abiEntry.outputs.length === 1 && abiEntry.outputs[0].type === 'bool').length === 0) {
             return false;
         }
-        if(abi.filter(abiEntry => abiEntry.type === 'function' && abiEntry.stateMutability !== 'view' && abiEntry.stateMutability !== 'pure' && abiEntry.name === 'deactivationByFailure' && (!abiEntry.outputs || abiEntry.outputs.length === 0) && (!abiEntry.inputs || abiEntry.inputs.length === 0)).length === 0) {
+        if (abi.filter(abiEntry => abiEntry.type === 'function' && abiEntry.stateMutability !== 'view' && abiEntry.stateMutability !== 'pure' && abiEntry.name === 'deactivationByFailure' && (!abiEntry.outputs || abiEntry.outputs.length === 0) && (!abiEntry.inputs || abiEntry.inputs.length === 0)).length === 0) {
             return false;
         }
-        if(abi.filter(abiEntry => abiEntry.type === 'function' && abiEntry.stateMutability !== 'view' && abiEntry.stateMutability !== 'pure' && abiEntry.name === 'receiveTokens' && (!abiEntry.outputs || abiEntry.outputs.length === 0) && abiEntry.inputs && abiEntry.inputs.length === 3 && abiEntry.inputs[0].type === 'address[]' && abiEntry.inputs[1].type === 'uint256[]' && abiEntry.inputs[2].type === 'uint256[]').length === 0) {
+        if (abi.filter(abiEntry => abiEntry.type === 'function' && abiEntry.stateMutability !== 'view' && abiEntry.stateMutability !== 'pure' && abiEntry.name === 'receiveTokens' && (!abiEntry.outputs || abiEntry.outputs.length === 0) && abiEntry.inputs && abiEntry.inputs.length === 3 && abiEntry.inputs[0].type === 'address[]' && abiEntry.inputs[1].type === 'uint256[]' && abiEntry.inputs[2].type === 'uint256[]').length === 0) {
             return false;
         }
-        if(abi.filter(abiEntry => abiEntry.type === 'function' && abiEntry.stateMutability !== 'view' && abiEntry.stateMutability !== 'pure' && abiEntry.name === 'setActive' && (!abiEntry.outputs || abiEntry.outputs.length === 0) && abiEntry.inputs && abiEntry.inputs.length === 1 && abiEntry.inputs[0].type === 'bool').length === 0) {
+        if (abi.filter(abiEntry => abiEntry.type === 'function' && abiEntry.stateMutability !== 'view' && abiEntry.stateMutability !== 'pure' && abiEntry.name === 'setActive' && (!abiEntry.outputs || abiEntry.outputs.length === 0) && abiEntry.inputs && abiEntry.inputs.length === 1 && abiEntry.inputs[0].type === 'bool').length === 0) {
             return false;
         }
         return true;
@@ -299,7 +402,7 @@ const CreateOrEditFixedInflation = (props) => {
 
     function saveEntry(entryName, lastBlock, blockInterval, callerRewardPercentage, operations) {
         setEntry({
-            name : entryName,
+            name: entryName,
             lastBlock,
             blockInterval,
             callerRewardPercentage,
@@ -338,24 +441,24 @@ const CreateOrEditFixedInflation = (props) => {
                 </div>
             </div>
             <div className="Web2ActionsBTNs">
-                    <a disabled={deploying} onClick={back} className="backActionBTN">Back</a>
-                    {deploying ? <Loading /> : <a onClick={editEntry} className="web2ActionBTN">Deploy</a>}
-                    {deployMessage && <span>{deployMessage}</span>}
-                </div>
+                <a disabled={deploying} onClick={back} className="backActionBTN">Back</a>
+                {deploying ? <Loading /> : <a onClick={editEntry} className="web2ActionBTN">Deploy</a>}
+                {deployMessage && <span>{deployMessage}</span>}
+            </div>
         </>
     }
 
     function render() {
         return <>
-                    <h6>Deploy</h6>
-                    {steps[step][0]()}
-        
-                <div className="Web2ActionsBTNs">
-                    <a disabled={deploying} onClick={back} className="backActionBTN">Back</a>
-                    {step !== steps.length - 1 && <a disabled={steps[step][1]()} onClick={() => setStep(step + 1)} className="web2ActionBTN">Next</a>}
-                    {step === steps.length - 1 && (deploying ? <Loading /> : <a disabled={steps[step][1]()} onClick={deploy} className="Web3ActionBTN">Deploy</a>)}
-                    {deployMessage && <span>{deployMessage}</span>}
-                </div>
+            <h6>Deploy</h6>
+            {steps[step][0]()}
+
+            <div className="Web2ActionsBTNs">
+                <a disabled={deploying} onClick={back} className="backActionBTN">Back</a>
+                {step !== steps.length - 1 && <a disabled={steps[step][1]()} onClick={() => setStep(step + 1)} className="web2ActionBTN">Next</a>}
+                {step === steps.length - 1 && (deploying ? <Loading /> : <a disabled={steps[step][1]()} onClick={deploy} className="Web3ActionBTN">Deploy</a>)}
+                {deployMessage && <span>{deployMessage}</span>}
+            </div>
         </>
     }
 
@@ -371,15 +474,29 @@ const CreateOrEditFixedInflation = (props) => {
                     <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}/address/${fixedInflationAddress}`}>{fixedInflationAddress}</a>
                 </div>
             </div>
+            {recap && <div className="row">
+                <div className="col-12">
+                    <p>Every <b>{recap.blockInterval}</b>, it will be possible to do {recap.transfers && `${recap.transfers} transfers${recap.swaps && " and "}`} {recap.swaps && `${recap.swaps} swaps`}.
+                    The <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}/address/${extensionAddress}`}>Extension address</a>:</p>
+                    {Object.entries(recap).filter(it => it[1].contract).map(it => it[1]).map(it => <div key={it.address} className="row">
+                        <div className="col-12">
+                            {it.mintAmount && <p>Will Mint {it.mintAmount} {it.symbol} <Coin address={it.address}/>, so make sure it has correct permissions to do this</p>}
+                            {it.mintPercentage && <p>Will Mint {it.mintPercentage}% of {it.symbol} <Coin address={it.address}/> total supply, so make sure it has correct permissions to do this</p>}
+                            {it.transferAmount && <p>Will Transfer {it.transferAmount} {it.symbol} <Coin address={it.address}/>, so make sure it has enough liquidity by sending it</p>}
+                            {it.transferPercentage && <p>Will Transfer {it.transferPercentage}% of {it.symbol} <Coin address={it.address}/> total supply, so make sure it has enough liquidity by sending it</p>}
+                        </div>
+                    </div>)}
+                </div>
+            </div>}
         </>
     }
 
     return (
         !entry ? <Loading /> :
-        fixedInflationAddress ? success() :
-        isNaN(step) ? <CreateOrEditFixedInflationEntry entry={copy(entry)} continue={creationComplete} saveEntry={saveEntry} notFirstTime={notFirstTime} /> :
-        fixedInflationContractAddress ? renderEditEntry() :
-        render()
+            fixedInflationAddress ? success() :
+                isNaN(step) ? <CreateOrEditFixedInflationEntry entry={copy(entry)} continue={creationComplete} saveEntry={saveEntry} notFirstTime={notFirstTime} /> :
+                    fixedInflationContractAddress ? renderEditEntry() :
+                        render()
     );
 }
 
