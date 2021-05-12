@@ -16,7 +16,7 @@ const Create = (props) => {
 
     const captureFile = (event) => {
         event.preventDefault();
-
+        setIcon(null);
         const file = event.target.files[0];
         if (file) {
             if (file.size > 5 * 1000 * 1024 * 1024) return;
@@ -32,11 +32,10 @@ const Create = (props) => {
                     reader.readAsArrayBuffer(file);
                     reader.onloadend = () => {
                         console.log(reader);
-                        setIcon({ buffer: Buffer.from(reader.result) });
+                        setIcon(file);
                     }
                 }
             }
-            
         }
     }
 
@@ -69,8 +68,8 @@ const Create = (props) => {
         }
         setDeployLoading(true);
         try {
-            const ipfsImage = await props.dfoCore.uploadDataToIpfs(icon.buffer);
-            const ipfsImageUrl = `${props.dfoCore.getContextElement('ipfsUrlBase')}/${ipfsImage.path}`;
+            const ipfsImage = await window.uploadToIPFS(icon);
+            const ipfsImageUrl = ipfsImage;
             const metadata = {
                 name: title,
                 description,
@@ -78,8 +77,8 @@ const Create = (props) => {
                 image: ipfsImageUrl,
                 background_color: "#ffffff",
             }
-            const metadataResult = await props.dfoCore.uploadDataToIpfs(JSON.stringify(metadata));
-            const metadataURI = `${props.dfoCore.getContextElement('ipfsUrlBase')}/${metadataResult.path}`;
+            const metadataResult = await window.uploadToIPFS(metadata);
+            const metadataURI = metadataResult;
             const indexContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("IndexABI"), props.dfoCore.getContextElement("indexAddress"));
 
             const gas = await indexContract.methods.mint(title, symbol, metadataURI, tokens.map((token) => token.address), tokens.map((token) => props.dfoCore.toFixed(token.amount * 10**token.decimals).toString()), 0, props.dfoCore.voidEthereumAddress).estimateGas({ from: props.dfoCore.address });

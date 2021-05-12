@@ -393,7 +393,7 @@ export default class DFOCore {
                 topics: [
                     this.web3.utils.sha3('NewIndex(uint256,address,address,uint256)')
                 ],
-                fromBlock: 11806961,
+                fromBlock: this.chainId === 1 ? 11806961 : '0',
                 toBlock : 'latest'
             });
             var map = {};
