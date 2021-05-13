@@ -190,6 +190,9 @@ const Mint = (props) => {
                 } else {
                     setIsHealthyPair(true);
                 }
+                if(props.dfoCore.chainId !== 1) {
+                    setIsHealthyPair(true);
+                }
             }
             setPair(pairIndex);
         } catch (error) {
