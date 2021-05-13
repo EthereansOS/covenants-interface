@@ -168,6 +168,7 @@ export default {
     "dfoProxyAddress": "0xeFAa6370A2ebdC47B12DBfB5a07F91A3182B5684",
     "uniswapAmmAddress": "0x2c56AD11c59A92F467966064121066913b2c1522",
     "WUSDAddress": "0x7c974104df9dd7fb91205ab3d66d15aff1049de8",
+    "WUSDAddressRopsten": "0xb0b0E8d28493b3D65157b40d81BB9365B9243c3a",
     "WUSDPrestoAddress" : "0x1a0107aC208775820B14B998460F1333a145A854",
     "WUSDPrestoAddressRopsten" : "0x7c974104df9dd7fb91205ab3d66d15aff1049de8",
     "WUSDFarmMainAddress": "0x0c0a8F2b7dACB9Efe8b805fd77D08363A74A208A",
