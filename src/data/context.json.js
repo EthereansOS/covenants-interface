@@ -6,6 +6,7 @@ export default {
     "dappVersion": "BETA 0.3",
     "etherscanURL": "https://etherscan.io/",
     "etherscanURLRopsten": "https://ropsten.etherscan.io/",
+    "covenantsURLplain": "https://covenants.eth.link/",
     "uniSwapInfoURL": "https://uniswap.info/token/",
     "uniSwapSwapURLTemplate": "https://app.uniswap.org/#/swap?inputCurrency={0}&outputCurrency={1}",
     "itemSwapURLTemplate": "https://item.eth.link/#/swap?outputCurrency={0}",

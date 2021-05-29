@@ -226,65 +226,7 @@ const CreateOrEditFixedInflation = (props) => {
         setRecap(finalRecap);
     }
 
-    window.setRecapDump = async function setRecapDump(set) {
-        setFixedInflationAddress("");
-        setExtensionAddress("");
-        setRecap(null);
-        if(!set) {
-            return;
-        }
-        await elaborateRecap("1600", [{
-            inputTokenAddress : window.voidEthereumAddress,
-            inputTokenAmount : window.toDecimals("0.13", 18),
-            inputTokenAmountIsPercentage : false,
-            inputTokenAmountIsByMint : false,
-            ammPlugin : window.voidEthereumAddress
-        }, {
-            inputTokenAddress : window.voidEthereumAddress,
-            inputTokenAmount : window.toDecimals("0.13", 18),
-            inputTokenAmountIsPercentage : false,
-            inputTokenAmountIsByMint : false,
-            ammPlugin : props.dfoCore.address
-        }, {
-            inputTokenAddress : "0x7b123f53421b1bf8533339bfbdc7c98aa94163db",
-            inputTokenAmount : window.toDecimals("50", 18),
-            inputTokenAmountIsPercentage : false,
-            inputTokenAmountIsByMint : true,
-            ammPlugin : props.dfoCore.address
-        }, {
-            inputTokenAddress : "0x7b123f53421b1bf8533339bfbdc7c98aa94163db",
-            inputTokenAmount : window.toDecimals("0.13", 18),
-            inputTokenAmountIsPercentage : false,
-            inputTokenAmountIsByMint : true,
-            ammPlugin : props.dfoCore.address
-        }, {
-            inputTokenAddress : "0x7b123f53421b1bf8533339bfbdc7c98aa94163db",
-            inputTokenAmount : window.toDecimals("0.13", 18),
-            inputTokenAmountIsPercentage : false,
-            inputTokenAmountIsByMint : false,
-            ammPlugin : props.dfoCore.address
-        }, {
-            inputTokenAddress : "0x9e78b8274e1d6a76a0dbbf90418894df27cbceb5",
-            inputTokenAmount : window.toDecimals("0.13", 18),
-            inputTokenAmountIsPercentage : false,
-            inputTokenAmountIsByMint : false,
-            ammPlugin : props.dfoCore.address
-        }, {
-            inputTokenAddress : "0x9e78b8274e1d6a76a0dbbf90418894df27cbceb5",
-            inputTokenAmount : window.toDecimals("0.05", 18),
-            inputTokenAmountIsPercentage : true,
-            inputTokenAmountIsByMint : false,
-            ammPlugin : props.dfoCore.address
-        }, {
-            inputTokenAddress : "0x9e78b8274e1d6a76a0dbbf90418894df27cbceb5",
-            inputTokenAmount : window.toDecimals("0.05", 18),
-            inputTokenAmountIsPercentage : true,
-            inputTokenAmountIsByMint : true,
-            ammPlugin : props.dfoCore.address
-        }]);
-        setExtensionAddress(window.voidEthereumAddress);
-        setFixedInflationAddress(window.voidEthereumAddress);
-    };
+    
 
     function elaborateEntry(entry) {
         var elaboratedEntry = {
@@ -464,30 +406,25 @@ const CreateOrEditFixedInflation = (props) => {
 
     function success() {
         return <>
-            <div className="row">
-                <div className="col-12">
-                    <h6>Success!</h6>
-                </div>
+            <div className="youDIDit">
+            <h3 className="SuccessText">Fixed Inflation Contract Deployed!</h3>
+            <p className="SuccessTextNow">And Now?</p>
+            {/*If choosen by wallet*/}
+                {extensionType == 'address' ? <>
+                <p><b>Before attempting to execute the FI remember to send the amount of token needed to the FI extension address: {extensionAddress}</b></p>
+                <p className="SuccessTextLink"><a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}/address/${extensionAddress}`}>Etherscan</a></p>
+                <p className="Disclamerfinish">The first time the FI will fail the execution due to insufficient funds in the extension address, this contract will be automatically deactivated until editing from the host and reactivation manually.<br></br>For more info about hosting a Fixed Inflation contract: <a className="SuccessTextLink" target="_blank" href="https://docs.ethos.wiki/covenants/protocols/inflation">Documentation</a></p>
+                </> : <> 
+                {/*If not choosen by wallet (custom extension contract)*/}
+                <p>Before attempting to execute the FI <b>you first need to do do all of the actions needed to send the amount of token needed to the FI extension address: {extensionAddress}</b></p>
+                <p className="SuccessTextLink"><a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}/address/${extensionAddress}`}>Etherscan</a></p>
+                <p>If you rule the extension via a DFO or a DAO, be sure to vote to grant permissions from its Treasury.</p>
+                <p className="Disclamerfinish">The first time the FI will fail the execution due to insufficient funds in the extension address, this contract will be automatically deactivated until editing from the host and reactivation manually.<br></br>For more info about hosting a Fixed Inflation contract: <a className="SuccessTextLink" target="_blank" href="https://docs.ethos.wiki/covenants/protocols/inflation">Documentation</a></p>
+                </>} 
+            <p>Fixed Inflation Contract Address: {fixedInflationAddress} <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}/address/${fixedInflationAddress}`}>(Etherscan)</a></p>
+            <p className="SuccessTextLink"><a target="_blank" href={"https://covenants.eth.link/#/inflation/dapp/" + fixedInflationAddress}>Fixed Inflation Link</a></p>
+                
             </div>
-            <div className="row">
-                <div className="col-12">
-                    <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}/address/${fixedInflationAddress}`}>{fixedInflationAddress}</a>
-                </div>
-            </div>
-            {recap && <div className="row">
-                <div className="col-12">
-                    <p>Every <b>{recap.blockInterval}</b>, it will be possible to do {recap.transfers && `${recap.transfers} transfers${recap.swaps && " and "}`} {recap.swaps && `${recap.swaps} swaps`}.
-                    The <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}/address/${extensionAddress}`}>Extension address</a>:</p>
-                    {Object.entries(recap).filter(it => it[1].contract).map(it => it[1]).map(it => <div key={it.address} className="row">
-                        <div className="col-12">
-                            {it.mintAmount && <p>Will Mint {it.mintAmount} {it.symbol} <Coin address={it.address}/>, so make sure it has correct permissions to do this</p>}
-                            {it.mintPercentage && <p>Will Mint {it.mintPercentage}% of {it.symbol} <Coin address={it.address}/> total supply, so make sure it has correct permissions to do this</p>}
-                            {it.transferAmount && <p>Will Transfer {it.transferAmount} {it.symbol} <Coin address={it.address}/>, so make sure it has enough liquidity by sending it</p>}
-                            {it.transferPercentage && <p>Will Transfer {it.transferPercentage}% of {it.symbol} <Coin address={it.address}/> total supply, so make sure it has enough liquidity by sending it</p>}
-                        </div>
-                    </div>)}
-                </div>
-            </div>}
         </>
     }
 
