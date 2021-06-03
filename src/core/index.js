@@ -665,7 +665,7 @@ export default class DFOCore {
     }
 
     fromDecimals = (amount, decimals = 18) => {
-        return decimals === 18 ? this.web3.utils.toWei(toFixed(amount), 'ether') : parseFloat(toFixed(amount)) * 10 ** decimals;
+        return window.numberToString(decimals === 18 ? this.web3.utils.toWei(window.numberToString(amount), 'ether') : parseFloat(window.numberToString(amount)) * 10 ** decimals).split('.')[0];
     }
 
     toFixed = (amount) => {
