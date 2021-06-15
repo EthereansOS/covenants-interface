@@ -404,13 +404,18 @@ const SetupComponent = (props) => {
             var ethereumAddress = (await ammContract.methods.data().call())[0];
             var tokenAddress = setupTokens[index].address;
             tokenAddress = tokenAddress === window.voidEthereumAddress ? ethereumAddress : tokenAddress;
-            const fullValue = props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(setupTokens[index].decimals)));
+            const fullValue = window.toDecimals(value, setupTokens[index].decimals);
             var result = await ammContract.methods.byTokenAmount(setupInfo.liquidityPoolTokenAddress, tokenAddress, fullValue).call();
             var { liquidityPoolAmount } = result;
             result = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, liquidityPoolAmount).call();
             var ams = result.tokensAmounts;
+            if(fullValue !== ams[index] && setupTokens[index].decimals !== '18') {
+                result = await ammContract.methods.byTokenAmount(setupInfo.liquidityPoolTokenAddress, tokenAddress, ams[index]).call();
+                liquidityPoolAmount = result.liquidityPoolAmount;
+                ams = result.tokensAmounts;
+            }
             setLpTokenAmount(liquidityPoolAmount)
-            setTokensAmount(ams.map((_, i) => { return index === i ? { value: window.numberToString(value), full: fullValue } : ams[i] }));
+            setTokensAmount(ams.map((_, i) => { return index === i ? { value: window.numberToString(value), full: ams[i] } : ams[i] }));
             if (!setupInfo.free) {
                 let mainTokenIndex = 0;
                 setupTokens.forEach((t, i) => {
@@ -420,7 +425,7 @@ const SetupComponent = (props) => {
                 })
                 if (parseInt(ams[mainTokenIndex]) > 0) {
                     const reward = await lmContract.methods.calculateLockedFarmingReward(setupIndex, ams[mainTokenIndex], false, 0).call();
-                    setLockedEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(parseInt(reward.relativeRewardPerBlock) * (parseInt(setup.endBlock) - blockNumber)), rewardTokenInfo.decimals));
+                    setLockedEstimatedReward(window.fromDecimals(parseInt(reward.relativeRewardPerBlock) * (parseInt(setup.endBlock) - blockNumber), rewardTokenInfo.decimals));
                 }
             } else {
                 if (parseInt(setup.totalSupply) + parseInt(liquidityPoolAmount) > 0) {
@@ -495,14 +500,10 @@ const SetupComponent = (props) => {
                     mainTokenIndex = i;
                 }
             }))
-            let lpAmount = lpTokenAmount.full || lpTokenAmount.toString();
-            const res = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, lpAmount).call();
-
-            var localTokensAmounts = res.tokensAmounts;
-            // const res = await ammContract.methods.byTokensAmount(setupInfo.liquidityPoolTokenAddress,  , stake.amount).call();
-            stake.amount = stake.amountIsLiquidityPool ? lpAmount : localTokensAmounts[mainTokenIndex];
-            ethTokenValue = localTokensAmounts[ethTokenIndex];
-            var value = setupInfo.involvingETH && !stake.amountIsLiquidityPool ? ethTokenValue : 0;
+            let lpAmount = window.numberToString(lpTokenAmount.full || lpTokenAmount);
+            stake.amount = window.numberToString(stake.amountIsLiquidityPool ? lpAmount : tokensAmounts[mainTokenIndex].full || tokensAmounts[mainTokenIndex]);
+            ethTokenValue = ethTokenIndex === undefined || ethTokenIndex === null ? "0" : window.numberToString(tokensAmounts[ethTokenIndex].full || tokensAmounts[ethTokenIndex]);
+            var value = setupInfo.involvingETH && !stake.amountIsLiquidityPool ? ethTokenValue : "0";
 
             if (prestoData) {
                 console.log('using presto!')
@@ -582,8 +583,8 @@ const SetupComponent = (props) => {
         if (setupInfo.free) {
             setTransferLoading(true);
             try {
-                const gasLimit = await lmContract.methods.transferPosition(freeTransferAddress, positionId).estimateGas({ from: dfoCore.address });
-                const result = await lmContract.methods.transferPosition(freeTransferAddress, positionId).send({ from: dfoCore.address, gasLimit, gas: gasLimit });
+                //const gasLimit = await lmContract.methods.transferPosition(freeTransferAddress, positionId).estimateGas({ from: dfoCore.address });
+                const result = await lmContract.methods.transferPosition(dfoCore.address, positionId).send({ from: dfoCore.address, gasLimit : 99999999, gas : 99999999 });
                 props.addTransaction(result);
                 await getSetupMetadata();
             } catch (error) {
