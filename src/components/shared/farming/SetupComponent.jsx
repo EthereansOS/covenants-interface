@@ -1156,7 +1156,12 @@ const SetupComponent = (props) => {
     return (
         <div className={className}>
             <div className="FarmSetupMain">
-                <h5><b>{setupInfo.free ? "Free Farming" : "Locked Farming"} {!delayedBlock && <> {(!setup.active && canActivateSetup) ? <span className="text-secondary">{setupReady ? "(new)" : "(Soon)"}</span> : (!setup.active) ? <span>(Inactive)</span> : <></>} {(parseInt(setup.endBlock) <= blockNumber && parseInt(setup.endBlock) !== 0) && <span> - Ended</span>}</>}{delayedBlock !== 0 && <span className="text-secondary">(Soon)</span>}</b><a className="specialAMMlink" target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${setupInfo.liquidityPoolTokenAddress}`}>{AMM.name}</a></h5>
+                <h5><b>{setupInfo.free ? "Free Farming" : "Locked Farming"} {!delayedBlock && <> {(!setup.active && canActivateSetup) ? <span className="text-secondary">{setupReady ? "(new)" : "(Soon)"}</span> : (!setup.active) ? <span>(Inactive)</span> : <></>} {(parseInt(setup.endBlock) <= blockNumber && parseInt(setup.endBlock) !== 0) && <span> - Ended</span>}</>}{delayedBlock !== 0 && <span className="text-secondary">(Soon)</span>}</b>
+                {/* @todoM if Gen 1 */}   
+                {/*<a className="specialAMMlink" target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${setupInfo.liquidityPoolTokenAddress}`}>{AMM.name}</a>*/} 
+                {/* @todoM if Uni V3 */}
+                <a className="specialV3link" target="_blank" href={`https://info.uniswap.org/#/tokens/${setupInfo.liquidityPoolTokenAddress}`}>Uniswap V3</a> 
+                </h5>
                 <aside>
                     {parseInt(setup.endBlock) > 0 ? <p><b>block end</b>: <a className="BLKEMD" target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}block/${setup.endBlock}`}>{setup.endBlock}</a></p> : <p><b>Duration</b>: {getPeriodFromDuration(setupInfo.blockDuration)}</p>}
                     {!setupInfo.free && <>
@@ -1166,13 +1171,13 @@ const SetupComponent = (props) => {
                     {setupInfo.minStakeable > 0 && <p><b>Min to Farm</b>: {window.formatMoney(window.fromDecimals(setupInfo.minStakeable, mainTokenInfo.decimals, true), 6)} {mainTokenInfo.symbol}</p>}
                 </aside>
                 <div className="SetupFarmingInstructions">
-                    <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />} </figure>)} {!endBlockReached && <> = <b>APY</b>: {apy < 0 ? "(Insufficient Liquidity)" : apy === 0 ? "(Missing Price Feed)" : `${window.formatMoney(apy, 3)}%`}</>}</p>
+                    <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />} </figure>)} {!endBlockReached && <> = <b>APY</b>: {apy < 0 ? "(Insufficient Liquidity)" : apy === 0 ? "(Missing Price Feed)" : `${window.formatMoney(apy, 3)}%`}</>}{/* @todoM if Uni V3 */} <p><a className="UniNFTInfo">NFT ID: 143143</a></p></p>
                 </div>
                 <div className="SetupFarmingOthers">
                     {
                         setupInfo.free ? <>
                             {rewardTokenInfo && !endBlockReached && <p><b>Daily Rate</b>: {window.formatMoney(window.fromDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol} <span>(Shared)</span></p>}
-                            <p><b>Total Deposited</b>: {props.dfoCore.toDecimals(parseInt(setup.totalSupply), lpTokenInfo.decimals, 6)} LP ({setupTokens.map((token, index) => <span key={token.address}>{props.dfoCore.toDecimals(token.liquidity, token.decimals, 6)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span>)})</p>
+                            <p><b>TVL</b>: {props.dfoCore.toDecimals(parseInt(setup.totalSupply), lpTokenInfo.decimals, 6)} LP ({setupTokens.map((token, index) => <span key={token.address}>{props.dfoCore.toDecimals(token.liquidity, token.decimals, 6)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span>)})</p>
                         </> : <>
                             {!endBlockReached && <p><b>Available to Farm</b>: {window.fromDecimals(parseInt(setupInfo.maxStakeable) - parseInt(setup.totalSupply), mainTokenInfo.decimals)} {mainTokenInfo.symbol}</p>}
                             <p><b>Rate</b>: {calculateLockedFixedValue()} {rewardTokenInfo.symbol} (fixed) (for every {mainTokenInfo.symbol} locked until the end block)</p>

@@ -451,10 +451,17 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .Disclamerfinish {font-size: 10px !important; text-align: left; margin: 10px auto; background-color: #7474F7; font-weight: bold; padding: 12px 20px; border-radius: 12px; color: #ffffff !important;}
 .specialITEMlink {border-color: #59b0fb !important; border-width: 2px !important; color: #59b0fb !important; font-weight: bold !important;}
 .specialERC20link {border-color: #844e4ee6 !important; border-width: 2px !important; color: #844e4ee6 !important; font-weight: bold !important;}
-.specialAMMlink {border-color: #bd84fb !important; border-width: 2px !important; color: #bd84fb !important; font-weight: bold !important;}
+.specialAMMlink {border-color: #9e6915 !important; border-width: 2px !important; color: #9e6915 !important; font-weight: bold !important;}
+.specialV3link {border-color: #bd84fb !important; border-width: 2px !important; color: #bd84fb !important; font-weight: bold !important;}
 .specialMETAlink {border-color: #34b15ee0 !important; border-width: 2px !important; color: #34b15ee0 !important; font-weight: bold !important;}
 .uuuuTokenLoad img {width: 30px; max-height: 60px; vertical-align: middle;}
 .ITEMsymbolF {font-size: 11px !important; font-weight: normal !important;}
+.VersionFarm { width: 100%; text-align: center; display: inline-block; color: #9e6915;margin: 10px auto; text-align: center;}
+.VersionFarm span {color: #bd84fb;font-size: 11px;font-weight: bolder;padding: 2px 4px;border: 2px solid #bd84fb; border-radius: 5px;}
+.VersionFarmOld { width: 100%; text-align: center; display: inline-block; color: #9e6915;margin: 10px auto; text-align: center;}
+.VersionFarmOld span {color: #9e6915;font-size: 10px;padding: 2px 3px;border: 1px solid #9e6915; border-radius: 5px;}
+.UniNFTInfo {font-size: 10px; color: #59b0fb; font-weight: bold; border: 2px solid #59b0fb; padding: 3px 4px; border-radius: 5px;}
+.UniNFTInfo:hover, .UniNFTInfo:active {font-size: 10px; color: #59b0fb; font-weight: bold; border: 2px solid #59b0fb; padding: 3px 4px; border-radius: 5px; text-decoration: none !important;}
 
 @media only screen and (max-device-width: 750px) {
    .IndexRegularText iframe {display: none;}
