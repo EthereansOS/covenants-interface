@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { SetupComponent } from '../../../../components';
+import { SetupComponent, SetupComponentGen2 } from '../../../../components';
 
 const Positions = (props) => {
     const [farmingSetups, setFarmingSetups] = useState([]);
@@ -42,8 +42,9 @@ const Positions = (props) => {
                     }
                     {
                         farmingSetups.length > 0 && farmingSetups.map((farmingSetup) => {
+                            var CurrentSetupComponent = farmingSetup.generation === 'gen2' ? SetupComponent : SetupComponentGen2;
                             return (
-                                <SetupComponent className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} key={`${farmingSetup.contract.options.address}-${farmingSetup.setupInfo}`} lmContract={farmingSetup.contract} dfoCore={props.dfoCore} setup={farmingSetup} hasBorder />
+                                <CurrentSetupComponent className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} key={`${farmingSetup.contract.options.address}-${farmingSetup.setupInfo}`} lmContract={farmingSetup.contract} dfoCore={props.dfoCore} setup={farmingSetup} hasBorder />
                             )
                         })
                     }

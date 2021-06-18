@@ -14,11 +14,8 @@ const FarmingComponent = (props) => {
                 <div className="FarmTitle">
                     <figure>
                         { metadata.rewardTokenAddress !== dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${metadata.rewardTokenAddress}`} ><Coin address={metadata.rewardTokenAddress} /></a> : <Coin address={metadata.rewardTokenAddress} />}
-                        {/* If Gen 2 (uniV3) @todoM */}
-                        <p className="VersionFarm"><span>&#129412; V3</span></p>
-                        
-                        {/* If Gen 1 (uniV3) @todoM */}
-                        {/* <p className="VersionFarmOld"><span>Gen 1</span></p> */}
+                        {metadata.generation === 'gen2' && <p className="VersionFarm"><span>&#129412; V3</span></p>}
+                        {metadata.generation === 'gen1' && <p className="VersionFarmOld"><span>Gen 1</span></p>}
                     </figure>
                     <aside>
                         <h6>{window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <b>Farm {metadata.name} {goBack && <span className="ITEMsymbolF"> ({metadata.symbol})</span>}</b>} {!window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <b>Farm {metadata.symbol}</b>} {(metadata.freeSetups.length + metadata.lockedSetups.length === 0 && !metadata.canActivateSetup) ? <span className="text-danger"><b>(inactive)</b></span> : <></> }</h6>

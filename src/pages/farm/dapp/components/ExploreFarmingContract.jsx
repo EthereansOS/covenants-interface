@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useParams } from 'react-router';
-import { FarmingComponent, SetupComponent } from '../../../../components';
+import { FarmingComponent, SetupComponent, SetupComponentGen2 } from '../../../../components';
 import Create from './Create';
 import CreateOrEditFarmingSetups from './CreateOrEditFarmingSetups';
 import { Coin } from '../../../../components/shared';
@@ -26,6 +26,7 @@ const ExploreFarmingContract = (props) => {
     const [newFarmingSetups, setNewFarmingSetups] = useState([]);
     const [totalRewardToSend, setTotalRewardToSend] = useState(0);
     const [cumulativeRewardToSend, setCumulativeRewardToSend] = useState(0);
+    const [CurrentSetupComponent, setCurrentSetupComponent] = useState(SetupComponent);
 
     useEffect(() => {
         if (dfoCore) {
@@ -38,6 +39,8 @@ const ExploreFarmingContract = (props) => {
         setLoading(true);
         try {
             const lmContract = await dfoCore.getContract(dfoCore.getContextElement('FarmMainABI'), address);
+            var generation = 'gen2';
+            setCurrentSetupComponent(generation === 'gen2' ? SetupComponentGen2 : SetupComponent);
             setContract(lmContract);
             const rewardTokenAddress = await lmContract.methods._rewardTokenAddress().call();
             const rewardToken = await dfoCore.getContract(dfoCore.getContextElement("ERC20ABI"), rewardTokenAddress);
@@ -95,6 +98,7 @@ const ExploreFarmingContract = (props) => {
                 farmAddress: `${lmContract.options.address.substring(0, 5)}...${lmContract.options.address.substring(lmContract.options.address.length - 3, lmContract.options.address.length)}`,
                 host: `${host.substring(0, 5)}...${host.substring(host.length - 3, host.length)}`,
                 fullhost: `${host}`,
+                generation
             };
             setMetadata({ contract: lmContract, metadata, isActive: freeSetups + lockedSetups > 0 || canActivateSetup });
         } catch (error) {
@@ -234,7 +238,7 @@ const ExploreFarmingContract = (props) => {
                         {
                             freeSetups.map((farmingSetup) => {
                                 return (
-                                    <SetupComponent key={farmingSetup.setupIndex} className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
+                                    <CurrentSetupComponent key={farmingSetup.setupIndex} className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
                                 )
                             })
                         }
@@ -242,7 +246,7 @@ const ExploreFarmingContract = (props) => {
                         {
                             lockedSetups.map((farmingSetup) => {
                                 return (
-                                    <SetupComponent key={farmingSetup.setupIndex} className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
+                                    <CurrentSetupComponent key={farmingSetup.setupIndex} className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
                                 )
                             })
                         }
@@ -251,7 +255,7 @@ const ExploreFarmingContract = (props) => {
                         {
                             showOldSetups && finishedSetups.map((farmingSetup) => {
                                 return (
-                                    <SetupComponent key={farmingSetup.setupIndex} className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
+                                    <CurrentSetupComponent key={farmingSetup.setupIndex} className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
                                 )
                             })
                         }
@@ -268,6 +272,7 @@ const ExploreFarmingContract = (props) => {
                         onFinish={() => { }}
                         finishButton={setupsLoading ? <Loading /> : <button className="btn btn-primary" onClick={() => updateSetups()}>Update setups</button>}
                         forEdit={true}
+                        generation={metadata.generation}
                     />
                 }
             </div>

@@ -342,7 +342,7 @@ export default class DFOCore {
                 const extensionAddress = await contract.methods._extension().call();
                 const extensionContract = await this.getContract(this.getContextElement("FarmExtensionABI"), extensionAddress);
                 const { host } = await extensionContract.methods.data().call();
-                deployedFarmingContracts.push({ address: farmMainAddress, sender: host });
+                deployedFarmingContracts.push({ address: farmMainAddress, sender: host, generation: 'gen2' });
             }
             return deployedFarmingContracts;
         } catch (error) {
@@ -431,7 +431,7 @@ export default class DFOCore {
                 const extensionAddress = await contract.methods._extension().call();
                 const extensionContract = await this.getContract(this.getContextElement("FarmExtensionABI"), extensionAddress);
                 const { host } = await extensionContract.methods.data().call();
-                deployedFarmingContracts.push({ address: farmMainAddress, sender: host });
+                deployedFarmingContracts.push({ address: farmMainAddress, sender: host, generation : 'gen2' });
             }
             return deployedFarmingContracts.filter((item) => item.sender.toLowerCase() === this.address.toLowerCase());
         } catch (error) {
@@ -569,7 +569,7 @@ export default class DFOCore {
                     const extensionAddress = await contract.methods._extension().call();
                     const extensionContract = await this.getContract(this.getContextElement("FarmExtensionABI"), extensionAddress);
                     const { host } = await extensionContract.methods.data().call();
-                    deployedFarmingContracts.push({ address: farmMainAddress, sender: host });
+                    deployedFarmingContracts.push({ address: farmMainAddress, sender: host, generation : 'gen2' });
                 } catch (error) {
                     console.error(error);
                 }
@@ -602,7 +602,7 @@ export default class DFOCore {
                             try {
                                 const { '0': setup, '1': setupInfo } = await this.loadFarmingSetup(contract, pos.setupIndex);
                                 if (this.isValidPosition(pos) && !this.positions.includes({...setup, contract, setupInfo, setupIndex: pos.setupIndex })) {
-                                    this.positions.push({...setup, contract, setupInfo, setupIndex: pos.setupIndex });
+                                    this.positions.push({...setup, contract, setupInfo, setupIndex: pos.setupIndex, generation : c.generation });
                                     found.push(pos.setupIndex);
                                 }
                             } catch (error) {
@@ -622,7 +622,7 @@ export default class DFOCore {
                                 const { '0': setup, '1': setupInfo } = await this.loadFarmingSetup(contract, setupIndex);
                                 const balance = await farmTokenCollection.methods.balanceOf(this.address, objectId).call();
                                 if (parseInt(balance) > 0) {
-                                    this.positions.push({...setup, contract, setupInfo, setupIndex })
+                                    this.positions.push({...setup, contract, setupInfo, setupIndex, generation : c.generation })
                                     found.push(setupIndex);
                                 }
                             }

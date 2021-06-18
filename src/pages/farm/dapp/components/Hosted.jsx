@@ -69,6 +69,7 @@ const Hosted = (props) => {
                             farmAddress: `${contract.options.address.substring(0, 5)}...${contract.options.address.substring(contract.options.address.length - 3, contract.options.address.length)}`,
                             host: `${host.substring(0, 5)}...${host.substring(host.length - 3, host.length)}`,
                             fullhost: `${host}`,
+                            generation : c.generation
                         };
                         return { contract, metadata, isActive: freeSetups.length + lockedSetups.length > 0 || canActivateSetup };
                     } catch (error) {

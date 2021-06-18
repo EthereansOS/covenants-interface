@@ -95,6 +95,7 @@ const Explore = (props) => {
                             fromDfoReady,
                             host: `${host.substring(0, 5)}...${host.substring(host.length - 3, host.length)}`,
                             fullhost: `${host}`,
+                            generation : c.generation
                         };
                         return { contract, metadata, isActive: freeSetups.length + lockedSetups.length > 0 || canActivateSetup };
                     } catch (error) {
