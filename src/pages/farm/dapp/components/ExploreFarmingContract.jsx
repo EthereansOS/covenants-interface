@@ -27,6 +27,7 @@ const ExploreFarmingContract = (props) => {
     const [totalRewardToSend, setTotalRewardToSend] = useState(0);
     const [cumulativeRewardToSend, setCumulativeRewardToSend] = useState(0);
     const [CurrentSetupComponent, setCurrentSetupComponent] = useState(SetupComponent);
+    const [generation, setGeneration] = useState('gen1');
 
     useEffect(() => {
         if (dfoCore) {
@@ -39,6 +40,7 @@ const ExploreFarmingContract = (props) => {
         setLoading(true);
         try {
             var generation = await props.dfoCore.getFarmingContractGenerationByAddress(address);
+            setGeneration(generation);
             const lmContract = await dfoCore.getContract(dfoCore.getContextElement(generation === 'gen2' ? "FarmMainGen2ABI" : 'FarmMainGen1ABI'), address);
             setCurrentSetupComponent(generation === 'gen2' ? SetupComponentGen2 : SetupComponent);
             setContract(lmContract);
@@ -242,7 +244,7 @@ const ExploreFarmingContract = (props) => {
                                 )
                             })
                         }
-                        {lockedSetups.length > 0 && <h3>Locked setups</h3>}
+                        {lockedSetups.length > 0 && <h3>{generation === "gen2" ? "Setups" : "Locked setups"}</h3>}
                         {
                             lockedSetups.map((farmingSetup) => {
                                 return (

@@ -219,17 +219,17 @@ const CreateOrEditFarmingSetup = (props) => {
         return (
             <div>
                 <div className="InputTokensRegular">
-                    <h6>tick Upper</h6>
-                    <p className="BreefRecapB">Set the tick Upper</p>
+                    <h6>Min Tick</h6>
+                    <p className="BreefRecapB">Set the Lower Tick</p>
                     <div className="InputTokenRegular">
-                        <input type="number" value={tickUpper} onChange={e => settickUpper(parseInt(e.currentTarget.value))}/>
+                        <input type="number" value={tickLower} onChange={e => settickLower(parseInt(e.currentTarget.value))}/>
                     </div>
                 </div>
                 <div className="InputTokensRegular">
-                    <h6>tick Lower</h6>
-                    <p className="BreefRecapB">Set the tick Lower</p>
+                    <h6>Max Tick</h6>
+                    <p className="BreefRecapB">Set the Upper Tick</p>
                     <div className="InputTokenRegular">
-                        <input type="number" value={tickLower} onChange={e => settickLower(parseInt(e.currentTarget.value))}/>
+                        <input type="number" value={tickUpper} onChange={e => settickUpper(parseInt(e.currentTarget.value))}/>
                     </div>
                 </div>
                 <div className="Web2ActionsBTNs">

@@ -37,6 +37,7 @@ export default {
     "ipfsUrlTemplates": ["ipfs://ipfs/", "ipfs://"],
     "ipfsUrlChanger": "https://gateway.ipfs.io/ipfs/",
     "ipfsUrlBase": "https://ipfs.io/ipfs",
+    "uniswapV3PoolURLTemplate" : "https://info.uniswap.org/#/pools/{0}",
     "deploySearchStart": 12071533,
     "deploySearchStartRopsten": 9851551,
     "blockSearchSection": 0,

@@ -221,7 +221,7 @@ const Create = (props) => {
             const farmFactory = await props.dfoCore.getContract(props.dfoCore.getContextElement("FarmFactoryABI"), factoryAddress);
             const types = genConversion[generation].initTypes;
             console.log(deployData);
-            const encodedSetups = abi.encode([`tuple(${genConversion[generation].farmingSetupInfoTypes.join(',')})[]`], [setups]);
+            const encodedSetups = abi.encode([`tuple(${genConversion[generation].setupInfoTypes.join(',')})[]`], [setups]);
             const params = genConversion[generation].getInitArray(extensionAddress, extensionInitData, rewardTokenAddress, encodedSetups);
             console.log(params)
             console.log(extensionInitData);
