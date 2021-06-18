@@ -122,7 +122,8 @@ const SetupComponentGen2 = (props) => {
     const getSetupMetadata = async () => {
         setLoading(true);
         try {
-            const { '0': farmSetup, '1': farmSetupInfo } = await props.dfoCore.loadFarmingSetup(lmContract, setupIndex);
+            var { '0': farmSetup, '1': farmSetupInfo } = await props.dfoCore.loadFarmingSetup(lmContract, setupIndex);
+            farmSetupInfo = {... farmSetupInfo, free : true};
             setSetup(farmSetup);
             setSetupInfo(farmSetupInfo);
             setShowPrestoError(false);

@@ -67,7 +67,8 @@ const ExploreFarmingContract = (props) => {
 
             const res = [];
             for (let i = 0; i < setups.length; i++) {
-                const { '0': setup, '1': setupInfo } = await props.dfoCore.loadFarmingSetup(lmContract, i);
+                var { '0': setup, '1': setupInfo } = await props.dfoCore.loadFarmingSetup(lmContract, i);
+                setupInfo = {...setupInfo, free : setupInfo.free || generation === 'gen2', generation}
                 if (!canActivateSetup) {
                     canActivateSetup = parseInt(setupInfo.renewTimes) > 0 && !setup.active && parseInt(setupInfo.lastSetupIndex) === parseInt(i);
                 }
