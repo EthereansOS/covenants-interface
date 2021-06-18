@@ -38,8 +38,8 @@ const ExploreFarmingContract = (props) => {
     const getContractMetadata = async () => {
         setLoading(true);
         try {
-            const lmContract = await dfoCore.getContract(dfoCore.getContextElement(props.generation === 'gen2' ? "FarmMainGen2ABI" : 'FarmMainGen1ABI'), address);
-            var generation = 'gen2';
+            var generation = await props.dfoCore.getFarmingContractGenerationByAddress(address);
+            const lmContract = await dfoCore.getContract(dfoCore.getContextElement(generation === 'gen2' ? "FarmMainGen2ABI" : 'FarmMainGen1ABI'), address);
             setCurrentSetupComponent(generation === 'gen2' ? SetupComponentGen2 : SetupComponent);
             setContract(lmContract);
             const rewardTokenAddress = await lmContract.methods._rewardTokenAddress().call();
@@ -49,7 +49,7 @@ const ExploreFarmingContract = (props) => {
             const rewardTokenDecimals = await rewardToken.methods.decimals().call();
             setToken({ name: rewardTokenName, symbol: rewardTokenSymbol, address: rewardTokenAddress, decimals: rewardTokenDecimals });
             const extensionAddress = await lmContract.methods._extension().call();
-            const extensionContract = await dfoCore.getContract(dfoCore.getContextElement(props.generation === 'gen2' ? "FarmExtensionGen2ABI" : 'FarmExtensionGen1ABI'), extensionAddress);
+            const extensionContract = await dfoCore.getContract(dfoCore.getContextElement(generation === 'gen2' ? "FarmExtensionGen2ABI" : 'FarmExtensionGen1ABI'), extensionAddress);
             setExtension(extensionContract);
             const { host, byMint } = await extensionContract.methods.data().call();
             const isHost = host.toLowerCase() === dfoCore.address.toLowerCase();

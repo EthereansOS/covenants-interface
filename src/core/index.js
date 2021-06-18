@@ -323,9 +323,17 @@ export default class DFOCore {
     /**
      * retrieves all the deployed liquidity mining contracts from the given factory address.
      */
-    loadDeployedFarmingContracts = async(factoryAddress) => {
+    loadDeployedFarmingContracts = async(factoryAddress, generation) => {
+        if(!generation) {
+            var contracts = [];
+            var c = await this.loadDeployedFarmingContracts(undefined, 'gen2');
+            c && contracts.push(...c);
+            c = await this.loadDeployedFarmingContracts(undefined, 'gen1');
+            c && contracts.push(...c);
+            return contracts;
+        }
         try {
-            if (!factoryAddress) factoryAddress = this.getContextElement("farmFactoryAddress");
+            if (!factoryAddress) factoryAddress = this.getContextElement(generation === 'gen2' ? "farmGen2FactoryAddress" : "farmFactoryAddress");
             const deployedFarmingContracts = [];
             const events = await window.getLogs({
                 address: factoryAddress,
@@ -338,11 +346,11 @@ export default class DFOCore {
             for (let i = 0; i < events.length; i++) {
                 const event = events[i];
                 const farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
-                const contract = await this.getContract(this.getContextElement("FarmMainGen1ABI"), farmMainAddress);
+                const contract = await this.getContract(this.getContextElement(generation === 'gen2' ? "FarmMainGen2ABI" : "FarmMainGen1ABI"), farmMainAddress);
                 const extensionAddress = await contract.methods._extension().call();
-                const extensionContract = await this.getContract(this.getContextElement("FarmExtensionGen1ABI"), extensionAddress);
+                const extensionContract = await this.getContract(this.getContextElement(generation === 'gen2' ? "FarmExtensionGen2ABI" : "FarmExtensionGen1ABI"), extensionAddress);
                 const { host } = await extensionContract.methods.data().call();
-                deployedFarmingContracts.push({ address: farmMainAddress, sender: host, generation: 'gen2' });
+                deployedFarmingContracts.push({ address: farmMainAddress, sender: host, generation });
             }
             return deployedFarmingContracts;
         } catch (error) {
@@ -412,9 +420,35 @@ export default class DFOCore {
         }
     }
 
-    getHostedFarmingContracts = async(factoryAddress) => {
+    getFarmingContractGenerationByAddress = async address => {
+        var gen2FarmingFactoryAddress = this.getContextElement("farmGen2FactoryAddress");
+        var gen1FarmingFactoryAddress = this.getContextElement("farmFactoryAddress");
+        var log = await window.getLogs({
+            address: [
+                gen2FarmingFactoryAddress,
+                gen1FarmingFactoryAddress
+            ],
+            topics: [
+                this.web3.utils.sha3('FarmMainDeployed(address,address,bytes)'),
+                this.web3.eth.abi.encodeParameter("address", address)
+            ],
+            fromBlock: 0,
+            toBlock: 'latest'
+        });
+        return log[0].address.toLowerCase() === gen2FarmingFactoryAddress ? "gen2" : "gen1";
+    }
+
+    getHostedFarmingContracts = async(factoryAddress, generation) => {
+        if(!generation) {
+            var contracts = [];
+            var c = await this.getHostedFarmingContracts(undefined, 'gen2');
+            c && contracts.push(...c);
+            c = await this.getHostedFarmingContracts(undefined, 'gen1');
+            c && contracts.push(...c);
+            return contracts;
+        }
         try {
-            if (!factoryAddress) factoryAddress = this.getContextElement("farmFactoryAddress");
+            if (!factoryAddress) factoryAddress = this.getContextElement(generation === 'gen2' ? "farmGen2FactoryAddress" : "farmFactoryAddress");
             const deployedFarmingContracts = [];
             const events = await window.getLogs({
                 address: factoryAddress,
@@ -427,11 +461,11 @@ export default class DFOCore {
             for (let i = 0; i < events.length; i++) {
                 const event = events[i];
                 const farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
-                const contract = await this.getContract(this.getContextElement("FarmMainGen1ABI"), farmMainAddress);
+                const contract = await this.getContract(this.getContextElement(generation === 'gen2' ? "FarmMainGen2ABI" : "FarmMainGen1ABI"), farmMainAddress);
                 const extensionAddress = await contract.methods._extension().call();
-                const extensionContract = await this.getContract(this.getContextElement("FarmExtensionGen1ABI"), extensionAddress);
+                const extensionContract = await this.getContract(this.getContextElement(generation === 'gen2' ? "FarmExtensionGen2ABI" : "FarmExtensionGen1ABI"), extensionAddress);
                 const { host } = await extensionContract.methods.data().call();
-                deployedFarmingContracts.push({ address: farmMainAddress, sender: host, generation : 'gen2' });
+                deployedFarmingContracts.push({ address: farmMainAddress, sender: host, generation });
             }
             return deployedFarmingContracts.filter((item) => item.sender.toLowerCase() === this.address.toLowerCase());
         } catch (error) {
@@ -548,10 +582,17 @@ export default class DFOCore {
         return hasGasMultiplierToken ? parseInt(gasLimit) * parseFloat(this.getContextElement("gasMultiplier")) : gasLimit;
     }
 
-    loadPositions = async(factoryAddress) => {
+    loadPositions = async(factoryAddress, generation) => {
+        if(!generation) {
+            var p = [];
+            await this.loadPositions(undefined, 'gen2');
+            this.positions && p.push(...this.positions);
+            await this.loadPositions(undefined, 'gen1');
+            this.positions && p.push(...this.positions);
+            this.positions = p;
+        }
         try {
-
-            if (!factoryAddress) factoryAddress = this.getContextElement("farmFactoryAddress");
+            if (!factoryAddress) factoryAddress = this.getContextElement(generation === 'gen2' ? "farmGen2FactoryAddress" : "farmFactoryAddress");
             const deployedFarmingContracts = [];
             const events = await window.getLogs({
                 address: factoryAddress,
@@ -565,11 +606,11 @@ export default class DFOCore {
                 const event = events[i];
                 const farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
                 try {
-                    const contract = await this.getContract(this.getContextElement("FarmMainGen1ABI"), farmMainAddress);
+                    const contract = await this.getContract(this.getContextElement(generation === 'gen2' ? "FarmMainGen2ABI" : "FarmMainGen1ABI"), farmMainAddress);
                     const extensionAddress = await contract.methods._extension().call();
-                    const extensionContract = await this.getContract(this.getContextElement("FarmExtensionGen1ABI"), extensionAddress);
+                    const extensionContract = await this.getContract(this.getContextElement(generation === 'gen2' ? "FarmExtensionGen2ABI" : "FarmExtensionGen1ABI"), extensionAddress);
                     const { host } = await extensionContract.methods.data().call();
-                    deployedFarmingContracts.push({ address: farmMainAddress, sender: host, generation : 'gen2' });
+                    deployedFarmingContracts.push({ address: farmMainAddress, sender: host, generation });
                 } catch (error) {
                     console.error(error);
                 }

@@ -24,7 +24,7 @@ const Explore = (props) => {
             const mappedContracts = await Promise.all(
                 contracts.map(async (c) => { 
                     try {
-                        const contract = await dfoCore.getContract(dfoCore.getContextElement(props.generation === 'gen2' ? "FarmMainGen2ABI" : 'FarmMainGen1ABI'), c.address)
+                        const contract = await dfoCore.getContract(dfoCore.getContextElement(c.generation === 'gen2' ? "FarmMainGen2ABI" : 'FarmMainGen1ABI'), c.address)
                         const rewardTokenAddress = await contract.methods._rewardTokenAddress().call();
                         const rewardTokenIsEth = rewardTokenAddress === dfoCore.voidEthereumAddress; 
                         const rewardToken = !rewardTokenIsEth ? await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), rewardTokenAddress) : null;
@@ -32,7 +32,7 @@ const Explore = (props) => {
                         const symbol = !rewardTokenIsEth ? await rewardToken.methods.symbol().call() : 'ETH';
                         const decimals = !rewardTokenIsEth ? await rewardToken.methods.decimals().call() : 18;
                         const extensionAddress = await contract.methods._extension().call();
-                        const extensionContract = await dfoCore.getContract(dfoCore.getContextElement(props.generation === 'gen2' ? "FarmExtensionGen2ABI" : 'FarmExtensionGen1ABI'), extensionAddress);
+                        const extensionContract = await dfoCore.getContract(dfoCore.getContextElement(c.generation === 'gen2' ? "FarmExtensionGen2ABI" : 'FarmExtensionGen1ABI'), extensionAddress);
                         const extensionBalance = !rewardTokenIsEth ? await rewardToken.methods.balanceOf(extensionAddress).call() : await dfoCore.web3.eth.getBalance(extensionAddress);
                         const { host, byMint } = await extensionContract.methods.data().call();
                         const blockNumber = await dfoCore.getBlockNumber();
