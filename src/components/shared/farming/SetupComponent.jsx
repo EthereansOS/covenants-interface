@@ -197,7 +197,7 @@ const SetupComponent = (props) => {
             setWithdrawOpen(false);
         }
         const extensionAddress = await lmContract.methods._extension().call();
-        const extContract = await dfoCore.getContract(dfoCore.getContextElement("FarmExtensionABI"), extensionAddress);
+        const extContract = await dfoCore.getContract(dfoCore.getContextElement(props.generation === 'gen2' ? "FarmExtensionGen2ABI" : "FarmExtensionGen1ABI"), extensionAddress);
         reset && setExtensionContract(extContract);
         const rewardTokenAddress = await lmContract.methods._rewardTokenAddress().call();
         const isEth = rewardTokenAddress === dfoCore.voidEthereumAddress;

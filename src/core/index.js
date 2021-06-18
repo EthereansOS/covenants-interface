@@ -338,9 +338,9 @@ export default class DFOCore {
             for (let i = 0; i < events.length; i++) {
                 const event = events[i];
                 const farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
-                const contract = await this.getContract(this.getContextElement("FarmMainABI"), farmMainAddress);
+                const contract = await this.getContract(this.getContextElement("FarmMainGen1ABI"), farmMainAddress);
                 const extensionAddress = await contract.methods._extension().call();
-                const extensionContract = await this.getContract(this.getContextElement("FarmExtensionABI"), extensionAddress);
+                const extensionContract = await this.getContract(this.getContextElement("FarmExtensionGen1ABI"), extensionAddress);
                 const { host } = await extensionContract.methods.data().call();
                 deployedFarmingContracts.push({ address: farmMainAddress, sender: host, generation: 'gen2' });
             }
@@ -427,9 +427,9 @@ export default class DFOCore {
             for (let i = 0; i < events.length; i++) {
                 const event = events[i];
                 const farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
-                const contract = await this.getContract(this.getContextElement("FarmMainABI"), farmMainAddress);
+                const contract = await this.getContract(this.getContextElement("FarmMainGen1ABI"), farmMainAddress);
                 const extensionAddress = await contract.methods._extension().call();
-                const extensionContract = await this.getContract(this.getContextElement("FarmExtensionABI"), extensionAddress);
+                const extensionContract = await this.getContract(this.getContextElement("FarmExtensionGen1ABI"), extensionAddress);
                 const { host } = await extensionContract.methods.data().call();
                 deployedFarmingContracts.push({ address: farmMainAddress, sender: host, generation : 'gen2' });
             }
@@ -565,9 +565,9 @@ export default class DFOCore {
                 const event = events[i];
                 const farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
                 try {
-                    const contract = await this.getContract(this.getContextElement("FarmMainABI"), farmMainAddress);
+                    const contract = await this.getContract(this.getContextElement("FarmMainGen1ABI"), farmMainAddress);
                     const extensionAddress = await contract.methods._extension().call();
-                    const extensionContract = await this.getContract(this.getContextElement("FarmExtensionABI"), extensionAddress);
+                    const extensionContract = await this.getContract(this.getContextElement("FarmExtensionGen1ABI"), extensionAddress);
                     const { host } = await extensionContract.methods.data().call();
                     deployedFarmingContracts.push({ address: farmMainAddress, sender: host, generation : 'gen2' });
                 } catch (error) {
@@ -576,7 +576,7 @@ export default class DFOCore {
             }
             this.positions = [];
             await Promise.all(deployedFarmingContracts.map(async(c) => {
-                const contract = await this.getContract(this.getContextElement("FarmMainABI"), c.address);
+                const contract = await this.getContract(this.getContextElement("FarmMainGen1ABI"), c.address);
                 const farmTokenCollectionAddress = await contract.methods._farmTokenCollection().call();
                 let farmTokenCollection = null;
                 if (farmTokenCollectionAddress !== this.voidEthereumAddress) {

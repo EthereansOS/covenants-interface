@@ -22,13 +22,13 @@ const Hosted = (props) => {
             const mappedContracts = await Promise.all(
                 hostedContracts.map(async (c) => {
                     try {
-                        const contract = await dfoCore.getContract(dfoCore.getContextElement('FarmMainABI'), c.address)
+                        const contract = await dfoCore.getContract(dfoCore.getContextElement(props.generation === 'gen2' ? "FarmMainGen2ABI" : 'FarmMainGen1ABI'), c.address)
                         const rewardTokenAddress = await contract.methods._rewardTokenAddress().call();
                         const rewardToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), rewardTokenAddress);
                         const symbol = await rewardToken.methods.symbol().call();
                         const decimals = await rewardToken.methods.decimals().call();
                         const extensionAddress = await contract.methods._extension().call();
-                        const extensionContract = await dfoCore.getContract(dfoCore.getContextElement('FarmExtensionABI'), extensionAddress);
+                        const extensionContract = await dfoCore.getContract(dfoCore.getContextElement(props.generation === 'gen2' ? "FarmExtensionGen2ABI" : 'FarmExtensionGen1ABI'), extensionAddress);
                         const { host, byMint } = await extensionContract.methods.data().call();
                         const blockNumber = await dfoCore.getBlockNumber();
                         const setups = await contract.methods.setups().call();
