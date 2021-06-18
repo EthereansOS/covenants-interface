@@ -209,17 +209,17 @@ a:disabled {cursor:wait !important;}
 .FarmSetupMain aside {width: 37%; display: inline-block;vertical-align: top; margin-left: 2%;}
 .FarmSetupMain aside p {font-size: 12px; width: 100%; text-align: right; margin-bottom: 5px;}
 .SetupFarmingInstructions {width: 100%; display: inline-block; margin-top: 10px; text-align: left;}
-.SetupFarmingInstructions p {display: inline-block; font-size: 16px; margin-bottom: 2px; width: 66%; margin-left: 2%;}
+.SetupFarmingInstructions p {display: inline-block; font-size: 14px; margin-bottom: 2px; width: 42%; margin-left: 2%;}
 .SetupFarmingInstructions p span {font-size: 12px;}
-.SetupFarmingInstructions figure {display: inline-block; margin-right: 5px;}
-.SetupFarmingInstructions img {width: 40px; height: auto;}
+.SetupFarmingInstructions figure {display: inline-block; margin-right: 5px; margin-block-start: 0em;margin-block-end: 0em;margin-inline-start: 0px;margin-inline-end: 0px;}
+.SetupFarmingInstructions img {height: auto;width: 35px;}
 .SetupFarmingOthers {display: inline-block; width: 100%; margin: 10px 0%;vertical-align: middle;}
 .SetupFarmingOthers p {font-size: 13px; margin: 5px; display: inline-block;}
 .SetupFarmingOthers p span {font-size: 11px;}
 .YourFarmingPositions {width: 100%; border-top: 1px solid; padding-top: 10px; text-align: center;}
 .YourFarmingPositions p {font-size: 13px; margin: 5px; display: inline-block; width: 100%;}
 .YourFarmingPositions .web2ActionBTN, .YourFarmingPositions .backActionBTN {margin: 5px;}
-.FarmYou {width: 48%; display: inline-block; margin-right: 2%; vertical-align: top; text-align: center;}
+.FarmYou {width: 48%; display: inline-block; margin-right: 2%; vertical-align: top; text-align: left;}
 .Farmed {width: 48%; display: inline-block;vertical-align: top; text-align: right;}
 .SetupFarmingBotton {display: inline-block; width: 15%; vertical-align: middle; text-align: left;}
 .InflationContract h4 {font-size: 20px; display: inline-block; width: 70%; font-weight: bold; vertical-align: middle; margin-bottom: 20px;}
@@ -452,7 +452,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .specialITEMlink {border-color: #59b0fb !important; border-width: 2px !important; color: #59b0fb !important; font-weight: bold !important;}
 .specialERC20link {border-color: #844e4ee6 !important; border-width: 2px !important; color: #844e4ee6 !important; font-weight: bold !important;}
 .specialAMMlink {border-color: #9e6915 !important; border-width: 2px !important; color: #9e6915 !important; font-weight: bold !important;}
-.specialV3link {border-color: #bd84fb !important; border-width: 2px !important; color: #bd84fb !important; font-weight: bold !important;}
+.specialV3link {border-color: #bd84fb !important; border-width: 2px !important; color: #bd84fb !important; font-weight: bold !important; border: 2px solid #bd84fb !important;}
 .specialMETAlink {border-color: #34b15ee0 !important; border-width: 2px !important; color: #34b15ee0 !important; font-weight: bold !important;}
 .uuuuTokenLoad img {width: 30px; max-height: 60px; vertical-align: middle;}
 .ITEMsymbolF {font-size: 11px !important; font-weight: normal !important;}
@@ -460,8 +460,37 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .VersionFarm span {color: #bd84fb;font-size: 11px;font-weight: bolder;padding: 2px 4px;border: 2px solid #bd84fb; border-radius: 5px;}
 .VersionFarmOld { width: 100%; text-align: center; display: inline-block; color: #9e6915;margin: 10px auto; text-align: center;}
 .VersionFarmOld span {color: #9e6915;font-size: 10px;padding: 2px 3px;border: 1px solid #9e6915; border-radius: 5px;}
-.UniNFTInfo {font-size: 10px; color: #59b0fb; font-weight: bold; border: 2px solid #59b0fb; padding: 3px 4px; border-radius: 5px;}
-.UniNFTInfo:hover, .UniNFTInfo:active {font-size: 10px; color: #59b0fb; font-weight: bold; border: 2px solid #59b0fb; padding: 3px 4px; border-radius: 5px; text-decoration: none !important;}
+.farmInfoCurve {background-color: rgb(247, 248, 250); display: inline-block; margin-left: 5% !important; padding: 2% 2%; vertical-align: middle; border-radius: 8px;width: 52% !important;margin-bottom: 15px !important;box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px, rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 2}
+.UniNFTInfo {font-size: 10px; color: #59b0fb; font-weight: bold; border: 2px solid #59b0fb; padding: 2px 4px; border-radius: 5px; display: inline-block; margin-left: 5px;}
+.UniNFTInfo:hover, .UniNFTInfo:active {color: #59b0fb; font-weight: bold; border: 2px solid #59b0fb;  text-decoration: none !important;}
+.MAinTokensel {display: inline-block; margin: 5px auto; width: 100% !important; vertical-align: middle; font-size: 12px ​!important; font-weight: bold;}
+.FarmV3APY {display: inline-block; margin: 5px auto; width: 50% !important;}
+.penguin .farmInfoCurve {background-color: rgb(33, 36, 41)}
+.farmInfoCurveL {width: 45% !important; display: inline-block; vertical-align: middle !important;}
+.farmInfoCurveR {width: 45% !important; display: inline-block; margin-left: 5% !important; vertical-align: middle !important;}
+.PriceRangeInfoFarm {width: 100% !important; display: block; font-size: 12px !important; text-align: right;}
+.InRangeV3 {padding: 2px 4px; font-size: 10px;display: inline-block;}
+.UniV3CurveView {display: block; width: 100%; margin-top: 10px; padding: 3%;}
+.UniV3CurveViewCurv {width: 95%; height: 30px; margin-bottom: 30px; border-bottom: 1px solid #c1c1c1; position: relative;}
+.CircleLeftV3Curve, .CircleRightV3Curve {position: absolute; bottom: -5px; background-color: transparent; border: 1px solid #c1c1c1;; height: 8px; width: 8px; border-radius: 100%;}
+.CircleLeftV3Curve {left: -7px;}
+.CircleRightV3Curve {right: -7px;}
+.CircleLeftV3CurvePrice, .CircleRightV3CurvePrice {font-size: 12px;position: absolute; bottom: -30px;}
+.CircleLeftV3CurvePrice {left: -7px;}
+.CircleRightV3CurvePrice {right: -7px;}
+.CircleActualPriceV3 {display: inline-block; text-align: center; position: absolute;left: 50%;bottom: -14px;}
+.CircleRightV3Actual {display: inline-block;height: 16px; width: 16px; border-radius: 100%;background-color: #59b0fb; position: relative;margin-left: -8px;}
+.CircleRightV3ActualPrice {display: inline-block;font-size: 12px; font-weight: bold;position: absolute; top: -20px;left: 0px;}
+.SetupFarmingInstructionsV3 {width: 42%; display: inline-block;vertical-align: middle;}
+.V3PairThings {width: 100% !important;}
+.SetupFarmingInstructionsV3 .specialV3link {font-size: 11px !important; font-weight: normal !important; border-radius: 4px !important; padding: 3px 7px; display: inline-block;}
+.SetupFarmingInstructionsV3 p {width: auto !important;}
+.UniPoolFeeInfo {font-size: 10px; color: #59b0fb; font-weight: bold; border: 2px solid #59b0fb;padding: 2px 4px; border-radius: 5px; display: inline-block; margin-left: 5px;}
+.UniPoolFeeInfo:hover, .UniPoolFeeInfo:active {color: #59b0fb; font-weight: bold; border: 2px solid #59b0fb;  text-decoration: none !important;}
+.BlockInfoV3 {font-size: 11px !important; width: 100%; display: block !important;margin: 8px 0;}
+.UniV3TVLFIV {width: 100%; margin: 5px auto; text-align: center; font-size: 10px !important; display: inline-block;}
+.UniV3TVLFIV span {font-size: 10px !important;}
+.farmInfoCurve p {margin-left: 0 !important;}
 
 @media only screen and (max-device-width: 750px) {
    .IndexRegularText iframe {display: none;}
