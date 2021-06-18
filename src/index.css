@@ -487,10 +487,17 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .SetupFarmingInstructionsV3 p {width: auto !important;}
 .UniPoolFeeInfo {font-size: 10px; color: #59b0fb; font-weight: bold; border: 2px solid #59b0fb;padding: 2px 4px; border-radius: 5px; display: inline-block; margin-left: 5px;}
 .UniPoolFeeInfo:hover, .UniPoolFeeInfo:active {color: #59b0fb; font-weight: bold; border: 2px solid #59b0fb;  text-decoration: none !important;}
-.BlockInfoV3 {font-size: 11px !important; width: 100%; display: block !important;margin: 8px 0;}
+.BlockInfoV3 {font-size: 11px !important; width: 100%; display: block !important;margin: 2px 0 2px 4px!important;}
+.BlockInfoV3B {font-size: 13px !important; width: 100%; display: block !important;margin: 5px 0 10px 4px !important;}
 .UniV3TVLFIV {width: 100%; margin: 5px auto; text-align: center; font-size: 10px !important; display: inline-block;}
 .UniV3TVLFIV span {font-size: 10px !important;}
 .farmInfoCurve p {margin-left: 0 !important;}
+.SetupFarmingInstructionsV3 .web2ActionBTN, .SetupFarmingInstructionsV3 .backActionBTN {display: inline-block; margin: 10px auto; width: 90%; text-align: center; border: 1px solid #9e6915;}
+.FarmSetupV2 {width: 100%;padding: 20px;border: 1px solid #e0e2e6;border-radius: 15px;}
+.TokenFarmV3InfoBox {width: 49%; display: inline-block;vertical-align: middle;}
+.TokenFarmV3InfoBox img {width: 25px !important;}
+.TokenFarmV3InfoBox span {font-size: 13px; font-weight: bold; color: #5f5b53;}
+.penguin .TokenFarmV3InfoBox span {color: #c1c1c1;}
 
 @media only screen and (max-device-width: 750px) {
    .IndexRegularText iframe {display: none;}

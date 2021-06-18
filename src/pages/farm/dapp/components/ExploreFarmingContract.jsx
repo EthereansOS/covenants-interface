@@ -241,7 +241,7 @@ const ExploreFarmingContract = (props) => {
                         {
                             freeSetups.map((farmingSetup) => {
                                 return (
-                                    <CurrentSetupComponent key={farmingSetup.setupIndex} className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
+                                    <CurrentSetupComponent key={farmingSetup.setupIndex} className={generation === "gen2" ? "FarmSetupV2" : "FarmSetup"} setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
                                 )
                             })
                         }

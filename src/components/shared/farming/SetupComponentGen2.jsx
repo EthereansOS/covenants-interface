@@ -1135,12 +1135,64 @@ const SetupComponentGen2 = (props) => {
             <div className="FarmSetupMain">
                 <div className="SetupFarmingInstructions">
                     <div className="SetupFarmingInstructionsV3">
-                        <p className="V3PairThings">{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />} </figure>)} {!endBlockReached && <> = <b>APY</b>: {apy < 0 ? "(Insufficient Liquidity)" : apy === 0 ? "(Missing Price Feed)" : `${window.formatMoney(apy, 3)}%`}</>}</p>
-                        {(!open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Farm</a>}
-                        {(open) && <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>}
+                        {setupTokens.map((token, i) => <div className="TokenFarmV3InfoBox"><figure key={token.address}>{i !== 0 ? '' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />}<span> 50% {token.symbol}</span> </figure></div>)}
+                        {!endBlockReached && <p className="BlockInfoV3B"><b>APY</b>: {apy < 0 ? "(Insufficient Liquidity)" : apy === 0 ? "(Missing Price Feed)" : `${window.formatMoney(apy, 3)}%`}</p>}
                         {rewardTokenInfo && !endBlockReached && <p className="BlockInfoV3"><b>Daily Rate</b>: {window.formatMoney(window.fromDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>}
                         {parseInt(setup.endBlock) > 0 ? <p className="BlockInfoV3"><b>block end</b>: <a className="BLKEMD" target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}block/${setup.endBlock}`}>{setup.endBlock}</a></p> : <p><b>Duration</b>: {getPeriodFromDuration(setupInfo.blockDuration)}</p>}
-                    </div>
+                        {(!open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Farm</a>}
+                        {(open) && <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>}
+                        {
+                                !delayedBlock && canActivateSetup && <>
+                                    {
+                                        setupReady && <>
+                                            {
+                                                activateLoading ? <a className="Web3ActionBTN" disabled={activateLoading}>
+                                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                </a> : <a className="Web3ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
+                                            }
+                                        </>
+                                    }
+                                    {
+                                        !setupReady && <>
+                                            <p className="BreefRecap">Not ready to be activated, come back at another time</p>
+                                        </>
+                                    }
+                                </>
+                            }
+                            {delayedBlock !== 0 && <div>
+                                <p><b>Start Block: <a href={`${props.dfoCore.getContextElement("etherscanURL")}block/${delayedBlock}`} target="_blank">#{delayedBlock}</a></b></p>
+                            </div>}
+                            {(canActivateSetup || (hostedBy && extensionContract && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex)) || parseInt(setup.endBlock) > parseInt(blockNumber)) &&
+                            <>
+                                {
+                                    canActivateSetup && <>
+                                        {
+                                            setupReady && <>
+                                                {
+                                                    activateLoading ? <a className="Web3ActionBTN" disabled={activateLoading}>
+                                                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                    </a> : <a className="Web3ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
+                                                }
+                                            </>
+                                        }
+                                        {
+                                            !setupReady && <>
+                                                <p className="BreefRecap">Not ready to be activated, come back at another time</p>
+                                            </>
+                                        }
+                                    </>
+                                }
+                                {
+                                    (hostedBy && extensionContract && !edit && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex)) &&
+                                    <a className="web2ActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(true) }}>Edit</a>
+                                }
+                                {
+                                    (edit) &&
+                                    <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>
+                                }
+                            </>
+                            }   
+                        </div>
                     <p className="farmInfoCurve">
                         <p className="farmInfoCurveL">
                             <p className="MAinTokensel">
@@ -1172,53 +1224,22 @@ const SetupComponentGen2 = (props) => {
                     </p>
                 </div>
             </div>
-            <div className="YourFarmingPositions">
                 {
-                    setupInfo.free ? <>
+                    setupInfo.free && manageStatus && currentPosition ? <>
+                    <div className="YourFarmingPositions">
                         <div className="FarmYou">
-                            {
-                                manageStatus && currentPosition && <>
+                        
 
                                     {!endBlockReached && <p><b>Daily Earnings</b>:<br></br> {calculateDailyEarnings()} {rewardTokenInfo.symbol}</p>}
                                     <p>
                                         <b>Your Deposit</b>:<br></br> {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(window.fromDecimals(manageStatus.tokensAmounts[i], token.decimals, true), 6)} {token.symbol} </span>)}
                                     </p>
-                                </>
-                            }
-                            {
-                                !delayedBlock && canActivateSetup && <>
-                                    {
-                                        setupReady && <>
-                                            {
-                                                activateLoading ? <a className="Web3ActionBTN" disabled={activateLoading}>
-                                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                                </a> : <a className="Web3ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
-                                            }
-                                        </>
-                                    }
-                                    {
-                                        !setupReady && <>
-                                            <p className="BreefRecap">Not ready to be activated, come back at another time</p>
-                                        </>
-                                    }
-                                </>
-                            }
-                            {delayedBlock !== 0 && <div>
-                                <p><b>Start Block: <a href={`${props.dfoCore.getContextElement("etherscanURL")}block/${delayedBlock}`} target="_blank">#{delayedBlock}</a></b></p>
-                            </div>}
                             {
                                 (hostedBy && extensionContract && !edit && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex) && hostedBy) &&
                                 <a className="web2ActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(true) }}>Edit</a>
                             }
                             {
                                 (edit) &&
-                                <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>
-                            }
-                            {
-                                (!open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Farm</a>
-                            }
-                            {
-                                (open) &&
                                 <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>
                             }
                             {
@@ -1229,6 +1250,7 @@ const SetupComponentGen2 = (props) => {
                                 <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>
                             }
                         </div>
+                    </div>
                         {
                             currentPosition &&
                             <div className="Farmed">
@@ -1257,15 +1279,6 @@ const SetupComponentGen2 = (props) => {
                             </div>
                         }
                     </> : <>
-                        {
-                            parseInt(farmTokenBalance) > 0 && <div className="LockedFarmTokensPosition">
-                                <p><b>Your Farm ITEM (fLP) Balance</b>:</p>
-                                <p>{window.formatMoney(window.fromDecimals(farmTokenBalance, farmTokenDecimals, true), 9)} ({setupTokens.map((setupToken, i) => `${parseInt(farmTokenBalance) === 0 ? 0 : window.formatMoney(window.fromDecimals(farmTokenRes[i], setupToken.decimals, true), 3)} ${setupToken.symbol}${i !== setupTokens.length - 1 ? ' - ' : ''}`)})
-                                    <a className="MetamaskAddButton specialITEMlink" target="_blank" href={props.dfoCore.getContextElement("itemURLTemplate").format(farmTokenERC20Address)}>ITEM</a>
-                                    <a className="MetamaskAddButton specialMETAlink" onClick={() => props.dfoCore.addTokenToMetamask(farmTokenERC20Address, "fLP", farmTokenDecimals, "https://ipfs.io/ipfs/Qmec5J1qui78ui9exoJmGdkYeyvvc8F45y86Wz2TfaXzhS")}>Add to Metamask</a>
-                                </p>
-                            </div>
-                        }
                         {
                             (parseInt(blockNumber) >= parseInt(setup.endBlock) && parseInt(farmTokenBalance) > 0) && <>
                                 <div className="QuestionRegular">
@@ -1318,39 +1331,9 @@ const SetupComponentGen2 = (props) => {
                                 }
                             </>
                         }
-                        {(canActivateSetup || (hostedBy && extensionContract && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex)) || parseInt(setup.endBlock) > parseInt(blockNumber)) &&
-                            <div className="FarmYou">
-                                {
-                                    canActivateSetup && <>
-                                        {
-                                            setupReady && <>
-                                                {
-                                                    activateLoading ? <a className="Web3ActionBTN" disabled={activateLoading}>
-                                                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                                    </a> : <a className="Web3ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
-                                                }
-                                            </>
-                                        }
-                                        {
-                                            !setupReady && <>
-                                                <p className="BreefRecap">Not ready to be activated, come back at another time</p>
-                                            </>
-                                        }
-                                    </>
-                                }
-                                {
-                                    (hostedBy && extensionContract && !edit && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex)) &&
-                                    <a className="web2ActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(true) }}>Edit</a>
-                                }
-                                {
-                                    (edit) &&
-                                    <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>
-                                }
-                            </div>
-                        }
+                        
                     </>
                 }
-            </div>
             {
                 ((open || withdrawOpen) && !edit) ? <><hr />{getAdvanced()}</> : <div />
             }
