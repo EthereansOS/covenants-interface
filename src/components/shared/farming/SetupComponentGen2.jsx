@@ -73,7 +73,7 @@ const SetupComponentGen2 = (props) => {
     const [loadingPrestoData, setLoadingPrestoData] = useState(false);
     const [delayedBlock, setDelayedBlock] = useState(0);
     const [endBlockReached, setEndBlockReached] = useState(false);
-    const [firstTokenIndex, setFirstTokenIndex] = useState(0);
+    const [lastTokenIndex, setLastTokenIndex] = useState(0);
 
     const ethereumAddress = props.dfoCore.getContextElement("wethTokenAddress");
 
@@ -378,12 +378,18 @@ const SetupComponentGen2 = (props) => {
             return;
         }
         updateAmountTimeout = setTimeout(async function () {
-            var ethereumAddress = (await ammContract.methods.data().call())[0];
             var tokenAddress = setupTokens[index].address;
             tokenAddress = tokenAddress === window.voidEthereumAddress ? ethereumAddress : tokenAddress;
             const fullValue = window.toDecimals(value, setupTokens[index].decimals);
-            var result = await ammContract.methods.byTokenAmount(setupInfo.liquidityPoolTokenAddress, tokenAddress, fullValue).call();
-            var { liquidityPoolAmount } = result;
+            var tks = tokensAmounts.map(it => it);
+            tks[index] = {
+                value,
+                full : fullValue
+            }
+            setTokensAmount(tks);
+            setLpTokenAmount('1');
+            /*var result = await ammContract.methods.byTokenAmount(setupInfo.liquidityPoolTokenAddress, tokenAddress, fullValue).call();
+            var { liquidityPoolAmount } = 0;
             result = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, liquidityPoolAmount).call();
             var ams = result.tokensAmounts;
             if (fullValue !== ams[index] && setupTokens[index].decimals !== '18') {
@@ -411,7 +417,7 @@ const SetupComponentGen2 = (props) => {
                         setFreeEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(val), rewardTokenInfo.decimals))
                     }
                 }
-            }
+            }*/
         }, 300);
     }
 
@@ -468,7 +474,6 @@ const SetupComponentGen2 = (props) => {
             let ethTokenIndex = null;
             let ethTokenValue = 0;
             let mainTokenIndex = 0;
-            var ethereumAddress = (await ammContract.methods.data().call())[0];
             await Promise.all(setupTokens.map(async (token, i) => {
                 if (setupInfo.involvingETH && token.address === window.voidEthereumAddress) {
                     ethTokenIndex = i;
@@ -481,7 +486,8 @@ const SetupComponentGen2 = (props) => {
             stake.amount = window.numberToString(stake.amountIsLiquidityPool ? lpAmount : tokensAmounts[mainTokenIndex].full || tokensAmounts[mainTokenIndex]);
             ethTokenValue = ethTokenIndex === undefined || ethTokenIndex === null ? "0" : window.numberToString(tokensAmounts[ethTokenIndex].full || tokensAmounts[ethTokenIndex]);
             var value = setupInfo.involvingETH && !stake.amountIsLiquidityPool ? ethTokenValue : "0";
-
+            stake.amount0 = stake.amount;
+            stake.amount1 = tokensAmounts[1 - mainTokenIndex].full || tokensAmounts[1 - mainTokenIndex];
             if (prestoData) {
                 console.log('using presto!')
                 var sendingOptions = { from: dfoCore.address, value: prestoData.ethValue, gasLimit: 9999999 };
@@ -491,20 +497,13 @@ const SetupComponentGen2 = (props) => {
                 var result = await prestoData.transaction.send(sendingOptions)
                 props.addTransaction(result);
             } else {
-                if (setupInfo.free) {
-                    if (!currentPosition || openPositionForAnotherWallet) {
-                        const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value });
-                        const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gas: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value });
-                        props.addTransaction(result);
-                    } else if (currentPosition) {
-                        const gasLimit = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).estimateGas({ from: dfoCore.address, value });
-                        const result = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).send({ from: dfoCore.address, gas: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value });
-                        props.addTransaction(result);
-                    }
-                } else {
-                    // opening position
+                if (!currentPosition || openPositionForAnotherWallet) {
                     const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value });
                     const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gas: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value });
+                    props.addTransaction(result);
+                } else if (currentPosition) {
+                    const gasLimit = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).estimateGas({ from: dfoCore.address, value });
+                    const result = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).send({ from: dfoCore.address, gas: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value });
                     props.addTransaction(result);
                 }
             }
@@ -1140,12 +1139,11 @@ const SetupComponentGen2 = (props) => {
                         {(open) && <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>}
                         {rewardTokenInfo && !endBlockReached && <p className="BlockInfoV3"><b>Daily Rate</b>: {window.formatMoney(window.fromDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>}
                         {parseInt(setup.endBlock) > 0 ? <p className="BlockInfoV3"><b>block end</b>: <a className="BLKEMD" target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}block/${setup.endBlock}`}>{setup.endBlock}</a></p> : <p><b>Duration</b>: {getPeriodFromDuration(setupInfo.blockDuration)}</p>}
-
                     </div>
                     <p className="farmInfoCurve">
                         <p className="farmInfoCurveL">
                             <p className="MAinTokensel">
-                                <a href="javascript:;" onClick={() => setFirstTokenIndex(firstTokenIndex === 0 ? 1 : 0)}>&#128260;</a> {setupTokens[firstTokenIndex].symbol}-{setupTokens[1 - firstTokenIndex].symbol}
+                                <a href="javascript:;" onClick={() => setLastTokenIndex(1 - lastTokenIndex)}>&#128260;</a> {setupTokens[lastTokenIndex].symbol}-{setupTokens[1 - lastTokenIndex].symbol}
                             </p>
                         </p>
                         <p className="farmInfoCurveR">
