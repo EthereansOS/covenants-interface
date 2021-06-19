@@ -1131,7 +1131,13 @@ const SetupComponentGen2 = (props) => {
                 <div className="SetupFarmingInstructions">
                     <div className="SetupFarmingInstructionsV3">
                         {setupTokens.map((token, i) => <div className="TokenFarmV3InfoBox"><figure key={token.address}>{i !== 0 ? '' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />}</figure><span> 50% {window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>} {!window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>}</span> </div>)}
-                        {!endBlockReached && <p className="BlockInfoV3B"><b>APY</b>: {apy < 0 ? "(Insufficient Liquidity)" : apy === 0 ? "(Missing Price Feed)" : `${window.formatMoney(apy, 3)}%`}</p>}
+                        {!endBlockReached && 
+                            <p className="BlockInfoV3B">
+                            {setup.active && parseInt(setup.endBlock) > blockNumber && <span className="V3FarmStatusYEP">Active</span>}
+                                {!delayedBlock && <> {(!setup.active && canActivateSetup) ? <span className="V3FarmStatusNew">{setupReady ? "new" : "Soon"}</span> : (!setup.active) ? <span className="V3FarmStatusNope">Inactive</span> : <></>} {(parseInt(setup.endBlock) <= blockNumber && parseInt(setup.endBlock) !== 0) && <span className="V3FarmStatusNopeNow">Ended</span>}</>}{delayedBlock !== 0 && <span className="V3FarmStatusNew">Soon</span>}
+                                {!apy < 0 || !apy === 0 && <> <b>APY</b>: {window.formatMoney(apy, 3)}%</>}
+                            </p>
+                        }
                         {rewardTokenInfo && <p className="BlockInfoV3"><b>Daily Rate</b>: {window.formatMoney(window.fromDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>}
                         {parseInt(setup.endBlock) > 0 ? <p className="BlockInfoV3"><b>End</b>: <a className="BLKEMD" target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}block/${setup.endBlock}`}>{setup.endBlock}</a></p> : <p className="BlockInfoV3"><b>Duration</b>: {getPeriodFromDuration(setupInfo.blockDuration)}</p>}
                         {(!open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Farm</a>}

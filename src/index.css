@@ -504,8 +504,12 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .TokenFarmV3InfoBox span .Spannino {font-size: 10px;}
 .penguin .TokenFarmV3InfoBox span {color: #c1c1c1;}
 .FarmSetupV3 .SetupFarmingInstructions {margin-top: 0 !important;}
-.FarmSetupV3 hr {margin-block-start: 0em;
-   margin-block-end: 0em;}
+.FarmSetupV3 hr {margin-block-start: 0em;margin-block-end: 0em;}
+.penguin .FarmSetupV3 {background-color: #2f3044; border-color: #1c1c27 !important;}
+.V3FarmStatusNew {padding: 1px 3px; font-size: 10px!important; margin-right: 4px; color: #59b0fb !important; border: 2px solid #59b0fb !important; border-radius: 4px; font-weight: bold;}
+.V3FarmStatusNope {padding: 1px 3px; font-size: 10px!important; margin-right: 4px; color: #FC4F4F !important; border: 2px solid #FC4F4F !important;border-radius: 4px;font-weight: bold;}
+.V3FarmStatusNopeNow {padding: 1px 3px; font-size: 10px!important; margin-right: 4px; color: #844e4ee6 !important; border: 2px solid #844e4ee6 !important;border-radius: 4px;font-weight: bold;}
+.V3FarmStatusYEP {padding: 1px 3px; font-size: 10px!important; margin-right: 4px; color: #34b15ee0 !important; border: 2px solid #34b15ee0 !important;border-radius: 4px;font-weight: bold;}
 
 @media only screen and (max-device-width: 750px) {
    .IndexRegularText iframe {display: none;}
