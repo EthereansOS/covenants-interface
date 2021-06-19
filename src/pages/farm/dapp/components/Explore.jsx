@@ -182,7 +182,7 @@ const Explore = (props) => {
                         <option value="3">More Setups</option>
                         <option value="4">Less Setups</option>
                     </select>
-                <label>
+                <label className="DeleteMRD">
                     <input type="checkbox" checked={activeOnly} onChange={(e) => setActiveOnly(e.target.checked)}></input><p>Only Active</p>
                 </label>
                 </div>

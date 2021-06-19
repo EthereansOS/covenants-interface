@@ -14,17 +14,25 @@ const FarmingComponent = (props) => {
                 <div className="FarmTitle">
                     <figure>
                         { metadata.rewardTokenAddress !== dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${metadata.rewardTokenAddress}`} ><Coin address={metadata.rewardTokenAddress} /></a> : <Coin address={metadata.rewardTokenAddress} />}
-                        {metadata.generation === 'gen2' && <p className="VersionFarm"><span>&#129412; V3</span></p>}
-                        {metadata.generation === 'gen1' && <p className="VersionFarmOld"><span>Gen 1</span></p>}
                     </figure>
                     <aside>
-                        <h6>{window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <b>Farm {metadata.name} {goBack && <span className="ITEMsymbolF"> ({metadata.symbol})</span>}</b>} {!window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <b>Farm {metadata.symbol}</b>} {(metadata.freeSetups.length + metadata.lockedSetups.length === 0 && !metadata.canActivateSetup) ? <span className="text-danger"><b>(inactive)</b></span> : <></> }</h6>
+                        <h6>{window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <b>Farm {metadata.name} {goBack && <span className="ITEMsymbolF"> ({metadata.symbol})</span>}</b>} {!window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <b>Farm {metadata.symbol}</b>}</h6>
                         { !withoutBack && <Link to={ goBack ? `/farm/dapp/` : `/farm/dapp/${metadata.contractAddress}`} className={ goBack ? "backActionBTN" : "web2ActionBTN" }>{ goBack ? "Back" : "Open" }</Link>}
                     </aside>
                 </div>
                 <div className="FarmThings">
-                        <p><b>Daily Rate</b>: {window.formatMoney(dailyReward, 6)} {window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <>{metadata.name} <span className="ITEMsymbolF">({symbol})</span></>} {!window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <>{symbol} <span className="ITEMsymbolF">({metadata.name})</span></>}</p>
-                        <p><b>Active Setups</b>: {metadata.freeSetups.length + metadata.lockedSetups.length} </p>
+                        {(metadata.freeSetups.length + metadata.lockedSetups.length === 0 && !metadata.canActivateSetup) ? <>
+                            <b className="InactiveSignalP">Inactive</b> 
+                            {metadata.generation === 'gen2' && <b className="VersionFarm">&#129412; V3</b>}
+                            {metadata.generation === 'gen1' && <b className="VersionFarmOld">Gen 1</b>}
+                            </>: <>
+                            <p><b>Daily Rate</b>: {window.formatMoney(dailyReward, 6)} {window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <>{metadata.name} <span className="ITEMsymbolF">({symbol})</span></>} {!window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <>{symbol} <span className="ITEMsymbolF">({metadata.name})</span></>}</p>
+                            <p>
+                                <b className="InactiveSignalA">Active ({metadata.freeSetups.length + metadata.lockedSetups.length})</b>
+                                {metadata.generation === 'gen2' && <b className="VersionFarm">&#129412; V3</b>}
+                                {metadata.generation === 'gen1' && <b className="VersionFarmOld">Gen 1</b>}
+                            </p>
+                        </> }
                         <div className="StatsLink">
                             {window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <a className="specialITEMlink" target="_blank" href={props.dfoCore.getContextElement("itemURLTemplate").format(metadata.rewardTokenAddress)}> ITEM</a>}
                             {!window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <a className="specialERC20link" target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${metadata.rewardTokenAddress}`}> ERC20</a>}

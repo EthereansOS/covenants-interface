@@ -1164,28 +1164,25 @@ const SetupComponent = (props) => {
     return (
         <div className={className}>
             <div className="FarmSetupMain">
-                <h5><b>{setupInfo.free ? "Free Farming" : "Locked Farming"} {!delayedBlock && <> {(!setup.active && canActivateSetup) ? <span className="text-secondary">{setupReady ? "(new)" : "(Soon)"}</span> : (!setup.active) ? <span>(Inactive)</span> : <></>} {(parseInt(setup.endBlock) <= blockNumber && parseInt(setup.endBlock) !== 0) && <span> - Ended</span>}</>}{delayedBlock !== 0 && <span className="text-secondary">(Soon)</span>}</b><a className="specialAMMlink" target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${setupInfo.liquidityPoolTokenAddress}`}>{AMM.name}</a></h5>
+                <h5><b>{setupInfo.free ? "Free Farming" : "Locked Farming"} {!delayedBlock && <> {(!setup.active && canActivateSetup) ? <span className="text-secondary">{setupReady ? "(new)" : "(Soon)"}</span> : (!setup.active) ? <span>(Inactive)</span> : <></>} {(parseInt(setup.endBlock) <= blockNumber && parseInt(setup.endBlock) !== 0) && <span> - Ended</span>}</>}{delayedBlock !== 0 && <span className="text-secondary">(Soon)</span>}</b><a className="specialAMMlink" target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${setupInfo.liquidityPoolTokenAddress}`}>{AMM.name}</a><p className="TVLGen1R"><b>TVL</b>: {setupTokens.map((token, index) => <span key={token.address}>{props.dfoCore.toDecimals(token.liquidity, token.decimals, 3)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span>)}</p></h5>
                 <aside>
                     {parseInt(setup.endBlock) > 0 ? <p><b>block end</b>: <a className="BLKEMD" target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}block/${setup.endBlock}`}>{setup.endBlock}</a></p> : <p><b>Duration</b>: {getPeriodFromDuration(setupInfo.blockDuration)}</p>}
                     {!setupInfo.free && <>
                         <p><b>Limit</b>: {props.dfoCore.toDecimals(setupInfo.maxStakeable, mainTokenInfo.decimals)} {mainTokenInfo.symbol}</p>
                         <p><b>Penalty fee</b>: {parseInt(setupInfo.penaltyFee) === 0 ? `0` : props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(setupInfo.penaltyFee), 18) * 100, 18)}%</p>
                     </>}
-                    {setupInfo.minStakeable > 0 && <p><b>Min to Farm</b>: {window.formatMoney(window.fromDecimals(setupInfo.minStakeable, mainTokenInfo.decimals, true), 6)} {mainTokenInfo.symbol}</p>}
-                </aside>
-                <div className="SetupFarmingInstructions">
-                    <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />} </figure>)} {!endBlockReached && <> {apy > 0 && <> <b> APY</b>: {window.formatMoney(apy, 3)}%</>}</>}</p>
-                </div>
-                <div className="SetupFarmingOthers">
                     {
                         setupInfo.free ? <>
-                            {rewardTokenInfo && !endBlockReached && <p><b>Daily Rate</b>: {window.formatMoney(window.fromDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol} <span>(Shared)</span></p>}
-                            <p><b>TVL</b>: {setupTokens.map((token, index) => <span key={token.address}>{props.dfoCore.toDecimals(token.liquidity, token.decimals, 3)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span>)}</p>
+                            {rewardTokenInfo && !endBlockReached && <p><b>Daily Rate</b>: {window.formatMoney(window.fromDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>}
                         </> : <>
                             {!endBlockReached && <p><b>Available to Farm</b>: {window.fromDecimals(parseInt(setupInfo.maxStakeable) - parseInt(setup.totalSupply), mainTokenInfo.decimals)} {mainTokenInfo.symbol}</p>}
                             <p><b>Rate</b>: {calculateLockedFixedValue()} {rewardTokenInfo.symbol} (fixed) (for every {mainTokenInfo.symbol} locked until the end block)</p>
                         </>
                     }
+                    {setupInfo.minStakeable > 0 && <p><b>Min to Farm</b>: {window.formatMoney(window.fromDecimals(setupInfo.minStakeable, mainTokenInfo.decimals, true), 6)} {mainTokenInfo.symbol}</p>}
+                </aside>
+                <div className="SetupFarmingInstructions SetupFarmingInstructionsOMLYG1">
+                    <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />} </figure>)} {!endBlockReached && <> {apy > 0 && <> <b> APY</b>: {window.formatMoney(apy, 3)}%</>}</>}</p>
                 </div>
                 <div className="ActionButtonV1">
                     {

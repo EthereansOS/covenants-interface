@@ -240,20 +240,19 @@ const ExploreFarmingContract = (props) => {
                                 )
                             })
                         }
-                        {lockedSetups.length > 0 && <h3>{generation === "gen2" ? "Setups" : "Locked setups"}</h3>}
+                        {lockedSetups.length > 0 && generation === "gen1" && <h3>Locked setups</h3>}
                         {
                             lockedSetups.map((farmingSetup) => {
                                 return (
-                                    <CurrentSetupComponent key={farmingSetup.setupIndex} className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
+                                    <CurrentSetupComponent key={farmingSetup.setupIndex} className={generation === "gen2" ? "FarmSetupV3" : "FarmSetup"} setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
                                 )
                             })
                         }
                         {finishedSetups.length > 0 && <a className="web2ActionBTN" onClick={() => setShowOldSetups(!showOldSetups)}>{`${showOldSetups ? 'Hide' : 'Show'} old setups`}</a>}
-                        {(finishedSetups.length > 0 && showOldSetups) && <h3>Old setups</h3>}
                         {
                             showOldSetups && finishedSetups.map((farmingSetup) => {
                                 return (
-                                    <CurrentSetupComponent key={farmingSetup.setupIndex} className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
+                                    <CurrentSetupComponent key={farmingSetup.setupIndex} className={generation === "gen2" ? "FarmSetupV3" : "FarmSetup"} setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} lmContract={contract} dfoCore={dfoCore} setup={farmingSetup} hostedBy={isHost} hasBorder />
                                 )
                             })
                         }
