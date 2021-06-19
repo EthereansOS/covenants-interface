@@ -90,27 +90,6 @@ const SetupComponentGen2 = (props) => {
 
     useEffect(() => {
         getSetupMetadata();
-        setTimeout(async () => {
-            let amms = [];
-            const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
-            const ammAddresses = await ammAggregator.methods.amms().call();
-            for (let address of ammAddresses) {
-                const ammContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("AMMABI"), address);
-                const amm = {
-                    address,
-                    contract: ammContract,
-                    info: await ammContract.methods.info().call(),
-                    data: await ammContract.methods.data().call()
-                }
-                amm.data[2] && amms.push(amm);
-            }
-            setSelectedAmmIndex(0);
-            const uniswap = amms.filter(it => it.info[0] === 'UniswapV2')[0];
-            const index = amms.indexOf(uniswap);
-            amms.splice(index, 1);
-            amms.unshift(uniswap);
-            setAmms(amms);
-        });
         return () => {
             clearInterval(intervalId.current)
         }
@@ -201,7 +180,16 @@ const SetupComponentGen2 = (props) => {
         const lpTokenBalance = "0";
         const lpTokenApproval = "0";
         const fee = await lpToken.methods.fee().call();
-        setLpTokenInfo({ fee, contract: lpToken, symbol: lpTokenSymbol, decimals: lpTokenDecimals, balance: lpTokenBalance, approval: parseInt(lpTokenApproval) !== 0 && parseInt(lpTokenApproval) >= parseInt(lpTokenBalance) });
+        const slot = await lpToken.methods.slot0().call();
+        console.log("Slot", farmSetup.infoIndex, {
+            tick: slot.tick,
+            sqrtPriceX96: slot.sqrtPriceX96,
+            tickLower : farmSetupInfo.tickLower,
+            tickUpper : farmSetupInfo.tickUpper,
+            fee,
+            inRange : parseInt(farmSetupInfo.tickLower) >= parseInt(slot.tick) && parseInt(slot.tick) <= parseInt(farmSetupInfo.tickUpper)
+        });
+        setLpTokenInfo({ slot, fee, contract: lpToken, symbol: lpTokenSymbol, decimals: lpTokenDecimals, balance: lpTokenBalance, approval: parseInt(lpTokenApproval) !== 0 && parseInt(lpTokenApproval) >= parseInt(lpTokenBalance) });
 
         const activateSetup = parseInt(farmSetupInfo.renewTimes) > 0 && !farmSetup.active && parseInt(farmSetupInfo.lastSetupIndex) === parseInt(setupIndex);
         setCanActivateSetup(activateSetup);
@@ -1087,7 +1075,7 @@ const SetupComponentGen2 = (props) => {
                         <p className="farmInfoCurveR">
                             <p className="PriceRangeInfoFarm">
                                 <a target="_blank" href={props.dfoCore.getContextElement("uniswapV3PoolURLTemplate").format(setupInfo.liquidityPoolTokenAddress)} className="InRangeV3 UniPoolFeeInfo">{window.formatMoney(window.numberToString(parseInt(lpTokenInfo.fee) / 10000), '2')}% Pool</a>
-                                {setup.objectId && setup.objectId !== '0' && <a href="javascript:;" target="_blank" className="UniNFTInfo">NFT</a>}
+                                {setup.objectId && setup.objectId !== '0' && <a href={props.dfoCore.getContextElement("uniswapV3NFTURLTemplate").format(setup.objectId)} target="_blank" className="UniNFTInfo">NFT</a>}
                             </p>
                         </p>
                         <div className="UniV3CurveView">
