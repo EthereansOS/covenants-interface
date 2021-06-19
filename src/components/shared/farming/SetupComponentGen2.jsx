@@ -248,7 +248,9 @@ const SetupComponentGen2 = (props) => {
             const positionSetupIndex = position['setupIndex'];
             const liquidityPoolTokenAmount = position['liquidityPoolTokenAmount'];
             const mainTokenAmount = position['mainTokenAmount'];
-            const amounts = await ammContract.methods.byLiquidityPoolAmount(farmSetupInfo.liquidityPoolTokenAddress, liquidityPoolTokenAmount).call();
+            const amounts = {
+                tokensAmounts : [0,0]
+            };
             console.log(position.positionId);
             const availableReward = await lmContract.methods.calculateFreeFarmingReward(position.positionId, true).call();
             let freeReward = parseInt(availableReward);
