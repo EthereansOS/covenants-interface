@@ -1118,16 +1118,8 @@ const SetupComponentGen2 = (props) => {
 
                                     {!endBlockReached && <p><b>Daily Earnings</b>:<br></br> {calculateDailyEarnings()} {rewardTokenInfo.symbol}</p>}
                                     <p>
-                                        <b>Your Deposit</b>:<br></br> {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(window.fromDecimals(manageStatus.tokensAmounts[i], token.decimals, true), 6)} {token.symbol} </span>)}
+                                        <b>Deposited</b>:<br></br> {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(window.fromDecimals(manageStatus.tokensAmounts[i], token.decimals, true), 6)} {token.symbol} </span>)}
                                     </p>
-                            {
-                                (hostedBy && extensionContract && !edit && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex) && hostedBy) &&
-                                <a className="web2ActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(true) }}>Edit</a>
-                            }
-                            {
-                                (edit) &&
-                                <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>
-                            }
                             {
                                 (!withdrawOpen && currentPosition) && <a className="web2ActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(true); setEdit(false); }}>Remove</a>
                             }

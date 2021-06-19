@@ -229,15 +229,10 @@ const ExploreFarmingContract = (props) => {
                         <FarmingComponent className="FarmContractOpen" dfoCore={dfoCore} contract={metadata.contract} metadata={metadata.metadata} goBack={true} withoutBack={withoutBack} hostedBy={isHost} />
                     </div> : <div />
             }
-            {
-                isHost && <>
-                    { !isAdd && <button className="btn btn-primary" onClick={() => setIsAdd(true)}>Add new setups</button>}
-                </>
-            }
             <div className="ListOfThings">
                 {
                     (!isAdd && farmingSetups.length > 0) && <div>
-                        {freeSetups.length > 0 && <h3>Free setups</h3>}
+                        {freeSetups.length > 0 && generation === "gen1" && <h3>Free setups</h3>}
                         {
                             freeSetups.map((farmingSetup) => {
                                 return (
@@ -253,7 +248,7 @@ const ExploreFarmingContract = (props) => {
                                 )
                             })
                         }
-                        {finishedSetups.length > 0 && <a className="web2ActionBTN my-4" onClick={() => setShowOldSetups(!showOldSetups)}>{`${showOldSetups ? 'Hide' : 'Show'} old setups`}</a>}
+                        {finishedSetups.length > 0 && <a className="web2ActionBTN" onClick={() => setShowOldSetups(!showOldSetups)}>{`${showOldSetups ? 'Hide' : 'Show'} old setups`}</a>}
                         {(finishedSetups.length > 0 && showOldSetups) && <h3>Old setups</h3>}
                         {
                             showOldSetups && finishedSetups.map((farmingSetup) => {
@@ -263,6 +258,11 @@ const ExploreFarmingContract = (props) => {
                             })
                         }
                     </div>
+                }
+                {
+                isHost && <>
+                        { !isAdd && <a className="web2ActionBTN" onClick={() => setIsAdd(true)}>Add new setups</a>}
+                    </>
                 }
                 {
                     isAdd && <CreateOrEditFarmingSetups

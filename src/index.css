@@ -519,6 +519,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .FarmSetupV3 .BreefRecap {padding: 8px 0; background-color: #e9effc; border-radius: 8px;}
 .penguin .FarmSetupV3 .BreefRecap {background-color: #1c1c27}
 .Web3ActionBTN:disabled {background-color: #5f5b53;}
+.FarmContract {background-color: #f7fafe;}
 
 
 @media only screen and (max-device-width: 750px) {
