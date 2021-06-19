@@ -90,27 +90,6 @@ const SetupComponentGen2 = (props) => {
 
     useEffect(() => {
         getSetupMetadata();
-        setTimeout(async () => {
-            let amms = [];
-            const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
-            const ammAddresses = await ammAggregator.methods.amms().call();
-            for (let address of ammAddresses) {
-                const ammContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("AMMABI"), address);
-                const amm = {
-                    address,
-                    contract: ammContract,
-                    info: await ammContract.methods.info().call(),
-                    data: await ammContract.methods.data().call()
-                }
-                amm.data[2] && amms.push(amm);
-            }
-            setSelectedAmmIndex(0);
-            const uniswap = amms.filter(it => it.info[0] === 'UniswapV2')[0];
-            const index = amms.indexOf(uniswap);
-            amms.splice(index, 1);
-            amms.unshift(uniswap);
-            setAmms(amms);
-        });
         return () => {
             clearInterval(intervalId.current)
         }
@@ -131,7 +110,8 @@ const SetupComponentGen2 = (props) => {
             await loadData(farmSetup, farmSetupInfo, true);
             if (!intervalId.current) {
                 intervalId.current = setInterval(async () => {
-                    const { '0': s, '1': si } = await props.dfoCore.loadFarmingSetup(lmContract, setupIndex);
+                    var { '0': s, '1': si } = await props.dfoCore.loadFarmingSetup(lmContract, setupIndex);
+                    si = {...si, free : true, generation : 'gen2'};
                     setSetup(s);
                     setSetupInfo(si);
                     await loadData(s, si);
@@ -201,7 +181,16 @@ const SetupComponentGen2 = (props) => {
         const lpTokenBalance = "0";
         const lpTokenApproval = "0";
         const fee = await lpToken.methods.fee().call();
-        setLpTokenInfo({ fee, contract: lpToken, symbol: lpTokenSymbol, decimals: lpTokenDecimals, balance: lpTokenBalance, approval: parseInt(lpTokenApproval) !== 0 && parseInt(lpTokenApproval) >= parseInt(lpTokenBalance) });
+        const slot = await lpToken.methods.slot0().call();
+        console.log("Slot", farmSetup.infoIndex, {
+            tick: slot.tick,
+            sqrtPriceX96: slot.sqrtPriceX96,
+            tickLower : farmSetupInfo.tickLower,
+            tickUpper : farmSetupInfo.tickUpper,
+            fee,
+            inRange : parseInt(farmSetupInfo.tickLower) >= parseInt(slot.tick) && parseInt(slot.tick) <= parseInt(farmSetupInfo.tickUpper)
+        });
+        setLpTokenInfo({ slot, fee, contract: lpToken, symbol: lpTokenSymbol, decimals: lpTokenDecimals, balance: lpTokenBalance, approval: parseInt(lpTokenApproval) !== 0 && parseInt(lpTokenApproval) >= parseInt(lpTokenBalance) });
 
         const activateSetup = parseInt(farmSetupInfo.renewTimes) > 0 && !farmSetup.active && parseInt(farmSetupInfo.lastSetupIndex) === parseInt(setupIndex);
         setCanActivateSetup(activateSetup);
@@ -260,7 +249,9 @@ const SetupComponentGen2 = (props) => {
             const positionSetupIndex = position['setupIndex'];
             const liquidityPoolTokenAmount = position['liquidityPoolTokenAmount'];
             const mainTokenAmount = position['mainTokenAmount'];
-            const amounts = await ammContract.methods.byLiquidityPoolAmount(farmSetupInfo.liquidityPoolTokenAddress, liquidityPoolTokenAmount).call();
+            const amounts = {
+                tokensAmounts : [0,0]
+            };
             console.log(position.positionId);
             const availableReward = await lmContract.methods.calculateFreeFarmingReward(position.positionId, true).call();
             let freeReward = parseInt(availableReward);
@@ -524,16 +515,10 @@ const SetupComponentGen2 = (props) => {
         if (setupInfo.free && (!removalAmount || removalAmount === 0)) return;
         setRemoveLoading(true);
         try {
-            if (setupInfo.free) {
-                const removedLiquidity = removalAmount === 100 ? manageStatus.liquidityPoolAmount : props.dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString().split('.')[0];
-                const gasLimit = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, 0, outputType === 'to-pair', removedLiquidity).estimateGas({ from: dfoCore.address });
-                const result = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, 0, outputType === 'to-pair', removedLiquidity).send({ from: dfoCore.address, gasLimit, gas: gasLimit });
-                props.addTransaction(result);
-            } else {
-                const gasLimit = await lmContract.methods.withdrawLiquidity(0, setup.objectId, outputType === 'to-pair', farmTokenBalance).estimateGas({ from: dfoCore.address });
-                const result = await lmContract.methods.withdrawLiquidity(0, setup.objectId, outputType === 'to-pair', farmTokenBalance).send({ from: dfoCore.address, gasLimit, gas: gasLimit });
-                props.addTransaction(result);
-            }
+            const removedLiquidity = removalAmount === 100 ? manageStatus.liquidityPoolAmount : props.dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString().split('.')[0];
+            const gasLimit = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, removedLiquidity).estimateGas({ from: dfoCore.address });
+            const result = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, removedLiquidity).send({ from: dfoCore.address, gasLimit, gas: gasLimit });
+            props.addTransaction(result);
             await getSetupMetadata();
         } catch (error) {
             console.error(error);
@@ -1087,7 +1072,7 @@ const SetupComponentGen2 = (props) => {
                         <p className="farmInfoCurveR">
                             <p className="PriceRangeInfoFarm">
                                 <a target="_blank" href={props.dfoCore.getContextElement("uniswapV3PoolURLTemplate").format(setupInfo.liquidityPoolTokenAddress)} className="InRangeV3 UniPoolFeeInfo">{window.formatMoney(window.numberToString(parseInt(lpTokenInfo.fee) / 10000), '2')}% Pool</a>
-                                {setup.objectId && setup.objectId !== '0' && <a href="javascript:;" target="_blank" className="UniNFTInfo">NFT</a>}
+                                {setup.objectId && setup.objectId !== '0' && <a href={props.dfoCore.getContextElement("uniswapV3NFTURLTemplate").format(setup.objectId)} target="_blank" className="UniNFTInfo">NFT</a>}
                             </p>
                         </p>
                         <div className="UniV3CurveView">
