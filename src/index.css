@@ -434,6 +434,11 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .ActionButtonV1 .web2ActionBTN {display: inline-block; text-align: center;}
 .ActionButtonV1 .backActionBTN {display: inline-block; text-align: center;}
 .FARMV1FancyThings {background-color: #e9effc; border: 1px solid #e0e2e6; border-radius: 12px; padding: 5px 8px;}
+.V1TokenLP {width: 100%; display: inline-block; padding: 10px; border: 1px solid #e0e2e6;border-radius: 15px; background-color: #f7fafe;}
+.penguin .V1TokenLP {background-color: #2f3044; border-color: #1c1c27 !important;}
+.V1TokenLP .LockedFarmTokensPosition {text-align: left; font-size: 12px; width: 45%; margin-right: 1%;}
+.V1TokenLP .LockedFarmTokensPosition p {font-size: 12px;}
+.QuestionRegularFarmTokenRem {}
 
 .PrestoSelector {padding: 5px; margin: 2px 3px; border-radius: 8px; border: 1px solid #9e6915;}
 .PrestoSelector span {font-size: 14px; margin: auto 5px auto auto; display: inline-block; vertical-align: middle;}

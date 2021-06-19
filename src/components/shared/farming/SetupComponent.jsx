@@ -1213,7 +1213,7 @@ const SetupComponent = (props) => {
                 </div>
             </div>
                 {
-                    setupInfo.free ? <>
+                    setupInfo.free && <> 
                         <div className="FarmYou">
                             {
                                 manageStatus && currentPosition && <>
@@ -1233,8 +1233,8 @@ const SetupComponent = (props) => {
                                 <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>
                             }
                         </div>
-                        {
-                            currentPosition &&
+                    </> }
+                        { setupInfo.free && currentPosition && <>
                             <div className="Farmed">
                                 {!endBlockReached && <p><b>Daily Earnings</b>: {calculateDailyEarnings()} {rewardTokenInfo.symbol}</p>}
                                 <p><b>Available</b>: {window.fromDecimals(freeAvailableRewards, rewardTokenInfo.decimals, true)} {rewardTokenInfo.symbol}</p>
@@ -1245,36 +1245,39 @@ const SetupComponent = (props) => {
                                     </a> : <a onClick={() => withdrawReward()} className="Web3ActionBTN">Claim</a>
                                 }
                             </div>
-                        }
-                    </> : <>
-                        {
-                            parseInt(farmTokenBalance) > 0 && <div className="LockedFarmTokensPosition">
+                        </> }
+                        { !setupInfo.free &&  
+                        <div className="V1TokenLP">
+                            {parseInt(farmTokenBalance) > 0 && <>
+                            <div className="LockedFarmTokensPosition">
                                 <p><b>Your Farm ITEM (fLP) Balance</b>:</p>
                                 <p>{window.formatMoney(window.fromDecimals(farmTokenBalance, farmTokenDecimals, true), 9)} ({setupTokens.map((setupToken, i) => `${parseInt(farmTokenBalance) === 0 ? 0 : window.formatMoney(window.fromDecimals(farmTokenRes[i], setupToken.decimals, true), 3)} ${setupToken.symbol}${i !== setupTokens.length - 1 ? ' - ' : ''}`)})
+                                <br></br>
                                 <a className="MetamaskAddButton specialITEMlink" target="_blank" href={props.dfoCore.getContextElement("itemURLTemplate").format(farmTokenERC20Address)}>ITEM</a>
                                 <a className="MetamaskAddButton specialMETAlink" onClick={() => props.dfoCore.addTokenToMetamask(farmTokenERC20Address, "fLP", farmTokenDecimals, "https://ipfs.io/ipfs/Qmec5J1qui78ui9exoJmGdkYeyvvc8F45y86Wz2TfaXzhS")}>Add to Metamask</a>
                                 </p>
                             </div>
-                        }
-                        {
-                            (parseInt(blockNumber) >= parseInt(setup.endBlock) && parseInt(farmTokenBalance) > 0) && <>
-                                <div className="QuestionRegular">
-                                    <label className="PrestoSelector">
-                                        <span>To Pair</span>
-                                        <input name={`outputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="to-pair" checked={outputType === "to-pair"} onChange={onOutputTypeChange} />
-                                    </label>
-                                    <label className="PrestoSelector">
-                                        <span>To LP Token</span>
-                                        <input name={`outputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="to-lp" checked={outputType === "to-lp"} onChange={onOutputTypeChange} />
-                                    </label>
-                                </div>
-                                {
-                                    removeLoading ? <a className="Web3ActionBTN Web3ActionBTNV" disabled={removeLoading}>
-                                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                    </a> : (parseInt(blockNumber) >= parseInt(setup.endBlock)) ? <a className="Web3ActionBTN Web3ActionBTNV" onClick={() => removeLiquidity()}>Withdraw Liquidity</a> : <></>
-                                }
-                            </>
-                        }
+                            </>} 
+                            {
+                                (parseInt(blockNumber) >= parseInt(setup.endBlock) && parseInt(farmTokenBalance) > 0) && <>
+                                    <div className="QuestionRegular QuestionRegularFarmTokenRem">
+                                        <label className="PrestoSelector">
+                                            <span>To Pair</span>
+                                            <input name={`outputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="to-pair" checked={outputType === "to-pair"} onChange={onOutputTypeChange} />
+                                        </label>
+                                        <label className="PrestoSelector">
+                                            <span>To LP Token</span>
+                                            <input name={`outputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="to-lp" checked={outputType === "to-lp"} onChange={onOutputTypeChange} />
+                                        </label>
+                                        {
+                                            removeLoading ? <a className="Web3ActionBTN Web3ActionBTNV" disabled={removeLoading}>
+                                                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                            </a> : (parseInt(blockNumber) >= parseInt(setup.endBlock)) ? <a className="Web3ActionBTN Web3ActionBTNV" onClick={() => removeLiquidity()}>Withdraw Liquidity</a> : <></>
+                                        }
+                                    </div>
+                                </>
+                            } 
+                        </div>}
                         {
                             lockedPositions.length > 0 && <>
                                 {
@@ -1329,14 +1332,6 @@ const SetupComponent = (props) => {
                                     </>
                                 }
                                 {
-                                    (hostedBy && extensionContract && !edit && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex)) &&
-                                    <a className="web2ActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(true) }}>Edit</a>
-                                }
-                                {
-                                    (edit) &&
-                                    <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>
-                                }
-                                {
                                     (!open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Farm</a>
                                 }
                                 {
@@ -1345,8 +1340,6 @@ const SetupComponent = (props) => {
                                 }
                             </div>
                         }
-                    </>
-                }
             {
                 ((open || withdrawOpen) && !edit) ? <><hr />{getAdvanced()}</> : <div />
             }
