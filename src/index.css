@@ -520,6 +520,9 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .penguin .FarmSetupV3 .BreefRecap {background-color: #1c1c27}
 .Web3ActionBTN:disabled {background-color: #5f5b53;}
 .FarmContract {background-color: #f7fafe;}
+.penguin .FarmContract {background-color: #2f3044;border-color: #1c1c27}
+.FarmSetupV3 .input-group-append {background-color: #e9effc;}
+.penguin .FarmSetupV3 .input-group-append {background-color: #2f3044;}
 
 
 @media only screen and (max-device-width: 750px) {
