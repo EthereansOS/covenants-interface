@@ -5,7 +5,8 @@ import { connect } from 'react-redux';
 import { addTransaction, removeInflationSetup } from '../../../store/actions';
 import axios from 'axios';
 import LockedPositionComponent from './LockedPositionComponent';
-import metamaskLogo from "../../../assets/images/metamask-fox.svg";
+import SwitchIcon from "../../../assets/images/switch.png";
+import ArrowIcon from "../../../assets/images/arrow.png";
 import Loading from "../Loading";
 import { useRef } from 'react';
 
@@ -990,12 +991,6 @@ const SetupComponentGen2 = (props) => {
                     </div>
                 }
                 {
-                    (!setupInfo.free && rewardTokenInfo) && <div className="DiffWallet">
-                        <p className="BreefRecap">Total Rewards until end block: <br></br><b>{window.formatMoney(lockedEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</b></p>
-                        <p className="BreefExpl">Once you lock this liquidity you'll be able to withdraw it at the Setup End Block. If you want to Unlock this position earlier, you'll need to pay a Penalty Fee (in Reward Tokens) + all of the Reward Tokens you Claimed from this position + All of the Farm Token you're minting (representing your LP tokens locked).</p>
-                    </div>
-                }
-                {
                     (setupInfo.free && rewardTokenInfo) && <div className="DiffWallet">
                         <p className="BreefRecap">Estimated reward per day: <br></br><b>{window.formatMoney(freeEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</b></p>
                     </div>
@@ -1135,7 +1130,7 @@ const SetupComponentGen2 = (props) => {
             <div className="FarmSetupMain">
                 <div className="SetupFarmingInstructions">
                     <div className="SetupFarmingInstructionsV3">
-                        {setupTokens.map((token, i) => <div className="TokenFarmV3InfoBox"><figure key={token.address}>{i !== 0 ? '' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />}<span> 50% {token.symbol}</span> </figure></div>)}
+                        {setupTokens.map((token, i) => <div className="TokenFarmV3InfoBox"><figure key={token.address}>{i !== 0 ? '' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />}</figure><span> 50% {window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>} {!window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>}</span> </div>)}
                         {!endBlockReached && <p className="BlockInfoV3B"><b>APY</b>: {apy < 0 ? "(Insufficient Liquidity)" : apy === 0 ? "(Missing Price Feed)" : `${window.formatMoney(apy, 3)}%`}</p>}
                         {rewardTokenInfo && !endBlockReached && <p className="BlockInfoV3"><b>Daily Rate</b>: {window.formatMoney(window.fromDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>}
                         {parseInt(setup.endBlock) > 0 ? <p className="BlockInfoV3"><b>block end</b>: <a className="BLKEMD" target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}block/${setup.endBlock}`}>{setup.endBlock}</a></p> : <p><b>Duration</b>: {getPeriodFromDuration(setupInfo.blockDuration)}</p>}
@@ -1193,10 +1188,10 @@ const SetupComponentGen2 = (props) => {
                             </>
                             }   
                         </div>
-                    <p className="farmInfoCurve">
+                    <div className="farmInfoCurve">
                         <p className="farmInfoCurveL">
                             <p className="MAinTokensel">
-                                <a href="javascript:;" onClick={() => setLastTokenIndex(1 - lastTokenIndex)}>&#128260;</a> {setupTokens[lastTokenIndex].symbol}-{setupTokens[1 - lastTokenIndex].symbol}
+                                <a href="javascript:;" onClick={() => setLastTokenIndex(1 - lastTokenIndex)}><img src={SwitchIcon}></img></a> {setupTokens[lastTokenIndex].symbol}
                             </p>
                         </p>
                         <p className="farmInfoCurveR">
@@ -1213,6 +1208,7 @@ const SetupComponentGen2 = (props) => {
                                 <span className="CircleRightV3CurvePrice">1,000,000</span>
                                 <div className="CircleActualPriceV3">
                                     <span className="CircleRightV3Actual">
+                                        <img src={ArrowIcon}></img>
                                         <span className="CircleRightV3ActualPrice">0.0019</span>
                                     </span>
                                 </div>
@@ -1221,7 +1217,7 @@ const SetupComponentGen2 = (props) => {
                         <span className="UniV3TVLFIV">
                             <b>TVL</b>: {setupTokens.map((token, index) => <span key={token.address}>{props.dfoCore.toDecimals(token.liquidity, token.decimals, 2)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span>)}
                         </span>
-                    </p>
+                    </div>
                 </div>
             </div>
                 {
