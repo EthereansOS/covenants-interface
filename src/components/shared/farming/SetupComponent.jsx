@@ -1214,20 +1214,16 @@ const SetupComponent = (props) => {
                 {currentPosition && <>
                     <div className="PositionInfoFarmingBigMoney">
                     {setupInfo.free && <> 
-                        <div className="FarmYou">
-                            {
-                                manageStatus && <>
+                        <div className="FarmYou FarmYouFARMFARMFARM">
+                            {manageStatus && <>
                                     <p>
-                                        <b>Your Deposit</b>: {window.formatMoney(window.fromDecimals(manageStatus.liquidityPoolAmount, lpTokenInfo.decimals, true), 6)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(window.fromDecimals(manageStatus.tokensAmounts[i], token.decimals, true), 6)} {token.symbol} </span>)}
+                                        <b>Your Deposit</b>:<br></br> {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(window.fromDecimals(manageStatus.tokensAmounts[i], token.decimals, true), 6)} {token.symbol} </span>)}
                                     </p>
                                 </>}
-                            {
-                                (!withdrawOpen && currentPosition) && <a className="web2ActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(true); setEdit(false); }}>Remove</a>
-                            }
-                            {
-                                (withdrawOpen) &&
-                                <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>
-                            }
+                            {(!open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Increase</a>}
+                            {(open) && <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>}
+                            {(!withdrawOpen && currentPosition) && <a className="web2ActionBTN web2ActionBTNGigi" onClick={() => { setOpen(false); setWithdrawOpen(true); setEdit(false); }}>Decrease</a>}
+                            {(withdrawOpen) && <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>}
                         </div>
                         </> }
                         { setupInfo.free && <>
@@ -1306,36 +1302,6 @@ const SetupComponent = (props) => {
                                     })
                                 }
                             </>
-                        }
-                        {/* Is this makes sense???? */}
-                        {(canActivateSetup || (hostedBy && extensionContract && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex)) || parseInt(setup.endBlock) > parseInt(blockNumber)) &&
-                            <div className="FarmYou">
-                                {
-                                    canActivateSetup && <>
-                                        {
-                                            setupReady && <>
-                                                {
-                                                    activateLoading ? <a className="Web3ActionBTN" disabled={activateLoading}>
-                                                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                                    </a> : <a className="Web3ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
-                                                }
-                                            </>
-                                        }
-                                        {
-                                            !setupReady && <>
-                                                <p className="BreefRecap">Not ready to be activated, come back at another time</p>
-                                            </>
-                                        }
-                                    </>
-                                }
-                                {
-                                    (!open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Farm</a>
-                                }
-                                {
-                                    (open) &&
-                                    <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>
-                                }
-                            </div>
                         }
             {
                 ((open || withdrawOpen) && !edit) ? <><hr />{getAdvanced()}</> : <div />
