@@ -116,6 +116,8 @@ export default {
     "itemsListURL" : "https://raw.githubusercontent.com/EthereansOS/ITEMS-Swap/master/src/constants/ethItemLists/dist/tokensList.json",
     "itemsContextURL" : "https://raw.githubusercontent.com/EthereansOS/ITEMS-Interface/main/data/context.json",
     "blockIntervals" : {
+      "30 Mins" : 135,
+      "1 Hour" : 270,
       "6 Hours" : 1600,
       "12 Hours" : 3200,
       "Day" : 6400,
