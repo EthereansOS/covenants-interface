@@ -496,7 +496,8 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .UniV3TVLFIV span {font-size: 10px !important;}
 .farmInfoCurve p {margin-left: 0 !important;}
 .SetupFarmingInstructionsV3 .web2ActionBTN, .SetupFarmingInstructionsV3 .backActionBTN {display: inline-block; margin: 10px auto; width: 90%; text-align: center; border: 1px solid #9e6915;}
-.FarmSetupV3 {width: 100%;border: 1px solid #e0e2e6;border-radius: 15px; background-color: #f7fafe;overflow: hidden;}
+.SetupFarmingInstructionsV3 .Web3ActionBTN, .SetupFarmingInstructionsV3 .web2ActionBTNS {display: inline-block;margin: 10px 4px;width: 40%;text-align: center;padding: 3px;font-size: 13px;margin-right: 7px;}
+.FarmSetupV3 {width: 100%;border: 1px solid #e0e2e6;border-radius: 15px; background-color: #f7fafe;overflow: hidden;margin: 25px auto;}
 .TokenFarmV3InfoBox {width: auto; display: block;margin: 6px 0px 0 4px;}
 .TokenFarmV3InfoBox img {width: 25px !important;}
 .TokenFarmV3InfoBox span {font-size: 13px; font-weight: bold; color: #5f5b53;}

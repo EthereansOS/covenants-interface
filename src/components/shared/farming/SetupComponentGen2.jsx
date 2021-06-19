@@ -1132,8 +1132,8 @@ const SetupComponentGen2 = (props) => {
                     <div className="SetupFarmingInstructionsV3">
                         {setupTokens.map((token, i) => <div className="TokenFarmV3InfoBox"><figure key={token.address}>{i !== 0 ? '' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />}</figure><span> 50% {window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>} {!window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>}</span> </div>)}
                         {!endBlockReached && <p className="BlockInfoV3B"><b>APY</b>: {apy < 0 ? "(Insufficient Liquidity)" : apy === 0 ? "(Missing Price Feed)" : `${window.formatMoney(apy, 3)}%`}</p>}
-                        {rewardTokenInfo && !endBlockReached && <p className="BlockInfoV3"><b>Daily Rate</b>: {window.formatMoney(window.fromDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>}
-                        {parseInt(setup.endBlock) > 0 ? <p className="BlockInfoV3"><b>block end</b>: <a className="BLKEMD" target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}block/${setup.endBlock}`}>{setup.endBlock}</a></p> : <p><b>Duration</b>: {getPeriodFromDuration(setupInfo.blockDuration)}</p>}
+                        {rewardTokenInfo && <p className="BlockInfoV3"><b>Daily Rate</b>: {window.formatMoney(window.fromDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>}
+                        {parseInt(setup.endBlock) > 0 ? <p className="BlockInfoV3"><b>End</b>: <a className="BLKEMD" target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}block/${setup.endBlock}`}>{setup.endBlock}</a></p> : <p className="BlockInfoV3"><b>Duration</b>: {getPeriodFromDuration(setupInfo.blockDuration)}</p>}
                         {(!open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Farm</a>}
                         {(open) && <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>}
                         {
@@ -1156,37 +1156,7 @@ const SetupComponentGen2 = (props) => {
                             }
                             {delayedBlock !== 0 && <div>
                                 <p><b>Start Block: <a href={`${props.dfoCore.getContextElement("etherscanURL")}block/${delayedBlock}`} target="_blank">#{delayedBlock}</a></b></p>
-                            </div>}
-                            {(canActivateSetup || (hostedBy && extensionContract && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex)) || parseInt(setup.endBlock) > parseInt(blockNumber)) &&
-                            <>
-                                {
-                                    canActivateSetup && <>
-                                        {
-                                            setupReady && <>
-                                                {
-                                                    activateLoading ? <a className="Web3ActionBTN" disabled={activateLoading}>
-                                                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                                    </a> : <a className="Web3ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
-                                                }
-                                            </>
-                                        }
-                                        {
-                                            !setupReady && <>
-                                                <p className="BreefRecap">Not ready to be activated, come back at another time</p>
-                                            </>
-                                        }
-                                    </>
-                                }
-                                {
-                                    (hostedBy && extensionContract && !edit && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex)) &&
-                                    <a className="web2ActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(true) }}>Edit</a>
-                                }
-                                {
-                                    (edit) &&
-                                    <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>
-                                }
-                            </>
-                            }   
+                            </div>} 
                         </div>
                     <div className="farmInfoCurve">
                         <p className="farmInfoCurveL">
@@ -1197,7 +1167,7 @@ const SetupComponentGen2 = (props) => {
                         <p className="farmInfoCurveR">
                             <p className="PriceRangeInfoFarm">
                                 <a target="_blank" href={props.dfoCore.getContextElement("uniswapV3PoolURLTemplate").format(setupInfo.liquidityPoolTokenAddress)} className="InRangeV3 UniPoolFeeInfo">{window.formatMoney(window.numberToString(parseInt(lpTokenInfo.fee) / 10000), '2')}% Pool</a>
-                                {setup.objectId && setup.objectId !== '0' && <a href="javascript:;" target="_blank" className="UniNFTInfo">NFT ID</a>}
+                                {setup.objectId && setup.objectId !== '0' && <a href="javascript:;" target="_blank" className="UniNFTInfo">NFT</a>}
                             </p>
                         </p>
                         <div className="UniV3CurveView">
@@ -1217,6 +1187,18 @@ const SetupComponentGen2 = (props) => {
                         <span className="UniV3TVLFIV">
                             <b>TVL</b>: {setupTokens.map((token, index) => <span key={token.address}>{props.dfoCore.toDecimals(token.liquidity, token.decimals, 2)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span>)}
                         </span>
+                        {(canActivateSetup || (hostedBy && extensionContract && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex)) || parseInt(setup.endBlock) > parseInt(blockNumber)) &&
+                            <>
+                                {
+                                    (hostedBy && extensionContract && !edit && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex)) &&
+                                    <a className="web2ActionBTN web2ActionBTNS" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(true) }}>Edit</a>
+                                }
+                                {
+                                    (edit) &&
+                                    <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>
+                                }
+                            </>
+                            }  
                     </div>
                 </div>
             </div>
