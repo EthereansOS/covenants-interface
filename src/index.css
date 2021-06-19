@@ -523,7 +523,11 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .penguin .FarmContract {background-color: #2f3044;border-color: #1c1c27}
 .FarmSetupV3 .input-group-append {background-color: #e9effc;}
 .penguin .FarmSetupV3 .input-group-append {background-color: #2f3044;}
-
+.generationSelector {width: 45%; display: inline-block; margin: 10px 1%; padding: 30px; background-color: #f7fafe; border: 1px solid #e0e2e6; border-radius: 12px;}
+.penguin .generationSelector {background-color: #2f3044;border-color: #1c1c27}
+.generationSelector h6 {font-size: 16px; font-weight: bold;}
+.generationSelector p {font-size: 11px;}
+.GenerationTime {font-size: 12px; width: 90%; display: inline-block; margin: 10px auto;}
 
 @media only screen and (max-device-width: 750px) {
    .IndexRegularText iframe {display: none;}
