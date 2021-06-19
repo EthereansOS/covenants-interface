@@ -209,7 +209,7 @@ a:disabled {cursor:wait !important;}
 .FarmSetupMain aside {width: 37%; display: inline-block;vertical-align: top; margin-left: 2%;}
 .FarmSetupMain aside p {font-size: 12px; width: 100%; text-align: right; margin-bottom: 5px;}
 .SetupFarmingInstructions {width: 100%; display: inline-block; margin-top: 10px; text-align: left;}
-.SetupFarmingInstructions p {display: inline-block; font-size: 14px; margin-bottom: 2px; width: 42%; margin-left: 2%;}
+.SetupFarmingInstructions p {display: inline-block; font-size: 14px; margin-bottom: 2px; max-width: 42%; margin-left: 2%;}
 .SetupFarmingInstructions p span {font-size: 12px;}
 .SetupFarmingInstructions figure {display: inline-block; margin-right: 5px; margin-block-start: 0em;margin-block-end: 0em;margin-inline-start: 0px;margin-inline-end: 0px;}
 .SetupFarmingInstructions img {height: auto;width: 35px;}
@@ -428,6 +428,12 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .magic .BLKEMD {color: #000000 !important;}
 .InputRegularB .form-control, .InputRegularB .form-control:focus {border-right: 1px solid #9e6915;}
 
+.FarmSetup {border: 1px solid #e0e2e6;border-radius: 15px; background-color: #f7fafe;margin: 15px auto;}
+.ActionButtonV1 {text-align: center; width: 60%; margin: 5px auto; display: block;}
+.ActionButtonV1 .web2ActionBTN {display: inline-block; text-align: center;}
+.ActionButtonV1 .backActionBTN {display: inline-block; text-align: center;}
+.FARMV1FancyThings {background-color: #e9effc; border: 1px solid #e0e2e6; border-radius: 12px; padding: 5px 8px;}
+
 .PrestoSelector {padding: 5px; margin: 2px 3px; border-radius: 8px; border: 1px solid #9e6915;}
 .PrestoSelector span {font-size: 14px; margin: auto 5px auto auto; display: inline-block; vertical-align: middle;}
 .FromETHPrestoDesc {width: 100%;}
@@ -512,17 +518,17 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .V3FarmStatusYEP {padding: 1px 3px; font-size: 10px!important; margin-right: 4px; color: #34b15ee0 !important; border: 2px solid #34b15ee0 !important;border-radius: 4px;font-weight: bold;}
 .FarmSetupV3 .Web3BTNs {margin: 20px auto 20px auto;}
 .FarmSetupV3 .Web3BTNs .Web3ActionBTN, .FarmSetupV3 .Web3BTNs .ApproveBTN {display: inline-block;padding: 4px 11px;border-radius: 10px;font-size: 14px;}
-.FarmSetupV3 .OptionalThingsFarmers {width: 95%;margin: 10px auto 20px auto;display: block;text-align: right;}
-.FarmSetupV3 .OptionalThingsFarmers p {background-color: #e9effc; padding: 3px 8px; border-radius: 5px; font-size: 12px;}
-.FarmSetupV3 .OptionalThingsFarmers p input {position: relative;margin-top: -2px;margin-left: 0; margin-right: 5px;vertical-align: middle;display: inline-block;}
-.penguin .FarmSetupV3 .OptionalThingsFarmers p {background-color: #1c1c27;}
-.FarmSetupV3 .BreefRecap {padding: 8px 0; background-color: #e9effc; border-radius: 8px;}
-.penguin .FarmSetupV3 .BreefRecap {background-color: #1c1c27}
+.OptionalThingsFarmers {width: 95%;margin: 10px auto 20px auto;display: block;text-align: right;}
+.OptionalThingsFarmers p {background-color: #e9effc; padding: 3px 8px; border-radius: 5px; font-size: 12px;}
+.OptionalThingsFarmers p input {position: relative;margin-top: -2px;margin-left: 0; margin-right: 5px;vertical-align: middle;display: inline-block;}
+.penguin .OptionalThingsFarmers p {background-color: #1c1c27;}
+.BreefRecap {padding: 8px 0; background-color: #e9effc; border-radius: 8px;}
+.penguin .BreefRecap {background-color: #1c1c27}
 .Web3ActionBTN:disabled {background-color: #5f5b53;}
 .FarmContract {background-color: #f7fafe;}
 .penguin .FarmContract {background-color: #2f3044;border-color: #1c1c27}
-.FarmSetupV3 .input-group-append {background-color: #e9effc;}
-.penguin .FarmSetupV3 .input-group-append {background-color: #2f3044;}
+.input-group-append {background-color: #e9effc;}
+.penguin .input-group-append {background-color: #2f3044;}
 .generationSelector {width: 45%; display: inline-block; margin: 10px 1%; padding: 30px; background-color: #f7fafe; border: 1px solid #e0e2e6; border-radius: 12px;}
 .penguin .generationSelector {background-color: #2f3044;border-color: #1c1c27}
 .generationSelector h6 {font-size: 16px; font-weight: bold;}

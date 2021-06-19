@@ -1049,7 +1049,7 @@ const SetupComponentGen2 = (props) => {
                             <p className="BlockInfoV3B">
                             {setup.active && parseInt(setup.endBlock) > blockNumber && <span className="V3FarmStatusYEP">Active</span>}
                                 {!delayedBlock && <> {(!setup.active && canActivateSetup) ? <span className="V3FarmStatusNew">{setupReady ? "new" : "Soon"}</span> : (!setup.active) ? <span className="V3FarmStatusNope">Inactive</span> : <></>} {(parseInt(setup.endBlock) <= blockNumber && parseInt(setup.endBlock) !== 0) && <span className="V3FarmStatusNopeNow">Ended</span>}</>}{delayedBlock !== 0 && <span className="V3FarmStatusNew">Soon</span>}
-                                {!apy < 0 || !apy === 0 && <> <b>APY</b>: {window.formatMoney(apy, 3)}%</>}
+                                {apy > 0 && <> <b>APY</b>: {window.formatMoney(apy, 3)}%</>}
                             </p>
                         }
                         {rewardTokenInfo && <p className="BlockInfoV3"><b>Daily Rate</b>: {window.formatMoney(window.fromDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>}
