@@ -913,18 +913,6 @@ const SetupComponentGen2 = (props) => {
                         <a className="web2ActionBTN" onClick={() => setRemovalAmount(90)} >90%</a>
                         <a className="web2ActionBTN" onClick={() => setRemovalAmount(100)} >MAX</a>
                     </div>
-                    <div className="row">
-                        <div className="QuestionRegular">
-                            <label className="PrestoSelector">
-                                <span>To Pair</span>
-                                <input name="outputType" type="radio" value="to-pair" checked={outputType === "to-pair"} onChange={onOutputTypeChange} />
-                            </label>
-                            <label className="PrestoSelector">
-                                <span>To LP Token</span>
-                                <input name="outputType" type="radio" value="to-lp" checked={outputType === "to-lp"} onChange={onOutputTypeChange} />
-                            </label>
-                        </div>
-                    </div>
                     <div className="Web2ActionsBTNs">
                         {
                             removeLoading ? <a className="Web3ActionBTN" disabled={removeLoading}>
@@ -937,6 +925,21 @@ const SetupComponentGen2 = (props) => {
         }
 
         return <div className="FarmActions">
+            <label className="OptionalThingsFarmers" htmlFor="openPositionWallet1">
+                <p><input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => {
+                        if (!e.target.checked) {
+                            setUniqueOwner("");
+                        }
+                        setOpenPositionForAnotherWallet(e.target.checked);
+                    }} id="openPositionWallet1" />
+                    External Owner</p>
+                </label>
+                {
+                    openPositionForAnotherWallet && <div className="DiffWallet">
+                        <input type="text" className="TextRegular" placeholder="Position owner address" value={uniqueOwner} onChange={(e) => setUniqueOwner(e.target.value)} id="uniqueOwner" />
+                        <p className="BreefExpl">This wallet will be the owner of this position and all of its assets.</p>
+                    </div>
+                }
             {
                 false && (parseInt(setup.endBlock) > parseInt(blockNumber) || currentPosition) &&
                 <div className="QuestionRegular">
@@ -952,10 +955,6 @@ const SetupComponentGen2 = (props) => {
                                 <input name={`inputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="add-eth" checked={inputType === "add-eth"} onChange={(e) => onInputTypeChange(e)} />
                             </label>
                         }
-                        <label className="PrestoSelector">
-                            <span>From LP Token</span>
-                            <input name={`inputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="add-lp" checked={inputType === "add-lp"} onChange={(e) => onInputTypeChange(e)} />
-                        </label>
                     </>
                     }
                 </div>
@@ -969,95 +968,23 @@ const SetupComponentGen2 = (props) => {
                     })
                 }
                 {
-                    parseFloat(lpTokenAmount) > 0 && <div className="DiffWallet">
-                        <p className="BreefRecap"><b>LP tokens</b>:
-                            <span> {window.formatMoney(dfoCore.toDecimals(lpTokenAmount, lpTokenInfo.decimals), lpTokenInfo.decimals)} {lpTokenInfo.symbol}</span>
+                    (setupInfo.free && rewardTokenInfo) && <div className="DiffWallet">
+                        <p className="BreefRecap">Estimated reward per day: <br></br><b>{window.formatMoney(freeEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</b>
                         </p>
                     </div>
                 }
-                <label className="OptionalThingsFarmers" htmlFor="openPositionWallet1">
-                    <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => {
-                        if (!e.target.checked) {
-                            setUniqueOwner("");
+                    <div className="Web3BTNs">
+                        {
+                            tokensApprovals.some((value) => !value) && <>
+                                {getApproveButton()}
+                            </>
                         }
-                        setOpenPositionForAnotherWallet(e.target.checked);
-                    }} id="openPositionWallet1" />
-                    <p>External Owner</p>
-                </label>
-                {
-                    openPositionForAnotherWallet && <div className="DiffWallet">
-                        <input type="text" className="TextRegular" placeholder="Position owner address" value={uniqueOwner} onChange={(e) => setUniqueOwner(e.target.value)} id="uniqueOwner" />
-                        <p className="BreefExpl">Open this farming position as another wallet - The wallet you insert here will be the owner of the entire position and Farm Tokens (if "Locked Position")</p>
-                    </div>
-                }
-                {
-                    (setupInfo.free && rewardTokenInfo) && <div className="DiffWallet">
-                        <p className="BreefRecap">Estimated reward per day: <br></br><b>{window.formatMoney(freeEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</b></p>
-                    </div>
-                }
-                <div className="Web3BTNs">
-                    {
-                        tokensApprovals.some((value) => !value) && <>
-                            {getApproveButton()}
-                        </>
-                    }
-                    {
-                        addLoading ? <a className="Web3ActionBTN" disabled={addLoading}>
-                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        </a> : <a className="Web3ActionBTN" onClick={() => addLiquidity()} disabled={tokensApprovals.some((value) => !value) || tokensAmounts.some((value) => value === 0)}>Add Liquidity</a>
-                    }
-                </div>
-            </> : inputType === 'add-lp' ? <>
-                <div className="InputTokenRegular">
-                    <Input showMax={true} address={lpTokenInfo.contract.options.address} value={lpTokenAmount.value || window.fromDecimals(lpTokenAmount, lpTokenInfo.decimals, true)} balance={window.fromDecimals(lpTokenInfo.balance, lpTokenInfo.decimals, true)} min={0} onChange={(e) => onUpdateLpTokenAmount(e.target.value)} showCoin={true} showBalance={true} name={lpTokenInfo.symbol} />
-                </div>
-                {
-                    parseFloat(lpTokenAmount.value || lpTokenAmount) > 0 && <div className="DiffWallet">
-                        <p className="BreefRecap"><b>Pair</b>:
-                            {
-                                setupTokens.map((setupToken, i) => <span key={setupToken.address}> {tokensAmounts[i].value || window.formatMoney(dfoCore.toDecimals(tokensAmounts[i], setupToken.decimals), setupToken.decimals)} {setupToken.symbol}</span>)
-                            }
-                        </p>
-                    </div>
-                }
-                <label className="OptionalThingsFarmers" htmlFor="openPosition2">
-                    <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => {
-                        if (!e.target.checked) {
-                            setUniqueOwner("");
+                        {
+                            addLoading ? <a className="Web3ActionBTN" disabled={addLoading}>
+                                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            </a> : <a className="Web3ActionBTN" onClick={() => addLiquidity()} disabled={tokensApprovals.some((value) => !value) || tokensAmounts.some((value) => value === 0)}>Add Liquidity</a>
                         }
-                        setOpenPositionForAnotherWallet(e.target.checked);
-                    }} id="openPosition2" />
-                    <p>External Owner</p>
-                </label>
-                {
-                    openPositionForAnotherWallet && <div className="DiffWallet">
-                        <input type="text" className="TextRegular" placeholder="Position owner address" value={uniqueOwner} onChange={(e) => setUniqueOwner(e.target.value)} id="uniqueOwner" />
-                        <p className="BreefExpl">Open this farming position as another wallet - The wallet you insert here will be the owner of the entire position and Farm Tokens (if "Locked Position")</p>
                     </div>
-                }
-                {
-                    (!setupInfo.free && rewardTokenInfo) && <div className="DiffWallet">
-                        <p className="BreefRecap">Total Rewards until end block: <br></br><b>{window.formatMoney(lockedEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</b></p>
-                        <p className="BreefExpl">Once you lock this liquidity you'll be able to withdraw it at the Setup End Block. If you want to Unlock this position earlier, you'll need to pay a Penalty Fee (in Reward Tokens) + all of the Reward Tokens you Claimed from this position + All of the Farm Token you're minting (representing your LP tokens locked).</p>
-                    </div>
-                }
-                {
-                    (setupInfo.free && rewardTokenInfo) && <div className="DiffWallet">
-                        <p className="BreefRecap"><b>Estimated reward per day</b>: {window.formatMoney(freeEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</p>
-                    </div>
-                }
-                <div className="Web3BTNs">
-                    {
-                        !lpTokenInfo.approval && <>
-                            {getApproveButton(true)}
-                        </>
-                    }
-                    {
-                        addLoading ? <a className="Web3ActionBTN" disabled={addLoading}>
-                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        </a> : <a className="Web3ActionBTN" onClick={() => addLiquidity()} disabled={!lpTokenInfo.approval || parseFloat(lpTokenAmount) === 0}>Add Liquidity</a>
-                    }
-                </div>
             </> :
                 inputType === 'add-eth' ? <>
                     <div className="InputTokenRegular">
@@ -1070,30 +997,17 @@ const SetupComponentGen2 = (props) => {
                         {loadingPrestoData && <Loading />}
                         {prestoData && <p className="BreefRecap">Position Weight: <br></br><b>{window.fromDecimals(prestoData.firstTokenAmount, prestoData.token0decimals)} {prestoData.token0Symbol}</b> and <b>{window.fromDecimals(prestoData.secondTokenAmount, prestoData.token1decimals)} {prestoData.token1Symbol}</b></p>}
                     </div>
-                    <label className="OptionalThingsFarmers" htmlFor="openPosition2">
-                        <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => {
-                            if (!e.target.checked) {
-                                setUniqueOwner("");
-                            }
-                            setOpenPositionForAnotherWallet(e.target.checked);
-                        }} id="openPosition2" />
-                        <p>External Owner</p>
-                    </label>
-                    {
-                        openPositionForAnotherWallet && <div className="DiffWallet">
-                            <input type="text" className="TextRegular" placeholder="Position owner address" value={uniqueOwner} onChange={(e) => setUniqueOwner(e.target.value)} id="uniqueOwner" />
-                            <p className="BreefExpl">Open this farming position as another wallet - The wallet you insert here will be the owner of the entire position and Farm Tokens (if "Locked Position")</p>
-                        </div>
-                    }
-                    {
-                        (!setupInfo.free && rewardTokenInfo) && <div className="DiffWallet">
-                            <p className="BreefRecap">Total Rewards until end block: <br></br><b>{window.formatMoney(lockedEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</b></p>
-                            <p className="BreefExpl">Once you lock this liquidity you'll be able to withdraw it at the Setup End Block. If you want to Unlock this position earlier, you'll need to pay a Penalty Fee (in Reward Tokens) + all of the Reward Tokens you Claimed from this position + All of the Farm Token you're minting (representing your LP tokens locked).</p>
-                        </div>
-                    }
                     {
                         (setupInfo.free && rewardTokenInfo) && <div className="DiffWallet">
-                            <p className="BreefRecap">Estimated reward per day: <br></br><b>{window.formatMoney(freeEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</b></p>
+                            <p className="BreefRecap">Estimated reward per day: <br></br><b>{window.formatMoney(freeEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</b>
+                                <div className="Web3BTNs">
+                                {
+                                    addLoading ? <a className="Web3ActionBTN" disabled={addLoading}>
+                                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    </a> : <a className="Web3ActionBTN" onClick={() => addLiquidity()} disabled={parseFloat(ethAmount) === 0}>Add Liquidity</a>
+                                }
+                                </div>
+                            </p>
                         </div>
                     }
                     <div className="Web3BTNs">
@@ -1192,19 +1106,7 @@ const SetupComponentGen2 = (props) => {
                         </div>
                         <span className="UniV3TVLFIV">
                             <b>TVL</b>: {setupTokens.map((token, index) => <span key={token.address}>{props.dfoCore.toDecimals(token.liquidity, token.decimals, 2)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span>)}
-                        </span>
-                        {(canActivateSetup || (hostedBy && extensionContract && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex)) || parseInt(setup.endBlock) > parseInt(blockNumber)) &&
-                            <>
-                                {
-                                    (hostedBy && extensionContract && !edit && parseInt(setupInfo.lastSetupIndex) === parseInt(setupIndex)) &&
-                                    <a className="web2ActionBTN web2ActionBTNS" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(true) }}>Edit</a>
-                                }
-                                {
-                                    (edit) &&
-                                    <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>
-                                }
-                            </>
-                            }  
+                        </span> 
                     </div>
                 </div>
             </div>

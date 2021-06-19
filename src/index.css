@@ -316,7 +316,7 @@ a:disabled {cursor:wait !important;}
 .FarmActions .InputTokenRegular {display: block;margin: 30px auto 0px auto;}
 .OptionalThingsFarmers {width: 95%; margin: 20px auto; display: block; text-align: center;}
 .OptionalThingsFarmers input {display: inline-block; font-size: 14px; vertical-align: middle;}
-.OptionalThingsFarmers p {display: inline-block; font-size: 14px; vertical-align: middle;}
+.OptionalThingsFarmers p {display: inline-block; font-size: 14px; vertical-align: middle; margin-block-start: 0em;margin-block-end: 0em;}
 .FarmActions .Web3BTNs {display: block;margin: 20px auto 0px auto;}
 .LockedFarmPositions {display: block; margin: 30px auto; width: 100%;}
 .ListOfThings h3 {font-size: 20px;}
@@ -491,7 +491,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .UniPoolFeeInfo {font-size: 10px; color: #7472fc; font-weight: bold; border: 2px solid #7472fc;padding: 2px 4px; border-radius: 5px; display: inline-block; margin-left: 5px;}
 .UniPoolFeeInfo:hover, .UniPoolFeeInfo:active {color: #7472fc; font-weight: bold; border: 2px solid #7472fc;  text-decoration: none !important;}
 .BlockInfoV3 {font-size: 11px !important; width: 100%; display: block !important;margin: 2px 0 2px 4px!important;}
-.BlockInfoV3B {font-size: 13px !important; width: 100%; display: block !important;margin: 4px 0 4px 4px !important;}
+.BlockInfoV3B {font-size: 13px !important; width: 100%; display: block !important;margin: 6px 0 4px 4px !important;}
 .UniV3TVLFIV {width: 100%; margin: 5px auto; text-align: center; font-size: 10px !important; display: inline-block;}
 .UniV3TVLFIV span {font-size: 10px !important;}
 .farmInfoCurve p {margin-left: 0 !important;}
@@ -510,6 +510,16 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .V3FarmStatusNope {padding: 1px 3px; font-size: 10px!important; margin-right: 4px; color: #FC4F4F !important; border: 2px solid #FC4F4F !important;border-radius: 4px;font-weight: bold;}
 .V3FarmStatusNopeNow {padding: 1px 3px; font-size: 10px!important; margin-right: 4px; color: #844e4ee6 !important; border: 2px solid #844e4ee6 !important;border-radius: 4px;font-weight: bold;}
 .V3FarmStatusYEP {padding: 1px 3px; font-size: 10px!important; margin-right: 4px; color: #34b15ee0 !important; border: 2px solid #34b15ee0 !important;border-radius: 4px;font-weight: bold;}
+.FarmSetupV3 .Web3BTNs {margin: 20px auto 20px auto;}
+.FarmSetupV3 .Web3BTNs .Web3ActionBTN, .FarmSetupV3 .Web3BTNs .ApproveBTN {display: inline-block;padding: 4px 11px;border-radius: 10px;font-size: 14px;}
+.FarmSetupV3 .OptionalThingsFarmers {width: 95%;margin: 10px auto 20px auto;display: block;text-align: right;}
+.FarmSetupV3 .OptionalThingsFarmers p {background-color: #e9effc; padding: 3px 8px; border-radius: 5px; font-size: 12px;}
+.FarmSetupV3 .OptionalThingsFarmers p input {position: relative;margin-top: -2px;margin-left: 0; margin-right: 5px;vertical-align: middle;display: inline-block;}
+.penguin .FarmSetupV3 .OptionalThingsFarmers p {background-color: #1c1c27;}
+.FarmSetupV3 .BreefRecap {padding: 8px 0; background-color: #e9effc; border-radius: 8px;}
+.penguin .FarmSetupV3 .BreefRecap {background-color: #1c1c27}
+.Web3ActionBTN:disabled {background-color: #5f5b53;}
+
 
 @media only screen and (max-device-width: 750px) {
    .IndexRegularText iframe {display: none;}
