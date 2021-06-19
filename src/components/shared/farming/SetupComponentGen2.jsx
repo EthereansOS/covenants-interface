@@ -110,7 +110,8 @@ const SetupComponentGen2 = (props) => {
             await loadData(farmSetup, farmSetupInfo, true);
             if (!intervalId.current) {
                 intervalId.current = setInterval(async () => {
-                    const { '0': s, '1': si } = await props.dfoCore.loadFarmingSetup(lmContract, setupIndex);
+                    var { '0': s, '1': si } = await props.dfoCore.loadFarmingSetup(lmContract, setupIndex);
+                    si = {...si, free : true, generation : 'gen2'};
                     setSetup(s);
                     setSetupInfo(si);
                     await loadData(s, si);
@@ -514,16 +515,10 @@ const SetupComponentGen2 = (props) => {
         if (setupInfo.free && (!removalAmount || removalAmount === 0)) return;
         setRemoveLoading(true);
         try {
-            if (setupInfo.free) {
-                const removedLiquidity = removalAmount === 100 ? manageStatus.liquidityPoolAmount : props.dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString().split('.')[0];
-                const gasLimit = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, 0, outputType === 'to-pair', removedLiquidity).estimateGas({ from: dfoCore.address });
-                const result = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, 0, outputType === 'to-pair', removedLiquidity).send({ from: dfoCore.address, gasLimit, gas: gasLimit });
-                props.addTransaction(result);
-            } else {
-                const gasLimit = await lmContract.methods.withdrawLiquidity(0, setup.objectId, outputType === 'to-pair', farmTokenBalance).estimateGas({ from: dfoCore.address });
-                const result = await lmContract.methods.withdrawLiquidity(0, setup.objectId, outputType === 'to-pair', farmTokenBalance).send({ from: dfoCore.address, gasLimit, gas: gasLimit });
-                props.addTransaction(result);
-            }
+            const removedLiquidity = removalAmount === 100 ? manageStatus.liquidityPoolAmount : props.dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString().split('.')[0];
+            const gasLimit = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, removedLiquidity).estimateGas({ from: dfoCore.address });
+            const result = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, removedLiquidity).send({ from: dfoCore.address, gasLimit, gas: gasLimit });
+            props.addTransaction(result);
             await getSetupMetadata();
         } catch (error) {
             console.error(error);

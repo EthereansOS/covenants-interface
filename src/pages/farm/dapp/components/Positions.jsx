@@ -42,7 +42,7 @@ const Positions = (props) => {
                     }
                     {
                         farmingSetups.length > 0 && farmingSetups.map((farmingSetup) => {
-                            var CurrentSetupComponent = farmingSetup.generation === 'gen2' ? SetupComponent : SetupComponentGen2;
+                            var CurrentSetupComponent = farmingSetup.generation === 'gen2' ? SetupComponentGen2 : SetupComponent;
                             return (
                                 <CurrentSetupComponent className="FarmSetup" setupIndex={farmingSetup.setupIndex} setupInfo={farmingSetup.setupInfo} key={`${farmingSetup.contract.options.address}-${farmingSetup.setupInfo}`} lmContract={farmingSetup.contract} dfoCore={props.dfoCore} setup={farmingSetup} hasBorder />
                             )

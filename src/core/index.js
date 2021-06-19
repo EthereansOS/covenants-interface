@@ -589,7 +589,7 @@ export default class DFOCore {
             this.positions && p.push(...this.positions);
             await this.loadPositions(undefined, 'gen1');
             this.positions && p.push(...this.positions);
-            this.positions = p;
+            return this.positions = p;
         }
         try {
             if (!factoryAddress) factoryAddress = this.getContextElement(generation === 'gen2' ? "farmGen2FactoryAddress" : "farmFactoryAddress");
@@ -610,18 +610,21 @@ export default class DFOCore {
                     const extensionAddress = await contract.methods._extension().call();
                     const extensionContract = await this.getContract(this.getContextElement(generation === 'gen2' ? "FarmExtensionGen2ABI" : "FarmExtensionGen1ABI"), extensionAddress);
                     const { host } = await extensionContract.methods.data().call();
-                    deployedFarmingContracts.push({ address: farmMainAddress, sender: host, generation });
+                    deployedFarmingContracts.push({ contract, address: farmMainAddress, sender: host, generation });
                 } catch (error) {
                     console.error(error);
                 }
             }
             this.positions = [];
             await Promise.all(deployedFarmingContracts.map(async(c) => {
-                const contract = await this.getContract(this.getContextElement("FarmMainGen1ABI"), c.address);
-                const farmTokenCollectionAddress = await contract.methods._farmTokenCollection().call();
+                const contract = c.contract;
                 let farmTokenCollection = null;
-                if (farmTokenCollectionAddress !== this.voidEthereumAddress) {
-                    farmTokenCollection = await this.getContract(this.getContextElement("INativeV1ABI"), farmTokenCollectionAddress);
+                try {
+                    const farmTokenCollectionAddress = await contract.methods._farmTokenCollection().call();
+                    if (farmTokenCollectionAddress !== this.voidEthereumAddress) {
+                        farmTokenCollection = await this.getContract(this.getContextElement("INativeV1ABI"), farmTokenCollectionAddress);
+                    }
+                } catch(e) {
                 }
                 const events = await window.getLogs({
                     address: c.address,
@@ -641,7 +644,8 @@ export default class DFOCore {
                         const pos = await contract.methods.position(positionId).call();
                         if (!found.includes(pos.setupIndex)) {
                             try {
-                                const { '0': setup, '1': setupInfo } = await this.loadFarmingSetup(contract, pos.setupIndex);
+                                var { '0': setup, '1': setupInfo } = await this.loadFarmingSetup(contract, pos.setupIndex);
+                                setupInfo = {...setupInfo, free : setupInfo.free || c.generation === 'gen2', generation : c.generation};
                                 if (this.isValidPosition(pos) && !this.positions.includes({...setup, contract, setupInfo, setupIndex: pos.setupIndex })) {
                                     this.positions.push({...setup, contract, setupInfo, setupIndex: pos.setupIndex, generation : c.generation });
                                     found.push(pos.setupIndex);
