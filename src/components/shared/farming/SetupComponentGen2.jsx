@@ -2,13 +2,13 @@ import Coin from '../coin/Coin';
 import { useEffect, useState } from 'react';
 import { Input, ApproveButton } from '..';
 import { connect } from 'react-redux';
-import { addTransaction, removeInflationSetup } from '../../../store/actions';
-import LockedPositionComponent from './LockedPositionComponent';
+import { addTransaction } from '../../../store/actions';
 import SwitchIcon from "../../../assets/images/switch.png";
 import ArrowIcon from "../../../assets/images/arrow.png";
 import Loading from "../Loading";
 import { useRef } from 'react';
-
+import { tickToPrice } from '@uniswap/v3-sdk/dist/';
+import { Token } from "@uniswap/sdk-core/dist";
 
 const SetupComponentGen2 = (props) => {
     let { className, dfoCore, setupIndex, lmContract, hostedBy } = props;
@@ -74,7 +74,8 @@ const SetupComponentGen2 = (props) => {
     const [loadingPrestoData, setLoadingPrestoData] = useState(false);
     const [delayedBlock, setDelayedBlock] = useState(0);
     const [endBlockReached, setEndBlockReached] = useState(false);
-    const [lastTokenIndex, setLastTokenIndex] = useState(0);
+    const [secondTokenIndex, setsecondTokenIndex] = useState(0);
+    const [tickData, setTickData] = useState(null);
 
     const ethereumAddress = props.dfoCore.getContextElement("wethTokenAddress");
 
@@ -98,6 +99,32 @@ const SetupComponentGen2 = (props) => {
     useEffect(() => {
         updateEthAmount(ethAmount);
     }, [uniqueOwner, selectedAmmIndex]);
+
+    useEffect(async () => {
+        try {
+            var slot = await lpTokenInfo.contract.methods.slot0().call();
+            var tickData = {
+                maxPrice : tickToPrice(lpTokenInfo.uniswapTokens[secondTokenIndex], lpTokenInfo.uniswapTokens[1 - secondTokenIndex], parseInt(setupInfo.tickLower)).toSignificant(18),
+                minPrice : tickToPrice(lpTokenInfo.uniswapTokens[secondTokenIndex], lpTokenInfo.uniswapTokens[1 - secondTokenIndex], parseInt(setupInfo.tickUpper)).toSignificant(18),
+                currentPrice : tickToPrice(lpTokenInfo.uniswapTokens[secondTokenIndex], lpTokenInfo.uniswapTokens[1 - secondTokenIndex], parseInt(slot.tick)).toSignificant(18),
+                cursor : parseInt(slot.tick) <= parseInt(setupInfo.tickLower) ? 0 : parseInt(slot.tick) >= parseInt(setupInfo.tickUpper) ? 100 : null,
+                outOfRangeLower : parseInt(slot.tick) <= parseInt(setupInfo.tickLower),
+                outOfRangeUpper : parseInt(slot.tick) >= parseInt(setupInfo.tickUpper)
+            };
+            if(secondTokenIndex === 0) {
+                var maxPrice = tickData.maxPrice;
+                tickData.maxPrice = tickData.minPrice;
+                tickData.minPrice = maxPrice;
+            }
+            if(tickData.cursor !== 0 && tickData.cursor !== 100) {
+                var denominator = Math.abs(parseInt(setupInfo.tickUpper) - parseInt(setupInfo.tickLower))
+                var numerator = Math.abs(parseInt(slot.tick) - parseInt(setupInfo.tickLower));
+                tickData.cursor = window.formatMoney(window.numberToString((numerator / denominator) * 100), 2);
+            }
+            setTickData(tickData);
+        } catch(e) {
+        }
+    }, [lpTokenInfo, secondTokenIndex, setupInfo]);
 
     const getSetupMetadata = async () => {
         setLoading(true);
@@ -182,6 +209,17 @@ const SetupComponentGen2 = (props) => {
         const lpTokenApproval = "0";
         const fee = await lpToken.methods.fee().call();
         const slot = await lpToken.methods.slot0().call();
+        var uniswapTokens = await Promise.all([
+            await lpToken.methods.token0().call(),
+            await lpToken.methods.token1().call()
+        ].map(async tkAddress => {
+            const currentToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), tkAddress);
+            const symbol = tkAddress === window.voidEthereumAddress || tkAddress === ethereumAddress ? "ETH" : await currentToken.methods.symbol().call();
+            var name = tkAddress === window.voidEthereumAddress || tkAddress === ethereumAddress ? "Ethereum" : await currentToken.methods.name().call();
+            var decimals = parseInt(tkAddress ===window.voidEthereumAddress ? "18" : await currentToken.methods.decimals().call());
+            var uniToken = new Token(props.dfoCore.chainId, tkAddress, decimals, symbol, name);
+            return uniToken;
+        }));
         console.log("Slot", farmSetup.infoIndex, {
             tick: slot.tick,
             sqrtPriceX96: slot.sqrtPriceX96,
@@ -190,7 +228,7 @@ const SetupComponentGen2 = (props) => {
             fee,
             inRange : parseInt(farmSetupInfo.tickLower) >= parseInt(slot.tick) && parseInt(slot.tick) <= parseInt(farmSetupInfo.tickUpper)
         });
-        setLpTokenInfo({ slot, fee, contract: lpToken, symbol: lpTokenSymbol, decimals: lpTokenDecimals, balance: lpTokenBalance, approval: parseInt(lpTokenApproval) !== 0 && parseInt(lpTokenApproval) >= parseInt(lpTokenBalance) });
+        setLpTokenInfo({ uniswapTokens, fee, contract: lpToken, symbol: lpTokenSymbol, decimals: lpTokenDecimals, balance: lpTokenBalance, approval: parseInt(lpTokenApproval) !== 0 && parseInt(lpTokenApproval) >= parseInt(lpTokenBalance) });
 
         const activateSetup = parseInt(farmSetupInfo.renewTimes) > 0 && !farmSetup.active && parseInt(farmSetupInfo.lastSetupIndex) === parseInt(setupIndex);
         setCanActivateSetup(activateSetup);
@@ -379,38 +417,28 @@ const SetupComponentGen2 = (props) => {
                 value,
                 full : fullValue
             }
-            setTokensAmount(tks);
-            setLpTokenAmount('1');
-            /*var result = await ammContract.methods.byTokenAmount(setupInfo.liquidityPoolTokenAddress, tokenAddress, fullValue).call();
-            var { liquidityPoolAmount } = 0;
-            result = await ammContract.methods.byLiquidityPoolAmount(setupInfo.liquidityPoolTokenAddress, liquidityPoolAmount).call();
-            var ams = result.tokensAmounts;
-            if (fullValue !== ams[index] && setupTokens[index].decimals !== '18') {
-                result = await ammContract.methods.byTokenAmount(setupInfo.liquidityPoolTokenAddress, tokenAddress, ams[index]).call();
-                liquidityPoolAmount = result.liquidityPoolAmount;
-                ams = result.tokensAmounts;
-            }
-            setLpTokenAmount(liquidityPoolAmount)
-            setTokensAmount(ams.map((_, i) => { return index === i ? { value: window.numberToString(value), full: ams[i] } : ams[i] }));
-            if (!setupInfo.free) {
-                let mainTokenIndex = 0;
-                setupTokens.forEach((t, i) => {
-                    if (t.address === setupInfo.mainTokenAddress) {
-                        mainTokenIndex = i;
-                    }
-                })
-                if (parseInt(ams[mainTokenIndex]) > 0) {
-                    const reward = await lmContract.methods.calculateLockedFarmingReward(setupIndex, ams[mainTokenIndex], false, 0).call();
-                    setLockedEstimatedReward(window.fromDecimals(parseInt(reward.relativeRewardPerBlock) * (parseInt(setup.endBlock) - blockNumber), rewardTokenInfo.decimals));
-                }
+            var tick = parseInt((await lpTokenInfo.contract.methods.slot0().call()).tick);
+            var x = window.formatNumber(tickToPrice(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], tick).toSignificant());
+            console.log(x);
+            tks[1 - index] = {
+                full : window.formatNumber(fullValue)
+            };
+            if(index === 0) {
+                tks[1 - index].full = tks[1 - index].full * x;
             } else {
-                if (parseInt(setup.totalSupply) + parseInt(liquidityPoolAmount) > 0) {
-                    const val = parseInt(liquidityPoolAmount) * 6400 * parseInt(setup.rewardPerBlock) / (parseInt(setup.totalSupply) + parseInt(liquidityPoolAmount));
-                    if (!isNaN(val)) {
-                        setFreeEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(val), rewardTokenInfo.decimals))
-                    }
+                tks[1 - index].full = tks[1 - index].full / x;
+            }
+            tks[1 - index].full = window.numberToString(tks[1 - index].full);
+            tks[1 - index].value = window.fromDecimals(tks[1 - index].full, lpTokenInfo.uniswapTokens[1 - index].decimals, true);
+            setTokensAmount(tks);
+            var liquidityPoolAmount = "1";
+            setLpTokenAmount(liquidityPoolAmount)
+            if (parseInt(setup.totalSupply) + parseInt(liquidityPoolAmount) > 0) {
+                const val = parseInt(liquidityPoolAmount) * 6400 * parseInt(setup.rewardPerBlock) / (parseInt(setup.totalSupply) + parseInt(liquidityPoolAmount));
+                if (!isNaN(val)) {
+                    setFreeEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(val), rewardTokenInfo.decimals))
                 }
-            }*/
+            }
         }, 300);
     }
 
@@ -972,7 +1000,7 @@ const SetupComponentGen2 = (props) => {
             <div className="FarmSetupMain">
                 <div className="SetupFarmingInstructions">
                     <div className="SetupFarmingInstructionsV3">
-                        {setupTokens.map((token, i) => <div className="TokenFarmV3InfoBox"><figure key={token.address}>{i !== 0 ? '' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />}</figure><span> 50% {window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>} {!window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>}</span> </div>)}
+                        {setupTokens.map((token, i) => <div className="TokenFarmV3InfoBox"><figure key={token.address}>{i !== 0 ? '' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />}</figure><span> {tickData && `${(i === 0 ? tickData.cursor : 100 - tickData.cursor)}%`} {window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>} {!window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>}</span> </div>)}
                         {!endBlockReached && 
                             <p className="BlockInfoV3B">
                             {setup.active && parseInt(setup.endBlock) > blockNumber && <span className="V3FarmStatusYEP">Active</span>}
@@ -1009,7 +1037,7 @@ const SetupComponentGen2 = (props) => {
                     <div className="farmInfoCurve">
                         <p className="farmInfoCurveL">
                             <p className="MAinTokensel">
-                                <a href="javascript:;" onClick={() => setLastTokenIndex(1 - lastTokenIndex)}><img src={SwitchIcon}></img></a> {setupTokens[lastTokenIndex].symbol}
+                                <a href="javascript:;" onClick={() => setsecondTokenIndex(1 - secondTokenIndex)}><img src={SwitchIcon}></img></a> {setupTokens[secondTokenIndex].symbol}
                             </p>
                         </p>
                         <p className="farmInfoCurveR">
@@ -1018,20 +1046,20 @@ const SetupComponentGen2 = (props) => {
                                 {setup.objectId && setup.objectId !== '0' && <a href={props.dfoCore.getContextElement("uniswapV3NFTURLTemplate").format(setup.objectId)} target="_blank" className="UniNFTInfo">NFT</a>}
                             </p>
                         </p>
-                        <div className="UniV3CurveView">
+                        {!tickData ? <Loading/> : <div className="UniV3CurveView">
                             <div className="UniV3CurveViewCurv">
                                 <span className="CircleLeftV3Curve"></span>
-                                <span className="CircleLeftV3CurvePrice">0.0000001</span>
+                                <span className="CircleLeftV3CurvePrice">{window.formatMoney(tickData.minPrice, 9)} {lpTokenInfo.uniswapTokens[1 - secondTokenIndex].symbol}</span>
                                 <span className="CircleRightV3Curve"></span>
-                                <span className="CircleRightV3CurvePrice">1,000,000</span>
-                                <div className="CircleActualPriceV3">
+                                <span className="CircleRightV3CurvePrice">{window.formatMoney(tickData.maxPrice, 9)} {lpTokenInfo.uniswapTokens[1 - secondTokenIndex].symbol}</span>
+                                <div className="CircleActualPriceV3" style={{left : `${tickData.cursor}%`}}>
                                     <span className="CircleRightV3Actual">
                                         <img src={ArrowIcon}></img>
-                                        <span className="CircleRightV3ActualPrice">0.0019</span>
+                                        <span className="CircleRightV3ActualPrice">{window.formatMoney(tickData.currentPrice, 9)} {lpTokenInfo.uniswapTokens[1 - secondTokenIndex].symbol}</span>
                                     </span>
                                 </div>
                             </div>
-                        </div>
+                        </div>}
                         <span className="UniV3TVLFIV">
                             <b>TVL</b>: {setupTokens.map((token, index) => <span key={token.address}>{props.dfoCore.toDecimals(token.liquidity, token.decimals, 2)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span>)}
                         </span>
@@ -1066,6 +1094,7 @@ const SetupComponentGen2 = (props) => {
             {
                 (edit && !open && !withdrawOpen) ? getEdit() : <div />
             }
+            {getAdvanced()}
         </div>)};
 
 const mapStateToProps = (state) => {

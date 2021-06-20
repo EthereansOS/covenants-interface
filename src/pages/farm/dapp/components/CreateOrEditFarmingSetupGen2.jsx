@@ -6,8 +6,8 @@ import {
     tickToPrice,
     priceToClosestTick,
     TICK_SPACINGS,
-  } from '@uniswap/v3-sdk/dist/';
-import { Token, CurrencyAmount, Price } from "@uniswap/sdk-core/dist"
+} from '@uniswap/v3-sdk/dist/';
+import { Token, CurrencyAmount, Price } from "@uniswap/sdk-core/dist";
 
 const CreateOrEditFarmingSetup = (props) => {
     const { rewardToken, onAddFarmingSetup, editSetup, onEditFarmingSetup, dfoCore, onCancel } = props;
@@ -50,11 +50,11 @@ const CreateOrEditFarmingSetup = (props) => {
 
     useEffect(() => {
         try {
-            lowerTickPriceInput.value = tickToPrice(uniswapTokens[1 - secondTokenIndex], uniswapTokens[secondTokenIndex], tickLower).toSignificant(18);
+            lowerTickPriceInput.value = tickToPrice(uniswapTokens[secondTokenIndex], uniswapTokens[1 - secondTokenIndex], tickLower).toSignificant(18);
         } catch(e) {
         }
         try {
-            upperTickPriceInput.value = tickToPrice(uniswapTokens[1 - secondTokenIndex], uniswapTokens[secondTokenIndex], tickUpper).toSignificant(18);
+            upperTickPriceInput.value = tickToPrice(uniswapTokens[secondTokenIndex], uniswapTokens[1 - secondTokenIndex], tickUpper).toSignificant(18);
         } catch(e) {
         }
     }, [tickLower, tickUpper]);
@@ -196,8 +196,8 @@ const CreateOrEditFarmingSetup = (props) => {
         var tokenIndex = 1 - secondTokenIndex;
         var tick = parseInt(e.currentTarget.dataset.tick);
         var price = new Price({
-            baseAmount: CurrencyAmount.fromRawAmount(uniswapTokens[tokenIndex], window.formatNumber(value)),
-            quoteAmount: CurrencyAmount.fromRawAmount(uniswapTokens[1 - tokenIndex], 1)
+            baseAmount: CurrencyAmount.fromRawAmount(uniswapTokens[1 - tokenIndex], 1),
+            quoteAmount: CurrencyAmount.fromRawAmount(uniswapTokens[tokenIndex], window.formatNumber(value))
         });
         var retrievedTick = priceToClosestTick(price);
         tick === 0 && settickLower(retrievedTick);
@@ -288,7 +288,7 @@ const CreateOrEditFarmingSetup = (props) => {
                     <h6>Min Price</h6>
                     <p className="BreefRecapB">Set the Lower Price of your Curve</p>
                     <div className="InputTokenRegular">
-                        <input type="number" data-tick="0" ref={ref => lowerTickPriceInput = ref} onBlur={onTickPriceManualInput} defaultValue={tickToPrice(uniswapTokens[1 - secondTokenIndex], uniswapTokens[secondTokenIndex], tickLower).toSignificant(18)}/>
+                        <input type="number" data-tick="0" ref={ref => lowerTickPriceInput = ref} onBlur={onTickPriceManualInput} defaultValue={tickToPrice(uniswapTokens[secondTokenIndex], uniswapTokens[1 - secondTokenIndex], tickLower).toSignificant(18)}/>
                     </div>
                     <div className="InputTokenRegular">
                         <a className="Web3ActionBtn" href="javascript:;" onClick={() => updateTick(0, false)}> - </a>
@@ -299,7 +299,7 @@ const CreateOrEditFarmingSetup = (props) => {
                     <h6>Max Price</h6>
                     <p className="BreefRecapB">Set the Upper Price of your Curve</p>
                     <div className="InputTokenRegular">
-                        <input type="number" data-tick="1" ref={ref => upperTickPriceInput = ref} onBlur={onTickPriceManualInput} defaultValue={tickToPrice(uniswapTokens[1 - secondTokenIndex], uniswapTokens[secondTokenIndex], tickUpper).toSignificant(18)}/>
+                        <input type="number" data-tick="1" ref={ref => upperTickPriceInput = ref} onBlur={onTickPriceManualInput} defaultValue={tickToPrice(uniswapTokens[secondTokenIndex], uniswapTokens[1 - secondTokenIndex], tickUpper).toSignificant(18)}/>
                     </div>
                     <div className="InputTokenRegular">
                         <a className="Web3ActionBtn" href="javascript:;" onClick={() => updateTick(1, false)}> - </a>
