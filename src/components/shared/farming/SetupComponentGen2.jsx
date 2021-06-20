@@ -120,7 +120,7 @@ const SetupComponentGen2 = (props) => {
             if(tickData.cursor !== 0 && tickData.cursor !== 100) {
                 var denominator = Math.abs(parseInt(setupInfo.tickUpper) - parseInt(setupInfo.tickLower))
                 var numerator = Math.abs(parseInt(slot.tick) - parseInt(setupInfo.tickLower));
-                tickData.cursor = window.formatMoney(window.numberToString((numerator / denominator) * 100), 2);
+                tickData.cursor = window.formatMoney(100 - window.numberToString((numerator / denominator) * 100), 2);
             }
             setTickData(tickData);
         } catch(e) {
