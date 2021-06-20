@@ -39,11 +39,25 @@ const CreateOrEditFarmingSetup = (props) => {
     // current step
     const [currentStep, setCurrentStep] = useState(0);
 
+    var lowerTickPriceInput;
+    var upperTickPriceInput;
+
     useEffect(() => {
         if (editSetup && (editSetup.liquidityPoolTokenAddress || (editSetup.liquidityPoolToken && editSetup.liquidityPoolToken.address))) {
             onSelectLiquidityPoolToken(editSetup.liquidityPoolTokenAddress || editSetup.liquidityPoolToken.address).then(() => editSetup.mainToken && setMainToken(editSetup.mainToken));
         }
     }, []);
+
+    useEffect(() => {
+        try {
+            lowerTickPriceInput.value = tickToPrice(uniswapTokens[1 - secondTokenIndex], uniswapTokens[secondTokenIndex], tickLower).toSignificant(18);
+        } catch(e) {
+        }
+        try {
+            upperTickPriceInput.value = tickToPrice(uniswapTokens[1 - secondTokenIndex], uniswapTokens[secondTokenIndex], tickUpper).toSignificant(18);
+        } catch(e) {
+        }
+    }, [tickLower, tickUpper]);
 
     const onSelectLiquidityPoolToken = async (address) => {
         if (!address) return;
@@ -181,15 +195,14 @@ const CreateOrEditFarmingSetup = (props) => {
         var value = window.formatMoney(e.currentTarget.value, 18);
         var tokenIndex = 1 - secondTokenIndex;
         var tick = parseInt(e.currentTarget.dataset.tick);
-        var currencyAmount = CurrencyAmount.fromRawAmount(uniswapTokens[tokenIndex], window.formatNumber(value));
         var price = new Price({
-            baseAmount: currencyAmount,
+            baseAmount: CurrencyAmount.fromRawAmount(uniswapTokens[tokenIndex], window.formatNumber(value)),
             quoteAmount: CurrencyAmount.fromRawAmount(uniswapTokens[1 - tokenIndex], 1)
         });
         var retrievedTick = priceToClosestTick(price);
         tick === 0 && settickLower(retrievedTick);
         tick === 1 && settickUpper(retrievedTick);
-        e.currentTarget.value = tickToPrice(uniswapTokens[1 - secondTokenIndex], uniswapTokens[secondTokenIndex], retrievedTick).toSignificant(18);
+        //e.currentTarget.value = tickToPrice(uniswapTokens[1 - secondTokenIndex], uniswapTokens[secondTokenIndex], retrievedTick).toSignificant(18);
     }
 
     const getFirstStep = () => {
@@ -275,7 +288,7 @@ const CreateOrEditFarmingSetup = (props) => {
                     <h6>Min Price</h6>
                     <p className="BreefRecapB">Set the Lower Price of your Curve</p>
                     <div className="InputTokenRegular">
-                        <input type="number" data-tick="0" onBlur={onTickPriceManualInput} defaultValue={tickToPrice(uniswapTokens[1 - secondTokenIndex], uniswapTokens[secondTokenIndex], tickLower).toSignificant(18)}/>
+                        <input type="number" data-tick="0" ref={ref => lowerTickPriceInput = ref} onBlur={onTickPriceManualInput} defaultValue={tickToPrice(uniswapTokens[1 - secondTokenIndex], uniswapTokens[secondTokenIndex], tickLower).toSignificant(18)}/>
                     </div>
                     <div className="InputTokenRegular">
                         <a className="Web3ActionBtn" href="javascript:;" onClick={() => updateTick(0, false)}> - </a>
@@ -286,7 +299,7 @@ const CreateOrEditFarmingSetup = (props) => {
                     <h6>Max Price</h6>
                     <p className="BreefRecapB">Set the Upper Price of your Curve</p>
                     <div className="InputTokenRegular">
-                        <input type="number" data-tick="1" onBlur={onTickPriceManualInput} defaultValue={tickToPrice(uniswapTokens[1 - secondTokenIndex], uniswapTokens[secondTokenIndex], tickUpper).toSignificant(18)}/>
+                        <input type="number" data-tick="1" ref={ref => upperTickPriceInput = ref} onBlur={onTickPriceManualInput} defaultValue={tickToPrice(uniswapTokens[1 - secondTokenIndex], uniswapTokens[secondTokenIndex], tickUpper).toSignificant(18)}/>
                     </div>
                     <div className="InputTokenRegular">
                         <a className="Web3ActionBtn" href="javascript:;" onClick={() => updateTick(1, false)}> - </a>
