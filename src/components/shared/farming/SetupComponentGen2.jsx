@@ -1097,7 +1097,6 @@ const SetupComponentGen2 = (props) => {
                 </div>
             </div>
                 {
-                    <div className="YourFarmingPositions">
                     currentPosition &&
                     <div className="YourFarmingPositions YourFarmingPositionsFarmingFarmingFarmingChiFarmaViveComeUnPAsha">
                         <div className="FarmYou">
