@@ -554,7 +554,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .SetupFarmingInstructionsOMLYG1 {width: 100%; text-align: center; margin: 5px auto;}
 .SetupFarmingInstructionsOMLYG1 p {width: auto; text-align: center;}
 .TVLGen1R {font-size: 11px !important;}
-
+.FarmSetupV3 .FarmYou, .FarmSetupV3 .farmed  {width: 45% !important;}
 
 
 @media only screen and (max-device-width: 750px) {

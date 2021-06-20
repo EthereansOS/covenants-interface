@@ -980,13 +980,13 @@ const SetupComponent = (props) => {
             </>}
             {inputType === 'add-lp' && <>
                     <label className="OptionalThingsFarmers" htmlFor="openPosition2">
-                        <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => {
+                    <p> <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => {
                             if (!e.target.checked) {
                                 setUniqueOwner("");
                             }
                             setOpenPositionForAnotherWallet(e.target.checked);
                         }} id="openPosition2" />
-                        <p>External Owner</p>
+                        External Owner</p>
                         </label>
                     {
                         openPositionForAnotherWallet && <div className="DiffWallet">
@@ -997,13 +997,13 @@ const SetupComponent = (props) => {
             </>}
             {inputType === 'add-eth' && <>
                 <label className="OptionalThingsFarmers" htmlFor="openPosition2">
-                        <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => {
+                    <p>  <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => {
                             if (!e.target.checked) {
                                 setUniqueOwner("");
                             }
                             setOpenPositionForAnotherWallet(e.target.checked);
                         }} id="openPosition2" />
-                        <p>External Owner</p>
+                    External Owner</p>
                     </label>
                     {
                         openPositionForAnotherWallet && <div className="DiffWallet">
@@ -1179,7 +1179,7 @@ const SetupComponent = (props) => {
                 <div className="SetupFarmingInstructions SetupFarmingInstructionsOMLYG1">
                     <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />} </figure>)} {!endBlockReached && <> {apy > 0 && <> <b> APY</b>: {window.formatMoney(apy, 3)}%</>}</>}</p>
                 </div>
-                {!manageStatus || !currentPosition &&
+                {!currentPosition &&
                 <div className="ActionButtonV1">
                     {
                             (!open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Farm</a>
