@@ -264,7 +264,7 @@ const SetupComponentGen2 = (props) => {
         var balances = [
             '0', '0'
         ];
-        if(farmSetup.objectId && farmSetup !== '0') {
+        if(farmSetup.objectId && farmSetup.objectId !== '0') {
             const MAX_UINT128 = ethers.BigNumber.from(2).pow(128).sub(1)
             var prov = new ethers.providers.Web3Provider(window.web3.currentProvider);
             var nftPosMan = new ethers.Contract(dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress"), dfoCore.getContextElement("UniswapV3NonfungiblePositionManagerABI"), prov);
@@ -442,15 +442,15 @@ const SetupComponentGen2 = (props) => {
             var x = window.formatNumber(tickToPrice(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], tick).toSignificant());
             console.log(x);
             tks[1 - index] = {
-                full : window.formatNumber(fullValue)
+                value : window.formatNumber(value)
             };
             if(index === 0) {
-                tks[1 - index].full = tks[1 - index].full * x;
+                tks[1 - index].value = tks[1 - index].value * x;
             } else {
-                tks[1 - index].full = tks[1 - index].full / x;
+                tks[1 - index].value = tks[1 - index].value / x;
             }
-            tks[1 - index].full = window.numberToString(tks[1 - index].full);
-            tks[1 - index].value = window.fromDecimals(tks[1 - index].full, lpTokenInfo.uniswapTokens[1 - index].decimals, true);
+            tks[1 - index].value = window.numberToString(tks[1 - index].value);
+            tks[1 - index].full = window.toDecimals(tks[1 - index].value, lpTokenInfo.uniswapTokens[1 - index].decimals, true);
             setTokensAmount(tks);
             var liquidityPoolAmount = "1";
             setLpTokenAmount(liquidityPoolAmount)
@@ -1058,7 +1058,7 @@ const SetupComponentGen2 = (props) => {
                     <div className="farmInfoCurve">
                         <p className="farmInfoCurveL">
                             <p className="MAinTokensel">
-                                <a href="javascript:;" onClick={() => setsecondTokenIndex(1 - secondTokenIndex)}><img src={SwitchIcon}></img></a> Tok {/*{setupTokens[1 - secondTokenIndex].symbol}*/}
+                                <a href="javascript:;" onClick={() => setsecondTokenIndex(1 - secondTokenIndex)}><img src={SwitchIcon}></img></a> {setupTokens[1 - secondTokenIndex].symbol}
                             </p>
                         </p>
                         <p className="farmInfoCurveR">
