@@ -1103,7 +1103,7 @@ const SetupComponentGen2 = (props) => {
                             {!endBlockReached && <p><b>Daily Earnings</b>: {calculateDailyEarnings()} {rewardTokenInfo.symbol}</p>}
                             {(!open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Increase</a>}
                             {(open) && <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>}
-                            {!withdrawOpen && <a className="web2ActionBTN web2ActionBTNGigi" onClick={() => { setOpen(false); setWithdrawOpen(true); setEdit(false); }}>Remove</a>}
+                            {!withdrawOpen && <a className="web2ActionBTN web2ActionBTNGigi" onClick={() => { setOpen(false); setWithdrawOpen(true); setEdit(false); }}>Decrease</a>}
                             {withdrawOpen && <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>}
                         </div>
                         <div className="Farmed">
