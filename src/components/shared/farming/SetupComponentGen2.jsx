@@ -1039,8 +1039,9 @@ const SetupComponentGen2 = (props) => {
                         }
                         {rewardTokenInfo && <p className="BlockInfoV3"><b>Daily Rate</b>: {window.formatMoney(window.fromDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>}
                         {parseInt(setup.endBlock) > 0 ? <p className="BlockInfoV3"><b>End</b>: <a className="BLKEMD" target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}block/${setup.endBlock}`}>{setup.endBlock}</a></p> : <p className="BlockInfoV3"><b>Duration</b>: {getPeriodFromDuration(setupInfo.blockDuration)}</p>}
-                        {(!open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Farm</a>}
-                        {(open) && <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>}
+                       
+                            {(!open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>{currentPosition ? "Increase" : "Farm"}</a>}
+                            {(open) && <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>}
                         {
                                 !delayedBlock && canActivateSetup && <>
                                     {
@@ -1096,106 +1097,25 @@ const SetupComponentGen2 = (props) => {
                 </div>
             </div>
                 {
-                    setupInfo.free && manageStatus && currentPosition ? <>
                     <div className="YourFarmingPositions">
+                    currentPosition &&
+                    <div className="YourFarmingPositions YourFarmingPositionsFarmingFarmingFarmingChiFarmaViveComeUnPAsha">
                         <div className="FarmYou">
-                        
-
-                                    {!endBlockReached && <p><b>Daily Earnings</b>:<br></br> {calculateDailyEarnings()} {rewardTokenInfo.symbol}</p>}
-                                    <p>
-                                        <b>Deposited</b>:<br></br> {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(window.fromDecimals(manageStatus.tokensAmounts[i], token.decimals, true), 6)} {token.symbol} </span>)}
-                                    </p>
-                            {
-                                (!withdrawOpen && currentPosition) && <a className="web2ActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(true); setEdit(false); }}>Remove</a>
-                            }
-                            {
-                                (withdrawOpen) &&
-                                <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>
-                            }
+                            {!endBlockReached && <p><b>Daily Earnings</b>:<br></br> {calculateDailyEarnings()} {rewardTokenInfo.symbol}</p>}
+                            <p><b>Your Deposit</b>:<br></br> {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(window.fromDecimals(manageStatus.tokensAmounts[i], token.decimals, true), 6)} {token.symbol} </span>)}</p>
+                            {!withdrawOpen && <a className="web2ActionBTN web2ActionBTNGigi" onClick={() => { setOpen(false); setWithdrawOpen(true); setEdit(false); }}>Remove</a>}
+                            {withdrawOpen && <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>}
                         </div>
-                    </div>
-                        {
-                            currentPosition &&
-                            <div className="Farmed">
+                        <div className="Farmed">
                                 <p><b>Available</b>: <br></br>{window.fromDecimals(freeAvailableRewards, rewardTokenInfo.decimals, true)} {rewardTokenInfo.symbol}</p>
-                                {/* @todoM if UniV3 */}
                                 <p><b>Fees Earned</b>: <br></br>1343,000.343 buidl - 3 ETH</p>
-                                {/* @todoM if UniV3 END*/}
-                                {/*{
-                                    !showFreeTransfer ? <a onClick={() => setShowFreeTransfer(true)} className="web2ActionBTN">Transfer</a> : <a onClick={() => setShowFreeTransfer(false)} className="backActionBTN">Close</a>
-                                }*/}
                                 {
                                     claimLoading ? <a className="Web3ActionBTN" disabled={claimLoading}>
                                         <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                     </a> : <a onClick={() => withdrawReward()} className="Web3ActionBTN">Claim</a>
                                 }
-                                {/*{
-                                    showFreeTransfer && <div className="Tranferpos">
-                                        <input type="text" className="TextRegular" placeholder="Position receiver" value={freeTransferAddress} onChange={(e) => setFreeTransferAddress(e.target.value)} id={`transferAddress`} />
-                                        {
-                                            transferLoading ? <a className="Web3ActionBTN" disabled={transferLoading}>
-                                                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                            </a> : <a onClick={() => transferPosition(currentPosition.positionId)} className="Web3ActionBTN">Transfer</a>
-                                        }
-                                    </div>
-                                }*/}
-                            </div>
-                        }
-                    </> : <>
-                        {
-                            (parseInt(blockNumber) >= parseInt(setup.endBlock) && parseInt(farmTokenBalance) > 0) && <>
-                                <div className="QuestionRegular">
-                                    <label className="PrestoSelector">
-                                        <span>To Pair</span>
-                                        <input name={`outputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="to-pair" checked={outputType === "to-pair"} onChange={onOutputTypeChange} />
-                                    </label>
-                                    <label className="PrestoSelector">
-                                        <span>To LP Token</span>
-                                        <input name={`outputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="to-lp" checked={outputType === "to-lp"} onChange={onOutputTypeChange} />
-                                    </label>
-                                </div>
-                                {
-                                    removeLoading ? <a className="Web3ActionBTN Web3ActionBTNV" disabled={removeLoading}>
-                                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                    </a> : (parseInt(blockNumber) >= parseInt(setup.endBlock)) ? <a className="Web3ActionBTN Web3ActionBTNV" onClick={() => removeLiquidity()}>Withdraw Liquidity</a> : <></>
-                                }
-                            </>
-                        }
-                        {
-                            lockedPositions.length > 0 && <>
-                                {
-                                    lockedPositions.map((position, index) => {
-                                        return (
-                                            <LockedPositionComponent
-                                                key={index}
-                                                farmTokenBalance={farmTokenBalance}
-                                                farmTokenSymbol={farmTokenSymbol}
-                                                farmTokenDecimals={farmTokenDecimals}
-                                                onComplete={(result) => {
-                                                    props.addTransaction(result); getSetupMetadata();
-                                                }
-                                                }
-                                                lmContract={lmContract}
-                                                position={position}
-                                                blockNumber={blockNumber}
-                                                setup={setup}
-                                                setupInfo={setupInfo}
-                                                dfoCore={dfoCore}
-                                                rewardTokenInfo={rewardTokenInfo}
-                                                setupTokens={setupTokens}
-                                                lpTokenInfo={lpTokenInfo}
-                                                lockedPositionStatus={lockedPositionStatuses[index]}
-                                                lockedPositionReward={lockedPositionRewards[index]}
-                                                mainTokenInfo={mainTokenInfo}
-                                                onRewardTokenApproval={() => setRewardTokenInfo({ ...rewardTokenInfo, approval: true })}
-                                            />
-                                        )
-                                    })
-                                }
-                            </>
-                        }
-                        
-                    </>
+                        </div>
+                    </div>
                 }
             {
                 ((open || withdrawOpen) && !edit) ? <><hr />{getAdvanced()}</> : <div />
@@ -1203,9 +1123,7 @@ const SetupComponentGen2 = (props) => {
             {
                 (edit && !open && !withdrawOpen) ? getEdit() : <div />
             }
-        </div>
-    )
-}
+        </div>)};
 
 const mapStateToProps = (state) => {
     return {};

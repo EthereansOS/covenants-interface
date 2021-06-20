@@ -446,6 +446,8 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .FarmYouFARMFARMFARM a {margin: 5px;}
 .web2ActionBTNGigi {background-color: #849BBD; border-color: #849BBD;}
 .Farmed p {font-size: 12px;}
+.YourFarmingPositionsFarmingFarmingFarmingChiFarmaViveComeUnPAsha {width: 90%; display: inline-block; padding: 10px; border: 1px solid #e0e2e6;border-radius: 15px; background-color: #e9effc; margin: 10px auto;}
+.penguin .YourFarmingPositionsFarmingFarmingFarmingChiFarmaViveComeUnPAsha {background-color: rgb(33, 36, 41); border-color: #1c1c27 !important;}
 
 
 .PrestoSelector {padding: 5px; margin: 2px 3px; border-radius: 8px; border: 1px solid #9e6915;}
@@ -554,7 +556,8 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .SetupFarmingInstructionsOMLYG1 {width: 100%; text-align: center; margin: 5px auto;}
 .SetupFarmingInstructionsOMLYG1 p {width: auto; text-align: center;}
 .TVLGen1R {font-size: 11px !important;}
-.FarmSetupV3 .FarmYou, .FarmSetupV3 .farmed  {width: 45% !important;}
+.FarmSetupV3 .FarmYou {width: 45% !important;} 
+.FarmSetupV3 .farmed  {width: 45% !important;}
 
 
 @media only screen and (max-device-width: 750px) {
