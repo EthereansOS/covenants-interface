@@ -1070,13 +1070,13 @@ const SetupComponentGen2 = (props) => {
                         {!tickData ? <Loading/> : <div className="UniV3CurveView">
                             <div className="UniV3CurveViewCurv">
                                 <span className="CircleLeftV3Curve"></span>
-                                <span className="CircleLeftV3CurvePrice">{window.formatMoney(tickData.minPrice, 18)}</span>
+                                <span className="CircleLeftV3CurvePrice">{window.formatMoney(tickData.minPrice, 3)}</span>
                                 <span className="CircleRightV3Curve"></span>
-                                <span className="CircleRightV3CurvePrice">{window.formatMoney(tickData.maxPrice, 18)}</span>
+                                <span className="CircleRightV3CurvePrice">{window.formatMoney(tickData.maxPrice, 3)}</span>
                                 <div className="CircleActualPriceV3" style={{left : `${tickData.cursor}%`}}>
                                     <span className="CircleRightV3Actual">
                                         <img src={ArrowIcon}></img>
-                                        <span className="CircleRightV3ActualPrice">{window.formatMoney(tickData.currentPrice, 18)}</span>
+                                        <span className="CircleRightV3ActualPrice">{window.formatMoney(tickData.currentPrice, 3)}</span>
                                     </span>
                                 </div>
                             </div>
