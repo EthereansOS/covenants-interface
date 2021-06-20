@@ -20,6 +20,7 @@ export default class DFOCore {
     voidEthereumAddress = '0x0000000000000000000000000000000000000000';
     web3;
     itemsTokens;
+    MAX_UINT128 = ethers.BigNumber.from(2).pow(128).sub(1);
 
     /**
      * constructs the DFOCore object by passing the context json object.
@@ -89,6 +90,7 @@ export default class DFOCore {
             this.web3.eth.transactionPollingTimeout = new Date().getTime();
             this.web3.startBlock = await this.web3.eth.getBlockNumber();
             window.web3ForLogs = window.web3 = this.web3;
+            this.ethersProvider = new ethers.providers.Web3Provider(window.web3.currentProvider);
 
             // set the core as initialized
             this.initialized = true;
@@ -208,6 +210,24 @@ export default class DFOCore {
             this.contracts[key].isItem = false;
             try {
                 var interoperable = await this.getContract(this.getContextElement("IEthItemInteroperableInterfaceABI"), address);
+                this.contracts[key].mainInterface = await interoperable.methods.mainInterface().call();
+                this.contracts[key].isItem = true;
+            } catch(e) {}
+        }
+        this.isItemDictionary = this.isItemDictionary || {};
+        this.isItemDictionary[address] = this.contracts[key].isItem;
+        return this.contracts[key];
+    }
+
+    getEthersContract = async(abi, address) => {
+        address = address || this.voidEthereumAddress;
+        // create the key
+        const key = (((address && address.toLowerCase()) || "") + this.web3.utils.sha3(JSON.stringify(abi)));
+        this.contracts[key] = this.contracts[key] || new ethers.Contract(address, abi, this.ethersProvider);
+        if(abi === this.getContextElement("ERC20ABI") || abi === this.getContextElement("IERC20ABI") && this.contracts[key].isItem === undefined) {
+            this.contracts[key].isItem = false;
+            try {
+                var interoperable = await this.getEthersContract(this.getContextElement("IEthItemInteroperableInterfaceABI"), address);
                 this.contracts[key].mainInterface = await interoperable.methods.mainInterface().call();
                 this.contracts[key].isItem = true;
             } catch(e) {}

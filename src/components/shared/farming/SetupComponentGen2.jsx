@@ -265,20 +265,15 @@ const SetupComponentGen2 = (props) => {
             '0', '0'
         ];
         if(farmSetup.objectId && farmSetup.objectId !== '0') {
-            const MAX_UINT128 = ethers.BigNumber.from(2).pow(128).sub(1)
-            var prov = new ethers.providers.Web3Provider(window.web3.currentProvider);
-            var nftPosMan = new ethers.Contract(dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress"), dfoCore.getContextElement("UniswapV3NonfungiblePositionManagerABI"), prov);
+            var nftPosMan = await dfoCore.getEthersContract(dfoCore.getContextElement("UniswapV3NonfungiblePositionManagerABI"), dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress"));
             var collect = await nftPosMan.callStatic.collect({
                 tokenId : farmSetup.objectId,
                 recipient: lmContract.options.address,
-                amount0Max: MAX_UINT128,
-                amount1Max: MAX_UINT128
+                amount0Max: dfoCore.MAX_UINT128,
+                amount1Max: dfoCore.MAX_UINT128
             }, {
                 from : lmContract.options.address
             });
-            console.log(collect);
-            //nftPosMan = await dfoCore.getContract(dfoCore.getContextElement("UniswapV3NonfungiblePositionManagerABI"), dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress"));
-            //var data = await nftPosMan.methods.positions(farmSetup.objectId);
             balances = [collect.amount0.toString(), collect.amount1.toString()];
         }
         for (let i = 0; i < liquidityPoolTokens.length; i++) {
