@@ -9,6 +9,7 @@ import Loading from "../Loading";
 import { useRef } from 'react';
 import { tickToPrice } from '@uniswap/v3-sdk/dist/';
 import { Token } from "@uniswap/sdk-core/dist";
+import { ethers } from 'ethers';
 
 const SetupComponentGen2 = (props) => {
     let { className, dfoCore, setupIndex, lmContract, hostedBy } = props;
@@ -104,14 +105,14 @@ const SetupComponentGen2 = (props) => {
         try {
             var slot = await lpTokenInfo.contract.methods.slot0().call();
             var tickData = {
-                maxPrice : tickToPrice(lpTokenInfo.uniswapTokens[secondTokenIndex], lpTokenInfo.uniswapTokens[1 - secondTokenIndex], parseInt(setupInfo.tickLower)).toSignificant(18),
-                minPrice : tickToPrice(lpTokenInfo.uniswapTokens[secondTokenIndex], lpTokenInfo.uniswapTokens[1 - secondTokenIndex], parseInt(setupInfo.tickUpper)).toSignificant(18),
-                currentPrice : tickToPrice(lpTokenInfo.uniswapTokens[secondTokenIndex], lpTokenInfo.uniswapTokens[1 - secondTokenIndex], parseInt(slot.tick)).toSignificant(18),
+                maxPrice : tickToPrice(lpTokenInfo.uniswapTokens[1 - secondTokenIndex], lpTokenInfo.uniswapTokens[secondTokenIndex], parseInt(setupInfo.tickLower)).toSignificant(18),
+                minPrice : tickToPrice(lpTokenInfo.uniswapTokens[1 - secondTokenIndex], lpTokenInfo.uniswapTokens[secondTokenIndex], parseInt(setupInfo.tickUpper)).toSignificant(18),
+                currentPrice : tickToPrice(lpTokenInfo.uniswapTokens[1 - secondTokenIndex], lpTokenInfo.uniswapTokens[secondTokenIndex], parseInt(slot.tick)).toSignificant(18),
                 cursor : parseInt(slot.tick) <= parseInt(setupInfo.tickLower) ? 0 : parseInt(slot.tick) >= parseInt(setupInfo.tickUpper) ? 100 : null,
                 outOfRangeLower : parseInt(slot.tick) <= parseInt(setupInfo.tickLower),
                 outOfRangeUpper : parseInt(slot.tick) >= parseInt(setupInfo.tickUpper)
             };
-            if(secondTokenIndex === 0) {
+            if(secondTokenIndex === 1) {
                 var maxPrice = tickData.maxPrice;
                 tickData.maxPrice = tickData.minPrice;
                 tickData.minPrice = maxPrice;
@@ -260,6 +261,26 @@ const SetupComponentGen2 = (props) => {
         const approvals = [];
         const contracts = [];
         var mtInfo;
+        var balances = [
+            '0', '0'
+        ];
+        if(farmSetup.objectId && farmSetup !== '0') {
+            const MAX_UINT128 = ethers.BigNumber.from(2).pow(128).sub(1)
+            var prov = new ethers.providers.Web3Provider(window.web3.currentProvider);
+            var nftPosMan = new ethers.Contract(dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress"), dfoCore.getContextElement("UniswapV3NonfungiblePositionManagerABI"), prov);
+            var collect = await nftPosMan.callStatic.collect({
+                tokenId : farmSetup.objectId,
+                recipient: lmContract.options.address,
+                amount0Max: MAX_UINT128,
+                amount1Max: MAX_UINT128
+            }, {
+                from : lmContract.options.address
+            });
+            console.log(collect);
+            //nftPosMan = await dfoCore.getContract(dfoCore.getContextElement("UniswapV3NonfungiblePositionManagerABI"), dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress"));
+            //var data = await nftPosMan.methods.positions(farmSetup.objectId);
+            balances = [collect.amount0.toString(), collect.amount1.toString()];
+        }
         for (let i = 0; i < liquidityPoolTokens.length; i++) {
             const address = liquidityPoolTokens[i];
             const token = !isWeth(farmSetupInfo, address) ? await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), address) : null;
@@ -268,7 +289,7 @@ const SetupComponentGen2 = (props) => {
             const balance = token ? await token.methods.balanceOf(dfoCore.address).call() : await dfoCore.web3.eth.getBalance(dfoCore.address);
             const approval = token ? await token.methods.allowance(dfoCore.address, lmContract.options.address).call() : true;
             approvals.push(parseInt(approval) !== 0 && (parseInt(approval) >= parseInt(balance) || !token));
-            tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: "0", decimals, address: token ? address : dfoCore.voidEthereumAddress, symbol });
+            tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: balances[i], decimals, address: token ? address : dfoCore.voidEthereumAddress, symbol });
             contracts.push(token);
             if (address.toLowerCase() === farmSetupInfo.mainTokenAddress.toLowerCase()) {
                 mtInfo = { approval: parseInt(approval) !== 0 && (parseInt(approval) >= parseInt(balance) || !token), decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol };
@@ -1037,7 +1058,7 @@ const SetupComponentGen2 = (props) => {
                     <div className="farmInfoCurve">
                         <p className="farmInfoCurveL">
                             <p className="MAinTokensel">
-                                <a href="javascript:;" onClick={() => setsecondTokenIndex(1 - secondTokenIndex)}><img src={SwitchIcon}></img></a> {setupTokens[secondTokenIndex].symbol}
+                                <a href="javascript:;" onClick={() => setsecondTokenIndex(1 - secondTokenIndex)}><img src={SwitchIcon}></img></a> {setupTokens[1 - secondTokenIndex].symbol}
                             </p>
                         </p>
                         <p className="farmInfoCurveR">
@@ -1049,13 +1070,13 @@ const SetupComponentGen2 = (props) => {
                         {!tickData ? <Loading/> : <div className="UniV3CurveView">
                             <div className="UniV3CurveViewCurv">
                                 <span className="CircleLeftV3Curve"></span>
-                                <span className="CircleLeftV3CurvePrice">{window.formatMoney(tickData.minPrice, 9)} {lpTokenInfo.uniswapTokens[1 - secondTokenIndex].symbol}</span>
+                                <span className="CircleLeftV3CurvePrice">{window.formatMoney(tickData.minPrice, 18)} {lpTokenInfo.uniswapTokens[secondTokenIndex].symbol}</span>
                                 <span className="CircleRightV3Curve"></span>
-                                <span className="CircleRightV3CurvePrice">{window.formatMoney(tickData.maxPrice, 9)} {lpTokenInfo.uniswapTokens[1 - secondTokenIndex].symbol}</span>
+                                <span className="CircleRightV3CurvePrice">{window.formatMoney(tickData.maxPrice, 18)} {lpTokenInfo.uniswapTokens[secondTokenIndex].symbol}</span>
                                 <div className="CircleActualPriceV3" style={{left : `${tickData.cursor}%`}}>
                                     <span className="CircleRightV3Actual">
                                         <img src={ArrowIcon}></img>
-                                        <span className="CircleRightV3ActualPrice">{window.formatMoney(tickData.currentPrice, 9)} {lpTokenInfo.uniswapTokens[1 - secondTokenIndex].symbol}</span>
+                                        <span className="CircleRightV3ActualPrice">{window.formatMoney(tickData.currentPrice, 18)} {lpTokenInfo.uniswapTokens[secondTokenIndex].symbol}</span>
                                     </span>
                                 </div>
                             </div>
@@ -1094,7 +1115,6 @@ const SetupComponentGen2 = (props) => {
             {
                 (edit && !open && !withdrawOpen) ? getEdit() : <div />
             }
-            {getAdvanced()}
         </div>)};
 
 const mapStateToProps = (state) => {
