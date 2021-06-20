@@ -38,7 +38,10 @@ const CreateOrEditFarmingSetups = (props) => {
             <div className="CheckboxQuestions">
                 {props.generation === 'gen2' ?  <>
                     <div className="Web2ActionsBTNs">
-                        <h6><b><a onClick={() => setSelectedFarmingType(selectedFarmingType !== 'free' ? 'free' : null)} className={`${selectedFarmingType === 'free' ? "web2ActionBTN" : "backActionBTN"} mr-4`}>Uniswap V3</a></b></h6>
+                        <h6><b><a selected onClick={() => setSelectedFarmingType(selectedFarmingType !== 'free' ? 'free' : null)} className={`${selectedFarmingType === 'free' ? "web2ActionBTN" : "backActionBTN"} mr-4`}>Create Farming Setups</a></b></h6>
+                        <a onClick={() => selectedFarmingType && setCurrentStep(1)} disabled={!selectedFarmingType} className="web2ActionBTN">Next</a>
+                        <a className="hiddenLink" onClick={onFinish}>Deploy without setups</a>
+                        <a className="backActionBTN" onClick={onCancel}>Back</a>
                     </div>
                 </> : <>
                     <h6><b>Create Setup by</b></h6>
@@ -46,16 +49,15 @@ const CreateOrEditFarmingSetups = (props) => {
                         <a onClick={() => setSelectedFarmingType(selectedFarmingType !== 'free' ? 'free' : null)} className={`${selectedFarmingType === 'free' ? "web2ActionBTN" : "backActionBTN"} mr-4`}>Free</a>
                         <a onClick={() => setSelectedFarmingType(selectedFarmingType !== 'locked' ? 'locked' : null)} className={`${selectedFarmingType === 'locked' ? "web2ActionBTN" : "backActionBTN"}`}>Locked</a>
                     </div>
-                </>}
-                <p className="BreefRecapB">Farming setups can be either Free or Locked. In free farming, Farmers can stake / un-stake liquidity anytime, but the reward/block is shared btween them. In Locked setups Farmers lock the liquidity until it ends, but reawards are fixed.</p>
-                <div className="Web2ActionsBTNs">
+                    <p className="BreefRecapB">Farming setups can be either Free or Locked. In free farming, Farmers can stake / un-stake liquidity anytime, but the reward/block is shared btween them. In Locked setups Farmers lock the liquidity until it ends, but reawards are fixed.</p>
+                    {farmingSetups.length === 0 && !props.forEdit && <div className="Web2ActionsBTNs">
+                    <a className="hiddenLink" onClick={onFinish}>Deploy without setups</a>
+                    <div className="Web2ActionsBTNs">
                     <a className="backActionBTN" onClick={onCancel}>Back</a>
                     <a onClick={() => selectedFarmingType && setCurrentStep(1)} disabled={!selectedFarmingType} className="web2ActionBTN">Next</a>
-                </div>
-                <br/>
-                {farmingSetups.length === 0 && !props.forEdit && <div className="Web2ActionsBTNs">
-                    <a className="hiddenLink" onClick={onFinish}>Deploy without setups</a>
+                    </div>
                 </div>}
+                </>}
             </div>
         );
     }
