@@ -925,26 +925,6 @@ const SetupComponentGen2 = (props) => {
                         <p className="BreefExpl">This wallet will be the owner of this position and all of its assets.</p>
                     </div>
                 }
-            {
-                false && (parseInt(setup.endBlock) > parseInt(blockNumber) || currentPosition) &&
-                <div className="QuestionRegular">
-                    {setup.active && (setupInfo.free || !currentPosition) && parseInt(setup.endBlock) > parseInt(blockNumber) && <>
-                        <label className="PrestoSelector">
-                            <span>From Pair</span>
-                            <input name={`inputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="add-pair" checked={inputType === "add-pair"} onChange={(e) => onInputTypeChange(e)} />
-                        </label>
-                        {
-                            (!currentPosition || openPositionForAnotherWallet || !setupInfo.free) &&
-                            <label className="PrestoSelector">
-                                <span>From ETH (BETA)</span>
-                                <input name={`inputType-${lmContract.options.address}-${setupIndex}`} type="radio" value="add-eth" checked={inputType === "add-eth"} onChange={(e) => onInputTypeChange(e)} />
-                            </label>
-                        }
-                    </>
-                    }
-                </div>
-            }
-            {inputType === 'add-pair' ? <>
                 {
                     setupTokens.map((setupToken, i) => {
                         return <div key={setupToken.address} className="InputTokenRegular">
@@ -970,43 +950,6 @@ const SetupComponentGen2 = (props) => {
                             </a> : <a className="Web3ActionBTN" onClick={() => addLiquidity()} disabled={tokensApprovals.some((value) => !value) || tokensAmounts.some((value) => value === 0)}>Add Liquidity</a>
                         }
                     </div>
-            </> :
-                inputType === 'add-eth' ? <>
-                    <div className="InputTokenRegular">
-                        <Input showMax={true} address={dfoCore.voidEthereumAddress} value={ethAmount} balance={dfoCore.toDecimals(ethBalanceOf, 18)} min={0} onChange={e => updateEthAmount(e.target.value)} showCoin={true} showBalance={true} name={"ETH"} />
-                    </div>
-                    <div className="DiffWallet">
-                        {false && amms.length > 0 && <select className="SelectRegular" value={selectedAmmIndex.toString()} onChange={e => setSelectedAmmIndex(e.target.value)}>
-                            {amms.map((it, i) => <option key={it.address} value={i}>{it.info[0]}</option>)}
-                        </select>}
-                        {loadingPrestoData && <Loading />}
-                        {prestoData && <p className="BreefRecap">Position Weight: <br></br><b>{window.fromDecimals(prestoData.firstTokenAmount, prestoData.token0decimals)} {prestoData.token0Symbol}</b> and <b>{window.fromDecimals(prestoData.secondTokenAmount, prestoData.token1decimals)} {prestoData.token1Symbol}</b></p>}
-                    </div>
-                    {
-                        (setupInfo.free && rewardTokenInfo) && <div className="DiffWallet">
-                            <p className="BreefRecap">Estimated reward per day: <br></br><b>{window.formatMoney(freeEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</b>
-                                <div className="Web3BTNs">
-                                {
-                                    addLoading ? <a className="Web3ActionBTN" disabled={addLoading}>
-                                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                    </a> : <a className="Web3ActionBTN" onClick={() => addLiquidity()} disabled={parseFloat(ethAmount) === 0}>Add Liquidity</a>
-                                }
-                                </div>
-                            </p>
-                        </div>
-                    }
-                    <div className="Web3BTNs">
-                        {
-                            addLoading ? <a className="Web3ActionBTN" disabled={addLoading}>
-                                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            </a> : <a className="Web3ActionBTN" onClick={() => addLiquidity()} disabled={parseFloat(ethAmount) === 0}>Add Liquidity</a>
-                        }
-                    </div>
-                    {
-                        (showPrestoError && inputType === 'add-eth') && <div className="BetaAllert"><p className="BreefRecap"><b>The Presto "From ETH" feature is in beta. You might received a failed transaction. Use it at your own risk!</b></p></div>
-                    }
-                </> : <></>
-            }
         </div>
     }
 
