@@ -108,7 +108,8 @@ const CreateOrEditFarmingSetup = (props) => {
                 name: 'Uniswap V3',
                 tokens,
                 poolContract,
-                fee
+                fee,
+                tick
             });
             setMainToken(tokens[0]);
             setUniswapTokens(uniTokens);
@@ -288,7 +289,7 @@ const CreateOrEditFarmingSetup = (props) => {
                     <h6>Min Price</h6>
                     <p className="BreefRecapB">Set the Lower Price of your Curve</p>
                     <div className="InputTokenRegular">
-                        <input type="number" data-tick="0" ref={ref => lowerTickPriceInput = ref} onBlur={onTickPriceManualInput} defaultValue={tickToPrice(uniswapTokens[secondTokenIndex], uniswapTokens[1 - secondTokenIndex], tickLower).toSignificant(18)}/>
+                        <input type="number" data-tick="0" ref={ref => lowerTickPriceInput = ref}/>
                     </div>
                     <div className="InputTokenRegular">
                         <a className="Web3ActionBtn" href="javascript:;" onClick={() => updateTick(0, false)}> - </a>
@@ -299,7 +300,7 @@ const CreateOrEditFarmingSetup = (props) => {
                     <h6>Max Price</h6>
                     <p className="BreefRecapB">Set the Upper Price of your Curve</p>
                     <div className="InputTokenRegular">
-                        <input type="number" data-tick="1" ref={ref => upperTickPriceInput = ref} onBlur={onTickPriceManualInput} defaultValue={tickToPrice(uniswapTokens[secondTokenIndex], uniswapTokens[1 - secondTokenIndex], tickUpper).toSignificant(18)}/>
+                        <input type="number" data-tick="1" ref={ref => upperTickPriceInput = ref}/>
                     </div>
                     <div className="InputTokenRegular">
                         <a className="Web3ActionBtn" href="javascript:;" onClick={() => updateTick(1, false)}> - </a>
