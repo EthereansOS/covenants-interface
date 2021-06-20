@@ -1058,7 +1058,7 @@ const SetupComponentGen2 = (props) => {
                     <div className="farmInfoCurve">
                         <p className="farmInfoCurveL">
                             <p className="MAinTokensel">
-                                <a href="javascript:;" onClick={() => setsecondTokenIndex(1 - secondTokenIndex)}><img src={SwitchIcon}></img></a> {setupTokens[1 - secondTokenIndex].symbol}
+                                <a href="javascript:;" onClick={() => setsecondTokenIndex(1 - secondTokenIndex)}><img src={SwitchIcon}></img></a> Tok {/*{setupTokens[1 - secondTokenIndex].symbol}*/}
                             </p>
                         </p>
                         <p className="farmInfoCurveR">
@@ -1070,13 +1070,13 @@ const SetupComponentGen2 = (props) => {
                         {!tickData ? <Loading/> : <div className="UniV3CurveView">
                             <div className="UniV3CurveViewCurv">
                                 <span className="CircleLeftV3Curve"></span>
-                                <span className="CircleLeftV3CurvePrice">{window.formatMoney(tickData.minPrice, 18)} {lpTokenInfo.uniswapTokens[secondTokenIndex].symbol}</span>
+                                <span className="CircleLeftV3CurvePrice">{window.formatMoney(tickData.minPrice, 18)}</span>
                                 <span className="CircleRightV3Curve"></span>
-                                <span className="CircleRightV3CurvePrice">{window.formatMoney(tickData.maxPrice, 18)} {lpTokenInfo.uniswapTokens[secondTokenIndex].symbol}</span>
+                                <span className="CircleRightV3CurvePrice">{window.formatMoney(tickData.maxPrice, 18)}</span>
                                 <div className="CircleActualPriceV3" style={{left : `${tickData.cursor}%`}}>
                                     <span className="CircleRightV3Actual">
                                         <img src={ArrowIcon}></img>
-                                        <span className="CircleRightV3ActualPrice">{window.formatMoney(tickData.currentPrice, 18)} {lpTokenInfo.uniswapTokens[secondTokenIndex].symbol}</span>
+                                        <span className="CircleRightV3ActualPrice">{window.formatMoney(tickData.currentPrice, 18)}</span>
                                     </span>
                                 </div>
                             </div>
