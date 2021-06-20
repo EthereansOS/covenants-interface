@@ -2,6 +2,12 @@ import { useEffect } from 'react';
 import { useState } from 'react';
 import { connect } from 'react-redux';
 import { Coin, Input, TokenInput } from '../../../../components/shared';
+import {
+    tickToPrice,
+    priceToClosestTick,
+    TICK_SPACINGS,
+  } from '@uniswap/v3-sdk/dist/';
+import { Token, CurrencyAmount, Price } from "@uniswap/sdk-core/dist"
 
 const CreateOrEditFarmingSetup = (props) => {
     const { rewardToken, onAddFarmingSetup, editSetup, onEditFarmingSetup, dfoCore, onCancel } = props;
@@ -28,6 +34,8 @@ const CreateOrEditFarmingSetup = (props) => {
     const [hasPenaltyFee, setHasPenaltyFee] = useState((editSetup && editSetup.penaltyFee) ? editSetup.penaltyFee > 0 : false);
     const [penaltyFee, setPenaltyFee] = useState((editSetup && editSetup.penaltyFee) ? editSetup.penaltyFee : 0);
     const [ethAddress, setEthAddress] = useState((editSetup && editSetup.ethAddress) ? editSetup.ethAddress : "");
+    const [uniswapTokens, setUniswapTokens] = useState([]);
+    const [secondTokenIndex, setSecondTokenIndex] = useState(1);
     // current step
     const [currentStep, setCurrentStep] = useState(0);
 
@@ -42,6 +50,10 @@ const CreateOrEditFarmingSetup = (props) => {
         setLoading(true);
         try {
             const poolContract = await dfoCore.getContract(dfoCore.getContextElement("UniswapV3PoolABI"), address);
+            var fee = await poolContract.methods.fee().call();
+            var tick = parseInt((await poolContract.methods.slot0().call()).tick);
+            settickLower(tick);
+            settickUpper(tick);
             const lpInfo = [
                 [], [], [
                     await poolContract.methods.token0().call(),
@@ -52,6 +64,7 @@ const CreateOrEditFarmingSetup = (props) => {
                 await (await dfoCore.getContract(dfoCore.getContextElement("UniswapV3NonfungiblePositionManagerABI"), dfoCore.getContextElement('uniswapV3NonfungiblePositionManagerAddress'))).methods.WETH9().call()
             ];
             const tokens = [];
+            var uniTokens = [];
             let ethTokenFound = false;
             setInvolvingEth(false);
             await Promise.all(lpInfo[2].map(async (tkAddress) => {
@@ -68,16 +81,24 @@ const CreateOrEditFarmingSetup = (props) => {
                     }
                 }
                 const currentToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), tkAddress);
-                const symbol = tkAddress === window.voidEthereumAddress ? "ETH" : await currentToken.methods.symbol().call();
-                tokens.push({ symbol, address: tkAddress, isEth: tkAddress.toLowerCase() === ammData[0].toLowerCase() })
+                const symbol = tkAddress === window.voidEthereumAddress || tkAddress === ammData[0] ? "ETH" : await currentToken.methods.symbol().call();
+                var name = tkAddress === window.voidEthereumAddress || tkAddress === ammData[0] ? "Ethereum" : await currentToken.methods.name().call();
+                var decimals = parseInt(tkAddress ===window.voidEthereumAddress ? "18" : await currentToken.methods.decimals().call());
+                tokens.push({ symbol, name, decimals, address: tkAddress, isEth: tkAddress.toLowerCase() === ammData[0].toLowerCase() });
+                var uniToken = new Token(props.dfoCore.chainId, tkAddress, decimals, name, symbol);
+                uniTokens.push(uniToken);
             }));
             if (!ethTokenFound) setEthSelectData(null);
             setLiquidityPoolToken({
                 address,
                 name: 'Uniswap V3',
-                tokens
+                tokens,
+                poolContract,
+                fee
             });
             setMainToken(tokens[0]);
+            setUniswapTokens(uniTokens);
+            setSecondTokenIndex(1);
         } catch (error) {
             setInvolvingEth(false);
             setEthSelectData(null);
@@ -141,6 +162,34 @@ const CreateOrEditFarmingSetup = (props) => {
         }
         currentStep === 0 && liquidityPoolToken && window.formatNumber(blockDuration) > 0 && window.formatNumber(rewardPerBlock) > 0 && setCurrentStep(1);
         currentStep === 1 && tickUpper !== tickLower && tickLower < tickUpper && setCurrentStep(2);
+    }
+
+    //tick === 0 -> tickLower
+    //tick === 1 -> tickUpper
+    //increment === true -> +
+    //increment === false -> -
+    function updateTick(tick, increment) {
+        var tickToUpdate = tick === 0 ? tickLower : tickUpper;
+        var step = TICK_SPACINGS[liquidityPoolToken.fee];
+        increment && (tickToUpdate += step);
+        !increment && (tickToUpdate -= step);
+        tick === 0 && settickLower(tickToUpdate);
+        tick === 1 && settickUpper(tickToUpdate);
+    }
+
+    function onTickPriceManualInput(e) {
+        var value = window.formatMoney(e.currentTarget.value, 18);
+        var tokenIndex = 1 - secondTokenIndex;
+        var tick = parseInt(e.currentTarget.dataset.tick);
+        var currencyAmount = CurrencyAmount.fromRawAmount(uniswapTokens[tokenIndex], window.formatNumber(value));
+        var price = new Price({
+            baseAmount: currencyAmount,
+            quoteAmount: CurrencyAmount.fromRawAmount(uniswapTokens[1 - tokenIndex], 1)
+        });
+        var retrievedTick = priceToClosestTick(price);
+        tick === 0 && settickLower(retrievedTick);
+        tick === 1 && settickUpper(retrievedTick);
+        e.currentTarget.value = tickToPrice(uniswapTokens[1 - secondTokenIndex], uniswapTokens[secondTokenIndex], retrievedTick).toSignificant(18);
     }
 
     const getFirstStep = () => {
@@ -218,18 +267,30 @@ const CreateOrEditFarmingSetup = (props) => {
     const choosetick = () => {
         return (
             <div>
+                <div>
+                    <a onClick={() => setSecondTokenIndex(1 - secondTokenIndex)}>Change</a>
+                    {liquidityPoolToken.tokens[1 - secondTokenIndex].symbol} - {liquidityPoolToken.tokens[secondTokenIndex].symbol}
+                </div>
                 <div className="InputTokensRegular">
-                    <h6>Min Tick</h6>
-                    <p className="BreefRecapB">Set the Lower Tick</p>
+                    <h6>Min Price</h6>
+                    <p className="BreefRecapB">Set the Lower Price of your Curve</p>
                     <div className="InputTokenRegular">
-                        <input type="number" value={tickLower} onChange={e => settickLower(parseInt(e.currentTarget.value))}/>
+                        <input type="number" data-tick="0" onBlur={onTickPriceManualInput} defaultValue={tickToPrice(uniswapTokens[1 - secondTokenIndex], uniswapTokens[secondTokenIndex], tickLower).toSignificant(18)}/>
+                    </div>
+                    <div className="InputTokenRegular">
+                        <a className="Web3ActionBtn" href="javascript:;" onClick={() => updateTick(0, false)}> - </a>
+                        <a className="Web3ActionBtn" href="javascript:;" onClick={() => updateTick(0, true)}> + </a>
                     </div>
                 </div>
                 <div className="InputTokensRegular">
-                    <h6>Max Tick</h6>
-                    <p className="BreefRecapB">Set the Upper Tick</p>
+                    <h6>Max Price</h6>
+                    <p className="BreefRecapB">Set the Upper Price of your Curve</p>
                     <div className="InputTokenRegular">
-                        <input type="number" value={tickUpper} onChange={e => settickUpper(parseInt(e.currentTarget.value))}/>
+                        <input type="number" data-tick="1" onBlur={onTickPriceManualInput} defaultValue={tickToPrice(uniswapTokens[1 - secondTokenIndex], uniswapTokens[secondTokenIndex], tickUpper).toSignificant(18)}/>
+                    </div>
+                    <div className="InputTokenRegular">
+                        <a className="Web3ActionBtn" href="javascript:;" onClick={() => updateTick(1, false)}> - </a>
+                        <a className="Web3ActionBtn" href="javascript:;" onClick={() => updateTick(1, true)}> + </a>
                     </div>
                 </div>
                 <div className="Web2ActionsBTNs">

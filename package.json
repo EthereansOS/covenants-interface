@@ -10,6 +10,7 @@
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/react": "^11.2.3",
     "@testing-library/user-event": "^12.6.0",
+    "@uniswap/v3-sdk": "^3.0.0",
     "axios": "^0.21.1",
     "bignumber.js": "^9.0.1",
     "bootstrap": "^4.6.0",

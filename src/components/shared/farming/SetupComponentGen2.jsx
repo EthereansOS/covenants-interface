@@ -3,12 +3,12 @@ import { useEffect, useState } from 'react';
 import { Input, ApproveButton } from '..';
 import { connect } from 'react-redux';
 import { addTransaction, removeInflationSetup } from '../../../store/actions';
-import axios from 'axios';
 import LockedPositionComponent from './LockedPositionComponent';
 import SwitchIcon from "../../../assets/images/switch.png";
 import ArrowIcon from "../../../assets/images/arrow.png";
 import Loading from "../Loading";
 import { useRef } from 'react';
+
 
 const SetupComponentGen2 = (props) => {
     let { className, dfoCore, setupIndex, lmContract, hostedBy } = props;
@@ -1034,7 +1034,7 @@ const SetupComponentGen2 = (props) => {
                         </div>
                         <span className="UniV3TVLFIV">
                             <b>TVL</b>: {setupTokens.map((token, index) => <span key={token.address}>{props.dfoCore.toDecimals(token.liquidity, token.decimals, 2)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span>)}
-                        </span> 
+                        </span>
                     </div>
                 </div>
             </div>
