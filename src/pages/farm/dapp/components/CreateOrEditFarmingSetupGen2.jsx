@@ -4,10 +4,10 @@ import { connect } from 'react-redux';
 import { Coin, Input, TokenInput } from '../../../../components/shared';
 import {
     tickToPrice,
-    priceToClosestTick,
-    TICK_SPACINGS,
+    nearestUsableTick,
+    TICK_SPACINGS
 } from '@uniswap/v3-sdk/dist/';
-import { Token, CurrencyAmount, Price } from "@uniswap/sdk-core/dist";
+import { Token } from "@uniswap/sdk-core/dist";
 
 const CreateOrEditFarmingSetup = (props) => {
     const { rewardToken, onAddFarmingSetup, editSetup, onEditFarmingSetup, dfoCore, onCancel } = props;
@@ -42,6 +42,8 @@ const CreateOrEditFarmingSetup = (props) => {
     const [currentStep, setCurrentStep] = useState(0);
 
     const dilutedTickRange = 92000;
+    var tickLowerInput;
+    var tickUpperInput;
 
     useEffect(() => {
         if (editSetup && (editSetup.liquidityPoolTokenAddress || (editSetup.liquidityPoolToken && editSetup.liquidityPoolToken.address))) {
@@ -53,11 +55,11 @@ const CreateOrEditFarmingSetup = (props) => {
         var minPrice;
         var maxPrice;
         try {
-            minPrice = tickToPrice(uniswapTokens[secondTokenIndex], uniswapTokens[1 - secondTokenIndex], parseInt(tickLower)).toSignificant(18);
+            minPrice = tickToPrice(uniswapTokens[secondTokenIndex], uniswapTokens[1 - secondTokenIndex], parseInt(tickLowerInput.value = tickLower)).toSignificant(18);
         } catch(e) {
         }
         try {
-            maxPrice = tickToPrice(uniswapTokens[secondTokenIndex], uniswapTokens[1 - secondTokenIndex], parseInt(tickUpper)).toSignificant(18);
+            maxPrice = tickToPrice(uniswapTokens[secondTokenIndex], uniswapTokens[1 - secondTokenIndex], parseInt(tickUpperInput.value = tickUpper)).toSignificant(18);
         } catch(e) {
         }
         secondTokenIndex === 1 && void(setMinPrice(minPrice), setMaxPrice(maxPrice));
@@ -183,7 +185,7 @@ const CreateOrEditFarmingSetup = (props) => {
             return;
         }
         currentStep === 0 && liquidityPoolToken && window.formatNumber(blockDuration) > 0 && window.formatNumber(rewardPerBlock) > 0 && setCurrentStep(props.gen2SetupType === 'diluted' ? 2 : 1);
-        currentStep === 1 && tickUpper !== tickLower && tickLower < tickUpper && setCurrentStep(2);
+        currentStep === 1 && tickUpper !== tickLower && tickLower < tickUpper && tickLower % TICK_SPACINGS[liquidityPoolToken.fee] === 0 && tickUpper % TICK_SPACINGS[liquidityPoolToken.fee] === 0 && setCurrentStep(2);
     }
 
     function updateTick(tick, increment) {
@@ -195,8 +197,8 @@ const CreateOrEditFarmingSetup = (props) => {
         tick === 1 && setTickUpper(tickToUpdate);
     }
 
-    function onTickPriceManualInput(e) {
-        var value = window.formatNumber(e.currentTarget.value);
+    function onTickInputBlur(e) {
+        var value = nearestUsableTick(window.formatNumber(e.currentTarget.value), TICK_SPACINGS[liquidityPoolToken.fee]);
         var tick = parseInt(e.currentTarget.dataset.tick);
         tick === 0 && setTickLower(value);
         tick === 1 && setTickUpper(value);
@@ -273,7 +275,7 @@ const CreateOrEditFarmingSetup = (props) => {
                     <h6>Min Price</h6>
                     <p>{minPrice} {liquidityPoolToken.tokens[1 - secondTokenIndex].symbol}</p>
                     <div className="InputTokenRegular">
-                        <input className="PriceRangeInput" type="number" data-tick="0" value={tickLower} onChange={onTickPriceManualInput}/>
+                        <input className="PriceRangeInput" type="number" data-tick="0"  ref={ref => tickLowerInput = ref} defaultValue={tickLower} onBlur={onTickInputBlur}/>
                     </div>
                     <div className="InputTokenRegular">
                         <a className="tickerchanger" href="javascript:;" onClick={() => updateTick(0, false)}> - </a>
@@ -285,7 +287,7 @@ const CreateOrEditFarmingSetup = (props) => {
                     <h6>Max Price</h6>
                     <p>{maxPrice} {liquidityPoolToken.tokens[1 - secondTokenIndex].symbol}</p>
                     <div className="InputTokenRegular">
-                        <input className="PriceRangeInput" type="number" data-tick="1" value={tickUpper} onChange={onTickPriceManualInput}/>
+                        <input className="PriceRangeInput" type="number" data-tick="1" ref={ref => tickUpperInput = ref} defaultValue={tickUpper} onBlur={onTickInputBlur}/>
                     </div>
                     <div className="InputTokenRegular">
                         <a className="tickerchanger" href="javascript:;" onClick={() => updateTick(1, false)}> - </a>
