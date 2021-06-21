@@ -16,7 +16,7 @@ const CreateOrEditFarmingSetups = (props) => {
         return props.generation === 'gen2' ? (
             <CreateOrEditFarmingSetupGen2
                 rewardToken={rewardToken}
-                onAddFarmingSetup={(setup) => { onAddFarmingSetup(setup); setCurrentStep(0); setIsAdd(false); }}
+                onAddFarmingSetup={(setup) => { onAddFarmingSetup(setup); setCurrentStep(0); setIsAdd(false); setGen2SetupType(""); }}
                 editSetup={editSetup}
                 editSetupIndex={editSetupIndex}
                 gen2SetupType={gen2SetupType}
