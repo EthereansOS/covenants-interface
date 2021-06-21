@@ -454,10 +454,16 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .TokenCoolFancy span {font-size: 11px; color: #ffffff !important; text-decoration: none !important; vertical-align: middle; display: inline-block;}
 .TokenCoolFancy span:hover {font-size: 11px; color: #ffffff !important; text-decoration: none !important;}
 .TokenCoolFancy:hover span {font-size: 11px; color: #ffffff !important; text-decoration: none !important;}
-.FarmTitle figure .TokenCoolFancy {display: inline-block; width: 55px; height: 55px; vertical-align: middle;padding: 33% 0;font-size: 14px;}
-
-
-
+.FarmTitle figure .TokenCoolFancy {display: inline-block; width: 55px; height: 55px; vertical-align: middle;}
+.FarmTitle figure .TokenCoolFancy span {margin-top: 17px;font-size: 14px;}
+.TokenFarmV3InfoBox .TokenCoolFancy, .TokenOperation .TokenCoolFancy, .uuuuTokenLoad .TokenCoolFancy {width: 25px !important; height: 25px !important; display: inline-block; vertical-align: middle;}
+.TokenFarmV3InfoBox .TokenCoolFancy span, .TokenOperation .TokenCoolFancy span, .uuuuTokenLoad .TokenCoolFancy span {font-size: 7px;margin-top: 4px;}
+.input-group-append .TokenCoolFancy {width: 22px !important; height: 22px !important; vertical-align: middle; margin-right: 5px;}
+.input-group-append .TokenCoolFancy span {font-size: 7px !important;padding: 0% 0;margin-top: -4px !important;}
+.IndexTokens .TokenCoolFancy {width: 23px !important; height: 23px !important; vertical-align: middle;display: inline-block;}
+.IndexTokens .TokenCoolFancy span {font-size: 7px !important;padding: 0% 0;margin-top: 4px !important;}
+.IndexContractOpenCollateralSingleTITLE .TokenCoolFancy {display: inline-block;margin: auto 5px;vertical-align: middle;width: 30px !important; height: 30px !important;}
+.IndexContractOpenCollateralSingleTITLE .TokenCoolFancy span {font-size: 9px;margin-top: 3px;}
 
 .PrestoSelector {padding: 5px; margin: 2px 3px; border-radius: 8px; border: 1px solid #9e6915;}
 .PrestoSelector span {font-size: 14px; margin: auto 5px auto auto; display: inline-block; vertical-align: middle;}
@@ -706,6 +712,8 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
    .Web2ActionsBTNs a {margin: 4px 4px;font-size: 12px; padding: 4px 8px;}
    .FarmContractOpen {padding: 0 3%;}
    .FarmContract .StatsLink {display: none;}
+   .farmInfoCurve {display: none !important;}
+   .SetupFarmingInstructionsV3 {width: 100%;}
 }
 
 @media only screen and (min-device-width: 751px) and (max-device-width: 1024px) {
