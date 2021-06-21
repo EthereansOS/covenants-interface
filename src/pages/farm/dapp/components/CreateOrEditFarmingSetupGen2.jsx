@@ -5,7 +5,8 @@ import { Coin, Input, TokenInput } from '../../../../components/shared';
 import {
     tickToPrice,
     nearestUsableTick,
-    TICK_SPACINGS
+    TICK_SPACINGS,
+    TickMath
 } from '@uniswap/v3-sdk/dist/';
 import { Token } from "@uniswap/sdk-core/dist";
 
@@ -185,7 +186,7 @@ const CreateOrEditFarmingSetup = (props) => {
             return;
         }
         currentStep === 0 && liquidityPoolToken && window.formatNumber(blockDuration) > 0 && window.formatNumber(rewardPerBlock) > 0 && setCurrentStep(props.gen2SetupType === 'diluted' ? 2 : 1);
-        currentStep === 1 && tickUpper !== tickLower && tickLower < tickUpper && tickLower % TICK_SPACINGS[liquidityPoolToken.fee] === 0 && tickUpper % TICK_SPACINGS[liquidityPoolToken.fee] === 0 && setCurrentStep(2);
+        currentStep === 1 && tickUpper !== tickLower && tickLower >= TickMath.MIN_TICK && tickUpper <= TickMath.MAX_TICK && tickLower < tickUpper && tickLower % TICK_SPACINGS[liquidityPoolToken.fee] === 0 && tickUpper % TICK_SPACINGS[liquidityPoolToken.fee] === 0 && setCurrentStep(2);
     }
 
     function updateTick(tick, increment) {
@@ -193,6 +194,7 @@ const CreateOrEditFarmingSetup = (props) => {
         var step = TICK_SPACINGS[liquidityPoolToken.fee];
         increment && (tickToUpdate += step);
         !increment && (tickToUpdate -= step);
+        tickToUpdate = tickToUpdate > TickMath.MAX_TICK ? TickMath.MAX_TICK : tickToUpdate < TickMath.MIN_TICK ? TickMath.MIN_TICK : tickToUpdate;
         tick === 0 && setTickLower(tickToUpdate);
         tick === 1 && setTickUpper(tickToUpdate);
     }
@@ -275,7 +277,7 @@ const CreateOrEditFarmingSetup = (props) => {
                     <h6>Min Price</h6>
                     <p>{minPrice} {liquidityPoolToken.tokens[1 - secondTokenIndex].symbol}</p>
                     <div className="InputTokenRegular">
-                        <input className="PriceRangeInput" type="number" data-tick="0"  ref={ref => tickLowerInput = ref} defaultValue={tickLower} onBlur={onTickInputBlur}/>
+                        <input className="PriceRangeInput" type="number" min={TickMath.MIN_TICK} max={TickMath.MAX_TICK} data-tick="0" ref={ref => tickLowerInput = ref} defaultValue={tickLower} onBlur={onTickInputBlur}/>
                     </div>
                     <div className="InputTokenRegular">
                         <a className="tickerchanger" href="javascript:;" onClick={() => updateTick(0, false)}> - </a>
@@ -287,7 +289,7 @@ const CreateOrEditFarmingSetup = (props) => {
                     <h6>Max Price</h6>
                     <p>{maxPrice} {liquidityPoolToken.tokens[1 - secondTokenIndex].symbol}</p>
                     <div className="InputTokenRegular">
-                        <input className="PriceRangeInput" type="number" data-tick="1" ref={ref => tickUpperInput = ref} defaultValue={tickUpper} onBlur={onTickInputBlur}/>
+                        <input className="PriceRangeInput" type="number" min={TickMath.MIN_TICK} max={TickMath.MAX_TICK} data-tick="1" ref={ref => tickUpperInput = ref} defaultValue={tickUpper} onBlur={onTickInputBlur}/>
                     </div>
                     <div className="InputTokenRegular">
                         <a className="tickerchanger" href="javascript:;" onClick={() => updateTick(1, false)}> - </a>

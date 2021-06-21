@@ -440,7 +440,7 @@ const SetupComponentGen2 = (props) => {
             };
             tks[1 - index] = {
                 value : window.numberToString(pos),
-                full : window.toDecimals(window.numberToString(pos), lpTokenInfo.uniswapTokens[0].decimals)
+                full : window.toDecimals(window.numberToString(pos), setupTokens[1 - index].decimals)
             };
             setTokensAmount(tks);
             var liquidityPoolAmount = "1";
