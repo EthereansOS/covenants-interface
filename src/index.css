@@ -450,6 +450,13 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .YourFarmingPositionsFarmingFarmingFarmingChiFarmaViveComeUnPAsha {width: 92%; display: inline-block; padding: 10px; border: 1px solid #e0e2e6 !important;;border-radius: 15px; background-color: #e9effc; margin: 10px auto;}
 .penguin .YourFarmingPositionsFarmingFarmingFarmingChiFarmaViveComeUnPAsha {background-color: rgb(33, 36, 41); border-color: #1c1c27 !important;}
 .YouEanBigMoney p {font-size: 11px;}
+.TokenCoolFancy {border-radius: 100%; background-color: #849BBD; overflow: hidden; text-align: center;}
+.TokenCoolFancy span {font-size: 11px; color: #ffffff !important; text-decoration: none !important; vertical-align: middle; display: inline-block;}
+.TokenCoolFancy span:hover {font-size: 11px; color: #ffffff !important; text-decoration: none !important;}
+.TokenCoolFancy:hover span {font-size: 11px; color: #ffffff !important; text-decoration: none !important;}
+.FarmTitle figure .TokenCoolFancy {display: inline-block; width: 55px; height: 55px; vertical-align: middle;padding: 33% 0;font-size: 14px;}
+
+
 
 
 .PrestoSelector {padding: 5px; margin: 2px 3px; border-radius: 8px; border: 1px solid #9e6915;}

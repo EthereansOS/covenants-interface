@@ -36,8 +36,9 @@ const Coin = (props) => {
             setImage(defaultLogoImage);
         }
     }
-
-    return <img className={props.className} src={forcedImage || imageLink} onError={(e) => onImageError()} />
+    return (image === defaultLogoImage ? <span className="TokenCoolFancy"><span>YYTFJ</span></span>
+    : 
+    <img className={props.className} src={forcedImage || imageLink} onError={(e) => onImageError()} />); 
 }
 
 Coin.propTypes = {
