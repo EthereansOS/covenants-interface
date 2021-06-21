@@ -714,6 +714,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
    .FarmContract .StatsLink {display: none;}
    .farmInfoCurve {display: none !important;}
    .SetupFarmingInstructionsV3 {width: 100%;}
+   .DeleteMRD {margin: 0px 9px;}
 }
 
 @media only screen and (min-device-width: 751px) and (max-device-width: 1024px) {
