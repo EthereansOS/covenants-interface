@@ -246,6 +246,12 @@ export default class DFOCore {
         return window.dfoCore.itemsTokens.filter(it => toChecksumAddress(it.address) === toChecksumAddress(address)).length > 0;
     }
 
+    getTokenSymbol = async (address) => {
+        var token = await this.getContract(this.getContextElement('ERC20ABI'), address);
+        var symbol = await token.methods.symbol().call();
+        return symbol;
+    }
+
     /**
      * returns the element with the given elementName from the context.
      * @param {*} elementName name of the element to retrieve from the context.

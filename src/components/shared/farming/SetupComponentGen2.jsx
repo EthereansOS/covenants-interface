@@ -7,9 +7,8 @@ import SwitchIcon from "../../../assets/images/switch.png";
 import ArrowIcon from "../../../assets/images/arrow.png";
 import Loading from "../Loading";
 import { useRef } from 'react';
-import { tickToPrice } from '@uniswap/v3-sdk/dist/';
+import { tickToPrice, Pool, Position } from '@uniswap/v3-sdk/dist/';
 import { Token } from "@uniswap/sdk-core/dist";
-import { ethers } from 'ethers';
 
 const SetupComponentGen2 = (props) => {
     let { className, dfoCore, setupIndex, lmContract, hostedBy } = props;
@@ -429,24 +428,20 @@ const SetupComponentGen2 = (props) => {
             var tokenAddress = setupTokens[index].address;
             tokenAddress = tokenAddress === window.voidEthereumAddress ? ethereumAddress : tokenAddress;
             const fullValue = window.toDecimals(value, setupTokens[index].decimals);
+            var mint = setup.objectId === '0';
+            var slot0 = await lpTokenInfo.contract.methods.slot0().call();
+            var pool = new Pool(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(lpTokenInfo.fee), parseInt(slot0.sqrtPriceX96), 0, parseInt(slot0.tick));
+            var fromAmountData = {pool, tickLower : parseInt(setupInfo.tickLower), tickUpper : parseInt(setupInfo.tickUpper), amount0 : window.formatNumber(fullValue), useFullPrecision : true};
+            var pos = Position[`fromAmount${index}`](fromAmountData)[`amount${1 - index}`].toSignificant(18);
             var tks = tokensAmounts.map(it => it);
             tks[index] = {
                 value,
                 full : fullValue
-            }
-            var tick = parseInt((await lpTokenInfo.contract.methods.slot0().call()).tick);
-            var x = window.formatNumber(tickToPrice(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], tick).toSignificant());
-            console.log(x);
-            tks[1 - index] = {
-                value : window.formatNumber(value)
             };
-            if(index === 0) {
-                tks[1 - index].value = tks[1 - index].value * x;
-            } else {
-                tks[1 - index].value = tks[1 - index].value / x;
-            }
-            tks[1 - index].value = window.numberToString(tks[1 - index].value);
-            tks[1 - index].full = window.toDecimals(tks[1 - index].value, lpTokenInfo.uniswapTokens[1 - index].decimals, true);
+            tks[1 - index] = {
+                value : window.numberToString(pos),
+                full : window.toDecimals(window.numberToString(pos), lpTokenInfo.uniswapTokens[0].decimals)
+            };
             setTokensAmount(tks);
             var liquidityPoolAmount = "1";
             setLpTokenAmount(liquidityPoolAmount)

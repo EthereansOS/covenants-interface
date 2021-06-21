@@ -10,6 +10,7 @@ const CreateOrEditFarmingSetups = (props) => {
     const [editSetupIndex, setEditSetupIndex] = useState(0);
     const [selectedFarmingType, setSelectedFarmingType] = useState("");
     const [currentStep, setCurrentStep] = useState(0);
+    const [gen2SetupType, setGen2SetupType] = useState("");
 
     if (currentStep > 0 || editSetup) {
         return props.generation === 'gen2' ? (
@@ -18,9 +19,10 @@ const CreateOrEditFarmingSetups = (props) => {
                 onAddFarmingSetup={(setup) => { onAddFarmingSetup(setup); setCurrentStep(0); setIsAdd(false); }}
                 editSetup={editSetup}
                 editSetupIndex={editSetupIndex}
-                onEditFarmingSetup={(setup, index) => { onEditFarmingSetup(setup, index); setEditSetup(null); setEditSetupIndex(0); setCurrentStep(0); }}
+                gen2SetupType={gen2SetupType}
+                onEditFarmingSetup={(setup, index) => { onEditFarmingSetup(setup, index); setEditSetup(null); setEditSetupIndex(0); setCurrentStep(0); setGen2SetupType(""); }}
                 selectedFarmingType={editSetup ? !editSetup.maxLiquidity ? "free" : "locked" : selectedFarmingType}
-                onCancel={() => { setCurrentStep(0); setEditSetup(null); setEditSetupIndex(0); }}
+                onCancel={() => { setCurrentStep(0); setEditSetup(null); setEditSetupIndex(0); setGen2SetupType(""); }}
             />) : (
             <CreateOrEditFarmingSetup
                 rewardToken={rewardToken}
@@ -43,23 +45,23 @@ const CreateOrEditFarmingSetups = (props) => {
                     <div className="generationSelector">
                         <h6>Diluted Liquidity</h6>
                         <p>Choosing Diluted Liquidity automatically the setup will calculate a price range by 10,000 times from the current price of tokens, to esily add liquidity as older AMMs (less trading fees and less IL risks).</p>
-                        <a className="web2ActionBTN" onClick={() => setSelectedFarmingType('free') && selectedFarmingType && setCurrentStep(1)}>Select</a>
+                        <a className="web2ActionBTN" onClick={() => void(setGen2SetupType("diluted"), setSelectedFarmingType('free'), setCurrentStep(1))}>Select</a>
                     </div>
                     <div className="generationSelector">
                         <h6>Concentrated Liquidity</h6>
                         <p>Choosing Concentrated Liquidity you'll set a custom price range for this farming setup. To know more about the potential and risks about it: <a target="_blank" href="https://docs.uniswap.org/concepts/V3-overview/concentrated-liquidity">Uniswap Documentation</a></p>
-                        <a className="web2ActionBTN" onClick={() => setSelectedFarmingType('free') && selectedFarmingType && setCurrentStep(1)}>Select</a>
+                        <a className="web2ActionBTN" onClick={() => void(setGen2SetupType("concentrated"), setSelectedFarmingType('free'), setCurrentStep(1))}>Select</a>
                     </div>
                 </> : <>
                     <div className="generationSelector">
                         <h6>Free</h6>
                         <p>In free farming, Farmers can stake / un-stake liquidity anytime, but the reward/block is shared btween them.</p>
-                        <a className="web2ActionBTN" onClick={() => setSelectedFarmingType('free') && selectedFarmingType && setCurrentStep(1)}>Select</a>
+                        <a className="web2ActionBTN" onClick={() => void(setSelectedFarmingType('free'), setCurrentStep(1))}>Select</a>
                     </div>
                     <div className="generationSelector">
                         <h6>Locked</h6>
                         <p>In Locked setups Farmers lock the liquidity until it ends, but reawards are fixed.</p>
-                        <a className="web2ActionBTN" onClick={() => setSelectedFarmingType('locked') && selectedFarmingType && setCurrentStep(1)}>Select</a>
+                        <a className="web2ActionBTN" onClick={() =>  void(setSelectedFarmingType('locked'), setCurrentStep(1))}>Select</a>
                     </div>
                 </>}
                 <div className="Web2ActionsBTNs">

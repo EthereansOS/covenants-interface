@@ -36,11 +36,10 @@ const CreateOrEditFarmingSetup = (props) => {
     const [ethAddress, setEthAddress] = useState((editSetup && editSetup.ethAddress) ? editSetup.ethAddress : "");
     const [uniswapTokens, setUniswapTokens] = useState([]);
     const [secondTokenIndex, setSecondTokenIndex] = useState(1);
+    const [maxPrice, setMaxPrice] = useState(0);
+    const [minPrice, setMinPrice] = useState(0);
     // current step
     const [currentStep, setCurrentStep] = useState(0);
-
-    var lowerTickPriceInput;
-    var upperTickPriceInput;
 
     useEffect(() => {
         if (editSetup && (editSetup.liquidityPoolTokenAddress || (editSetup.liquidityPoolToken && editSetup.liquidityPoolToken.address))) {
@@ -49,15 +48,19 @@ const CreateOrEditFarmingSetup = (props) => {
     }, []);
 
     useEffect(() => {
+        var minPrice;
+        var maxPrice;
         try {
-            lowerTickPriceInput.value = tickToPrice(uniswapTokens[secondTokenIndex], uniswapTokens[1 - secondTokenIndex], tickLower).toSignificant(18);
+            minPrice = tickToPrice(uniswapTokens[secondTokenIndex], uniswapTokens[1 - secondTokenIndex], parseInt(tickLower)).toSignificant(18);
         } catch(e) {
         }
         try {
-            upperTickPriceInput.value = tickToPrice(uniswapTokens[secondTokenIndex], uniswapTokens[1 - secondTokenIndex], tickUpper).toSignificant(18);
+            maxPrice = tickToPrice(uniswapTokens[secondTokenIndex], uniswapTokens[1 - secondTokenIndex], parseInt(tickUpper)).toSignificant(18);
         } catch(e) {
         }
-    }, [tickLower, tickUpper]);
+        secondTokenIndex === 1 && void(setMinPrice(minPrice), setMaxPrice(maxPrice));
+        secondTokenIndex === 0 && void(setMinPrice(maxPrice), setMaxPrice(minPrice));
+    }, [tickLower, tickUpper, secondTokenIndex]);
 
     const onSelectLiquidityPoolToken = async (address) => {
         if (!address) return;
@@ -66,8 +69,6 @@ const CreateOrEditFarmingSetup = (props) => {
             const poolContract = await dfoCore.getContract(dfoCore.getContextElement("UniswapV3PoolABI"), address);
             var fee = await poolContract.methods.fee().call();
             var tick = parseInt((await poolContract.methods.slot0().call()).tick);
-            settickLower(tick);
-            settickUpper(tick);
             const lpInfo = [
                 [], [], [
                     await poolContract.methods.token0().call(),
@@ -179,10 +180,6 @@ const CreateOrEditFarmingSetup = (props) => {
         currentStep === 1 && tickUpper !== tickLower && tickLower < tickUpper && setCurrentStep(2);
     }
 
-    //tick === 0 -> tickLower
-    //tick === 1 -> tickUpper
-    //increment === true -> +
-    //increment === false -> -
     function updateTick(tick, increment) {
         var tickToUpdate = tick === 0 ? tickLower : tickUpper;
         var step = TICK_SPACINGS[liquidityPoolToken.fee];
@@ -193,17 +190,10 @@ const CreateOrEditFarmingSetup = (props) => {
     }
 
     function onTickPriceManualInput(e) {
-        var value = window.formatMoney(e.currentTarget.value, 18);
-        var tokenIndex = 1 - secondTokenIndex;
+        var value = window.formatNumber(e.currentTarget.value);
         var tick = parseInt(e.currentTarget.dataset.tick);
-        var price = new Price({
-            baseAmount: CurrencyAmount.fromRawAmount(uniswapTokens[1 - tokenIndex], 1),
-            quoteAmount: CurrencyAmount.fromRawAmount(uniswapTokens[tokenIndex], window.formatNumber(value))
-        });
-        var retrievedTick = priceToClosestTick(price);
-        tick === 0 && settickLower(retrievedTick);
-        tick === 1 && settickUpper(retrievedTick);
-        //e.currentTarget.value = tickToPrice(uniswapTokens[1 - secondTokenIndex], uniswapTokens[secondTokenIndex], retrievedTick).toSignificant(18);
+        tick === 0 && settickLower(value);
+        tick === 1 && settickUpper(value);
     }
 
     const getFirstStep = () => {
@@ -275,9 +265,9 @@ const CreateOrEditFarmingSetup = (props) => {
 
                 <div className="generationSelector">
                     <h6>Min Price</h6>
-                    <p>0.0001 {liquidityPoolToken.tokens[1 - secondTokenIndex].symbol}</p>
+                    <p>{minPrice} {liquidityPoolToken.tokens[1 - secondTokenIndex].symbol}</p>
                     <div className="InputTokenRegular">
-                        <input className="PriceRangeInput" type="number" data-tick="0" ref={ref => lowerTickPriceInput = ref}/>
+                        <input className="PriceRangeInput" type="number" data-tick="0" value={tickLower} onChange={onTickPriceManualInput}/>
                     </div>
                     <div className="InputTokenRegular">
                         <a className="tickerchanger" href="javascript:;" onClick={() => updateTick(0, false)}> - </a>
@@ -287,9 +277,9 @@ const CreateOrEditFarmingSetup = (props) => {
                 </div>
                 <div className="generationSelector">
                     <h6>Max Price</h6>
-                    <p>100 {liquidityPoolToken.tokens[1 - secondTokenIndex].symbol}</p>
+                    <p>{maxPrice} {liquidityPoolToken.tokens[1 - secondTokenIndex].symbol}</p>
                     <div className="InputTokenRegular">
-                        <input className="PriceRangeInput" type="number" data-tick="1" ref={ref => upperTickPriceInput = ref}/>
+                        <input className="PriceRangeInput" type="number" data-tick="1" value={tickUpper} onChange={onTickPriceManualInput}/>
                     </div>
                     <div className="InputTokenRegular">
                         <a className="tickerchanger" href="javascript:;" onClick={() => updateTick(1, false)}> - </a>
@@ -299,8 +289,8 @@ const CreateOrEditFarmingSetup = (props) => {
                 </div>
                 <div className="FancyExplanationCreate">
                     <div className="FancyExplanationCreateS">
-                    <h6>{liquidityPoolToken.tokens[1 - secondTokenIndex].symbol} per {liquidityPoolToken.tokens[secondTokenIndex].symbol}</h6>
-                    <p>Current Price: 0.0001 {liquidityPoolToken.tokens[secondTokenIndex].symbol}<br></br>Tick: -12321</p>
+                    <h6>{liquidityPoolToken.tokens[secondTokenIndex].symbol} per {liquidityPoolToken.tokens[1 - secondTokenIndex].symbol}</h6>
+                    <p>Current Price: {tickToPrice(uniswapTokens[secondTokenIndex], uniswapTokens[1 - secondTokenIndex], parseInt(liquidityPoolToken.tick)).toSignificant(18)} {liquidityPoolToken.tokens[1 - secondTokenIndex].symbol}<br></br>Tick: {liquidityPoolToken.tick}</p>
                     </div>
                     <div className="FancyExplanationCreateS">
                         <a className="web2ActionBTN web2ActionBTNGigi" onClick={() => setSecondTokenIndex(1 - secondTokenIndex)}>Switch</a>
@@ -351,7 +341,6 @@ const CreateOrEditFarmingSetup = (props) => {
                             }
                         </div>
                     }
-                    
                     <p className="BreefRecapB">[Optional] You can set a floor for the minimum amount of main tokens required to stake a position.</p>
                 </div>
                 <div className="FancyExplanationCreate">
