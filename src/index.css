@@ -242,8 +242,8 @@ a:disabled {cursor:wait !important;}
 .ExploreCreate {text-align: right;}
 .InputForm h5 {font-size: 16px; margin: 30px auto 5px auto;}
 .InputForm .imputCool {width: 300px; border: 1px solid #9e6915;}
-.CovCODEEDITOR {width: 600px; height: 400px;; display: block; margin: 20px auto;}
-.CovCODEEDITOR section {width: 600px !important; height: 400px !important;display: block !important;}
+.CovCODEEDITOR {width: 560px; height: 400px;; display: block; margin: 20px auto;}
+.CovCODEEDITOR section {width: 560px !important; height: 400px !important;display: block !important;}
 .monaco-editor {height: 400px !important;}
 .CheckboxQuestions {width: 100%; display: inline-block; margin: 10px auto;}
 .CheckboxQuestions label {width: 100%; display: inline-block; margin: 10px auto; text-align: center;}
@@ -351,7 +351,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .Web3ActionBTNV {display: inline-block; margin: 10px auto;}
 .BalanceImputPRCD {font-size: 13px; margin-left: 5px;}
 .BLKEMD {text-decoration: underline !important;}
-.hiddenLink {text-decoration: underline; font-size: 12px; color: #50555C; display: block; margin: 5px auto;}
+.hiddenLink {text-decoration: underline; font-size: 12px; color: #50555C; display: block; margin: 20px auto !important;}
 .hiddenLink:hover {color: #50555C;}
 .TokenSelectedB {padding: 10px; border: 1px solid #7474f7; display: inline-block;width: auto;border-radius: 12px;}
 
@@ -557,8 +557,14 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .penguin .input-group-append {background-color: #2f3044;}
 .generationSelector {width: 45%; display: inline-block; margin: 10px 1%; padding: 30px; background-color: #f7fafe; border: 1px solid #e0e2e6; border-radius: 12px;}
 .penguin .generationSelector {background-color: #2f3044;border-color: #1c1c27}
-.generationSelector h6 {font-size: 16px; font-weight: bold;}
-.generationSelector p {font-size: 11px;}
+.generationSelector h6, .FancyExplanationCreate h6 {font-size: 16px; font-weight: bold;}
+.generationSelector p, .FancyExplanationCreate p {font-size: 11px;}
+.generationSelector h5, .FancyExplanationCreate h5 {font-size: 14px;}
+.PriceRangeInput {border: 1px solid #bd84fb; border-radius: 8px;}
+.tickerchanger {display: inline-block; width: 30%; margin: 5px 5%; background-color: #bd84fb; color: #ffffff; border-radius: 8px; font-weight: bold;}
+.tickerchanger:hover {text-decoration: none;color: #ffffff}
+.FancyExplanationCreate {width: 91%; display: inline-block; margin: 10px auto; padding: 2%; background-color: #f7fafe; border: 1px solid #e0e2e6; border-radius: 12px;}
+.penguin .FancyExplanationCreate {background-color: #2f3044;border-color: #1c1c27}
 .GenerationTime {font-size: 12px; width: 90%; display: inline-block; margin: 10px auto;}
 .InactiveSignalP {color: #ad0002; border: 2px solid #ad0002;padding: 2px 4px;border-radius: 6px;font-size: 13px;margin-left: 4px;}
 .InactiveSignalA {color: #34b15ee0; border: 2px solid #34b15ee0;padding: 2px 4px;border-radius: 6px;font-size: 13px;margin-left: 4px;}
@@ -567,6 +573,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .TVLGen1R {font-size: 11px !important;}
 .FarmSetupV3 .FarmYou {width: 45% !important;} 
 .FarmSetupV3 .farmed  {width: 45% !important;}
+.FancyExplanationCreateS {width: 35%; text-align: center; display: inline-block; vertical-align: middle;}
 
 
 @media only screen and (max-device-width: 750px) {

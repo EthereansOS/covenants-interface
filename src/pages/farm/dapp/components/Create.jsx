@@ -337,8 +337,10 @@ const Create = (props) => {
 
     const getCreationComponent = () => {
         return <div className="CheckboxQuestions uuuuTokenLoad">
-            <h6>Reward token address</h6>
-            <p className="BreefRecapB">The reward token is the token chosen to reward farmers and can be one per contract.</p>
+            <div className="FancyExplanationCreate">
+                <h6>Reward token address</h6>
+                <p className="BreefRecapB">The reward token is the token chosen to reward farmers and can be one per contract.</p>
+            </div>
             <TokenInput placeholder={"Reward token"} onClick={onSelectRewardToken} tokenAddress={(selectedRewardToken && selectedRewardToken.address) || ""} text={"Load"} />
             {
                 loading ? <div className="row justify-content-center">
@@ -348,7 +350,9 @@ const Create = (props) => {
                 </div> : <>
                     {selectedRewardToken && <div className="CheckboxQuestions uuuuTokenLoad">
                         <p><Coin address={selectedRewardToken.address} /> {selectedRewardToken.symbol}</p>
-                        <p className="BreefRecapB"> If “by reserve” is selected, the input token will be sent from a wallet. If “by mint” is selected, it will be minted and then sent. The logic of this action must be carefully coded into the extension! To learn more, read the <a target="_blank" href="https://docs.ethos.wiki/covenants/">Documentation</a></p>
+                        <div className="FancyExplanationCreate">
+                            <p className="BreefRecapB"> If “by reserve” is selected, the input token will be sent from a wallet. If “by mint” is selected, it will be minted and then sent. The logic of this action must be carefully coded into the extension! To learn more, read the <a target="_blank" href="https://docs.ethos.wiki/covenants/">Documentation</a></p>
+                        </div>
                         <select value={byMint === true ? "true" : "false"} onChange={e => setByMint(e.target.value === 'true')} className="SelectRegular">
                             <option value="">Select method</option>
                             {/*!enterInETH &&*/ <option value="true">By mint</option>}
@@ -409,6 +413,7 @@ const Create = (props) => {
 
         return (
             <div className="CheckboxQuestions">
+                <div className="FancyExplanationCreate">
                 <h6>Host</h6>
                 <p className="BreefRecapB">The host is the wallet, contract, dApp, DAO or DFO with permission to manage and add new setups in the contract. Permissions are set in the extension. If you choose "Standard Extension (address, wallet)," the extension must hold all of the tokens needed to reward every setup. You can also program extension permissions via your DFO to mint reward tokens or transfer them from its treasury, using the DFOhub site or a custom contract. For more info on this, see the <a target="_blank" href="https://docs.ethos.wiki/covenants/">Documentation</a>.</p>
                 <select className="SelectRegular" value={selectedHost} onChange={onHostSelection}>
@@ -417,30 +422,45 @@ const Create = (props) => {
                     <option value="deployedContract">Custom Extension (Deployed Contract)</option>
                     <option value="fromSourceCode">Custom Extension (Deploy Contract)</option>
                 </select>
+                </div>
                 {
                     selectedHost === 'address' ? <>
-                        <div className="InputTokensRegular InputRegularB">
-                            <input type="text" className="TextRegular" value={hostWalletAddress || ""} onChange={(e) => setHostWalletAddress(e.target.value.toString())} placeholder={"Wallet address"} aria-label={"Host address"} />
+                        <div className="FancyExplanationCreate">
+                            <div className="InputTokensRegular InputRegularB">
+                                <input type="text" className="TextRegular" value={hostWalletAddress || ""} onChange={(e) => setHostWalletAddress(e.target.value.toString())} placeholder={"Wallet address"} aria-label={"Host address"} />
+                            </div>
                         </div>
-                        <div className="CheckboxQuestions">
-                            <h6><input type="checkbox" checked={hasTreasuryAddress} onChange={onHasTreasuryAddress} /> External Treasury</h6>
-                            {hasTreasuryAddress && <input type="text" className="TextRegular" value={treasuryAddress || ""} onChange={onTreasuryAddressChange} placeholder={"Treasury address"} aria-label={"Treasury address"} />}
-                            <p className="BreefRecapB">[Optional] You can choose a treasury other than the extension to which unissued tokens are returned to at the end of the setups.</p>
+                        <div className="FancyExplanationCreate">
+                            <div className="CheckboxQuestions">
+                                <h6><input type="checkbox" checked={hasTreasuryAddress} onChange={onHasTreasuryAddress} /> External Treasury</h6>
+                                {hasTreasuryAddress && <input type="text" className="TextRegular" value={treasuryAddress || ""} onChange={onTreasuryAddressChange} placeholder={"Treasury address"} aria-label={"Treasury address"} />}
+                                <p className="BreefRecapB">[Optional] You can choose a treasury other than the extension to which unissued tokens are returned to at the end of the setups.</p>
+                            </div>
                         </div>
                     </> : selectedHost === 'fromSourceCode' ? <>
-                        <p className="BreefRecapB">Deploy a custom extension contract. In the IDE, we loaded a simple extension contract, and you can use it as a guide. Before building a custom contract, we kindly recommend reading the Covenants Documentation. Do it at your own risk.</p>
-                        <ContractEditor filterDeployedContract={filterDeployedContract} dfoCore={props.dfoCore} onContract={setDeployContract} templateCode={farmingExtensionTemplateCode} />
+                        <div className="FancyExplanationCreate">
+                            <p className="BreefRecapB">Deploy a custom extension contract. In the IDE, we loaded a simple extension contract, and you can use it as a guide. Before building a custom contract, we kindly recommend reading the Covenants Documentation. Do it at your own risk.</p>
+                        </div>
+                        <div className="FancyExplanationCreate">
+                            <ContractEditor filterDeployedContract={filterDeployedContract} dfoCore={props.dfoCore} onContract={setDeployContract} templateCode={farmingExtensionTemplateCode} />
+                        </div>
+                        <div className="FancyExplanationCreate">
                         <h6>Extension payload</h6>
-                        <div className="InputTokensRegular InputRegularB">
-                            <input type="text" className="TextRegular" value={extensionPayload || ""} onChange={(e) => setExtensionPayload(e.target.value.toString())} placeholder={"Payload"} aria-label={"Payload"} />
+                            <div className="InputTokensRegular InputRegularB">
+                                <input type="text" className="TextRegular" value={extensionPayload || ""} onChange={(e) => setExtensionPayload(e.target.value.toString())} placeholder={"Payload"} aria-label={"Payload"} />
+                            </div>
                         </div>
                     </> : selectedHost === 'deployedContract' ? <>
-                        <div className="InputTokensRegular InputRegularB">
-                            <input type="text" className="TextRegular" value={hostDeployedContract} onChange={(e) => setHostDeployedContract(e.target.value.toString())} placeholder="Insert extension address" aria-label={"Deployed contract address"} />
+                        <div className="FancyExplanationCreate">
+                            <div className="InputTokensRegular InputRegularB">
+                                <input type="text" className="TextRegular" value={hostDeployedContract} onChange={(e) => setHostDeployedContract(e.target.value.toString())} placeholder="Insert extension address" aria-label={"Deployed contract address"} />
+                            </div>
                         </div>
-                        <h6>[Optional] Extension payload</h6>
-                        <div className="InputTokensRegular InputRegularB">
-                            <input type="text" className="TextRegular" value={extensionPayload || ""} onChange={(e) => setExtensionPayload(e.target.value.toString())} placeholder={"Payload"} aria-label={"Payload"} />
+                        <div className="FancyExplanationCreate">
+                            <h6>[Optional] Extension payload</h6>
+                            <div className="InputTokensRegular InputRegularB">
+                                <input type="text" className="TextRegular" value={extensionPayload || ""} onChange={(e) => setExtensionPayload(e.target.value.toString())} placeholder={"Payload"} aria-label={"Payload"} />
+                            </div>
                         </div>
                     </> : <></>
                 }
@@ -537,7 +557,7 @@ const Create = (props) => {
                     <a className="web2ActionBTN" href="javascript:;" onClick={() => setGeneration("gen1")}>Select</a>
                 </div>
                 <div className="generationSelector">
-                    <h6>Gen 2</h6>
+                    <h6>Uniswap V3</h6>
                     <p>This contract work with <b>Uniswap V3</b> powered by customized concentrated liquidity options and very low cost farming with shared NFTs.</p>
                     <a className="web2ActionBTN" href="javascript:;" onClick={() => setGeneration("gen2")}>Select</a>
                 </div>
