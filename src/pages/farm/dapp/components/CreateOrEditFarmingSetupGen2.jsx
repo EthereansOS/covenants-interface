@@ -23,8 +23,8 @@ const CreateOrEditFarmingSetup = (props) => {
     const [renewTimes, setRenewTimes] = useState((editSetup && editSetup.renewTimes) ? editSetup.renewTimes : 0);
     const [involvingEth, setInvolvingEth] = useState((editSetup && editSetup.involvingEth) ? editSetup.involvingEth : false);
     const [ethSelectData, setEthSelectData] = useState((editSetup && editSetup.ethSelectData) ? editSetup.ethSelectData : null);
-    const [tickUpper, settickUpper] = useState((editSetup && editSetup.tickUpper) ? editSetup.tickUpper : 0);
-    const [tickLower, settickLower] = useState((editSetup && editSetup.tickLower) ? editSetup.tickLower : 0);
+    const [tickUpper, setTickUpper] = useState((editSetup && editSetup.tickUpper) ? editSetup.tickUpper : 0);
+    const [tickLower, setTickLower] = useState((editSetup && editSetup.tickLower) ? editSetup.tickLower : 0);
     // token state
     const [liquidityPoolToken, setLiquidityPoolToken] = useState((editSetup && editSetup.data) ? editSetup.data : null);
     const [mainTokenIndex, setMainTokenIndex] = useState((editSetup && editSetup.mainTokenIndex) ? editSetup.mainTokenIndex : 0);
@@ -40,6 +40,8 @@ const CreateOrEditFarmingSetup = (props) => {
     const [minPrice, setMinPrice] = useState(0);
     // current step
     const [currentStep, setCurrentStep] = useState(0);
+
+    const dilutedTickRange = 92000;
 
     useEffect(() => {
         if (editSetup && (editSetup.liquidityPoolTokenAddress || (editSetup.liquidityPoolToken && editSetup.liquidityPoolToken.address))) {
@@ -69,6 +71,10 @@ const CreateOrEditFarmingSetup = (props) => {
             const poolContract = await dfoCore.getContract(dfoCore.getContextElement("UniswapV3PoolABI"), address);
             var fee = await poolContract.methods.fee().call();
             var tick = parseInt((await poolContract.methods.slot0().call()).tick);
+            if(props.gen2SetupType === 'diluted') {
+                setTickLower(tick - dilutedTickRange);
+                setTickUpper(tick + dilutedTickRange);
+            }
             const lpInfo = [
                 [], [], [
                     await poolContract.methods.token0().call(),
@@ -176,7 +182,7 @@ const CreateOrEditFarmingSetup = (props) => {
         if (selectedFarmingType === 'locked' && window.formatNumber(maxStakeable) <= 0) {
             return;
         }
-        currentStep === 0 && liquidityPoolToken && window.formatNumber(blockDuration) > 0 && window.formatNumber(rewardPerBlock) > 0 && setCurrentStep(1);
+        currentStep === 0 && liquidityPoolToken && window.formatNumber(blockDuration) > 0 && window.formatNumber(rewardPerBlock) > 0 && setCurrentStep(props.gen2SetupType === 'diluted' ? 2 : 1);
         currentStep === 1 && tickUpper !== tickLower && tickLower < tickUpper && setCurrentStep(2);
     }
 
@@ -185,15 +191,15 @@ const CreateOrEditFarmingSetup = (props) => {
         var step = TICK_SPACINGS[liquidityPoolToken.fee];
         increment && (tickToUpdate += step);
         !increment && (tickToUpdate -= step);
-        tick === 0 && settickLower(tickToUpdate);
-        tick === 1 && settickUpper(tickToUpdate);
+        tick === 0 && setTickLower(tickToUpdate);
+        tick === 1 && setTickUpper(tickToUpdate);
     }
 
     function onTickPriceManualInput(e) {
         var value = window.formatNumber(e.currentTarget.value);
         var tick = parseInt(e.currentTarget.dataset.tick);
-        tick === 0 && settickLower(value);
-        tick === 1 && settickUpper(value);
+        tick === 0 && setTickLower(value);
+        tick === 1 && setTickUpper(value);
     }
 
     const getFirstStep = () => {
