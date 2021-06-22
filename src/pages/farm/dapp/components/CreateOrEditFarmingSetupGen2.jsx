@@ -42,7 +42,7 @@ const CreateOrEditFarmingSetup = (props) => {
     // current step
     const [currentStep, setCurrentStep] = useState(0);
 
-    const dilutedTickRange = 92000;
+    const dilutedTickRange = 92100;
     var tickLowerInput;
     var tickUpperInput;
 
@@ -80,6 +80,11 @@ const CreateOrEditFarmingSetup = (props) => {
             }
             setTickLower(tickLower);
             setTickUpper(tickUpper);
+            console.log({
+                tick : nearestUsableTick(tick, TICK_SPACINGS[fee]),
+                tickLower,
+                tickUpper
+            });
             const lpInfo = [
                 [], [], [
                     await poolContract.methods.token0().call(),
