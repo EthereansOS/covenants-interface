@@ -354,7 +354,8 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .hiddenLink {text-decoration: underline; font-size: 12px; color: #50555C; display: block; margin: 20px auto !important;}
 .hiddenLink:hover {color: #50555C;}
 .TokenSelectedB {padding: 10px; border: 1px solid #7474f7; display: inline-block;width: auto;border-radius: 12px;}
-
+.SetupFarmingInstructionsOMLYG1 .TokenCoolFancy {height: 35px;width: 35px;display: inline-block;vertical-align: middle;}
+.SetupFarmingInstructionsOMLYG1 .TokenCoolFancy span {margin-top: 9px;}
 
 
 .fantasy {background-color: #4d4c4a !important;}
