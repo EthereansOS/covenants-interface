@@ -45,7 +45,7 @@ const SetupComponentGen2 = (props) => {
     const [tokensAmounts, setTokensAmount] = useState([]);
     const [tokensApprovals, setTokensApprovals] = useState([]);
     const [tokensContracts, setTokensContracts] = useState([]);
-    const [lpTokenAmount, setLpTokenAmount] = useState(0);
+    const [lpTokenAmount, setLpTokenAmount] = useState(null);
     const [lockedEstimatedReward, setLockedEstimatedReward] = useState(0);
     const [freeEstimatedReward, setFreeEstimatedReward] = useState(0);
     const [lpTokenInfo, setLpTokenInfo] = useState(null);
@@ -313,7 +313,7 @@ const SetupComponentGen2 = (props) => {
         }
         setSetupTokens(tokens);
         setTokensContracts(contracts);
-        reset && setLpTokenAmount(0);
+        reset && setLpTokenAmount(null);
         reset && setTokensAmount(new Array(tokens.length).fill(0));
         setTokensApprovals(approvals);
         // retrieve the manage data using the position
@@ -466,7 +466,7 @@ const SetupComponentGen2 = (props) => {
 
     const onUpdateTokenAmount = async (value, index) => {
         updateAmountTimeout && clearTimeout(updateAmountTimeout);
-        setLpTokenAmount('');
+        setLpTokenAmount(null);
         if (!value) {
             setLockedEstimatedReward(0);
             setFreeEstimatedReward(0);
@@ -1035,7 +1035,7 @@ const SetupComponentGen2 = (props) => {
                     })
                 }
                 {
-                    (setupInfo.free && rewardTokenInfo && lpTokenAmount && lpTokenAmount !== '0' && lpTokenAmount.full && lpTokenAmount.full !== '0') && <div className="DiffWallet">
+                    (setupInfo.free && rewardTokenInfo && lpTokenAmount !== undefined && lpTokenAmount !== null && lpTokenAmount !== '' && lpTokenAmount !== '0' && (!lpTokenAmount.full || lpTokenAmount.full !== '0')) && <div className="DiffWallet">
                         <p className="BreefRecap">Estimated reward per day: <br></br><b>{window.formatMoney(freeEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</b>
                         </p>
                     </div>
@@ -1153,7 +1153,7 @@ const SetupComponentGen2 = (props) => {
                         </div>
                         <div className="Farmed">
                                 <p><b>Available</b>: <br></br>{window.formatMoney(window.fromDecimals(freeAvailableRewards, rewardTokenInfo.decimals, true), 4)} {rewardTokenInfo.symbol}</p>
-                                <p><b>Fees Earned</b>: <br></br>{window.formatMoney(window.fromDecimals(manageStatus.additionalFees[0], setupTokens[0].decimals, true), 4)} {setupTokens[0].symbol} - {window.formatMoney(window.fromDecimals(manageStatus.additionalFees[1], setupTokens[1].decimals), 4)} {setupTokens[1].symbol}</p>
+                                {manageStatus && <p><b>Fees Earned</b>: <br></br>{window.formatMoney(window.fromDecimals(manageStatus.additionalFees[0], setupTokens[0].decimals, true), 4)} {setupTokens[0].symbol} - {window.formatMoney(window.fromDecimals(manageStatus.additionalFees[1], setupTokens[1].decimals), 4)} {setupTokens[1].symbol}</p>}
                                 {
                                     claimLoading ? <a className="Web3ActionBTN" disabled={claimLoading}>
                                         <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
