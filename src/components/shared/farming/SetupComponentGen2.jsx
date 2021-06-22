@@ -7,7 +7,7 @@ import SwitchIcon from "../../../assets/images/switch.png";
 import ArrowIcon from "../../../assets/images/arrow.png";
 import Loading from "../Loading";
 import { useRef } from 'react';
-import { tickToPrice, Pool, Position } from '@uniswap/v3-sdk/dist/';
+import { tickToPrice, Pool, Position, nearestUsableTick, TICK_SPACINGS, TickMath } from '@uniswap/v3-sdk/dist/';
 import { Token } from "@uniswap/sdk-core/dist";
 
 const SetupComponentGen2 = (props) => {
@@ -429,7 +429,9 @@ const SetupComponentGen2 = (props) => {
             tokenAddress = tokenAddress === window.voidEthereumAddress ? ethereumAddress : tokenAddress;
             const fullValue = window.toDecimals(value, setupTokens[index].decimals);
             var slot0 = await lpTokenInfo.contract.methods.slot0().call();
-            var pool = new Pool(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(lpTokenInfo.fee), parseInt(slot0.sqrtPriceX96), 0, parseInt(slot0.tick));
+            var tick = nearestUsableTick(parseInt(slot0.tick), TICK_SPACINGS[lpTokenInfo.fee]);
+            var sqrtPriceX96 = TickMath.getSqrtRatioAtTick(tick);
+            var pool = new Pool(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(lpTokenInfo.fee), sqrtPriceX96, 0, tick);
             var fromAmountData = {pool, tickLower : parseInt(setupInfo.tickLower), tickUpper : parseInt(setupInfo.tickUpper), useFullPrecision : true};
             fromAmountData[`amount${index}`] = window.formatNumber(fullValue);
             var pos = Position[`fromAmount${index}`](fromAmountData)[`amount${1 - index}`].toSignificant(18);
