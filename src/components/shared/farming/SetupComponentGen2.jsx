@@ -117,13 +117,16 @@ const SetupComponentGen2 = (props) => {
                 tickData.minPrice = maxPrice;
             }
             if(tickData.cursor !== 0 && tickData.cursor !== 100) {
-                var denominator = Math.abs(parseInt(setupInfo.tickUpper) - parseInt(setupInfo.tickLower))
-                var numerator = Math.abs(parseInt(slot.tick) - parseInt(setupInfo.tickLower));
-                tickData.cursorNumber = 1 - window.numberToString(numerator / denominator);
-                tickData.cursor = window.formatMoney(tickData.cursorNumber * 100, 2);
+                var a = tickToPrice(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(setupInfo.tickLower)).toSignificant(15);
+                var b = tickToPrice(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(setupInfo.tickUpper)).toSignificant(15);
+                var c = tickToPrice(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(slot.tick)).toSignificant(15);
+                tickData.cursorNumber = window.formatNumber(Math.floor((1 / ((Math.sqrt(a * b) - Math.sqrt(b * c)) / (c - Math.sqrt(b * c)) + 1)) * 100));
+                tickData.cursor = window.formatMoney(tickData.cursorNumber, 2);
             }
             setTickData(tickData);
         } catch(e) {
+            console.log("Perc");
+            console.error(e);
         }
     }, [lpTokenInfo, secondTokenIndex, setupInfo]);
 
@@ -336,7 +339,8 @@ const SetupComponentGen2 = (props) => {
                 ]
             } catch(e) {}
             let freeReward = parseInt(availableReward);
-            if (blockNumber < parseInt(farmSetup.endBlock)) {
+            const bNumber = await dfoCore.getBlockNumber();
+            if (bNumber < parseInt(farmSetup.endBlock)) {
                 freeReward += (parseInt(farmSetup.rewardPerBlock) * (parseInt(position.liquidityPoolTokenAmount) / parseInt(farmSetup.totalSupply)))
             }
             freeReward = window.numberToString(freeReward).split('.')[0];
@@ -451,6 +455,7 @@ const SetupComponentGen2 = (props) => {
 
     const onUpdateTokenAmount = async (value, index) => {
         updateAmountTimeout && clearTimeout(updateAmountTimeout);
+        setLpTokenAmount('');
         if (!value) {
             setLockedEstimatedReward(0);
             setFreeEstimatedReward(0);
@@ -599,8 +604,8 @@ const SetupComponentGen2 = (props) => {
         setRemoveLoading(true);
         try {
             const removedLiquidity = removalAmount === 100 ? manageStatus.liquidityPoolAmount : props.dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString().split('.')[0];
-            const gasLimit = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, removedLiquidity).estimateGas({ from: dfoCore.address });
-            const result = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, removedLiquidity).send({ from: dfoCore.address, gasLimit, gas: gasLimit });
+            //const gasLimit = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, removedLiquidity).estimateGas({ from: dfoCore.address });
+            const result = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, removedLiquidity).send({ from: dfoCore.address });
             props.addTransaction(result);
             await getSetupMetadata();
         } catch (error) {
@@ -1019,7 +1024,7 @@ const SetupComponentGen2 = (props) => {
                     })
                 }
                 {
-                    (setupInfo.free && rewardTokenInfo && lpTokenAmount && (lpTokenAmount.full || lpTokenAmount) !== '0') && <div className="DiffWallet">
+                    (setupInfo.free && rewardTokenInfo && lpTokenAmount && lpTokenAmount !== '0' && lpTokenAmount.full && lpTokenAmount.full !== '0') && <div className="DiffWallet">
                         <p className="BreefRecap">Estimated reward per day: <br></br><b>{window.formatMoney(freeEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</b>
                         </p>
                     </div>
@@ -1073,11 +1078,11 @@ const SetupComponentGen2 = (props) => {
                         {
                                 !delayedBlock && canActivateSetup && <>
                                     {
-                                        setupReady && <>
+                                        !open && setupReady && <>
                                             {
                                                 activateLoading ? <a className="Web3ActionBTN" disabled={activateLoading}>
                                                     <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                                </a> : <a className="Web3ActionBTN" onClick={activateSetup}>Activate</a>
+                                                </a> : <a className="web2ActionBTN" onClick={() => void(setOpen(true), setWithdrawOpen(false), setEdit(false))}>Activate</a>
                                             }
                                         </>
                                     }
