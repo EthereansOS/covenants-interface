@@ -585,7 +585,7 @@ export default class DFOCore {
         for(var i in models.setup.names) {
             var name = models.setup.names[i];
             var value = data[0][i];
-            value !== true && value !== false && (value = value.toString());
+            value !== true && value !== false && (value = value && value.toString());
             setup[name] = value;
         }
         var info = {};
