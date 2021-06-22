@@ -7,7 +7,7 @@ import SwitchIcon from "../../../assets/images/switch.png";
 import ArrowIcon from "../../../assets/images/arrow.png";
 import Loading from "../Loading";
 import { useRef } from 'react';
-import { tickToPrice, Pool, Position, nearestUsableTick, TICK_SPACINGS, TickMath } from '@uniswap/v3-sdk/dist/';
+import { tickToPrice, Pool, Position, nearestUsableTick, TICK_SPACINGS, TickMath, maxLiquidityForAmounts } from '@uniswap/v3-sdk/dist/';
 import { Token } from "@uniswap/sdk-core/dist";
 
 const SetupComponentGen2 = (props) => {
@@ -339,41 +339,6 @@ const SetupComponentGen2 = (props) => {
         setApy(await calculateApy(farmSetup, farmSetupInfo, rewardTokenAddress, rewardTokenDecimals, tokens));
     }
 
-    async function simulateAddLiquidty(amount0Desired, amount1Desired) {
-        var nftPosManEthers = await dfoCore.getEthersContract(dfoCore.getContextElement("UniswapV3NonfungiblePositionManagerABI"), dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress"));
-        var nftPosMan = await dfoCore.getContract(dfoCore.getContextElement("UniswapV3NonfungiblePositionManagerABI"), dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress"));
-
-        var params = {
-            tokenId : setup.objectId,
-            token0 : setupTokens[0].address,
-            token1 : setupTokens[1].address,
-            fee : lpTokenInfo.fee,
-            tickLower: setupInfo.tickLower, 
-            tickUpper: setupInfo.tickUpper,
-            amount0Desired,
-            amount1Desired,
-            amount0Min: 0,
-            amount1Min: 0,
-            deadline: new Date().getTime() + 10000,
-            recipient : props.dfoCore.address
-        };
-        var bytes = [
-            nftPosMan.methods[params.tokenId ? 'increaseLiquidity' : 'mint'](params).encodeABI()
-        ];
-        setupInfo.involvingETH && bytes.push(nftPosMan.methods.refundETH().encodeABI());
-
-        try {
-            var result = await nftPosManEthers.callStatic.multicall(
-                bytes, {
-                value : setupInfo.involvingETH ? setupTokens[0].address === ethereumAddress ? amount0Desired : amount1Desired : 0,
-                from : props.dfoCore.address
-            });
-            console.log("Multicall: ",result);
-        } catch(e) {
-            console.error(e);
-        }
-    }
-
     const calculateApy = async (setup, setupInfo, rewardTokenAddress, rewardTokenDecimals, setupTokens) => {
         if (parseInt(setup.totalSupply) === 0) return -1;
         const yearlyBlocks = 2304000;
@@ -480,7 +445,15 @@ const SetupComponentGen2 = (props) => {
                 full : window.toDecimals(window.numberToString(pos), setupTokens[1 - index].decimals)
             };
             setTokensAmount(tks);
-            var liquidityPoolAmount = "1";
+            var liquidityPoolAmount = maxLiquidityForAmounts(
+                parseInt(slot0.sqrtPriceX96),
+                TickMath.getSqrtRatioAtTick(parseInt(setupInfo.tickLower)),
+                TickMath.getSqrtRatioAtTick(parseInt(setupInfo.tickUpper)),
+                tks[0].full,
+                tks[1].full,
+                true
+            ).toString();
+            console.log("Liquidity", liquidityPoolAmount);
             setLpTokenAmount(liquidityPoolAmount)
             if (parseInt(setup.totalSupply) + parseInt(liquidityPoolAmount) > 0) {
                 const val = parseInt(liquidityPoolAmount) * 6400 * parseInt(setup.rewardPerBlock) / (parseInt(setup.totalSupply) + parseInt(liquidityPoolAmount));
