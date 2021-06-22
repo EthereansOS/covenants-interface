@@ -222,6 +222,7 @@ export default class DFOCore {
     getEthersContract = async(abi, address) => {
         address = address || this.voidEthereumAddress;
         // create the key
+        this.ethersContract = this.ethersContract || {};
         const key = (((address && address.toLowerCase()) || "") + this.web3.utils.sha3(JSON.stringify(abi)));
         this.ethersContract[key] = this.ethersContract[key] || new ethers.Contract(address, abi, this.ethersProvider);
         if(abi === this.getContextElement("ERC20ABI") || abi === this.getContextElement("IERC20ABI") && this.ethersContract[key].isItem === undefined) {
