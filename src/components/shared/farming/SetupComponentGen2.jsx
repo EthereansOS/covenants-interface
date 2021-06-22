@@ -142,7 +142,7 @@ const SetupComponentGen2 = (props) => {
                     si = {...si, free : true, generation : 'gen2'};
                     setSetup(s);
                     setSetupInfo(si);
-                    await loadData(s, si);
+                    await loadData(s, si, false, true);
                 }, 5000);
             }
         } catch (error) {
@@ -152,7 +152,7 @@ const SetupComponentGen2 = (props) => {
         }
     }
 
-    const loadData = async (farmSetup, farmSetupInfo, reset) => {
+    const loadData = async (farmSetup, farmSetupInfo, reset, loop) => {
         let position = null;
         let lockPositions = [];
         let positionIds = [];
@@ -201,36 +201,36 @@ const SetupComponentGen2 = (props) => {
 
         const bNumber = await dfoCore.getBlockNumber();
         setBlockNumber(bNumber);
-
         const tokenAddress = farmSetupInfo.liquidityPoolTokenAddress;
         const lpToken = await props.dfoCore.getContract(props.dfoCore.getContextElement("UniswapV3PoolABI"), tokenAddress);
-        const lpTokenSymbol = "UniV3";
-        const lpTokenDecimals = "18";
-        const lpTokenBalance = "0";
-        const lpTokenApproval = "0";
-        const fee = await lpToken.methods.fee().call();
-        const slot = await lpToken.methods.slot0().call();
-        var uniswapTokens = await Promise.all([
-            await lpToken.methods.token0().call(),
-            await lpToken.methods.token1().call()
-        ].map(async tkAddress => {
-            const currentToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), tkAddress);
-            const symbol = tkAddress === window.voidEthereumAddress || tkAddress === ethereumAddress ? "ETH" : await currentToken.methods.symbol().call();
-            var name = tkAddress === window.voidEthereumAddress || tkAddress === ethereumAddress ? "Ethereum" : await currentToken.methods.name().call();
-            var decimals = parseInt(tkAddress ===window.voidEthereumAddress ? "18" : await currentToken.methods.decimals().call());
-            var uniToken = new Token(props.dfoCore.chainId, tkAddress, decimals, symbol, name);
-            return uniToken;
-        }));
-        console.log("Slot", farmSetup.infoIndex, {
-            tick: slot.tick,
-            sqrtPriceX96: slot.sqrtPriceX96,
-            tickLower : farmSetupInfo.tickLower,
-            tickUpper : farmSetupInfo.tickUpper,
-            fee,
-            inRange : parseInt(farmSetupInfo.tickLower) >= parseInt(slot.tick) && parseInt(slot.tick) <= parseInt(farmSetupInfo.tickUpper)
-        });
-        setLpTokenInfo({ uniswapTokens, fee, contract: lpToken, symbol: lpTokenSymbol, decimals: lpTokenDecimals, balance: lpTokenBalance, approval: parseInt(lpTokenApproval) !== 0 && parseInt(lpTokenApproval) >= parseInt(lpTokenBalance) });
-
+        if(!loop) {
+            const lpTokenSymbol = "UniV3";
+            const lpTokenDecimals = "18";
+            const lpTokenBalance = "0";
+            const lpTokenApproval = "0";
+            const fee = await lpToken.methods.fee().call();
+            const slot = await lpToken.methods.slot0().call();
+            var uniswapTokens = await Promise.all([
+                await lpToken.methods.token0().call(),
+                await lpToken.methods.token1().call()
+            ].map(async tkAddress => {
+                const currentToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), tkAddress);
+                const symbol = tkAddress === window.voidEthereumAddress || tkAddress === ethereumAddress ? "ETH" : await currentToken.methods.symbol().call();
+                var name = tkAddress === window.voidEthereumAddress || tkAddress === ethereumAddress ? "Ethereum" : await currentToken.methods.name().call();
+                var decimals = parseInt(tkAddress ===window.voidEthereumAddress ? "18" : await currentToken.methods.decimals().call());
+                var uniToken = new Token(props.dfoCore.chainId, tkAddress, decimals, symbol, name);
+                return uniToken;
+            }));
+            console.log("Slot", farmSetup.infoIndex, {
+                tick: slot.tick,
+                sqrtPriceX96: slot.sqrtPriceX96,
+                tickLower : farmSetupInfo.tickLower,
+                tickUpper : farmSetupInfo.tickUpper,
+                fee,
+                inRange : parseInt(farmSetupInfo.tickLower) >= parseInt(slot.tick) && parseInt(slot.tick) <= parseInt(farmSetupInfo.tickUpper)
+            });
+            setLpTokenInfo({ uniswapTokens, fee, contract: lpToken, symbol: lpTokenSymbol, decimals: lpTokenDecimals, balance: lpTokenBalance, approval: parseInt(lpTokenApproval) !== 0 && parseInt(lpTokenApproval) >= parseInt(lpTokenBalance) });
+        }
         const activateSetup = parseInt(farmSetupInfo.renewTimes) > 0 && !farmSetup.active && parseInt(farmSetupInfo.lastSetupIndex) === parseInt(setupIndex);
         setCanActivateSetup(activateSetup);
         var startBlock = window.formatNumber(farmSetupInfo.startBlock || 0);
@@ -239,19 +239,21 @@ const SetupComponentGen2 = (props) => {
         setEndBlockReached(bNumber > window.formatNumber(farmSetup.endBlock));
 
         const { host, byMint } = await extContract.methods.data().call();
-        let isSetupReady = false;
-        const extensionBalance = !isEth ? await rewardToken.methods.balanceOf(extensionAddress).call() : await dfoCore.web3.eth.getBalance(extensionAddress);
-        // check if it's a setup from a DFO
-        try {
-            const doubleProxyContract = await dfoCore.getContract(dfoCore.getContextElement('dfoDoubleProxyABI'), host);
-            const proxyContract = await dfoCore.getContract(dfoCore.getContextElement('dfoProxyABI'), await doubleProxyContract.methods.proxy().call());
-            const stateHolderContract = await dfoCore.getContract(dfoCore.getContextElement('dfoStateHolderABI'), await proxyContract.methods.getStateHolderAddress().call());
-            isSetupReady = await stateHolderContract.methods.getBool(`farming.authorized.${extensionAddress.toLowerCase()}`).call();
-        } catch (error) {
-            // not from dfo
-            isSetupReady = byMint || parseInt(extensionBalance) >= (parseInt(farmSetup.rewardPerBlock) * parseInt(farmSetupInfo.blockDuration));
+        if(!loop) {
+            let isSetupReady = false;
+            const extensionBalance = !isEth ? await rewardToken.methods.balanceOf(extensionAddress).call() : await dfoCore.web3.eth.getBalance(extensionAddress);
+            // check if it's a setup from a DFO
+            try {
+                const doubleProxyContract = await dfoCore.getContract(dfoCore.getContextElement('dfoDoubleProxyABI'), host);
+                const proxyContract = await dfoCore.getContract(dfoCore.getContextElement('dfoProxyABI'), await doubleProxyContract.methods.proxy().call());
+                const stateHolderContract = await dfoCore.getContract(dfoCore.getContextElement('dfoStateHolderABI'), await proxyContract.methods.getStateHolderAddress().call());
+                isSetupReady = await stateHolderContract.methods.getBool(`farming.authorized.${extensionAddress.toLowerCase()}`).call();
+            } catch (error) {
+                // not from dfo
+                isSetupReady = byMint || parseInt(extensionBalance) >= (parseInt(farmSetup.rewardPerBlock) * parseInt(farmSetupInfo.blockDuration));
+            }
+            setSetupReady(isSetupReady);
         }
-        setSetupReady(isSetupReady);
 
         const liquidityPoolTokens = [
             await lpToken.methods.token0().call(),
@@ -264,6 +266,20 @@ const SetupComponentGen2 = (props) => {
         var balances = ['0', '0'];
         try {
             farmSetup.objectId && farmSetup.objectId !== '0' && (balances = await simulateDecreaseLiquidityAndCollect(farmSetup.objectId, lmContract.options.address));
+        } catch(e) {
+        }
+        var fees = ['0', '0'];
+        try {
+            var nftPosMan = await dfoCore.getEthersContract(dfoCore.getContextElement("UniswapV3NonfungiblePositionManagerABI"), dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress"));
+            var collect = await nftPosMan.callStatic.collect({
+                tokenId : farmSetup.objectId,
+                recipient: lmContract.options.address,
+                amount0Max: dfoCore.MAX_UINT128,
+                amount1Max: dfoCore.MAX_UINT128
+            }, {
+                from : lmContract.options.address
+            });
+            fees = [collect.amount0.toString(), collect.amount1.toString()];
         } catch(e) {
         }
         for (let i = 0; i < liquidityPoolTokens.length; i++) {
@@ -292,38 +308,40 @@ const SetupComponentGen2 = (props) => {
             const creationBlock = position['creationBlock'];
             const positionSetupIndex = position['setupIndex'];
             const liquidityPoolTokenAmount = position['liquidityPoolTokenAmount'];
-            const mainTokenAmount = position['mainTokenAmount'];
             const amounts = {
-                tokensAmounts : [0,0]
+                tokensAmounts : [0, 0]
             };
+            try {
+                var nftPosMan = await dfoCore.getEthersContract(dfoCore.getContextElement("UniswapV3NonfungiblePositionManagerABI"), dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress"));
+                var decreaseLiquidity = await nftPosMan.callStatic.decreaseLiquidity({
+                    tokenId : farmSetup.objectId,
+                    liquidity : position.liquidityPoolTokenAmount,
+                    amount0Min: 0,
+                    amount1Min: 0,
+                    deadline : new Date().getTime() + 100000
+                }, {
+                    from : lmContract.options.address
+                });
+                amounts.tokensAmounts = [decreaseLiquidity.amount0.toString(), decreaseLiquidity.amount1.toString()];
+            } catch(e) {
+            }
             console.log(position.positionId);
             const availableReward = await lmContract.methods.calculateFreeFarmingReward(position.positionId, true).call();
+            var additionalFees = ['0', '0'];
+            try {
+                var result = await lmContract.methods.calculateTradingFees(position.positionId, availableReward, fees[0], fees[1]).call();
+                additionalFees = [
+                    result[0],
+                    result[1]
+                ]
+            } catch(e) {}
             let freeReward = parseInt(availableReward);
             if (blockNumber < parseInt(farmSetup.endBlock)) {
                 freeReward += (parseInt(farmSetup.rewardPerBlock) * (parseInt(position.liquidityPoolTokenAmount) / parseInt(farmSetup.totalSupply)))
             }
             freeReward = window.numberToString(freeReward).split('.')[0];
             setFreeAvailableRewards(freeReward);
-            setManageStatus({ free, creationBlock, positionSetupIndex, liquidityPoolAmount: liquidityPoolTokenAmount, mainTokenAmount, tokensAmounts: amounts['tokensAmounts'], tokens })
-        } else if (lockPositions.length > 0) {
-            const lockStatuses = [];
-            const lockRewards = [];
-            for (let j = 0; j < lockPositions.length; j++) {
-                const lockedPosition = lockPositions[j];
-                const free = lockedPosition['free'];
-                const creationBlock = lockedPosition['creationBlock'];
-                const positionSetupIndex = lockedPosition['setupIndex'];
-                const liquidityPoolTokenAmount = lockedPosition['liquidityPoolTokenAmount'];
-                const mainTokenAmount = lockedPosition['mainTokenAmount'];
-                const amounts = await ammContract.methods.byLiquidityPoolAmount(farmSetupInfo.liquidityPoolTokenAddress, liquidityPoolTokenAmount).call();
-                const availableReward = await lmContract.methods.calculateLockedFarmingReward(0, 0, true, lockedPosition.positionId).call();
-                const lockedReward = parseInt(availableReward.reward) + (parseInt(farmSetup.endBlock) <= parseInt(blockNumber) ? 0 : parseInt(lockedPosition.lockedRewardPerBlock));
-                const partiallyRedeemed = await lmContract.methods._partiallyRedeemed(lockedPosition.positionId).call();
-                lockRewards.push(lockedReward);
-                lockStatuses.push({ free, creationBlock, positionSetupIndex, partiallyRedeemed, liquidityPoolAmount: liquidityPoolTokenAmount, mainTokenAmount, tokensAmounts: amounts['tokensAmounts'], tokens })
-            }
-            setLockedPositionStatuses(lockStatuses);
-            setLockedPositionRewards(lockRewards);
+            setManageStatus({ additionalFees, free, creationBlock, positionSetupIndex, liquidityPoolAmount: liquidityPoolTokenAmount, tokensAmounts: amounts['tokensAmounts'], tokens })
         }
         // calculate APY
         setApy(await calculateApy(farmSetup, farmSetupInfo, rewardTokenAddress, rewardTokenDecimals, tokens));
@@ -1077,7 +1095,7 @@ const SetupComponentGen2 = (props) => {
                     <div className="farmInfoCurve">
                         <p className="farmInfoCurveL">
                             <p className="MAinTokensel">
-                                <a href="javascript:;" onClick={() => setsecondTokenIndex(1 - secondTokenIndex)}><img src={SwitchIcon}></img></a> {setupTokens[1 - secondTokenIndex].symbol}
+                                <a href="javascript:;" onClick={() => setsecondTokenIndex(1 - secondTokenIndex)}><img src={SwitchIcon}></img></a> {setupTokens[secondTokenIndex].symbol} per {setupTokens[1 - secondTokenIndex].symbol}
                             </p>
                         </p>
                         <p className="farmInfoCurveR">
@@ -1119,7 +1137,7 @@ const SetupComponentGen2 = (props) => {
                         </div>
                         <div className="Farmed">
                                 <p><b>Available</b>: <br></br>{window.fromDecimals(freeAvailableRewards, rewardTokenInfo.decimals, true)} {rewardTokenInfo.symbol}</p>
-                                <p><b>Fees Earned</b>: <br></br>1343,000.343 buidl - 3 ETH</p>
+                                <p><b>Fees Earned</b>: <br></br>{window.fromDecimals(manageStatus.additionalFees[0], setupTokens[0].decimals)} {setupTokens[0].symbol} - {window.fromDecimals(manageStatus.additionalFees[1], setupTokens[1].decimals)} {setupTokens[1].symbol}</p>
                                 {
                                     claimLoading ? <a className="Web3ActionBTN" disabled={claimLoading}>
                                         <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
