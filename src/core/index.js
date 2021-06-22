@@ -223,18 +223,18 @@ export default class DFOCore {
         address = address || this.voidEthereumAddress;
         // create the key
         const key = (((address && address.toLowerCase()) || "") + this.web3.utils.sha3(JSON.stringify(abi)));
-        this.contracts[key] = this.contracts[key] || new ethers.Contract(address, abi, this.ethersProvider);
-        if(abi === this.getContextElement("ERC20ABI") || abi === this.getContextElement("IERC20ABI") && this.contracts[key].isItem === undefined) {
-            this.contracts[key].isItem = false;
+        this.ethersContract[key] = this.ethersContract[key] || new ethers.Contract(address, abi, this.ethersProvider);
+        if(abi === this.getContextElement("ERC20ABI") || abi === this.getContextElement("IERC20ABI") && this.ethersContract[key].isItem === undefined) {
+            this.ethersContract[key].isItem = false;
             try {
                 var interoperable = await this.getEthersContract(this.getContextElement("IEthItemInteroperableInterfaceABI"), address);
-                this.contracts[key].mainInterface = await interoperable.methods.mainInterface().call();
-                this.contracts[key].isItem = true;
+                this.ethersContract[key].mainInterface = await interoperable.methods.mainInterface().call();
+                this.ethersContract[key].isItem = true;
             } catch(e) {}
         }
         this.isItemDictionary = this.isItemDictionary || {};
-        this.isItemDictionary[address] = this.contracts[key].isItem;
-        return this.contracts[key];
+        this.isItemDictionary[address] = this.ethersContract[key].isItem;
+        return this.ethersContract[key];
     }
 
     isItem = async address => {

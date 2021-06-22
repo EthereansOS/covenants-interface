@@ -56,15 +56,13 @@ const CreateOrEditFarmingSetup = (props) => {
         var minPrice;
         var maxPrice;
         try {
-            minPrice = tickToPrice(uniswapTokens[secondTokenIndex], uniswapTokens[1 - secondTokenIndex], parseInt(tickLowerInput.value = tickLower)).toSignificant(18);
+            setMinPrice(minPrice = tickToPrice(uniswapTokens[secondTokenIndex], uniswapTokens[1 - secondTokenIndex], parseInt(tickLowerInput.value = tickLower)).toSignificant(18));
         } catch(e) {
         }
         try {
-            maxPrice = tickToPrice(uniswapTokens[secondTokenIndex], uniswapTokens[1 - secondTokenIndex], parseInt(tickUpperInput.value = tickUpper)).toSignificant(18);
+            setMaxPrice(maxPrice = tickToPrice(uniswapTokens[secondTokenIndex], uniswapTokens[1 - secondTokenIndex], parseInt(tickUpperInput.value = tickUpper)).toSignificant(18));
         } catch(e) {
         }
-        secondTokenIndex === 1 && void(setMinPrice(minPrice), setMaxPrice(maxPrice));
-        secondTokenIndex === 0 && void(setMinPrice(maxPrice), setMaxPrice(minPrice));
     }, [tickLower, tickUpper, secondTokenIndex]);
 
     const onSelectLiquidityPoolToken = async (address) => {
@@ -200,7 +198,7 @@ const CreateOrEditFarmingSetup = (props) => {
     }
 
     function onTickInputBlur(e) {
-        var value = nearestUsableTick(window.formatNumber(e.currentTarget.value), TICK_SPACINGS[liquidityPoolToken.fee]);
+        var value = nearestUsableTick(window.formatNumber(e.currentTarget.value) || 0, TICK_SPACINGS[liquidityPoolToken.fee]);
         var tick = parseInt(e.currentTarget.dataset.tick);
         tick === 0 && setTickLower(value);
         tick === 1 && setTickUpper(value);
