@@ -153,7 +153,7 @@ const ExploreFarmingContract = (props) => {
                     isFree,
                     parseInt(setup.blockDuration),
                     parseInt(setup.startBlock),
-                    window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.rewardPerBlock), selectedRewardToken.decimals)),
+                    window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.rewardPerBlock), token.decimals)),
                     window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.minStakeable), mainTokenDecimals)),
                     !isFree ? window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.maxStakeable)), mainTokenDecimals) : 0,
                     setup.renewTimes,
@@ -167,8 +167,6 @@ const ExploreFarmingContract = (props) => {
                     0
                 ];
                 return parsedSetup;
-            }, getInitArray(extensionAddress, extensionInitData, rewardTokenAddress, encodedSetups) {
-                return  [props.dfoCore.web3.utils.toChecksumAddress(extensionAddress ? extensionAddress : hostDeployedContract), extensionPayload || extensionInitData || "0x", props.dfoCore.getContextElement("ethItemOrchestratorAddress"), rewardTokenAddress, encodedSetups || 0];
             }
         }, gen2 : {
             setupInfoTypes : ["uint256","uint256","uint256","uint256","uint256","address","address","bool","uint256","uint256","int24","int24"],
@@ -187,7 +185,7 @@ const ExploreFarmingContract = (props) => {
                 const parsedSetup = [
                     parseInt(setup.blockDuration),
                     parseInt(setup.startBlock),
-                    window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.rewardPerBlock), selectedRewardToken.decimals)),
+                    window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.rewardPerBlock), token.decimals)),
                     window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.minStakeable), mainTokenDecimals)),
                     setup.renewTimes,
                     setup.liquidityPoolToken.address,
@@ -199,8 +197,6 @@ const ExploreFarmingContract = (props) => {
                     setup.tickUpper
                 ];
                 return parsedSetup;
-            }, getInitArray(extensionAddress, extensionInitData, rewardTokenAddress, encodedSetups) {
-                return  [props.dfoCore.web3.utils.toChecksumAddress(extensionAddress ? extensionAddress : hostDeployedContract), extensionPayload || extensionInitData || "0x", props.dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress"), window.voidEthereumAddress, rewardTokenAddress, encodedSetups || 0];
             }
         }
     };
