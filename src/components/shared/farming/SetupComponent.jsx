@@ -371,8 +371,8 @@ const SetupComponent = (props) => {
         if (!setupReady) return;
         setActivateLoading(true);
         try {
-            const gas = window.formatNumber(await lmContract.methods.activateSetup(setupIndex).estimateGas({ from: props.dfoCore.address }));
-            const result = await lmContract.methods.activateSetup(setupIndex).send({ from: props.dfoCore.address, gas : window.numberToString(gas * props.dfoCore.getContextElement("farmSetupActivationGasMultiplier")) });
+            const gas = window.formatNumber(await lmContract.methods.activateSetup(setup.infoIndex).estimateGas({ from: props.dfoCore.address }));
+            const result = await lmContract.methods.activateSetup(setup.infoIndex).send({ from: props.dfoCore.address, gas : window.numberToString(gas * props.dfoCore.getContextElement("farmSetupActivationGasMultiplier")) });
             props.addTransaction(result);
             await getSetupMetadata();
         } catch (error) {
