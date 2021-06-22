@@ -7,7 +7,7 @@ import SwitchIcon from "../../../assets/images/switch.png";
 import ArrowIcon from "../../../assets/images/arrow.png";
 import Loading from "../Loading";
 import { useRef } from 'react';
-import { tickToPrice, Pool, Position } from '@uniswap/v3-sdk/dist/';
+import { tickToPrice, Pool, Position, TICK_SPACINGS, TickMath } from '@uniswap/v3-sdk/dist/';
 import { Token } from "@uniswap/sdk-core/dist";
 
 const SetupComponentGen2 = (props) => {
@@ -431,8 +431,15 @@ const SetupComponentGen2 = (props) => {
             var mint = setup.objectId === '0';
             var slot0 = await lpTokenInfo.contract.methods.slot0().call();
             var pool = new Pool(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(lpTokenInfo.fee), parseInt(slot0.sqrtPriceX96), 0, parseInt(slot0.tick));
-            var fromAmountData = {pool, tickLower : parseInt(setupInfo.tickLower), tickUpper : parseInt(setupInfo.tickUpper), amount0 : window.formatNumber(fullValue), useFullPrecision : true};
-            var pos = Position[`fromAmount${index}`](fromAmountData)[`amount${1 - index}`].toSignificant(18);
+            // var fromAmountData = {pool, tickLower : parseInt(setupInfo.tickLower), tickUpper : parseInt(setupInfo.tickUpper), amount0 : window.formatNumber(fullValue), useFullPrecision : true};
+            var fromAmountData0 = {pool, tickLower : parseInt(setupInfo.tickLower), tickUpper : parseInt(setupInfo.tickUpper), amount0 : window.formatNumber(fullValue), useFullPrecision : true};
+            var fromAmountData1 = {pool, tickLower : parseInt(setupInfo.tickLower), tickUpper : parseInt(setupInfo.tickUpper), amount1 : window.formatNumber(fullValue), useFullPrecision : true};
+            console.log(pool)
+            console.log(TICK_SPACINGS[pool.fee])
+            console.log(TickMath.MIN_TICK)
+            var pos = Position[`fromAmount${index}`](index == 0 ? fromAmountData0 : fromAmountData1)[`amount${1 - index}`].toSignificant(18);
+            console.log("position")
+            console.log(pos)
             var tks = tokensAmounts.map(it => it);
             tks[index] = {
                 value,
@@ -442,6 +449,24 @@ const SetupComponentGen2 = (props) => {
                 value : window.numberToString(pos),
                 full : window.toDecimals(window.numberToString(pos), setupTokens[1 - index].decimals)
             };
+
+            // var amounts = []
+            // console.log(pool.fromAmount0({
+            //     pool: pool,
+            //     tickLower: parseInt(setupInfo.tickLower),
+            //     tickUpper: parseInt(setupInfo.tickUpper),
+            //     amount0 : tks[0].full,
+            //     useFullPrecision: true, // we want full precision for the theoretical position
+            //   }))
+            // amounts[1] = pool.fromAmount0({
+            //     pool: pool,
+            //     tickLower: parseInt(setupInfo.tickLower),
+            //     tickUpper: parseInt(setupInfo.tickUpper),
+            //     amount0 : tks[1].full,
+            //     useFullPrecision: true, // we want full precision for the theoretical position
+            // })
+            // console.log("amount0" + amounts[0])
+            // console.log("amount1" + amounts[1])
             setTokensAmount(tks);
             var liquidityPoolAmount = "1";
             setLpTokenAmount(liquidityPoolAmount)
