@@ -72,8 +72,8 @@ const CreateOrEditFarmingSetup = (props) => {
             const poolContract = await dfoCore.getContract(dfoCore.getContextElement("UniswapV3PoolABI"), address);
             var fee = await poolContract.methods.fee().call();
             var tick = parseInt((await poolContract.methods.slot0().call()).tick);
-            var tickLower = tick;
-            var tickUpper = tick;
+            var tickLower = nearestUsableTick(tick, TICK_SPACINGS[fee]);
+            var tickUpper = tickLower;
             if(props.gen2SetupType === 'diluted') {
                 tickLower -= dilutedTickRange;
                 tickUpper += dilutedTickRange;
