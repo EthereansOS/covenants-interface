@@ -281,8 +281,6 @@ const CreateOrEditFarmingSetup = (props) => {
             <div>
 
                 <div className="generationSelector">
-                    <h6>Min Price</h6>
-                    <p>{minPrice} {liquidityPoolToken.tokens[1 - secondTokenIndex].symbol}</p>
                     <div className="InputTokenRegular">
                         <input className="PriceRangeInput" type="number" min={TickMath.MIN_TICK} max={TickMath.MAX_TICK} data-tick="0" ref={ref => tickLowerInput = ref} defaultValue={tickLower} onBlur={onTickInputBlur}/>
                     </div>
@@ -290,11 +288,11 @@ const CreateOrEditFarmingSetup = (props) => {
                         <a className="tickerchanger" href="javascript:;" onClick={() => updateTick(0, false)}> - </a>
                         <a className="tickerchanger" href="javascript:;" onClick={() => updateTick(0, true)}> + </a>
                     </div>
+                    <h6>Min Price</h6>
+                    <h5>{minPrice} {liquidityPoolToken.tokens[1 - secondTokenIndex].symbol}</h5>
                     <p>The minumum price of the curve, all position will be 100% {liquidityPoolToken.tokens[1 - secondTokenIndex].symbol} at this price and will no more earn fees.</p>
                 </div>
                 <div className="generationSelector">
-                    <h6>Max Price</h6>
-                    <p>{maxPrice} {liquidityPoolToken.tokens[1 - secondTokenIndex].symbol}</p>
                     <div className="InputTokenRegular">
                         <input className="PriceRangeInput" type="number" min={TickMath.MIN_TICK} max={TickMath.MAX_TICK} data-tick="1" ref={ref => tickUpperInput = ref} defaultValue={tickUpper} onBlur={onTickInputBlur}/>
                     </div>
@@ -302,6 +300,8 @@ const CreateOrEditFarmingSetup = (props) => {
                         <a className="tickerchanger" href="javascript:;" onClick={() => updateTick(1, false)}> - </a>
                         <a className="tickerchanger" href="javascript:;" onClick={() => updateTick(1, true)}> + </a>
                     </div>
+                    <h6>Max Price</h6>
+                    <h5>{maxPrice} {liquidityPoolToken.tokens[1 - secondTokenIndex].symbol}</h5>
                     <p>The minumum price of the curve, all position will be 100% {liquidityPoolToken.tokens[1 - secondTokenIndex].symbol} at this price and will no more earn fees.</p>
                 </div>
                 <div className="FancyExplanationCreate">

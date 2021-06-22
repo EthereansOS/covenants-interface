@@ -566,7 +566,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .generationSelector h6, .FancyExplanationCreate h6 {font-size: 16px; font-weight: bold;}
 .generationSelector p, .FancyExplanationCreate p {font-size: 11px;}
 .generationSelector h5, .FancyExplanationCreate h5 {font-size: 14px;}
-.PriceRangeInput {border: 1px solid #bd84fb; border-radius: 8px;}
+.PriceRangeInput {border: 1px solid #bd84fb;border-radius: 8px;width: 70%;height: 40px;text-align: center;font-size: 20px;font-weight: bold;}
 .tickerchanger {display: inline-block; width: 30%; margin: 5px 5%; background-color: #bd84fb; color: #ffffff; border-radius: 8px; font-weight: bold;}
 .tickerchanger:hover {text-decoration: none;color: #ffffff}
 .FancyExplanationCreate {width: 91%; display: inline-block; margin: 10px auto; padding: 2%; background-color: #f7fafe; border: 1px solid #e0e2e6; border-radius: 12px;}
