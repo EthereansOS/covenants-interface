@@ -939,6 +939,9 @@ const SetupComponentGen2 = (props) => {
     }
 
     function calculateDailyEarnings() {
+        if(!manageStatus) {
+            return 0;
+        }
         var rewardPerBlock = window.formatNumber(window.fromDecimals(setup.rewardPerBlock, rewardTokenInfo.decimals, true));
         var liquidityPoolAmount = window.formatNumber(window.fromDecimals(manageStatus.liquidityPoolAmount, rewardTokenInfo.decimals, true));
         var totalSupply = window.formatNumber(window.fromDecimals(setup.totalSupply, rewardTokenInfo.decimals, true));
@@ -1107,7 +1110,7 @@ const SetupComponentGen2 = (props) => {
                     currentPosition &&
                     <div className="YourFarmingPositions YourFarmingPositionsFarmingFarmingFarmingChiFarmaViveComeUnPAsha">
                         <div className="FarmYou">
-                            <p><b>Your Deposit</b>:<br></br> {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(window.fromDecimals(manageStatus.tokensAmounts[i], token.decimals, true), 3)} {token.symbol} </span>)}</p>
+                            {manageStatus && <p><b>Your Deposit</b>:<br></br> {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(window.fromDecimals(manageStatus.tokensAmounts[i], token.decimals, true), 3)} {token.symbol} </span>)}</p>}
                             {!endBlockReached && <p><b>Daily Earnings</b>: {calculateDailyEarnings()} {rewardTokenInfo.symbol}</p>}
                             {(!open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Increase</a>}
                             {(open) && <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>}
