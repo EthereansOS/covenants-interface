@@ -886,7 +886,7 @@ const SetupComponentGen2 = (props) => {
 
             if (!setupInfo.free) {
                 const reward = await lmContract.methods.calculateLockedFarmingReward(setupIndex, mainTokenIndex === 0 ? firstTokenAmount : secondTokenAmount, false, 0).call();
-                setLockedEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(parseInt(reward.relativeRewardPerBlock) * (parseInt(setup.endBlock) - blockNumber)), rewardTokenInfo.decimals));
+                setLockedEstimatedReward(window.fromDecimals(parseInt(reward.relativeRewardPerBlock) * (parseInt(setup.endBlock) - blockNumber), rewardTokenInfo.decimals));
             } else {
                 const val = parseInt(lpAmount) * 6400 * parseInt(setup.rewardPerBlock) / (parseInt(setup.totalSupply) + parseInt(lpAmount));
                 if (!isNaN(val)) {
@@ -976,7 +976,7 @@ const SetupComponentGen2 = (props) => {
                 <div className="FarmActions">
                     <input type="range" value={removalAmount} onChange={(e) => setRemovalAmount(parseInt(e.target.value))} className="form-control-range" id="formControlRange" />
                     <div className="Web2ActionsBTNs">
-                        <p className="BreefRecap"><b>Amount:</b> {removalAmount}% ({window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString(), lpTokenInfo.decimals), lpTokenInfo.decimals)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.tokensAmounts[i].full || manageStatus.tokensAmounts[i]) * removalAmount / 100).toString(), token.decimals), token.decimals)} {token.symbol} </span>)})</p>
+                        <p className="BreefRecap"><b>Amount:</b> {removalAmount}% ({window.fromDecimals(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100, lpTokenInfo.decimals)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.fromDecimals(parseInt(manageStatus.tokensAmounts[i].full || manageStatus.tokensAmounts[i]) * removalAmount / 100, token.decimals)} {token.symbol} </span>)})</p>
                         <a className="web2ActionBTN" onClick={() => setRemovalAmount(10)} >10%</a>
                         <a className="web2ActionBTN" onClick={() => setRemovalAmount(25)} >25%</a>
                         <a className="web2ActionBTN" onClick={() => setRemovalAmount(50)} >50%</a>
