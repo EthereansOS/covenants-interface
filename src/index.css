@@ -184,7 +184,7 @@ a:disabled {cursor:wait !important;}
 .InputForm .SpecialInputPerch {margin-top: 10px;}
 .PathSelected {width: 300px; text-align: center; margin: 5px auto; display: block;}
 .PathSelected p {width: auto; display: inline;}
-
+.FarmSetup {text-align: center;}
 .MainExploration {width: 95%; display: inline-block; margin: 10px auto; width: 600px;}
 .SortSection {width: 100%; text-align: center; display: inline-block; margin: 10px auto; min-width: 600px;} 
 .SortSection .SelectRegular {width: 45%; margin: 0 2.5%;}
