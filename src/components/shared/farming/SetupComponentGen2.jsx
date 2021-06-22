@@ -965,7 +965,7 @@ const SetupComponentGen2 = (props) => {
         var totalSupply = window.formatNumber(window.fromDecimals(setup.totalSupply, rewardTokenInfo.decimals, true));
         var dailyEarnings = (rewardPerBlock * 6400 * liquidityPoolAmount) / totalSupply;
         dailyEarnings = window.numberToString(dailyEarnings);
-        dailyEarnings = window.formatMoney(dailyEarnings, 9);
+        dailyEarnings = window.formatMoney(dailyEarnings, 4);
         return dailyEarnings;
         //window.fromDecimals((parseInt(setup.rewardPerBlock) * 6400 * parseInt(manageStatus.liquidityPoolAmount) / parseInt(setup.totalSupply)).toString().split('.')[0], rewardTokenInfo.decimals, true)
     }
@@ -976,7 +976,7 @@ const SetupComponentGen2 = (props) => {
                 <div className="FarmActions">
                     <input type="range" value={removalAmount} onChange={(e) => setRemovalAmount(parseInt(e.target.value))} className="form-control-range" id="formControlRange" />
                     <div className="Web2ActionsBTNs">
-                        <p className="BreefRecap"><b>Amount:</b> {removalAmount}% ({window.formatMoney(window.fromDecimals(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100, lpTokenInfo.decimals, true), 9)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(window.fromDecimals(parseInt(manageStatus.tokensAmounts[i].full || manageStatus.tokensAmounts[i]) * removalAmount / 100, token.decimals, true), 6)} {token.symbol} </span>)})</p>
+                        <p className="BreefRecap"><b>Amount:</b> {removalAmount}% ({manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(window.fromDecimals(parseInt(manageStatus.tokensAmounts[i].full || manageStatus.tokensAmounts[i]) * removalAmount / 100, token.decimals, true), 4)} {token.symbol} </span>)})</p>
                         <a className="web2ActionBTN" onClick={() => setRemovalAmount(10)} >10%</a>
                         <a className="web2ActionBTN" onClick={() => setRemovalAmount(25)} >25%</a>
                         <a className="web2ActionBTN" onClick={() => setRemovalAmount(50)} >50%</a>
@@ -1066,7 +1066,7 @@ const SetupComponentGen2 = (props) => {
                                 {apy > 0 && <> <b>APY</b>: {window.formatMoney(apy, 3)}%</>}
                             </p>
                         }
-                        {rewardTokenInfo && <p className="BlockInfoV3"><b>Daily Rate</b>: {window.formatMoney(window.fromDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>}
+                        {rewardTokenInfo && <p className="BlockInfoV3"><b>Daily Rate</b>: {window.formatMoney(window.fromDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals, true), 4)} {rewardTokenInfo.symbol}</p>}
                         {parseInt(setup.endBlock) > 0 ? <p className="BlockInfoV3"><b>End</b>: <a className="BLKEMD" target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}block/${setup.endBlock}`}>{setup.endBlock}</a></p> : <p className="BlockInfoV3"><b>Duration</b>: {getPeriodFromDuration(setupInfo.blockDuration)}</p>}
                         {!currentPosition && (!open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Farm</a>}
                         {!currentPosition && (open) && <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>}
@@ -1119,7 +1119,7 @@ const SetupComponentGen2 = (props) => {
                             </div>
                         </div>}
                         <span className="UniV3TVLFIV">
-                            <b>TVL</b>: {setupTokens.map((token, index) => <span key={token.address}>{props.dfoCore.toDecimals(token.liquidity, token.decimals, 2)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span>)}
+                            <b>TVL</b>: {setupTokens.map((token, index) => <span key={token.address}>{window.formatMoney(window.fromDecimals(token.liquidity, token.decimals, true), 4)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span>)}
                         </span>
                     </div>
                 </div>
@@ -1136,8 +1136,8 @@ const SetupComponentGen2 = (props) => {
                             {withdrawOpen && <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>}
                         </div>
                         <div className="Farmed">
-                                <p><b>Available</b>: <br></br>{window.fromDecimals(freeAvailableRewards, rewardTokenInfo.decimals, true)} {rewardTokenInfo.symbol}</p>
-                                <p><b>Fees Earned</b>: <br></br>{window.fromDecimals(manageStatus.additionalFees[0], setupTokens[0].decimals)} {setupTokens[0].symbol} - {window.fromDecimals(manageStatus.additionalFees[1], setupTokens[1].decimals)} {setupTokens[1].symbol}</p>
+                                <p><b>Available</b>: <br></br>{window.formatMoney(window.fromDecimals(freeAvailableRewards, rewardTokenInfo.decimals, true), 4)} {rewardTokenInfo.symbol}</p>
+                                <p><b>Fees Earned</b>: <br></br>{window.formatMoney(window.fromDecimals(manageStatus.additionalFees[0], setupTokens[0].decimals, true), 4)} {setupTokens[0].symbol} - {window.formatMoney(window.fromDecimals(manageStatus.additionalFees[1], setupTokens[1].decimals), 4)} {setupTokens[1].symbol}</p>
                                 {
                                     claimLoading ? <a className="Web3ActionBTN" disabled={claimLoading}>
                                         <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
