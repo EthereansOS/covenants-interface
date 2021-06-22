@@ -130,11 +130,21 @@ const SetupComponentGen2 = (props) => {
         }
     }, [lpTokenInfo, secondTokenIndex, setupInfo]);
 
+    async function toggleSetup() {
+        try {
+            const gasLimit = await lmContract.methods.toggleSetup(setup.infoIndex).estimateGas({ from: dfoCore.address });
+            const result = await lmContract.methods.toggleSetup(setup.infoIndex).send({ from: dfoCore.address, gas: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)) });
+        } catch(e) {
+        }
+    }
+
     const getSetupMetadata = async () => {
         setLoading(true);
         try {
+            var blockNumber = await dfoCore.getBlockNumber();
             var { '0': farmSetup, '1': farmSetupInfo } = await props.dfoCore.loadFarmingSetup(lmContract, setupIndex);
             farmSetupInfo = {... farmSetupInfo, free : true};
+            farmSetup = {... farmSetup, togglable : farmSetup.active && blockNumber > parseInt(farmSetup.endBlock)};
             setSetup(farmSetup);
             setSetupInfo(farmSetupInfo);
             setShowPrestoError(false);
@@ -143,6 +153,7 @@ const SetupComponentGen2 = (props) => {
                 intervalId.current = setInterval(async () => {
                     var { '0': s, '1': si } = await props.dfoCore.loadFarmingSetup(lmContract, setupIndex);
                     si = {...si, free : true, generation : 'gen2'};
+                    s = {... s, togglable : s.active && blockNumber > parseInt(s.endBlock)};
                     setSetup(s);
                     setSetupInfo(si);
                     await loadData(s, si, false, true);
@@ -567,8 +578,8 @@ const SetupComponentGen2 = (props) => {
             stake.amount = window.numberToString(stake.amountIsLiquidityPool ? lpAmount : tokensAmounts[mainTokenIndex].full || tokensAmounts[mainTokenIndex]);
             ethTokenValue = ethTokenIndex === undefined || ethTokenIndex === null ? "0" : window.numberToString(tokensAmounts[ethTokenIndex].full || tokensAmounts[ethTokenIndex]);
             var value = setupInfo.involvingETH && !stake.amountIsLiquidityPool ? ethTokenValue : "0";
-            stake.amount0 = stake.amount;
-            stake.amount1 = tokensAmounts[1 - mainTokenIndex].full || tokensAmounts[1 - mainTokenIndex];
+            stake.amount0 = tokensAmounts[0].full || tokensAmounts[0];
+            stake.amount1 = tokensAmounts[1].full || tokensAmounts[1];
             if (prestoData) {
                 console.log('using presto!')
                 var sendingOptions = { from: dfoCore.address, value: prestoData.ethValue, gasLimit: 9999999 };
@@ -1019,7 +1030,7 @@ const SetupComponentGen2 = (props) => {
                 {
                     setupTokens.map((setupToken, i) => {
                         return <div key={setupToken.address} className="InputTokenRegular">
-                            <Input showMax={true} address={setupToken.address} value={tokensAmounts[i].value || window.fromDecimals(tokensAmounts[i], setupToken.decimals, true)} balance={setupToken.balance} min={0} onChange={(e) => onUpdateTokenAmount(e.target.value, i)} showCoin={true} showBalance={true} name={setupToken.symbol} />
+                            {<Input showMax={true} address={setupToken.address} value={tokensAmounts[i].value || window.fromDecimals(tokensAmounts[i], setupToken.decimals, true)} balance={setupToken.balance} min={0} onChange={(e) => onUpdateTokenAmount(e.target.value, i)} showCoin={true} showBalance={true} name={setupToken.symbol} />}
                         </div>
                     })
                 }
