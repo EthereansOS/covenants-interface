@@ -73,7 +73,7 @@ a:disabled {cursor:wait !important;}
 .CovAMMs a {font-size: 13px; display: inline-block; text-decoration: none !important; font-weight: bold !important; cursor: pointer; width: 100%; text-align: left;color: #ffffff !important;}
 .disclamer {font-size: 9px; color: #636363; width: 60%; text-align: center;}
 .disclamer a {text-decoration: underline !important;}
-.IndexRegularText iframe {border: 2px solid #9e6915; border-radius: 8px;}
+.IndexRegularText iframe {border: 2px solid #849BBD; border-radius: 8px;}
 @keyframes slidebg {to {background-position:20vw;}}
 .DescCov {text-align: center; width: 80%; display: inline-block; margin:0 auto 30px auto;}
 .DescCov p {font-size: 14px;}
@@ -123,7 +123,7 @@ a:disabled {cursor:wait !important;}
 .InputTokenRegular {width: 100%;max-width: 370px;}
 .InputTokenRegular section {width: 100%; display: inline-block;}
 .InputTokenRegular aside {width: 100%; display: inline-block; margin-top: 3px; text-align: left;}
-.InputTokenRegular aside a {display: inline-block; padding: 2px 4px; background-color: #9e6915; color: #ffffff !important; border-radius: 8px; font-size: 10px; font-weight: bold;vertical-align: middle;}
+.InputTokenRegular aside a {display: inline-block; padding: 2px 4px; background-color: #849BBD; color: #ffffff !important; border-radius: 8px; font-size: 10px; font-weight: bold;vertical-align: middle;}
 .InputTokenRegular aside p {display: inline-block; font-size: 12px; margin-left: 10px; vertical-align: middle; color: #5f5b53;}
 .InputTokenRegular img {width: 22px;height: 22px;margin-right: 5px;}
 .ApproveBTN {display: inline-block; padding: 8px 17px; background-color: #bd84fb; color: #ffffff; border-radius: 20px; font-size: 16px; font-weight: bold; cursor: pointer;}
@@ -156,11 +156,11 @@ a:disabled {cursor:wait !important;}
 .GrimoureContent header h2 {font-size: 27px; font-weight: bold !important;}
 .GrimoureContent header p {font-size: 13px; font-weight: normal !important;}
 .ListOfThings {width: 100%; text-align: center; display: inline-block; margin: 20px auto;max-width: 600px;}
-.web2ActionBTN {display: inline-block; padding: 4px 13px; background-color: #9e6915; color: #ffffff; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer;}
+.web2ActionBTN {display: inline-block; padding: 4px 13px; background-color: #849BBD; color: #ffffff; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer;}
 .web2ActionBTN:hover {color: #ffffff; text-decoration: none;}
 .web2ActionBTN:disabled {font-weight: normal !important;}
-.backActionBTN {display: inline-block; padding: 4px 13px; border:1px solid #9e6915; color: #9e6915; border-radius: 20px; font-size: 14px; font-weight: normal; cursor: pointer;}
-.backActionBTN:hover {color: #9e6915; text-decoration: none;}
+.backActionBTN {display: inline-block; padding: 4px 13px; border:1px solid #849BBD; color: #849BBD; border-radius: 20px; font-size: 14px; font-weight: normal; cursor: pointer;}
+.backActionBTN:hover {color: #849BBD; text-decoration: none;}
 .backActionBTN:disabled {font-weight: normal !important;}
 .InputForm {width: 100%; display: inline-block; margin: 10px auto; text-align: center;}
 .CreateList {width: 95%; width: 600px; display: inline-block; text-align: center; margin: 10px auto;}
@@ -241,7 +241,7 @@ a:disabled {cursor:wait !important;}
 .TokenOperationExecute .SelectRegular {width: 20%;margin: auto 5px; display: inline-block; vertical-align: middle;}
 .ExploreCreate {text-align: right;}
 .InputForm h5 {font-size: 16px; margin: 30px auto 5px auto;}
-.InputForm .imputCool {width: 300px; border: 1px solid #9e6915;}
+.InputForm .imputCool {width: 300px; border: 1px solid #849BBD;}
 .CovCODEEDITOR {width: 560px; height: 400px;; display: block; margin: 20px auto;}
 .CovCODEEDITOR section {width: 560px !important; height: 400px !important;display: block !important;}
 .monaco-editor {height: 400px !important;}
@@ -250,7 +250,7 @@ a:disabled {cursor:wait !important;}
 .CheckboxQuestions label h5 {display: inline-block;font-size: 16px; margin: auto 10px; vertical-align: middle;}
 .CheckboxQuestions label input[type="checkbox"] {display: inline-block;vertical-align: middle;}
 .SpecialInputPerch {width: 100%; display: inline-block;max-width: 370px; position: relative;}
-.SpecialInputPerch aside {position: absolute; right: 0; width: 40px; font-size: 18px; color: #9e6915; border-left: 1px solid #9e6915; top: 4px;}
+.SpecialInputPerch aside {position: absolute; right: 0; width: 40px; font-size: 18px; color: #849BBD; border-left: 1px solid #849BBD; top: 4px;}
 .TokenInflLoaded {width: 100%; display: inline-block; text-align: center; margin: 20px auto;}
 .TokenInflLoaded h5 {font-size: 18px; display: inline-block; margin: auto 10px auto auto; vertical-align: middle; font-weight: bold;}
 .TokenInflLoaded img {width: 40px; display: inline-block; height: auto; vertical-align: middle;}
@@ -303,7 +303,7 @@ a:disabled {cursor:wait !important;}
 .ReceiverSingle .DeleteAddress {width: 15%; margin-left: 4%; display: inline-block; text-align: center;}
 .ReceiverSingle .TextRegular {width: 100%; display: inline-block;}
 .InputForm .Web2ActionsBTNs {width: 100%;}
-.CreateListOp {width: 100%; padding: 10px 10px; border: 1px solid #9e6915; border-radius: 12px;}
+.CreateListOp {width: 100%; padding: 10px 10px; border: 1px solid #849BBD; border-radius: 12px;}
 .CreateListOp p {font-size: 15px;}
 .SortBox {width: 99%; display: block; margin: 5px auto; text-align: center;}
 .SortBox .TextRegular {width: 40%; display: inline-block; margin: auto 5px auto auto;}
@@ -321,7 +321,7 @@ a:disabled {cursor:wait !important;}
 .LockedFarmPositions {display: block; margin: 30px auto; width: 100%;}
 .ListOfThings h3 {font-size: 20px;}
 .FarmActions .Web2ActionsBTNs {width: 100%;}
-input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 100%;background-color: transparent;}
+input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 100%;background-color: transparent;width: 80%; margin: 10px auto;}
  input[type=range]:focus {outline: none;}
  input[type=range]::-webkit-slider-runnable-track {width: 100%;height: 15px;cursor: pointer;animate: 0.2s;box-shadow: 0px 0px 0px #50555C;background: #849BBD;border-radius: 10px;border: 0px solid #000000;}
  input[type=range]::-webkit-slider-thumb {box-shadow: 0px 0px 0px #000000;border: 0px solid #000000;height: 25px;width: 40px;border-radius: 12px;background: #7474F7;cursor: pointer;-webkit-appearance: none;margin-top: -5px;}
@@ -347,7 +347,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
  .MetamaskAddButton:hover {border-radius: 8px; border: 1px solid;text-decoration: none !important;}
  .UnlockInfo {font-size: 14px !important;width: 90% !important;display: block !important;}
  .UnlockInfoBal {font-size: 12px !important;width: 90% !important;}
-.UnlockDiv, .Tranferpos {padding: 10px 8px; border: 1px solid #9e6915; border-radius: 12px;}
+.UnlockDiv, .Tranferpos {padding: 10px 8px; border: 1px solid #849BBD; border-radius: 12px;}
 .Web3ActionBTNV {display: inline-block; margin: 10px auto;}
 .BalanceImputPRCD {font-size: 13px; margin-left: 5px;}
 .BLKEMD {text-decoration: underline !important;}
@@ -370,30 +370,30 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .fantasy .Footer p a {font-weight: bold; color: #000000 !important;}
 .fantasy .FooterP p {color: #000000;}
 .fantasy .FooterP p a, .penguin .disclamer a {font-weight: bold; color: #000000 !important;}
-.fantasy .grimoireBox {background-color: #4d4c4a; border: 1px solid #9e6915;}
+.fantasy .grimoireBox {background-color: #4d4c4a; border: 1px solid #849BBD;}
 .fantasy .GrimoureContent {color: #ffffff;}
 
 .penguin h1, .penguin .aside, .penguin input[type="file"], .penguin p, .penguin h2, .penguin h3, .penguin h4, .penguin h5, .penguin h6, .penguin label, .penguin span {color: #ffffff;}
 .penguin {background: rgb(58,60,106);background: linear-gradient(135deg, rgba(58,60,106,1) 0%, rgba(0,0,0,1) 41%);}
 .penguin .dapp-container, .penguin .DappBox {background-color: #2d2e40 !important;box-shadow: rgb(0 0 0 / 1%) 0px 0px 1px, rgb(0 0 0 / 4%) 0px 4px 8px, rgb(0 0 0 / 4%) 0px 16px 24px, rgb(0 0 0 / 1%) 0px 24px;}
 .penguin .sidebar-menu-link, .penguin .nav-link, .penguin .fantasyMenu:hover, .penguin .fantasyMenu, .penguin .form-check-label, .penguin .infoList, .penguin .StatsBro, .penguin .StatsBroO, .penguin .IndexRegular, .penguin .Web3, .penguin .disclamer, .penguin .TitleCov, .penguin .xTitle, .penguin .StatsIndicator a, .penguin .QuestionRegular label,.penguin .DisclamerRegular p, .penguin .InputTokensRegular p, .penguin .Resultsregular p, .penguin .Resultsregular p, .penguin .Rebalance aside h6, .penguin .Rebalance aside p, .penguin .FarmThings p, .penguin .FarmTitle aside h6, .penguin .FarmSetupMain h5 {color: #ffffff;}
-.penguin .custom-control-label::before, .penguin .custom-file-label, .penguin .custom-select, .penguin .custom-select:focus {transition: none; background: url("./assets/images/arrowdown.png") right 0.75rem center/15px 10px no-repeat;border-color: #9e6915 !important; box-shadow: none;}
-.penguin .token-filter-input {border-color: #9e6915 !important;}
+.penguin .custom-control-label::before, .penguin .custom-file-label, .penguin .custom-select, .penguin .custom-select:focus {transition: none; background: url("./assets/images/arrowdown.png") right 0.75rem center/15px 10px no-repeat;border-color: #849BBD !important; box-shadow: none;}
+.penguin .token-filter-input {border-color: #849BBD !important;}
 .penguin .wusd-pair-select, .penguin .token-filter-input {background-color: #2d2e40 !important; color: #ffffff;}
 .penguin .LogoM {background-position: 0 0px;}
 .penguin .BtnConnect {border: 1px solid #7474f7; color: #7474f7;}
-.penguin .BtnConnectAfter {border: 1px solid #9e6915; color: #9e6915;}
+.penguin .BtnConnectAfter {border: 1px solid #849BBD; color: #849BBD;}
 .penguin .FooterP p {color: #adadad;}
 .penguin .FooterP p a, .penguin .disclamer a, .penguin .FarmThings p a {font-weight: bold; color: #adadad !important;}
 .penguin .card {border: 1px solid #000000; color: #ffffff;}
-.penguin .StatsLink a, .penguin .FarmSetupMain h5 a, .penguin .InflationContractLinks a, .penguin .TokenOperationLinks a {border: 1px solid #9e6915; color: #9e6915;text-decoration: none;}
-.penguin .StatsLink a:hover, .penguin .FarmSetupMain h5 a:hover, .penguin .InflationContractLinks a:hover, .penguin .TokenOperationLinks a:hover {color: #9e6915; text-decoration: none !important;}
+.penguin .StatsLink a, .penguin .FarmSetupMain h5 a, .penguin .InflationContractLinks a, .penguin .TokenOperationLinks a {border: 1px solid #849BBD; color: #849BBD;text-decoration: none;}
+.penguin .StatsLink a:hover, .penguin .FarmSetupMain h5 a:hover, .penguin .InflationContractLinks a:hover, .penguin .TokenOperationLinks a:hover {color: #849BBD; text-decoration: none !important;}
 .penguin .nav-item-selected {border-bottom: 8px solid #7474f7;}
 .penguin .health-bar {background-color: #1c1c27;}
-.penguin .SelectRegular {border-color: #9e6915; color: #9e6915;}
-.penguin .TextRegular, .penguin .TextAreaRegular {border-color: #9e6915; color: #9e6915;}
-.penguin .input-group-text {background-color: transparent;border-top: 1px solid #9e6915; border-right: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-left: 0px solid #9e6915; color: #ffffff;}
-.penguin .form-control, .penguin .form-control:focus {background-color: transparent;border-top: 1px solid #9e6915; border-left: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-right: 0px solid #9e6915; color: #ffffff;}
+.penguin .SelectRegular {border-color: #849BBD; color: #849BBD;}
+.penguin .TextRegular, .penguin .TextAreaRegular {border-color: #849BBD; color: #849BBD;}
+.penguin .input-group-text {background-color: transparent;border-top: 1px solid #849BBD; border-right: 1px solid #849BBD; border-bottom: 1px solid #849BBD; border-left: 0px solid #849BBD; color: #ffffff;}
+.penguin .form-control, .penguin .form-control:focus {background-color: transparent;border-top: 1px solid #849BBD; border-left: 1px solid #849BBD; border-bottom: 1px solid #849BBD; border-right: 0px solid #849BBD; color: #ffffff;}
 .penguin .FarmContract,.penguin .IndexContract, .penguin .FarmContractOpen, .penguin .FarmSetup, .penguin .InflationContract, .penguin .TokenOperation, .penguin .IndexContractOpenInfo, .penguin .IndexContractOpenCollateralSingle, .penguin .IndexContractOpenStatistic, .penguin .ShowCollateralNeededBal {border-color: #4d4c4a;}
 .penguin .YourFarmingPositions {border-color: #636363;}
 .penguin .BLKEMD {color: #ffffff !important;}
@@ -406,7 +406,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .magic .wusd-pair-select, .magic .token-filter-input {background-color: #ffffff !important; color: #000000;}
 .magic .LogoM {background-position: 0 -50px;}
 .magic .BtnConnect {border: 1px solid #7474f7; color: #7474f7;}
-.magic .BtnConnectAfter {border: 1px solid #9e6915; color: #9e6915;}
+.magic .BtnConnectAfter {border: 1px solid #849BBD; color: #849BBD;}
 .magic .TitleCov, .magic .StatsIndicator a {color: #000000;}
 .magic .fantasyMenu:hover, .magic .fantasyMenu {color: #000000;}
 .magic .form-check-label {color: #000000;}
@@ -414,19 +414,19 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .magic .FooterP p {color: #636363;}
 .magic .FooterP p a, .magic .disclamer a, .magic .FarmThings p a {font-weight: bold; color: #636363 !important;}
 .magic .card {border: 1px solid #aaaaaa; color: #000000;}
-.magic .StatsLink a, .magic .FarmSetupMain h5 a, .magic .InflationContractLinks a, .magic .TokenOperationLinks a {border: 1px solid #9e6915; color: #9e6915;}
-.magic .StatsLink a:hover, .magic .FarmSetupMain h5 a:hover, .magic .InflationContractLinks a:hover, .magic .TokenOperationLinks a:hover {color: #9e6915;text-decoration: none !important;}
+.magic .StatsLink a, .magic .FarmSetupMain h5 a, .magic .InflationContractLinks a, .magic .TokenOperationLinks a {border: 1px solid #849BBD; color: #849BBD;}
+.magic .StatsLink a:hover, .magic .FarmSetupMain h5 a:hover, .magic .InflationContractLinks a:hover, .magic .TokenOperationLinks a:hover {color: #849BBD;text-decoration: none !important;}
 .magic .nav-item-selected {border-bottom: 8px solid #7474f7;}
 .magic .health-bar {background-color: #ebebeb;}
-.magic .SelectRegular {border-color: #9e6915; color: #9e6915;}
-.magic .TextRegular, .magic .TextAreaRegular {border-color: #9e6915; color: #9e6915;}
-.magic .input-group-text {background-color: transparent;border-top: 1px solid #9e6915; border-right: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-left: 0px solid #9e6915; color: #000000;}
-.magic .form-control, .magic .form-control:focus {background-color: transparent;border-top: 1px solid #9e6915; border-left: 1px solid #9e6915; border-bottom: 1px solid #9e6915; border-right: 0px solid #9e6915; color: #000000;}
+.magic .SelectRegular {border-color: #849BBD; color: #849BBD;}
+.magic .TextRegular, .magic .TextAreaRegular {border-color: #849BBD; color: #849BBD;}
+.magic .input-group-text {background-color: transparent;border-top: 1px solid #849BBD; border-right: 1px solid #849BBD; border-bottom: 1px solid #849BBD; border-left: 0px solid #849BBD; color: #000000;}
+.magic .form-control, .magic .form-control:focus {background-color: transparent;border-top: 1px solid #849BBD; border-left: 1px solid #849BBD; border-bottom: 1px solid #849BBD; border-right: 0px solid #849BBD; color: #000000;}
 .magic .FarmContract,.magic .IndexContract, .magic .FarmContractOpen, .magic .FarmSetup, .magic .InflationContract, .magic .TokenOperation, .magic .IndexContractOpenInfo, .magic .IndexContractOpenCollateralSingle, .magic .IndexContractOpenStatistic, .magic .ShowCollateralNeededBal {border-color: #ebebeb;}
 .magic .IndexSinglePerchBar span {color: #ffffff;}
 .magic .YourFarmingPositions {border-color: #bdbdbd;}
 .magic .BLKEMD {color: #000000 !important;}
-.InputRegularB .form-control, .InputRegularB .form-control:focus {border-right: 1px solid #9e6915;}
+.InputRegularB .form-control, .InputRegularB .form-control:focus {border-right: 1px solid #849BBD;}
 
 .FarmSetup {border: 1px solid #e0e2e6 !important;;border-radius: 15px; background-color: #f7fafe;margin: 15px auto; padding: 3% 3% 1% 3%;}
 .penguin .FarmSetup {background-color: #2f3044; border-color: #1c1c27 !important;border-radius: 15px; margin: 15px auto;}
@@ -444,7 +444,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .penguin .PositionInfoFarmingBigMoney  {background-color: rgb(33, 36, 41); border-color: #1c1c27 !important;}
 .FarmYouFARMFARMFARM p {font-size: 12px;}
 .FarmYouFARMFARMFARM a {margin: 5px;}
-.web2ActionBTNGigi {background-color: #849BBD; border-color: #849BBD;}
+.web2ActionBTNGigi {background-color: #aebdd2; border-color: #aebdd2;}
 .YourFarmingPositionsFarmingFarmingFarmingChiFarmaViveComeUnPAsha .Farmed p {width: 90%;}
 .Farmed p {font-size: 12px;}
 .YourFarmingPositionsFarmingFarmingFarmingChiFarmaViveComeUnPAsha {width: 92%; display: inline-block; padding: 10px; border: 1px solid #e0e2e6 !important;;border-radius: 15px; background-color: #e9effc; margin: 10px auto;}
@@ -465,7 +465,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .IndexContractOpenCollateralSingleTITLE .TokenCoolFancy {display: inline-block;margin: auto 5px;vertical-align: middle;width: 30px !important; height: 30px !important;}
 .IndexContractOpenCollateralSingleTITLE .TokenCoolFancy span {font-size: 9px;margin-top: 3px;}
 
-.PrestoSelector {padding: 5px; margin: 2px 3px; border-radius: 8px; border: 1px solid #9e6915;}
+.PrestoSelector {padding: 5px; margin: 2px 3px; border-radius: 8px; border: 1px solid #849BBD;}
 .PrestoSelector span {font-size: 14px; margin: auto 5px auto auto; display: inline-block; vertical-align: middle;}
 .FromETHPrestoDesc {width: 100%;}
 .FromETHPrestoDesc p {width: 100%;font-size: 12px;}
@@ -483,18 +483,18 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .youDIDit p {font-size: 13px; text-align: left;}
 .youDIDit .SuccessText {font-size: 20px; text-align: center; margin: 10px auto;}
 .youDIDit .SuccessTextNow {font-size: 25px; text-align: center; margin: 10px auto; color: #7474F7; font-weight: bold;}
-.youDIDit .SuccessTextLink {font-size: 11px; padding: 5px 8px; border: 1px solid #9e6915; color: #ffffff !important; display: inline-block; background-color: #9e6915; border-radius: 6px;}
+.youDIDit .SuccessTextLink {font-size: 11px; padding: 5px 8px; border: 1px solid #849BBD; color: #ffffff !important; display: inline-block; background-color: #849BBD; border-radius: 6px;}
 .youDIDit .SuccessTextLink a {color: #ffffff !important; text-decoration: none !important; font-weight: bold;font-size: 11px;}
 .Disclamerfinish {font-size: 10px !important; text-align: left; margin: 10px auto; background-color: #7474F7; font-weight: bold; padding: 12px 20px; border-radius: 12px; color: #ffffff !important;}
 .specialITEMlink {border-color: #59b0fb !important; border-width: 2px !important; color: #59b0fb !important; font-weight: bold !important;}
 .specialERC20link {border-color: #844e4ee6 !important; border-width: 2px !important; color: #844e4ee6 !important; font-weight: bold !important;}
-.specialAMMlink {border-color: #9e6915 !important; border-width: 2px !important; color: #9e6915 !important; font-weight: bold !important;}
+.specialAMMlink {border-color: #849BBD !important; border-width: 2px !important; color: #849BBD !important; font-weight: bold !important;}
 .specialV3link {border-color: #bd84fb !important; border-width: 2px !important; color: #bd84fb !important; font-weight: bold !important; border: 2px solid #bd84fb !important;}
 .specialMETAlink {border-color: #7472fc !important; border-width: 2px !important; color: #7472fc !important; font-weight: bold !important;}
 .uuuuTokenLoad img {width: 30px; max-height: 60px; vertical-align: middle;}
 .ITEMsymbolF {font-size: 11px !important; font-weight: normal !important;}
 .VersionFarm {color: #bd84fb;font-size: 13px;font-weight: bolder;padding: 2px 4px;border: 2px solid #bd84fb; border-radius: 5px;margin: 0px 0px 0px 10px;}
-.VersionFarmOld {color: #9e6915; font-size: 13px;padding: 2.5px 3px; border: 1px solid #9e6915;border-radius: 5px;margin: 0px 0px 0px 10px; font-weight: normal !important;}
+.VersionFarmOld {color: #849BBD; font-size: 13px;padding: 2.5px 3px; border: 1px solid #849BBD;border-radius: 5px;margin: 0px 0px 0px 10px; font-weight: normal !important;}
 .farmInfoCurve {background-color: #e9effc; display: inline-block; width: 56% !important; float: right; height: 100% !important;min-height: 100% !important;max-height: 100% !important;padding: 40px 20px;}
 .UniNFTInfo {font-size: 10px; color: #7472fc; font-weight: bold; border: 2px solid #7472fc; padding: 2px 4px; border-radius: 5px; display: inline-block; margin-left: 5px;}
 .UniNFTInfo:hover, .UniNFTInfo:active {color: #7472fc; font-weight: bold; border: 2px solid #7472fc;  text-decoration: none !important;}
@@ -530,7 +530,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .UniV3TVLFIV {width: 100%; margin: 5px auto; text-align: center; font-size: 10px !important; display: inline-block;}
 .UniV3TVLFIV span {font-size: 10px !important;}
 .farmInfoCurve p {margin-left: 0 !important;}
-.SetupFarmingInstructionsV3 .web2ActionBTN, .SetupFarmingInstructionsV3 .backActionBTN {display: inline-block; margin: 10px auto; width: 90%; text-align: center; border: 1px solid #9e6915;}
+.SetupFarmingInstructionsV3 .web2ActionBTN, .SetupFarmingInstructionsV3 .backActionBTN {display: inline-block; margin: 10px auto; width: 90%; text-align: center; border: 1px solid #849BBD;}
 .SetupFarmingInstructionsV3 .Web3ActionBTN, .SetupFarmingInstructionsV3 .web2ActionBTNS {display: inline-block;margin: 10px 4px;width: 40%;text-align: center;padding: 3px;font-size: 13px;margin-right: 7px;}
 .FarmSetupV3 {width: 100%;border: 1px solid #e0e2e6;border-radius: 15px; background-color: #f7fafe;overflow: hidden;margin: 25px auto;}
 .TokenFarmV3InfoBox {width: auto; display: block;margin: 6px 0px 0 4px;}
@@ -580,6 +580,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .FarmSetupV3 .FarmYou {width: 45% !important;} 
 .FarmSetupV3 .farmed  {width: 45% !important;}
 .FancyExplanationCreateS {width: 35%; text-align: center; display: inline-block; vertical-align: middle;}
+.web2ActionBTNFFF {margin: 10px auto;}
 
 
 @media only screen and (max-device-width: 750px) {
@@ -613,7 +614,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
    .Ditone {display: none !important;}
    .sidebar-menu-link-selected .Ditone {display: none !important;}
    .Menuone {display: none;}
-   .sidemenu-active {display: inline-block; position: fixed; z-index: 30; right: 10px; top: 10px; background-color: #2d2e40; border-radius: 8px;top: 55px; border: 1px solid #9e6915;}
+   .sidemenu-active {display: inline-block; position: fixed; z-index: 30; right: 10px; top: 10px; background-color: #2d2e40; border-radius: 8px;top: 55px; border: 1px solid #849BBD;}
    .penguin .sidemenu-active {background-color: #2d2e40;}
    .magic .sidemenu-active {background-color: #ffffff; color: #000000;}
    .magic .sidebar-menu-link {color: #000000 !important;}
@@ -726,7 +727,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
    .MobileMenu {display: inline-block;}
    .MobileMenu {display: inline-block; font-size: 15px; background-color: #7474f7; padding: 3px 5px; border-radius: 5px; color: #ffffff;text-decoration: none;}
    .MobileMenu:hover, .MobileMenu:after {color: #ffffff; text-decoration: none;}
-   .sidemenu-active {display: inline-block; position: fixed; z-index: 30; right: 10px; top: 10px; background-color: #2d2e40; border-radius: 8px;top: 55px; border: 1px solid #9e6915;}
+   .sidemenu-active {display: inline-block; position: fixed; z-index: 30; right: 10px; top: 10px; background-color: #2d2e40; border-radius: 8px;top: 55px; border: 1px solid #849BBD;}
    .penguin .sidemenu-active {background-color: #2d2e40;}
    .magic .sidemenu-active {background-color: #ffffff; color: #000000;}
    .magic .sidebar-menu-link {color: #000000 !important;}

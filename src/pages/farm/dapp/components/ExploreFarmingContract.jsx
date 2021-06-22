@@ -308,7 +308,7 @@ const ExploreFarmingContract = (props) => {
                 }
                 {
                 isHost && <>
-                        { !isAdd && <a className="web2ActionBTN" onClick={() => setIsAdd(true)}>Add new setups</a>}
+                        { !isAdd && <a className="web2ActionBTN web2ActionBTNFFF" onClick={() => setIsAdd(true)}>Add new setups</a>}
                     </>
                 }
                 {
