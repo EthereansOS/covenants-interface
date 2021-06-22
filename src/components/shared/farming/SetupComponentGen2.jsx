@@ -261,20 +261,10 @@ const SetupComponentGen2 = (props) => {
         const approvals = [];
         const contracts = [];
         var mtInfo;
-        var balances = [
-            '0', '0'
-        ];
-        if(farmSetup.objectId && farmSetup.objectId !== '0') {
-            var nftPosMan = await dfoCore.getEthersContract(dfoCore.getContextElement("UniswapV3NonfungiblePositionManagerABI"), dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress"));
-            var collect = await nftPosMan.callStatic.collect({
-                tokenId : farmSetup.objectId,
-                recipient: lmContract.options.address,
-                amount0Max: dfoCore.MAX_UINT128,
-                amount1Max: dfoCore.MAX_UINT128
-            }, {
-                from : lmContract.options.address
-            });
-            balances = [collect.amount0.toString(), collect.amount1.toString()];
+        var balances = ['0', '0'];
+        try {
+            farmSetup.objectId && farmSetup.objectId !== '0' && (balances = await simulateDecreaseLiquidityAndCollect(farmSetup.objectId, lmContract.options.address));
+        } catch(e) {
         }
         for (let i = 0; i < liquidityPoolTokens.length; i++) {
             const address = liquidityPoolTokens[i];
@@ -337,6 +327,31 @@ const SetupComponentGen2 = (props) => {
         }
         // calculate APY
         setApy(await calculateApy(farmSetup, farmSetupInfo, rewardTokenAddress, rewardTokenDecimals, tokens));
+    }
+
+    async function simulateDecreaseLiquidityAndCollect(objectId, lmContractAddress) {
+        var nftPosManEthers = await dfoCore.getEthersContract(dfoCore.getContextElement("UniswapV3NonfungiblePositionManagerABI"), dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress"));
+        var nftPosMan = await dfoCore.getContract(dfoCore.getContextElement("UniswapV3NonfungiblePositionManagerABI"), dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress"));
+        var bytes = [
+            nftPosMan.methods.decreaseLiquidity({
+                tokenId : objectId,
+                liquidity : (await nftPosMan.methods.positions(objectId).call()).liquidity,
+                amount0Min : 0,
+                amount1Min : 0,
+                deadline: new Date().getTime() + 10000
+            }).encodeABI(),
+            nftPosMan.methods.collect({
+                tokenId : objectId,
+                recipient: lmContractAddress,
+                amount0Max: dfoCore.MAX_UINT128,
+                amount1Max: dfoCore.MAX_UINT128
+            }).encodeABI()
+        ];
+        var result = await nftPosManEthers.callStatic.multicall(
+            bytes, {
+            from : lmContractAddress
+        });
+        return props.dfoCore.web3.eth.abi.decodeParameters(["uint128", "uint128"], result[1]);
     }
 
     const calculateApy = async (setup, setupInfo, rewardTokenAddress, rewardTokenDecimals, setupTokens) => {
