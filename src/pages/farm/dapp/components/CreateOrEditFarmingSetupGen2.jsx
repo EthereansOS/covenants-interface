@@ -42,6 +42,7 @@ const CreateOrEditFarmingSetup = (props) => {
     // current step
     const [currentStep, setCurrentStep] = useState(0);
 
+    const dilutedTickRange = 92100;
     var tickLowerInput;
     var tickUpperInput;
 
@@ -76,8 +77,8 @@ const CreateOrEditFarmingSetup = (props) => {
             setTickLower(tickLower);
             setTickUpper(tickUpper);
             if(props.gen2SetupType === 'diluted') {
-                setTickLower(TickMath.MIN_TICK);
-                setTickUpper(TickMath.MAX_TICK);
+                setTickLower(nearestUsableTick(-dilutedTickRange, TICK_SPACINGS[fee]));
+                setTickUpper(nearestUsableTick(dilutedTickRange, TICK_SPACINGS[fee]));
             }
             const lpInfo = [
                 [], [], [
