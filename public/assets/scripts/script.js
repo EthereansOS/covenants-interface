@@ -540,7 +540,7 @@ window.fromDecimals = function fromDecimals(n, d, noFormat) {
     var decimals = (typeof d).toLowerCase() === 'string' ? parseInt(d) : d;
     var symbol = window.toEthereumSymbol(decimals);
     if (symbol) {
-        var result = window.web3.utils.fromWei((typeof n).toLowerCase() === 'string' ? n : window.numberToString(n), symbol);
+        var result = window.web3.utils.fromWei(((typeof n).toLowerCase() === 'string' ? n : window.numberToString(n)).split('.')[0], symbol);
         return noFormat === true ? result : window.formatMoney(result);
     }
     var number = (typeof n).toLowerCase() === 'string' ? parseInt(n) : n;

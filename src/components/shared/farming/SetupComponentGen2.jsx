@@ -976,7 +976,7 @@ const SetupComponentGen2 = (props) => {
                 <div className="FarmActions">
                     <input type="range" value={removalAmount} onChange={(e) => setRemovalAmount(parseInt(e.target.value))} className="form-control-range" id="formControlRange" />
                     <div className="Web2ActionsBTNs">
-                        <p className="BreefRecap"><b>Amount:</b> {removalAmount}% ({window.fromDecimals(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100, lpTokenInfo.decimals)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.fromDecimals(parseInt(manageStatus.tokensAmounts[i].full || manageStatus.tokensAmounts[i]) * removalAmount / 100, token.decimals)} {token.symbol} </span>)})</p>
+                        <p className="BreefRecap"><b>Amount:</b> {removalAmount}% ({window.formatMoney(window.fromDecimals(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100, lpTokenInfo.decimals, true), 9)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(window.fromDecimals(parseInt(manageStatus.tokensAmounts[i].full || manageStatus.tokensAmounts[i]) * removalAmount / 100, token.decimals, true), 6)} {token.symbol} </span>)})</p>
                         <a className="web2ActionBTN" onClick={() => setRemovalAmount(10)} >10%</a>
                         <a className="web2ActionBTN" onClick={() => setRemovalAmount(25)} >25%</a>
                         <a className="web2ActionBTN" onClick={() => setRemovalAmount(50)} >50%</a>
@@ -1019,7 +1019,7 @@ const SetupComponentGen2 = (props) => {
                     })
                 }
                 {
-                    (setupInfo.free && rewardTokenInfo) && <div className="DiffWallet">
+                    (setupInfo.free && rewardTokenInfo && lpTokenAmount && (lpTokenAmount.full || lpTokenAmount) !== '0') && <div className="DiffWallet">
                         <p className="BreefRecap">Estimated reward per day: <br></br><b>{window.formatMoney(freeEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</b>
                         </p>
                     </div>
@@ -1033,7 +1033,7 @@ const SetupComponentGen2 = (props) => {
                         {
                             addLoading ? <a className="Web3ActionBTN" disabled={addLoading}>
                                 <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            </a> : <a className="Web3ActionBTN" onClick={() => addLiquidity()} disabled={tokensApprovals.some((value) => !value) || tokensAmounts.some((value) => value === 0)}>Add Liquidity</a>
+                            </a> : <a className="Web3ActionBTN" onClick={addLiquidity} disabled={tokensApprovals.some((value) => !value) || tokensAmounts.some((value) => value === 0)}>Add Liquidity</a>
                         }
                     </div>
         </div>
@@ -1077,7 +1077,7 @@ const SetupComponentGen2 = (props) => {
                                             {
                                                 activateLoading ? <a className="Web3ActionBTN" disabled={activateLoading}>
                                                     <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                                </a> : <a className="Web3ActionBTN" onClick={() => { activateSetup() }}>Activate</a>
+                                                </a> : <a className="Web3ActionBTN" onClick={activateSetup}>Activate</a>
                                             }
                                         </>
                                     }
@@ -1141,7 +1141,7 @@ const SetupComponentGen2 = (props) => {
                                 {
                                     claimLoading ? <a className="Web3ActionBTN" disabled={claimLoading}>
                                         <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                    </a> : <a onClick={() => withdrawReward()} className="Web3ActionBTN">Claim</a>
+                                    </a> : <a onClick={withdrawReward} className="Web3ActionBTN">Claim</a>
                                 }
                         </div>
                     </div>
