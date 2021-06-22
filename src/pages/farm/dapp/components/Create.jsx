@@ -116,7 +116,7 @@ const Create = (props) => {
                 return  [props.dfoCore.web3.utils.toChecksumAddress(extensionAddress ? extensionAddress : hostDeployedContract), extensionPayload || extensionInitData || "0x", props.dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress"), window.voidEthereumAddress, rewardTokenAddress, encodedSetups || 0];
             }
         }
-    }
+    };
 
     window.showSuccessMessage = function showSuccessMessage(show, selectedHost, hasTreasuryAddress) {
         setDeployLoading(false);

@@ -131,6 +131,80 @@ const ExploreFarmingContract = (props) => {
         setNewFarmingSetups(updatedSetups);
     }
 
+    const genConversion = {
+        gen1 : {
+            setupInfoTypes : ["bool","uint256","uint256","uint256","uint256","uint256","uint256","address","address","address","address","bool","uint256","uint256","uint256"],
+            initTypes : [
+                "address",
+                "bytes",
+                "address",
+                "address",
+                "bytes",
+            ], async parseSetup(setup) {
+                const ammAggregator = await props.dfoCore.getContract(props.dfoCore.getContextElement('AMMAggregatorABI'), props.dfoCore.getContextElement('ammAggregatorAddress'));
+                const isFree = setup.free;
+                const result = await ammAggregator.methods.findByLiquidityPool(setup.liquidityPoolToken.address).call();
+                const { amm } = result;
+                var mainTokenAddress = isFree ? setup.liquidityPoolToken.tokens[0].address : setup.mainToken.address;
+                const mainTokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), mainTokenAddress);
+                const mainTokenDecimals = mainTokenAddress === window.voidEthereumAddress ? 18 : await mainTokenContract.methods.decimals().call();
+
+                const parsedSetup = [
+                    isFree,
+                    parseInt(setup.blockDuration),
+                    parseInt(setup.startBlock),
+                    window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.rewardPerBlock), selectedRewardToken.decimals)),
+                    window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.minStakeable), mainTokenDecimals)),
+                    !isFree ? window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.maxStakeable)), mainTokenDecimals) : 0,
+                    setup.renewTimes,
+                    amm,
+                    setup.liquidityPoolToken.address,
+                    mainTokenAddress,
+                    props.dfoCore.voidEthereumAddress,
+                    setup.involvingEth,
+                    isFree ? 0 : props.dfoCore.fromDecimals(window.numberToString(parseFloat(setup.penaltyFee) / 100)),
+                    0,
+                    0
+                ];
+                return parsedSetup;
+            }, getInitArray(extensionAddress, extensionInitData, rewardTokenAddress, encodedSetups) {
+                return  [props.dfoCore.web3.utils.toChecksumAddress(extensionAddress ? extensionAddress : hostDeployedContract), extensionPayload || extensionInitData || "0x", props.dfoCore.getContextElement("ethItemOrchestratorAddress"), rewardTokenAddress, encodedSetups || 0];
+            }
+        }, gen2 : {
+            setupInfoTypes : ["uint256","uint256","uint256","uint256","uint256","address","address","bool","uint256","uint256","int24","int24"],
+            initTypes :  [
+                "address",
+                "bytes",
+                "address",
+                "address",
+                "address",
+                "bytes",
+            ], async parseSetup(setup) {
+                var mainTokenAddress = setup.liquidityPoolToken.tokens[0].address;
+                const mainTokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), mainTokenAddress);
+                const mainTokenDecimals = mainTokenAddress === window.voidEthereumAddress ? 18 : await mainTokenContract.methods.decimals().call();
+
+                const parsedSetup = [
+                    parseInt(setup.blockDuration),
+                    parseInt(setup.startBlock),
+                    window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.rewardPerBlock), selectedRewardToken.decimals)),
+                    window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.minStakeable), mainTokenDecimals)),
+                    setup.renewTimes,
+                    setup.liquidityPoolToken.address,
+                    mainTokenAddress,
+                    setup.involvingEth,
+                    0,
+                    0,
+                    setup.tickLower,
+                    setup.tickUpper
+                ];
+                return parsedSetup;
+            }, getInitArray(extensionAddress, extensionInitData, rewardTokenAddress, encodedSetups) {
+                return  [props.dfoCore.web3.utils.toChecksumAddress(extensionAddress ? extensionAddress : hostDeployedContract), extensionPayload || extensionInitData || "0x", props.dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress"), window.voidEthereumAddress, rewardTokenAddress, encodedSetups || 0];
+            }
+        }
+    };
+
     const updateSetups = async () => {
         console.log(newFarmingSetups);
         setSetupsLoading(true);
@@ -145,34 +219,12 @@ const ExploreFarmingContract = (props) => {
                 ).mul(props.dfoCore.web3.utils.toBN(window.numberToString(setup.blockDuration))).toString();
                 calculatedTotalToSend = props.dfoCore.web3.utils.toBN(calculatedTotalToSend).add(props.dfoCore.web3.utils.toBN(amountToSend)).toString();
                 cumulativeTotalToSend = props.dfoCore.web3.utils.toBN(cumulativeTotalToSend).add(props.dfoCore.web3.utils.toBN(amountToSend).mul(props.dfoCore.web3.utils.toBN(window.numberToString(window.formatNumber(setup.renewTimes || '0') === 0 ? 1 : setup.renewTimes)))).toString();
-                const isFree = setup.free;
-                const result = await ammAggregator.methods.findByLiquidityPool(setup.liquidityPoolToken.address).call();
-                const { amm } = result;
-                var mainTokenAddress = isFree ? setup.liquidityPoolToken.tokens[0].address : setup.mainToken.address;
-                const mainTokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), mainTokenAddress);
-                const mainTokenDecimals = mainTokenAddress === window.voidEthereumAddress ? 18 : await mainTokenContract.methods.decimals().call();
-                const setupInfo =
-                {
+                const info = await genConversion[generation].parseSetup(setup);
+                const setupInfo = {
                     add: true,
                     disable: false,
                     index: 0,
-                    info: {
-                        free: isFree,
-                        blockDuration: parseInt(setup.blockDuration),
-                        startBlock: parseInt(setup.startBlock),
-                        originalRewardPerBlock: window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.rewardPerBlock), token.decimals)),
-                        minStakeable: window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.minStakeable), mainTokenDecimals)),
-                        maxStakeable: !isFree ? window.numberToString(props.dfoCore.fromDecimals(window.numberToString(setup.maxStakeable)), mainTokenDecimals) : 0,
-                        renewTimes: setup.renewTimes,
-                        ammPlugin: amm,
-                        liquidityPoolTokenAddress: setup.liquidityPoolToken.address,
-                        mainTokenAddress,
-                        ethereumAddress: dfoCore.voidEthereumAddress,
-                        involvingETH: setup.involvingEth,
-                        penaltyFee: isFree ? 0 : props.dfoCore.fromDecimals(window.numberToString(parseFloat(setup.penaltyFee) / 100)),
-                        setupsCount: 0,
-                        lastSetupIndex: 0
-                    }
+                    info
                 };
                 newSetupsInfo.push(setupInfo);
             }
@@ -274,7 +326,7 @@ const ExploreFarmingContract = (props) => {
                         onFinish={() => { }}
                         finishButton={setupsLoading ? <Loading /> : <button className="btn btn-primary" onClick={() => updateSetups()}>Update setups</button>}
                         forEdit={true}
-                        generation={metadata.generation}
+                        generation={metadata.metadata.generation}
                     />
                 }
             </div>
