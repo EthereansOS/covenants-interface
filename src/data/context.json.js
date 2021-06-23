@@ -216,7 +216,7 @@ export default {
     "indexPrestoAddressRopsten": "0x976e088D6cb237f0b1aCfc6d31C7e23d4b7e0591",
     "farmFactoryAddress" : "0x6BC8530fecc0001b9FC0bf5DAA17873e847616ed",
     "farmFactoryAddressRopsten": "0x75687cb2A21F7c596DC973193f26D01c597F2e75",
-    "farmGen2FactoryAddress" : "0x88990bc4d9c423dff812adf0e0fd52dc76ab7c25",
+    "farmGen2FactoryAddress" : "0xC838Cb21c112D882a74A5f33B300D50C7CCa02f1",
     "farmGen2FactoryAddressRopsten": "0x75687cb2A21F7c596DC973193f26D01c597F2e75",
     "uniswapV3FactoryAddress" : "0x1F98431c8aD98523631AE4a59f267346ea31F984",
     "uniswapV3NonfungiblePositionManagerAddress" : "0xc36442b4a4522e871399cd717abdd847ab11fe88",
