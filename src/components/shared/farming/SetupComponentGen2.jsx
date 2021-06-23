@@ -122,12 +122,10 @@ const SetupComponentGen2 = (props) => {
                 var c = tickToPrice(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(slot.tick)).toSignificant(15);
                 tickData.cursorNumber = window.formatNumber(Math.floor((1 / ((Math.sqrt(a * b) - Math.sqrt(b * c)) / (c - Math.sqrt(b * c)) + 1)) * 100));
             }
-            //secondTokenIndex === 0 && (tickData.cursorNumber = 100 - tickData.cursorNumber);
+            tickData.cursorNumber = 100 - tickData.cursorNumber;
             tickData.cursor = window.formatMoney(tickData.cursorNumber, 2);
             setTickData(tickData);
         } catch(e) {
-            console.log("Perc");
-            console.error(e);
         }
     }, [lpTokenInfo, secondTokenIndex, setupInfo]);
 
