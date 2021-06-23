@@ -462,10 +462,16 @@ const SetupComponentGen2 = (props) => {
         setTokensApprovals(tokensApprovals.map((val, i) => i === index ? true : val));
     }
 
-    var updateAmountTimeout;
 
     const onUpdateTokenAmount = async (value, index) => {
-        updateAmountTimeout && clearTimeout(updateAmountTimeout);
+        var tks = tokensAmounts.map(it => it);
+        const fullValue = window.toDecimals(value, setupTokens[index].decimals);
+        tks[index] = {
+            value,
+            full : fullValue
+        }
+        //setTokensAmount(tks.map(it => it));
+        window.updateAmountTimeout && clearTimeout(window.updateAmountTimeout);
         setLpTokenAmount(null);
         if (!value) {
             setLockedEstimatedReward(0);
@@ -473,10 +479,9 @@ const SetupComponentGen2 = (props) => {
             setTokensAmount(tokensAmounts.map(() => 0));
             return;
         }
-        updateAmountTimeout = setTimeout(async function () {
+        window.updateAmountTimeout = setTimeout(async function () {
             var tokenAddress = setupTokens[index].address;
             tokenAddress = tokenAddress === window.voidEthereumAddress ? ethereumAddress : tokenAddress;
-            const fullValue = window.toDecimals(value, setupTokens[index].decimals);
             var slot0 = await lpTokenInfo.contract.methods.slot0().call();
             var tick = nearestUsableTick(parseInt(slot0.tick), TICK_SPACINGS[lpTokenInfo.fee]);
             var sqrtPriceX96 = TickMath.getSqrtRatioAtTick(tick);
@@ -484,16 +489,19 @@ const SetupComponentGen2 = (props) => {
             var fromAmountData = {pool, tickLower : parseInt(setupInfo.tickLower), tickUpper : parseInt(setupInfo.tickUpper), useFullPrecision : true};
             fromAmountData[`amount${index}`] = window.formatNumber(fullValue);
             var pos = Position[`fromAmount${index}`](fromAmountData)[`amount${1 - index}`].toSignificant(18);
-            var tks = tokensAmounts.map(it => it);
-            tks[index] = {
-                value,
-                full : fullValue
-            };
             tks[1 - index] = {
                 value : window.numberToString(pos),
                 full : window.toDecimals(window.numberToString(pos), setupTokens[1 - index].decimals)
             };
-            setTokensAmount(tks);
+            tickData && tickData.cursor === 0 && (tks[0] = {
+                value : '0',
+                full : '0'
+            });
+            tickData && tickData.cursor === 100 && (tks[1] = {
+                value : '0',
+                full : '0'
+            });
+            setTokensAmount(tks.map(it => it));
             var liquidityPoolAmount = maxLiquidityForAmounts(
                 parseInt(slot0.sqrtPriceX96),
                 TickMath.getSqrtRatioAtTick(parseInt(setupInfo.tickLower)),
@@ -510,18 +518,18 @@ const SetupComponentGen2 = (props) => {
                     setFreeEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(val), rewardTokenInfo.decimals))
                 }
             }
-        }, 300);
+        }, 700);
     }
 
     const onUpdateLpTokenAmount = async (value, index, isFull) => {
-        updateAmountTimeout && clearTimeout(updateAmountTimeout);
+        window.updateAmountTimeout && clearTimeout(window.updateAmountTimeout);
         if (!value || value === 'NaN') {
             setLockedEstimatedReward(0);
             setFreeEstimatedReward(0);
             // setLpTokenAmount("0");
             return;
         }
-        updateAmountTimeout = setTimeout(async function () {
+        window.updateAmountTimeout = setTimeout(async function () {
             try {
                 const fullValue = isFull ? value : props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(lpTokenInfo.decimals)));
                 setLpTokenAmount({ value: window.numberToString(value), full: fullValue })
@@ -590,6 +598,8 @@ const SetupComponentGen2 = (props) => {
                 props.addTransaction(result);
             } else {
                 if (!currentPosition || openPositionForAnotherWallet) {
+                    /*//const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value });
+                    const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, value });*/
                     const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value });
                     const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gas: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value });
                     props.addTransaction(result);
