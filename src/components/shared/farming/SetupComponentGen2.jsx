@@ -122,7 +122,7 @@ const SetupComponentGen2 = (props) => {
                 var c = tickToPrice(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(slot.tick)).toSignificant(15);
                 tickData.cursorNumber = window.formatNumber(Math.floor((1 / ((Math.sqrt(a * b) - Math.sqrt(b * c)) / (c - Math.sqrt(b * c)) + 1)) * 100));
             }
-            secondTokenIndex === 0 && (tickData.cursorNumber = 100 - tickData.cursorNumber);
+            //secondTokenIndex === 0 && (tickData.cursorNumber = 100 - tickData.cursorNumber);
             tickData.cursor = window.formatMoney(tickData.cursorNumber, 2);
             setTickData(tickData);
         } catch(e) {
@@ -494,11 +494,11 @@ const SetupComponentGen2 = (props) => {
                 value : window.numberToString(pos),
                 full : window.toDecimals(window.numberToString(pos), setupTokens[1 - index].decimals)
             };
-            tickData && tickData.cursor === 0 && (tks[0] = {
+            tickData && tickData.cursorNumber === 0 && (tks[0] = {
                 value : '0',
                 full : '0'
             });
-            tickData && tickData.cursor === 100 && (tks[1] = {
+            tickData && tickData.cursorNumber === 100 && (tks[1] = {
                 value : '0',
                 full : '0'
             });
@@ -1041,7 +1041,7 @@ const SetupComponentGen2 = (props) => {
                 {
                     setupTokens.map((setupToken, i) => {
                         return <div key={setupToken.address} className="InputTokenRegular">
-                            {(i === 1 ? tickData.cursor !== 100 : tickData.cursor !== 0) && <Input showMax={true} address={setupToken.address} value={tokensAmounts[i].value || window.fromDecimals(tokensAmounts[i], setupToken.decimals, true)} balance={setupToken.balance} min={0} onChange={(e) => onUpdateTokenAmount(e.target.value, i)} showCoin={true} showBalance={true} name={setupToken.symbol} />}
+                            {(i === 1 ? tickData.cursorNumber !== 100 : tickData.cursorNumber !== 0) && <Input showMax={true} address={setupToken.address} value={tokensAmounts[i].value || window.fromDecimals(tokensAmounts[i], setupToken.decimals, true)} balance={setupToken.balance} min={0} onChange={(e) => onUpdateTokenAmount(e.target.value, i)} showCoin={true} showBalance={true} name={setupToken.symbol} />}
                         </div>
                     })
                 }
@@ -1085,7 +1085,7 @@ const SetupComponentGen2 = (props) => {
             <div className="FarmSetupMain">
                 <div className="SetupFarmingInstructions">
                     <div className="SetupFarmingInstructionsV3">
-                        {setupTokens.map((token, i) => <div className="TokenFarmV3InfoBox"><figure key={token.address}>{i !== 0 ? '' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />}</figure><span> {tickData && `${(i === 0 ? tickData.cursor : 100 - tickData.cursor)}%`} {window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>} {!window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>}</span> </div>)}
+                        {setupTokens.map((token, i) => <div className="TokenFarmV3InfoBox"><figure key={token.address}>{i !== 0 ? '' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />}</figure><span> {tickData && `${(i === 0 ? tickData.cursorNumber : 100 - tickData.cursorNumber)}%`} {window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>} {!window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>}</span> </div>)}
                         {!endBlockReached && 
                             <p className="BlockInfoV3B">
                             {setup.active && parseInt(setup.endBlock) > blockNumber && <span className="V3FarmStatusYEP">Active</span>}
