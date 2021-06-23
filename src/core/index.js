@@ -462,7 +462,7 @@ export default class DFOCore {
             fromBlock: 0,
             toBlock: 'latest'
         });
-        return log[0].address.toLowerCase() === gen2FarmingFactoryAddress ? "gen2" : "gen1";
+        return log[0].address.toLowerCase() === gen2FarmingFactoryAddress.toLowerCase() ? "gen2" : "gen1";
     }
 
     getHostedFarmingContracts = async(factoryAddress, generation) => {
