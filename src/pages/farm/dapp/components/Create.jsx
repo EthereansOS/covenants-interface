@@ -560,18 +560,18 @@ const Create = (props) => {
                     <p>Designed for <b>Uniswap v3</b>, these contracts enable customizable price curves and low-cost farming by allowing farmers to pool together in shared v3 NFTs.</p>
                     <a className="web2ActionBTN" href="javascript:;" onClick={() => setGeneration("gen2")}>Select</a>
                 </div>
-                <p className="OnlyMobileVersion">Use a Desktop or a tablet to build Farming Contracts</p>
             </div>
+            <p className="OnlyMobileVersion">Use a Desktop or a tablet to build Farming Contracts</p>
         </div>);
     }
 
     return (
         <div>
-            <p className="OnlyMobileVersion">Use a Desktop or a tablet to build Farming Contracts</p>
             <div className="NUUUMobileVersion">
             { !props.farmingContract && getCreationComponent()}
             { props.farmingContract && getFarmingContractStatus()}
             </div>
+            <p className="OnlyMobileVersion">Use a Desktop or a tablet to build Farming Contracts</p>
         </div>
     )
 }
