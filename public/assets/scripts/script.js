@@ -2185,7 +2185,34 @@ window.getTokenPriceInDollarsOnUniswap = async function getTokenPriceInDollarsOn
     return ethereumValue;
 };
 
-window.elaboratePrices = async function elaboratePrices(res, tokens) {
+window.getTokenPriceInDollarsOnUniswapV3 = async function getTokenPriceInDollarsOnUniswap(tokenAddress, decimals, amountPlain = 0, uniswapV3Lib) {
+    var uniswapV2Router = window.newContract(window.context.uniswapV2RouterABI, window.context.uniswapV2RouterAddress);
+    var wethAddress = window.web3.utils.toChecksumAddress(await window.blockchainCall(uniswapV2Router.methods.WETH));
+    var ethereumPrice = await window.getEthereumPrice();
+    var ethereumValue = "0";
+    var univ3Factory = window.newContract(window.context.UniswapV3FactoryABI, window.context.uniswapV3FactoryAddress);
+    var uniToken = new uniswapV3Lib.Token(window.dfoCore.chainId, tokenAddress, parseInt(decimals), "TOK", "Token");
+    var uniTokenWeth = new uniswapV3Lib.Token(window.dfoCore.chainId, wethAddress, 18, "ETH", "Ethereum");
+    try {
+        var proms = (await Promise.all(Object.keys(uniswapV3Lib.TICK_SPACINGS).map(async fee => {
+            try {
+                var pool = window.newContract(window.context.UniswapV3PoolABI, await window.blockchainCall(univ3Factory.methods.getPool, wethAddress, tokenAddress, fee));
+                var slot0 = await window.blockchainCall(pool.methods.slot0);
+                var price = uniswapV3Lib.tickToPrice(uniToken, uniTokenWeth, parseInt(slot0.tick)).toSignificant(15);
+                return window.toDecimals(price, 18);
+            } catch(e) {
+                return '0';
+            }
+        }))).filter(it => it && it !== '0');
+        ethereumValue = proms.reduce((a, b) => window.web3.utils.toBN(a).add(window.web3.utils.toBN(b)).toString());
+        ethereumValue = window.web3.utils.toBN(ethereumValue).div(window.web3.utils.toBN(proms.length)).toString();
+    } catch (e) {}
+    ethereumValue = parseFloat(window.fromDecimals(ethereumValue, 18, true));
+    ethereumValue *= ethereumPrice;
+    return ethereumValue;
+};
+
+window.elaboratePrices = async function elaboratePrices(res, tokens, uniswapV3Lib) {
     var response = {
         data: {}
     };
@@ -2193,13 +2220,13 @@ window.elaboratePrices = async function elaboratePrices(res, tokens) {
     tokens = (!(tokens instanceof Array) ? (tokens = tokens.split(',')) : tokens).map(it => it.toLowerCase()).filter(it => it && it !== window.voidEthereumAddress && !response.data[it]);
     for (var token of tokens) {
         response.data[token] = {
-            usd: await window.getTokenPriceInDollarsOnUniswap(token, await window.blockchainCall(window.newContract(window.context.ERC20ABI, token).methods.decimals))
+            usd: await window['getTokenPriceInDollarsOnUniswap' + (uniswapV3Lib ? 'V3' : '')](token, await window.blockchainCall(window.newContract(window.context.ERC20ABI, token).methods.decimals), undefined, uniswapV3Lib)
         };
     }
     return response;
 }
 
-window.getTokenPricesInDollarsOnCoingecko = async function getTokenPricesInDollarsOnCoingecko(t) {
+window.getTokenPricesInDollarsOnCoingecko = async function getTokenPricesInDollarsOnCoingecko(t, uniswapV3Lib) {
     var tokens = (!(t instanceof Array) ? (t = t.split(',')) : t).map(it => it.toLowerCase());
     var response = {
         data: {}
@@ -2227,7 +2254,7 @@ window.getTokenPricesInDollarsOnCoingecko = async function getTokenPricesInDolla
         try {
             t1.length > 0 && (res.data = await window.AJAXRequest(window.context.coingeckoCoinPriceURL + t1.join(',')));
         } catch (e) {}
-        return await window.elaboratePrices(res, t2);
+        return await window.elaboratePrices(res, t2, uniswapV3Lib);
     };
     prom = prom(tkns, t);
     for (var token of tkns) {

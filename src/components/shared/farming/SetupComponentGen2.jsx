@@ -396,7 +396,7 @@ const SetupComponentGen2 = (props) => {
             const wusdAddress = await dfoCore.getContextElement("WUSDAddress");
             if (setupInfo.free) {
                 const searchTokens = `${rewardTokenAddress},${setupTokens.map((token) => (token && token.address) ? `${token.address},` : '')}`.slice(0, -1);
-                const res = await window.getTokenPricesInDollarsOnCoingecko(searchTokens);
+                const res = await window.getTokenPricesInDollarsOnCoingecko(searchTokens, { tickToPrice, Token, Pool, Position, nearestUsableTick, TICK_SPACINGS, TickMath, maxLiquidityForAmounts });
                 const { data } = res;
                 const rewardTokenPriceUsd = rewardTokenAddress !== dfoCore.voidEthereumAddress ? rewardTokenAddress.toLowerCase() === wusdAddress.toLowerCase() ? 1 : data[rewardTokenAddress.toLowerCase()].usd : ethPrice;
                 let den = 0;
