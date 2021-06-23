@@ -183,7 +183,7 @@ const Create = (props) => {
     const initializeDeployData = async () => {
         setDeployLoading(true);
         try {
-            const host = props.dfoCore.web3.utils.toChecksumAddress(selectedHost === 'address' ? hostWalletAddress : hostDeployedContract);
+            const host = selectedHost !== "fromSourceCode" && props.dfoCore.web3.utils.toChecksumAddress(selectedHost === 'address' ? hostWalletAddress : hostDeployedContract);
             const hasExtension = (selectedHost === "deployedContract" && hostDeployedContract && !deployContract);
             const data = { setups: [], rewardTokenAddress: selectedRewardToken.address, byMint, deployContract, host, hasExtension, extensionInitData: extensionPayload || '' };
             console.log(farmingSetups);
@@ -329,7 +329,7 @@ const Create = (props) => {
             if (useDeployedContract) {
                 return window.isEthereumAddress(hostDeployedContract);
             }
-            return deployContract !== undefined && deployContract !== null && deployContract.contract !== undefined && deployContract.contract !== null;
+            return deployContract !== undefined && deployContract !== null;
         }
         return window.isEthereumAddress(hostDeployedContract);
     }
