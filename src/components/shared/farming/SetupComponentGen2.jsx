@@ -1119,7 +1119,10 @@ const SetupComponentGen2 = (props) => {
                                             {
                                                 activateLoading ? <a className="Web3ActionBTN" disabled={activateLoading}>
                                                     <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                                </a> : <a className="web2ActionBTN" onClick={() => void(setOpen(true), setWithdrawOpen(false), setEdit(false))}>Activate</a>
+                                                </a> : <>
+                                                    <a className="web2ActionBTN" onClick={() => void(setOpen(true), setWithdrawOpen(false), setEdit(false))}>Farm</a> 
+                                                    <p className="littleDisclamer">You're the first farmer on this setup, you'll spend more gas, but all of the initial block rewards are yours! </p>
+                                                </>
                                             }
                                         </>
                                     }

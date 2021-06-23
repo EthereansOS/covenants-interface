@@ -582,6 +582,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .FarmSetupV3 .farmed  {width: 45% !important;}
 .FancyExplanationCreateS {width: 35%; text-align: center; display: inline-block; vertical-align: middle;}
 .web2ActionBTNFFF {margin: 10px auto;}
+.littleDisclamer {font-size: 8px !important; margin-top: -9px;}
 
 
 @media only screen and (max-device-width: 750px) {
