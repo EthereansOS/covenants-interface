@@ -122,7 +122,6 @@ const SetupComponentGen2 = (props) => {
             if(tickData.cursorNumber !== 0 && tickData.cursorNumber !== 100) {
                 tickData.cursorNumber = window.formatNumber(Math.floor((1 / ((Math.sqrt(a * b) - Math.sqrt(b * c)) / (c - Math.sqrt(b * c)) + 1)) * 100));
             }
-            //tickData.cursorNumber = 100 - tickData.cursorNumber;
             tickData.cursor = window.formatMoney(tickData.cursorNumber, 2);
             setTickData(tickData);
         } catch(e) {
@@ -731,6 +730,10 @@ const SetupComponentGen2 = (props) => {
         if (!isLp) {
             const notApprovedIndex = tokensApprovals.findIndex((value) => !value);
             if (notApprovedIndex !== -1) {
+                if(tickData.cursorNumber === 0 || tickData.cursorNumber === 0) {
+                    var index = tickData.cursorNumber === 100 ? 0 : 1;
+                    return <ApproveButton contract={tokensContracts[index]} from={props.dfoCore.address} spender={lmContract.options.address} onApproval={() => onTokenApproval(index, false)} onError={(error) => console.error(error)} text={`Approve ${setupTokens[index].symbol}`} />
+                }
                 return <ApproveButton contract={tokensContracts[notApprovedIndex]} from={props.dfoCore.address} spender={lmContract.options.address} onApproval={() => onTokenApproval(notApprovedIndex, false)} onError={(error) => console.error(error)} text={`Approve ${setupTokens[notApprovedIndex].symbol}`} />
             } else {
                 return <div />
