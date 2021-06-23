@@ -74,6 +74,8 @@ const SetupComponent = (props) => {
     const [delayedBlock, setDelayedBlock] = useState(0);
     const [endBlockReached, setEndBlockReached] = useState(false);
 
+    const [withdrawingAll, setWithdrawingAll] = useState(false);
+
     function getFarmingPrestoAddress() {
         var prestoAddress = props.dfoCore.getContextElement("farmingPrestoAddress");
         var oldPrestoAddress = props.dfoCore.getContextElement("farmingPrestoAddressOld");
@@ -290,7 +292,8 @@ const SetupComponent = (props) => {
             }
             freeReward = window.numberToString(freeReward).split('.')[0];
             setFreeAvailableRewards(freeReward);
-            setManageStatus({ free, creationBlock, positionSetupIndex, liquidityPoolAmount: liquidityPoolTokenAmount, mainTokenAmount, tokensAmounts: amounts['tokensAmounts'], tokens })
+            var withdrawOnly = !farmSetup.active || bNumber > parseInt(farmSetup.endBlock);
+            setManageStatus({ withdrawOnly, free, creationBlock, positionSetupIndex, liquidityPoolAmount: liquidityPoolTokenAmount, mainTokenAmount, tokensAmounts: amounts['tokensAmounts'], tokens })
         } else if (lockPositions.length > 0) {
             const lockStatuses = [];
             const lockRewards = [];
@@ -561,6 +564,19 @@ const SetupComponent = (props) => {
             setRemoveLoading(false);
         }
     }
+
+    async function withdrawAll() {
+        setWithdrawingAll(true);
+        try {
+            var method = lmContract.methods.withdrawLiquidity(currentPosition.positionId, manageStatus.liquidityPoolAmount);
+            const gasLimit = await method.estimateGas({ from: dfoCore.address });
+            const result = await method.send({ from: dfoCore.address, gasLimit, gas : gasLimit });
+            props.addTransaction(result);
+        } catch(e) {
+            console.error(e);
+        }
+        setWithdrawingAll(false);
+    };
 
     const withdrawReward = async () => {
         setClaimLoading(true);
@@ -1218,10 +1234,12 @@ const SetupComponent = (props) => {
                                         <b>Your Deposit</b>:<br></br> {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(window.fromDecimals(manageStatus.tokensAmounts[i], token.decimals, true), 6)} {token.symbol} </span>)}
                                     </p>
                                 </>}
-                            {(!open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Increase</a>}
+                            {(!manageStatus?.withdrawOnly && !open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Increase</a>}
                             {(open) && <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>}
-                            {(!withdrawOpen && currentPosition) && <a className="web2ActionBTN web2ActionBTNGigi" onClick={() => { setOpen(false); setWithdrawOpen(true); setEdit(false); }}>Decrease</a>}
+                            {(!manageStatus?.withdrawOnly && !withdrawOpen && currentPosition) && <a className="web2ActionBTN web2ActionBTNGigi" onClick={() => { setOpen(false); setWithdrawOpen(true); setEdit(false); }}>Decrease</a>}
                             {(withdrawOpen) && <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>}
+                            {manageStatus?.withdrawOnly && !withdrawingAll && <a onClick={withdrawAll} className="Web3ActionBTN">Withdraw All</a>}
+                            {withdrawingAll && <Loading/>}
                         </div>
                         </> }
                         { setupInfo.free && <>
@@ -1232,7 +1250,7 @@ const SetupComponent = (props) => {
                                 {
                                     claimLoading ? <a className="Web3ActionBTN" disabled={claimLoading}>
                                         <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                    </a> : <a onClick={() => withdrawReward()} className="Web3ActionBTN">Claim</a>
+                                    </a> : !manageStatus?.withdrawOnly && <a onClick={() => withdrawReward()} className="Web3ActionBTN">Claim</a>
                                 }
                             </div>
                         </> }

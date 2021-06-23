@@ -77,6 +77,8 @@ const SetupComponentGen2 = (props) => {
     const [secondTokenIndex, setsecondTokenIndex] = useState(0);
     const [tickData, setTickData] = useState(null);
 
+    const [withdrawingAll, setWithdrawingAll] = useState(false);
+
     const ethereumAddress = props.dfoCore.getContextElement("wethTokenAddress");
 
     function getFarmingPrestoAddress() {
@@ -354,7 +356,8 @@ const SetupComponentGen2 = (props) => {
             }
             freeReward = window.numberToString(freeReward).split('.')[0];
             setFreeAvailableRewards(freeReward);
-            setManageStatus({ additionalFees, free, creationBlock, positionSetupIndex, liquidityPoolAmount: liquidityPoolTokenAmount, tokensAmounts: amounts['tokensAmounts'], tokens })
+            var withdrawOnly = !farmSetup.active || bNumber > parseInt(farmSetup.endBlock);
+            setManageStatus({ withdrawOnly, additionalFees, free, creationBlock, positionSetupIndex, liquidityPoolAmount: liquidityPoolTokenAmount, tokensAmounts: amounts['tokensAmounts'], tokens })
         }
         // calculate APY
         setApy(await calculateApy(farmSetup, farmSetupInfo, rewardTokenAddress, rewardTokenDecimals, tokens));
@@ -596,8 +599,6 @@ const SetupComponentGen2 = (props) => {
                 props.addTransaction(result);
             } else {
                 if (!currentPosition || openPositionForAnotherWallet) {
-                    /*//const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value });
-                    const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, value });*/
                     const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value });
                     const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gas: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value });
                     props.addTransaction(result);
@@ -633,6 +634,19 @@ const SetupComponentGen2 = (props) => {
             setRemoveLoading(false);
         }
     }
+
+    async function withdrawAll() {
+        setWithdrawingAll(true);
+        try {
+            var method = lmContract.methods.withdrawLiquidity(currentPosition.positionId, manageStatus.liquidityPoolAmount);
+            const gasLimit = await method.estimateGas({ from: dfoCore.address });
+            const result = await method.send({ from: dfoCore.address, gasLimit, gas : gasLimit });
+            props.addTransaction(result);
+        } catch(e) {
+            console.error(e);
+        }
+        setWithdrawingAll(false);
+    };
 
     const withdrawReward = async () => {
         setClaimLoading(true);
@@ -1158,10 +1172,12 @@ const SetupComponentGen2 = (props) => {
                         <div className="FarmYou">
                             {manageStatus && <p><b>Your Deposit</b>:<br></br> {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(window.fromDecimals(manageStatus.tokensAmounts[i], token.decimals, true), 3)} {token.symbol} </span>)}</p>}
                             {!endBlockReached && <p><b>Daily Earnings</b>: {calculateDailyEarnings()} {rewardTokenInfo.symbol}</p>}
-                            {(!open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Increase</a>}
+                            {(!manageStatus?.withdrawOnly && !open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Increase</a>}
                             {(open) && <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>}
-                            {!withdrawOpen && <a className="web2ActionBTN web2ActionBTNGigi" onClick={() => { setOpen(false); setWithdrawOpen(true); setEdit(false); }}>Decrease</a>}
+                            {!manageStatus?.withdrawOnly && !withdrawOpen && <a className="web2ActionBTN web2ActionBTNGigi" onClick={() => { setOpen(false); setWithdrawOpen(true); setEdit(false); }}>Decrease</a>}
                             {withdrawOpen && <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>}
+                            {manageStatus?.withdrawOnly && !withdrawingAll && <a onClick={withdrawAll} className="Web3ActionBTN">Withdraw All</a>}
+                            {withdrawingAll && <Loading/>}
                         </div>
                         <div className="Farmed">
                                 <p><b>Available</b>: <br></br>{window.formatMoney(window.fromDecimals(freeAvailableRewards, rewardTokenInfo.decimals, true), 4)} {rewardTokenInfo.symbol}</p>
@@ -1169,7 +1185,7 @@ const SetupComponentGen2 = (props) => {
                                 {
                                     claimLoading ? <a className="Web3ActionBTN" disabled={claimLoading}>
                                         <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                    </a> : <a onClick={withdrawReward} className="Web3ActionBTN">Claim</a>
+                                    </a> : !manageStatus?.withdrawOnly && <a onClick={withdrawReward} className="Web3ActionBTN">Claim</a>
                                 }
                         </div>
                     </div>
