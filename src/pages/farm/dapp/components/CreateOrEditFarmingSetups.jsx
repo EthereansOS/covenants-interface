@@ -44,23 +44,23 @@ const CreateOrEditFarmingSetups = (props) => {
                 {props.generation === 'gen2' ?  <>
                     <div className="generationSelector">
                         <h6>Diluted Liquidity</h6>
-                        <p>Choosing Diluted Liquidity automatically the setup will calculate a price range by 10,000 times from the current price of tokens, to esily add liquidity as older AMMs (less trading fees and less IL risks).</p>
+                        <p>By selecting Diluted Liquidity, your setup will be automatically customized with a price curve the moment it is activated. The range of the curve will have a max of (10,000 x current price of the token) and a minimum of (current price of the token / 10,000). Diluted liquidity mitigates the risk of impermanent loss.</p>
                         <a className="web2ActionBTN" onClick={() => void(setGen2SetupType("diluted"), setSelectedFarmingType('free'), setCurrentStep(1))}>Select</a>
                     </div>
                     <div className="generationSelector">
                         <h6>Concentrated Liquidity</h6>
-                        <p>Choosing Concentrated Liquidity you'll set a custom price range for this farming setup. To know more about the potential and risks about it: <a target="_blank" href="https://docs.uniswap.org/concepts/V3-overview/concentrated-liquidity">Uniswap Documentation</a></p>
+                        <p>By selecting Concentrated Liquidity, you will need to manually customize the setup’s price curve. To learn more about price curves and the risk of impermanent loss, read the Uniswap Documentation: <a target="_blank" href="https://docs.uniswap.org/concepts/V3-overview/concentrated-liquidity">Uniswap Documentation</a></p>
                         <a className="web2ActionBTN" onClick={() => void(setGen2SetupType("concentrated"), setSelectedFarmingType('free'), setCurrentStep(1))}>Select</a>
                     </div>
                 </> : <>
                     <div className="generationSelector">
                         <h6>Free</h6>
-                        <p>In free farming, Farmers can stake / un-stake liquidity anytime, but the reward/block is shared btween them.</p>
+                        <p>In free farming setups, farmers can stake and un-stake liquidity anytime, but the total rewards available are shared among all active farmers (relative to how much liquidity each has staked).</p>
                         <a className="web2ActionBTN" onClick={() => void(setSelectedFarmingType('free'), setCurrentStep(1))}>Select</a>
                     </div>
                     <div className="generationSelector">
                         <h6>Locked</h6>
-                        <p>In Locked setups Farmers lock the liquidity until it ends, but reawards are fixed.</p>
+                        <p>In locked setups, farmers lock liquidity until the setup ends, but rewards are predetermined & guaranteed.</p>
                         <a className="web2ActionBTN" onClick={() =>  void(setSelectedFarmingType('locked'), setCurrentStep(1))}>Select</a>
                     </div>
                 </>}

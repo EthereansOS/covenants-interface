@@ -552,12 +552,12 @@ const Create = (props) => {
                 <p className="GenerationTime"><b>Build a farming contract with multiple customizable setups.</b> Covenants farming contracts can be extended and governed by a wallet, an automated contract, a DAO or a DFO.</p>
                 <div className="generationSelector">
                     <h6>Gen 1</h6>
-                    <p>This contract, powered by the AMM aggregator, can work with <b>Uniswap V2, Balancer V1, Mooniswap V1 and Sushiswap V1.</b></p>
+                    <p>Powered by the Covenant AMM aggregator, these contracts work with <b>Uniswap V2, Balancer V1, Mooniswap V1 and Sushiswap V1.</b></p>
                     <a className="web2ActionBTN" href="javascript:;" onClick={() => setGeneration("gen1")}>Select</a>
                 </div>
                 <div className="generationSelector">
                     <h6>Uniswap V3</h6>
-                    <p>This contract work with <b>Uniswap V3</b> powered by customized concentrated liquidity options and very low cost farming with shared NFTs.</p>
+                    <p>Designed for <b>Uniswap v3</b>, these contracts enable customizable price curves and low-cost farming by allowing farmers to pool together in shared v3 NFTs.</p>
                     <a className="web2ActionBTN" href="javascript:;" onClick={() => setGeneration("gen2")}>Select</a>
                 </div>
                 <p className="OnlyMobileVersion">Use a Desktop or a tablet to build Farming Contracts</p>
