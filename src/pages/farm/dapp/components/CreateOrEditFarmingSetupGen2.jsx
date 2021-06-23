@@ -74,12 +74,18 @@ const CreateOrEditFarmingSetup = (props) => {
             var tick = parseInt((await poolContract.methods.slot0().call()).tick);
             var tickLower = nearestUsableTick(tick, TICK_SPACINGS[fee]);
             var tickUpper = tickLower;
-            setTickLower(tickLower);
-            setTickUpper(tickUpper);
             if(props.gen2SetupType === 'diluted') {
-                setTickLower(nearestUsableTick(-dilutedTickRange, TICK_SPACINGS[fee]));
-                setTickUpper(nearestUsableTick(dilutedTickRange, TICK_SPACINGS[fee]));
+                tickLower -= dilutedTickRange;
+                tickUpper += dilutedTickRange;
             }
+            setTickLower(nearestUsableTick(tickLower, TICK_SPACINGS[fee]));
+            setTickUpper(nearestUsableTick(tickUpper, TICK_SPACINGS[fee]));
+            console.log({
+                tick : nearestUsableTick(tick, TICK_SPACINGS[fee]),
+                tickLower,
+                tickUpper
+            });
+
             const lpInfo = [
                 [], [], [
                     await poolContract.methods.token0().call(),
