@@ -90,7 +90,6 @@ const Create = (props) => {
                 "bytes",
                 "address",
                 "address",
-                "address",
                 "bytes",
             ], async parseSetup(setup) {
                 var mainTokenAddress = setup.liquidityPoolToken.tokens[0].address;
@@ -113,7 +112,7 @@ const Create = (props) => {
                 ];
                 return parsedSetup;
             }, getInitArray(extensionAddress, extensionInitData, rewardTokenAddress, encodedSetups) {
-                return  [props.dfoCore.web3.utils.toChecksumAddress(extensionAddress ? extensionAddress : hostDeployedContract), extensionPayload || extensionInitData || "0x", props.dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress"), window.voidEthereumAddress, rewardTokenAddress, encodedSetups || 0];
+                return  [props.dfoCore.web3.utils.toChecksumAddress(extensionAddress ? extensionAddress : hostDeployedContract), extensionPayload || extensionInitData || "0x", props.dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress"), rewardTokenAddress, encodedSetups || 0];
             }
         }
     };
