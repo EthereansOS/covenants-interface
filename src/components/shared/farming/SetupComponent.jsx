@@ -390,17 +390,15 @@ const SetupComponent = (props) => {
         setTokensApprovals(tokensApprovals.map((val, i) => i === index ? true : val));
     }
 
-    var updateAmountTimeout;
-
     const onUpdateTokenAmount = async (value, index) => {
-        updateAmountTimeout && clearTimeout(updateAmountTimeout);
+        window.updateAmountTimeout && clearTimeout(window.updateAmountTimeout);
         if (!value) {
             setLockedEstimatedReward(0);
             setFreeEstimatedReward(0);
             setTokensAmount(tokensAmounts.map(() => 0));
             return;
         }
-        updateAmountTimeout = setTimeout(async function () {
+        window.updateAmountTimeout = setTimeout(async function () {
             var ethereumAddress = (await ammContract.methods.data().call())[0];
             var tokenAddress = setupTokens[index].address;
             tokenAddress = tokenAddress === window.voidEthereumAddress ? ethereumAddress : tokenAddress;
@@ -439,14 +437,14 @@ const SetupComponent = (props) => {
     }
 
     const onUpdateLpTokenAmount = async (value, index, isFull) => {
-        updateAmountTimeout && clearTimeout(updateAmountTimeout);
+        window.updateAmountTimeout && clearTimeout(window.updateAmountTimeout);
         if (!value || value === 'NaN') {
             setLockedEstimatedReward(0);
             setFreeEstimatedReward(0);
             // setLpTokenAmount("0");
             return;
         }
-        updateAmountTimeout = setTimeout(async function () {
+        window.updateAmountTimeout = setTimeout(async function () {
             try {
                 const fullValue = isFull ? value : props.dfoCore.toFixed(props.dfoCore.fromDecimals(value, parseInt(lpTokenInfo.decimals)));
                 setLpTokenAmount({ value: window.numberToString(value), full: fullValue })

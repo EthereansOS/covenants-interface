@@ -107,7 +107,7 @@ const SetupComponentGen2 = (props) => {
                 maxPrice : tickToPrice(lpTokenInfo.uniswapTokens[1 - secondTokenIndex], lpTokenInfo.uniswapTokens[secondTokenIndex], parseInt(setupInfo.tickLower)).toSignificant(18),
                 minPrice : tickToPrice(lpTokenInfo.uniswapTokens[1 - secondTokenIndex], lpTokenInfo.uniswapTokens[secondTokenIndex], parseInt(setupInfo.tickUpper)).toSignificant(18),
                 currentPrice : tickToPrice(lpTokenInfo.uniswapTokens[1 - secondTokenIndex], lpTokenInfo.uniswapTokens[secondTokenIndex], parseInt(slot.tick)).toSignificant(18),
-                cursor : parseInt(slot.tick) <= parseInt(setupInfo.tickLower) ? 0 : parseInt(slot.tick) >= parseInt(setupInfo.tickUpper) ? 100 : null,
+                cursorNumber : parseInt(slot.tick) <= parseInt(setupInfo.tickLower) ? 0 : parseInt(slot.tick) >= parseInt(setupInfo.tickUpper) ? 100 : null,
                 outOfRangeLower : parseInt(slot.tick) <= parseInt(setupInfo.tickLower),
                 outOfRangeUpper : parseInt(slot.tick) >= parseInt(setupInfo.tickUpper)
             };
@@ -116,13 +116,14 @@ const SetupComponentGen2 = (props) => {
                 tickData.maxPrice = tickData.minPrice;
                 tickData.minPrice = maxPrice;
             }
-            if(tickData.cursor !== 0 && tickData.cursor !== 100) {
+            if(tickData.cursorNumber !== 0 && tickData.cursorNumber !== 100) {
                 var a = tickToPrice(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(setupInfo.tickLower)).toSignificant(15);
                 var b = tickToPrice(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(setupInfo.tickUpper)).toSignificant(15);
                 var c = tickToPrice(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(slot.tick)).toSignificant(15);
                 tickData.cursorNumber = window.formatNumber(Math.floor((1 / ((Math.sqrt(a * b) - Math.sqrt(b * c)) / (c - Math.sqrt(b * c)) + 1)) * 100));
-                tickData.cursor = window.formatMoney(100 - tickData.cursorNumber, 2);
             }
+            secondTokenIndex === 0 && (tickData.cursorNumber = 100 - tickData.cursorNumber);
+            tickData.cursor = window.formatMoney(tickData.cursorNumber, 2);
             setTickData(tickData);
         } catch(e) {
             console.log("Perc");
@@ -518,7 +519,7 @@ const SetupComponentGen2 = (props) => {
                     setFreeEstimatedReward(props.dfoCore.toDecimals(props.dfoCore.toFixed(val), rewardTokenInfo.decimals))
                 }
             }
-        }, 700);
+        }, 300);
     }
 
     const onUpdateLpTokenAmount = async (value, index, isFull) => {
