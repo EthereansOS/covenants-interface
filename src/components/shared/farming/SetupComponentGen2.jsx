@@ -623,8 +623,8 @@ const SetupComponentGen2 = (props) => {
         setRemoveLoading(true);
         try {
             const removedLiquidity = removalAmount === 100 ? manageStatus.liquidityPoolAmount : props.dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString().split('.')[0];
-            //const gasLimit = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, removedLiquidity).estimateGas({ from: dfoCore.address });
-            const result = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, removedLiquidity).send({ from: dfoCore.address });
+            const gasLimit = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, removedLiquidity).estimateGas({ from: dfoCore.address });
+            const result = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, removedLiquidity).send({ from: dfoCore.address, gasLimit, gas : gasLimit });
             props.addTransaction(result);
             await getSetupMetadata();
         } catch (error) {
