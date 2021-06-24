@@ -124,7 +124,7 @@ const SetupComponentGen2 = (props) => {
             if(tickData.cursorNumber !== 0 && tickData.cursorNumber !== 100) {
                 tickData.cursorNumber = window.formatNumber(Math.floor((1 / ((Math.sqrt(a * b) - Math.sqrt(b * c)) / (c - Math.sqrt(b * c)) + 1)) * 100));
             }
-            tickData.cursor = window.formatMoney(secondTokenIndex === 1 ? tickData.cursorNumber : 100 - tickData.cursorNumber, 2);
+            tickData.cursor = window.formatMoney(secondTokenIndex === 1 ? 100 - tickData.cursorNumber : tickData.cursorNumber, 2);
             setTickData(tickData);
         } catch(e) {
         }
