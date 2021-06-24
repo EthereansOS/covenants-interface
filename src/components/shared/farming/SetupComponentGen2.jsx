@@ -487,9 +487,13 @@ const SetupComponentGen2 = (props) => {
             var tick = nearestUsableTick(parseInt(slot0.tick), TICK_SPACINGS[lpTokenInfo.fee]);
             var sqrtPriceX96 = TickMath.getSqrtRatioAtTick(tick);
             var pool = new Pool(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(lpTokenInfo.fee), sqrtPriceX96, 0, tick);
-            var fromAmountData = {pool, tickLower : parseInt(setupInfo.tickLower), tickUpper : parseInt(setupInfo.tickUpper), useFullPrecision : true};
+            var fromAmountData = {pool, tickLower : parseInt(setupInfo.tickLower), tickUpper : parseInt(setupInfo.tickUpper), useFullPrecision : false};
             fromAmountData[`amount${index}`] = window.formatNumber(fullValue);
-            var pos = Position[`fromAmount${index}`](fromAmountData)[`amount${1 - index}`].toSignificant(18);
+            var pos = Position[`fromAmount${index}`](fromAmountData);
+            var liquidityPoolAmount = pos.liquidity.toString();
+            console.log("Liquidity", liquidityPoolAmount);
+            console.log("totalSupply", setup.totalSupply);
+            pos = pos[`amount${1 - index}`].toSignificant(18);
             tks[1 - index] = {
                 value : window.numberToString(pos),
                 full : window.toDecimals(window.numberToString(pos), setupTokens[1 - index].decimals)
@@ -503,15 +507,6 @@ const SetupComponentGen2 = (props) => {
                 full : '0'
             });
             setTokensAmount(tks.map(it => it));
-            var liquidityPoolAmount = maxLiquidityForAmounts(
-                parseInt(slot0.sqrtPriceX96),
-                TickMath.getSqrtRatioAtTick(parseInt(setupInfo.tickLower)),
-                TickMath.getSqrtRatioAtTick(parseInt(setupInfo.tickUpper)),
-                tks[0].full,
-                tks[1].full,
-                true
-            ).toString();
-            console.log("Liquidity", liquidityPoolAmount);
             setLpTokenAmount(liquidityPoolAmount)
             if (parseInt(setup.totalSupply) + parseInt(liquidityPoolAmount) > 0) {
                 const val = parseInt(liquidityPoolAmount) * 6400 * parseInt(setup.rewardPerBlock) / (parseInt(setup.totalSupply) + parseInt(liquidityPoolAmount));
