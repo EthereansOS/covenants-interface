@@ -159,6 +159,7 @@ export default {
       "6 months": 18000,
       "1 year": 36000
     },
+    "dilutedTickRange" : 92100,
     "ethItemOrchestratorAddress" : "0xf15aAAE073F578d3B7c086cA7Cb7901424120D51",
     "ethItemOrchestratorAddressRopsten" : "0x08136a13c040A8f07fb4e7a68f2cE272B7ADE501",
     "uniswapV2RouterAddress" : "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",

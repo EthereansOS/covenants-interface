@@ -1247,13 +1247,23 @@ window.dumpFunctionalities = async function dumpFunctionalities(dfo) {
     return entries.join('\n        ');
 };
 
+window.formatMoneyUniV3 = function formatMoneyUniV3(value) {
+    var str = window.numberToString(value).split('.');
+    if(str[1]) {
+        var n = str[1];
+        for(var i = 0; i < n.length; i++) {
+            if(n[i] !== '0') {
+                str[1] = str[1].substring(0, i + 1);
+                break;
+            }
+        }
+    }
+    var newN = window.formatMoney(str[0]) + (str.length === 1 ? '' : ('.' + str[1]));
+    return newN;
+};
+
 window.formatMoney = function formatMoney(value, dcp, thouSeparator, decSeparator) {
     var decPlaces = window.formatNumber(dcp);
-    if(decPlaces === -1) {
-        var str = window.numberToString(value).split('.');
-        var newN = window.formatMoney(str[0]) + (str.length === 1 ? '' : ((thouSeparator || '.') + str[1]));
-        return newN;
-    }
     value = (typeof value).toLowerCase() !== 'number' ? window.asNumber(value) : value;
     var n = value,
         decPlaces = isNaN(decPlaces = Math.abs(decPlaces)) ? 2 : decPlaces,

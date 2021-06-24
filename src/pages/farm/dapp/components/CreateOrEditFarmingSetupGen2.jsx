@@ -42,7 +42,7 @@ const CreateOrEditFarmingSetup = (props) => {
     // current step
     const [currentStep, setCurrentStep] = useState(0);
 
-    const dilutedTickRange = 92100;
+    const dilutedTickRange = props.dfoCore.getContextElement("dilutedTickRange");
     var tickLowerInput;
     var tickUpperInput;
 
