@@ -76,7 +76,6 @@ const SetupComponentGen2 = (props) => {
     const [endBlockReached, setEndBlockReached] = useState(false);
     const [secondTokenIndex, setsecondTokenIndex] = useState(0);
     const [tickData, setTickData] = useState(null);
-    const [dollarPrices, setDollarPrices] = useState(['0', '0']);
 
     const [withdrawingAll, setWithdrawingAll] = useState(false);
 
@@ -115,7 +114,10 @@ const SetupComponentGen2 = (props) => {
                 currentPrice : tickToPrice(lpTokenInfo.uniswapTokens[1 - secondTokenIndex], lpTokenInfo.uniswapTokens[secondTokenIndex], parseInt(slot.tick)).toSignificant(4),
                 cursorNumber : !(c > a) ? 100 : !(c < b) ? 0 : null,
                 outOfRangeLower : parseInt(slot.tick) <= parseInt(setupInfo.tickLower),
-                outOfRangeUpper : parseInt(slot.tick) >= parseInt(setupInfo.tickUpper)
+                outOfRangeUpper : parseInt(slot.tick) >= parseInt(setupInfo.tickUpper),
+                tickLowerUSDPrice : 0,
+                tickUpperUSDPrice : 0,
+                tickCurrentUSDPrice : 0
             };
             if(secondTokenIndex === 1) {
                 var maxPrice = tickData.maxPrice;
@@ -126,6 +128,15 @@ const SetupComponentGen2 = (props) => {
                 tickData.cursorNumber = window.formatNumber(Math.floor((1 / ((Math.sqrt(a * b) - Math.sqrt(b * c)) / (c - Math.sqrt(b * c)) + 1)) * 100));
             }
             tickData.cursor = window.formatMoney(secondTokenIndex === 1 ? 100 - tickData.cursorNumber : tickData.cursorNumber, 2);
+
+            var tokensForPrice = lpTokenInfo.uniswapTokens.map(it => it.address === ethereumAddress ? window.voidEthereumAddress : it.address);
+            var ethIndex = tokensForPrice.indexOf(window.voidEthereumAddress);
+            if(ethIndex !== -1) {
+                var ethPrice = await window.getEthereumPrice();
+                tickData.tickLowerUSDPrice = window.formatNumber(tickToPrice(lpTokenInfo.uniswapTokens[1 - ethIndex], lpTokenInfo.uniswapTokens[ethIndex], parseInt(setupInfo.tickLower)).toSignificant(15)) * ethPrice;
+                tickData.tickUpperUSDPrice = window.formatNumber(tickToPrice(lpTokenInfo.uniswapTokens[1 - ethIndex], lpTokenInfo.uniswapTokens[ethIndex], parseInt(setupInfo.tickUpper)).toSignificant(15)) * ethPrice;
+                tickData.tickCurrentUSDPrice = window.formatNumber(tickToPrice(lpTokenInfo.uniswapTokens[1 - ethIndex], lpTokenInfo.uniswapTokens[ethIndex], parseInt(slot.tick)).toSignificant(15)) * ethPrice;
+            }
             setTickData(tickData);
         } catch(e) {
         }
@@ -236,14 +247,6 @@ const SetupComponentGen2 = (props) => {
                 var uniToken = new Token(props.dfoCore.chainId, tkAddress, decimals, symbol, name);
                 return uniToken;
             }));
-            var tokensForPrice = uniswapTokens.map(it => it.address === ethereumAddress ? window.voidEthereumAddress : it.address);
-            var res = await window.getTokenPricesInDollarsOnCoingecko(tokensForPrice, { tickToPrice, Token, Pool, Position, nearestUsableTick, TICK_SPACINGS, TickMath, maxLiquidityForAmounts });
-            tokensForPrice = [
-                res.data[tokensForPrice[0].toLowerCase()].usd || res.data[tokensForPrice[0].toLowerCase()] || 0,
-                res.data[tokensForPrice[1].toLowerCase()].usd || res.data[tokensForPrice[1].toLowerCase()] || 0
-            ];
-            console.log(tokensForPrice);
-            setDollarPrices(tokensForPrice);
             console.log("Slot", farmSetup.infoIndex, {
                 tick: slot.tick,
                 sqrtPriceX96: slot.sqrtPriceX96,
@@ -1157,23 +1160,23 @@ const SetupComponentGen2 = (props) => {
                             <div className="UniV3CurveViewCurv">
                                 <span className="CircleLeftV3Curve"></span>
                                 <span className="CircleLeftV3CurvePrice">
-                                    {window.formatMoney(tickData.minPrice, -1)} {setupTokens[1 - secondTokenIndex].symbol}
+                                    {window.formatMoney(tickData.minPrice, -1)} {setupTokens[secondTokenIndex].symbol}
                                     <br/>
-                                    {dollarPrices && dollarPrices.length > 0 && dollarPrices[1 - secondTokenIndex] && (window.formatMoney(window.formatNumber(tickData.minPrice) * dollarPrices[1 - secondTokenIndex], 6) + "$")}
+                                    {tickData.tickLowerUSDPrice ? (window.formatMoney(tickData.tickLowerUSDPrice, 6) + "$") : ""}
                                 </span>
                                 <span className="CircleRightV3Curve"></span>
                                 <span className="CircleRightV3CurvePrice">
-                                    {window.formatMoney(tickData.maxPrice, -1)} {setupTokens[1 - secondTokenIndex].symbol}
+                                    {window.formatMoney(tickData.maxPrice, -1)} {setupTokens[secondTokenIndex].symbol}
                                     <br/>
-                                    {dollarPrices && dollarPrices.length > 0 && dollarPrices[1 - secondTokenIndex] && (window.formatMoney(window.formatNumber(tickData.maxPrice) * dollarPrices[1 - secondTokenIndex], 6) + "$")}
+                                    {tickData.tickUpperUSDPrice ? (window.formatMoney(tickData.tickUpperUSDPrice, 6) + "$") : ""}
                                 </span>
                                 <div className="CircleActualPriceV3" style={{left : `${tickData.cursor}%`}}>
                                     <span className="CircleRightV3Actual">
                                         <img src={ArrowIcon}></img>
                                         <span className="CircleRightV3ActualPrice">
-                                            {window.formatMoney(tickData.currentPrice, -1)} {setupTokens[1 - secondTokenIndex].symbol}
+                                            {window.formatMoney(tickData.currentPrice, -1)} {setupTokens[secondTokenIndex].symbol}
                                             <br/>
-                                            {dollarPrices && dollarPrices.length > 0 && dollarPrices[1 - secondTokenIndex] && (window.formatMoney(window.formatNumber(tickData.currentPrice) * dollarPrices[1 - secondTokenIndex], 6) + "$")}
+                                            {tickData.tickCurrentUSDPrice ? (window.formatMoney(tickData.tickCurrentUSDPrice, 6) + "$") : ""}
                                         </span>
                                     </span>
                                 </div>
