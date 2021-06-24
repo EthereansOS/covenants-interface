@@ -114,10 +114,6 @@ const Hosted = (props) => {
 
     return (
         <div className="MainExploration">
-            
-
-            <h6><b>Reward token address</b></h6>
-            <input type="text" className="TextRegular" placeholder="Reward token address.." value={tokenFilter} onChange={(e) => onChangeTokenFilter(e.target.value)} />
             {
                 loading ?
                     <div className="row mt-4">
@@ -129,7 +125,7 @@ const Hosted = (props) => {
                     </div> : <div className="ListOfThings">
                         {
                             farmingContracts.length === 0 && <div className="col-12 text-left">
-                                <h6><b>No farming contract available!</b></h6>
+                                <h6><b>You're not hosting any contract</b></h6>
                             </div>
                         }
                         {
