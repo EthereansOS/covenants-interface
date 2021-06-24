@@ -1165,14 +1165,14 @@ const SetupComponentGen2 = (props) => {
                                 <span className="CircleLeftV3Curve"></span>
                                 <span className="CircleLeftV3CurvePrice">
                                     {tickData.tickLowerUSDPrice ? 
-                                        (window.formatMoneyUniV3(tickData.tickLowerUSDPrice) + " $") : 
+                                        "$ " + (window.formatMoneyUniV3(tickData.tickLowerUSDPrice)) : 
                                         `${window.formatMoneyUniV3(tickData.minPrice)} ${setupTokens[secondTokenIndex].symbol}`
                                     }
                                 </span>
                                 <span className="CircleRightV3Curve"></span>
                                 <span className="CircleRightV3CurvePrice">
                                     {tickData.tickUpperUSDPrice ?
-                                        (window.formatMoneyUniV3(tickData.tickUpperUSDPrice) + " $") :
+                                        "$ " + (window.formatMoneyUniV3(tickData.tickUpperUSDPrice)) :
                                         `${window.formatMoneyUniV3(tickData.maxPrice)} ${setupTokens[secondTokenIndex].symbol}`
                                     }
                                 </span>
@@ -1181,7 +1181,7 @@ const SetupComponentGen2 = (props) => {
                                         <img src={ArrowIcon}></img>
                                         <span className="CircleRightV3ActualPrice">
                                             {tickData.tickCurrentUSDPrice ?
-                                                (window.formatMoneyUniV3(tickData.tickCurrentUSDPrice) + " $") :
+                                                "$ " + (window.formatMoneyUniV3(tickData.tickCurrentUSDPrice)) :
                                                 `${window.formatMoneyUniV3(tickData.currentPrice)} ${setupTokens[secondTokenIndex].symbol}`
                                             }
                                         </span>
