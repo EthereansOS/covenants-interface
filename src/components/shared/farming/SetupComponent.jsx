@@ -548,7 +548,7 @@ const SetupComponent = (props) => {
         setRemoveLoading(true);
         try {
             if (setupInfo.free) {
-                const removedLiquidity = removalAmount === 100 ? manageStatus.liquidityPoolAmount : props.dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString().split('.')[0];
+                const removedLiquidity = manageStatus?.withdrawOnly ? manageStatus.liquidityPoolAmount : removalAmount === 100 ? manageStatus.liquidityPoolAmount : props.dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString().split('.')[0];
                 const gasLimit = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, 0, outputType === 'to-pair', removedLiquidity).estimateGas({ from: dfoCore.address });
                 const result = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, 0, outputType === 'to-pair', removedLiquidity).send({ from: dfoCore.address, gasLimit, gas: gasLimit });
                 props.addTransaction(result);
@@ -564,19 +564,6 @@ const SetupComponent = (props) => {
             setRemoveLoading(false);
         }
     }
-
-    async function withdrawAll() {
-        setWithdrawingAll(true);
-        try {
-            var method = lmContract.methods.withdrawLiquidity(currentPosition.positionId, manageStatus.liquidityPoolAmount);
-            const gasLimit = await method.estimateGas({ from: dfoCore.address });
-            const result = await method.send({ from: dfoCore.address, gasLimit, gas : gasLimit });
-            props.addTransaction(result);
-        } catch(e) {
-            console.error(e);
-        }
-        setWithdrawingAll(false);
-    };
 
     const withdrawReward = async () => {
         setClaimLoading(true);
@@ -939,16 +926,18 @@ const SetupComponent = (props) => {
         if (withdrawOpen && currentPosition && setupInfo.free) {
             return (
                 <div className="FarmActions">
-                    <input type="range" value={removalAmount} onChange={(e) => setRemovalAmount(parseInt(e.target.value))} className="form-control-range" id="formControlRange" />
-                    <div className="Web2ActionsBTNs">
-                        <p className="BreefRecap"><b>Amount:</b> {removalAmount}% ({window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString(), lpTokenInfo.decimals), lpTokenInfo.decimals)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.tokensAmounts[i].full || manageStatus.tokensAmounts[i]) * removalAmount / 100).toString(), token.decimals), token.decimals)} {token.symbol} </span>)})</p>
-                        <a className="web2ActionBTN" onClick={() => setRemovalAmount(10)} >10%</a>
-                        <a className="web2ActionBTN" onClick={() => setRemovalAmount(25)} >25%</a>
-                        <a className="web2ActionBTN" onClick={() => setRemovalAmount(50)} >50%</a>
-                        <a className="web2ActionBTN" onClick={() => setRemovalAmount(75)} >75%</a>
-                        <a className="web2ActionBTN" onClick={() => setRemovalAmount(90)} >90%</a>
-                        <a className="web2ActionBTN" onClick={() => setRemovalAmount(100)} >MAX</a>
-                    </div>
+                    {!manageStatus?.withdrawOnly &&  <>
+                        <input type="range" value={removalAmount} onChange={(e) => setRemovalAmount(parseInt(e.target.value))} className="form-control-range" id="formControlRange" />
+                        <div className="Web2ActionsBTNs">
+                            <p className="BreefRecap"><b>Amount:</b> {removalAmount}% ({window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString(), lpTokenInfo.decimals), lpTokenInfo.decimals)} {lpTokenInfo.symbol} - {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(dfoCore.toDecimals(dfoCore.toFixed(parseInt(manageStatus.tokensAmounts[i].full || manageStatus.tokensAmounts[i]) * removalAmount / 100).toString(), token.decimals), token.decimals)} {token.symbol} </span>)})</p>
+                            <a className="web2ActionBTN" onClick={() => setRemovalAmount(10)} >10%</a>
+                            <a className="web2ActionBTN" onClick={() => setRemovalAmount(25)} >25%</a>
+                            <a className="web2ActionBTN" onClick={() => setRemovalAmount(50)} >50%</a>
+                            <a className="web2ActionBTN" onClick={() => setRemovalAmount(75)} >75%</a>
+                            <a className="web2ActionBTN" onClick={() => setRemovalAmount(90)} >90%</a>
+                            <a className="web2ActionBTN" onClick={() => setRemovalAmount(100)} >MAX</a>
+                        </div>
+                    </>}
                     <div className="row">
                         <div className="QuestionRegular">
                             <label className="PrestoSelector">
@@ -1236,10 +1225,8 @@ const SetupComponent = (props) => {
                                 </>}
                             {(!manageStatus?.withdrawOnly && !open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Increase</a>}
                             {(open) && <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>}
-                            {(!manageStatus?.withdrawOnly && !withdrawOpen && currentPosition) && <a className="web2ActionBTN web2ActionBTNGigi" onClick={() => { setOpen(false); setWithdrawOpen(true); setEdit(false); }}>Decrease</a>}
+                            {(!withdrawOpen && currentPosition) && <a className="web2ActionBTN web2ActionBTNGigi" onClick={() => { setOpen(false); setWithdrawOpen(true); setEdit(false); }}>Decrease</a>}
                             {(withdrawOpen) && <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>}
-                            {manageStatus?.withdrawOnly && !withdrawingAll && <a onClick={withdrawAll} className="Web3ActionBTN">Withdraw All</a>}
-                            {withdrawingAll && <Loading/>}
                         </div>
                         </> }
                         { setupInfo.free && <>
