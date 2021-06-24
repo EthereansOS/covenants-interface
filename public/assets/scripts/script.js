@@ -1247,7 +1247,13 @@ window.dumpFunctionalities = async function dumpFunctionalities(dfo) {
     return entries.join('\n        ');
 };
 
-window.formatMoney = function formatMoney(value, decPlaces, thouSeparator, decSeparator) {
+window.formatMoney = function formatMoney(value, dcp, thouSeparator, decSeparator) {
+    var decPlaces = window.formatNumber(dcp);
+    if(decPlaces === -1) {
+        var str = window.numberToString(value).split('.');
+        var newN = window.formatMoney(str[0]) + (str.length === 1 ? '' : ((thouSeparator || '.') + str[1]));
+        return newN;
+    }
     value = (typeof value).toLowerCase() !== 'number' ? window.asNumber(value) : value;
     var n = value,
         decPlaces = isNaN(decPlaces = Math.abs(decPlaces)) ? 2 : decPlaces,

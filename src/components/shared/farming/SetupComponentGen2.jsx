@@ -109,9 +109,9 @@ const SetupComponentGen2 = (props) => {
             var b = window.formatNumber(tickToPrice(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(setupInfo.tickUpper)).toSignificant(15));
             var c = window.formatNumber(tickToPrice(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(slot.tick)).toSignificant(15));
             var tickData = {
-                maxPrice : tickToPrice(lpTokenInfo.uniswapTokens[1 - secondTokenIndex], lpTokenInfo.uniswapTokens[secondTokenIndex], parseInt(setupInfo.tickLower)).toSignificant(18),
-                minPrice : tickToPrice(lpTokenInfo.uniswapTokens[1 - secondTokenIndex], lpTokenInfo.uniswapTokens[secondTokenIndex], parseInt(setupInfo.tickUpper)).toSignificant(18),
-                currentPrice : tickToPrice(lpTokenInfo.uniswapTokens[1 - secondTokenIndex], lpTokenInfo.uniswapTokens[secondTokenIndex], parseInt(slot.tick)).toSignificant(18),
+                maxPrice : tickToPrice(lpTokenInfo.uniswapTokens[1 - secondTokenIndex], lpTokenInfo.uniswapTokens[secondTokenIndex], parseInt(setupInfo.tickLower)).toSignificant(4),
+                minPrice : tickToPrice(lpTokenInfo.uniswapTokens[1 - secondTokenIndex], lpTokenInfo.uniswapTokens[secondTokenIndex], parseInt(setupInfo.tickUpper)).toSignificant(4),
+                currentPrice : tickToPrice(lpTokenInfo.uniswapTokens[1 - secondTokenIndex], lpTokenInfo.uniswapTokens[secondTokenIndex], parseInt(slot.tick)).toSignificant(4),
                 cursorNumber : !(c > a) ? 100 : !(c < b) ? 0 : null,
                 outOfRangeLower : parseInt(slot.tick) <= parseInt(setupInfo.tickLower),
                 outOfRangeUpper : parseInt(slot.tick) >= parseInt(setupInfo.tickUpper)
@@ -1152,13 +1152,13 @@ const SetupComponentGen2 = (props) => {
                         {!tickData ? <Loading/> : <div className="UniV3CurveView">
                             <div className="UniV3CurveViewCurv">
                                 <span className="CircleLeftV3Curve"></span>
-                                <span className="CircleLeftV3CurvePrice">{window.formatMoney(tickData.minPrice, 3)}</span>
+                                <span className="CircleLeftV3CurvePrice">{window.formatMoney(tickData.minPrice, -1)} {setupTokens[1 - secondTokenIndex].symbol}</span>
                                 <span className="CircleRightV3Curve"></span>
-                                <span className="CircleRightV3CurvePrice">{window.formatMoney(tickData.maxPrice, 3)}</span>
+                                <span className="CircleRightV3CurvePrice">{window.formatMoney(tickData.maxPrice, -1)} {setupTokens[1 - secondTokenIndex].symbol}</span>
                                 <div className="CircleActualPriceV3" style={{left : `${tickData.cursor}%`}}>
                                     <span className="CircleRightV3Actual">
                                         <img src={ArrowIcon}></img>
-                                        <span className="CircleRightV3ActualPrice">{window.formatMoney(tickData.currentPrice, 3)}</span>
+                                        <span className="CircleRightV3ActualPrice">{window.formatMoney(tickData.currentPrice, -1)} {setupTokens[1 - secondTokenIndex].symbol}</span>
                                     </span>
                                 </div>
                             </div>
