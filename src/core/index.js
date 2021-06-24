@@ -600,7 +600,7 @@ export default class DFOCore {
     }
 
     isValidPosition = (position) => {
-        return position.uniqueOwner !== this.voidEthereumAddress && position.creationBlock !== '0' && position.uniqueOwner === this.address;
+        return position.uniqueOwner !== this.voidEthereumAddress && position.creationBlock !== '0' && position.uniqueOwner.toLowerCase() === this.address.toLowerCase();
     }
 
     applyGasMultiplier = (gasLimit, tokens) => {

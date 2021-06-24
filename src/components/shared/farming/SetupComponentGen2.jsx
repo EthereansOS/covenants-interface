@@ -358,14 +358,6 @@ const SetupComponentGen2 = (props) => {
             }
             console.log(position.positionId);
             const availableReward = await lmContract.methods.calculateFreeFarmingReward(position.positionId, true).call();
-            var additionalFees = ['0', '0'];
-            try {
-                var result = await lmContract.methods.calculateTradingFees(position.positionId, availableReward, fees[0], fees[1]).call();
-                additionalFees = [
-                    result[0],
-                    result[1]
-                ]
-            } catch(e) {}
             let freeReward = parseInt(availableReward);
             const bNumber = await dfoCore.getBlockNumber();
             if (bNumber < parseInt(farmSetup.endBlock)) {
@@ -373,6 +365,14 @@ const SetupComponentGen2 = (props) => {
             }
             freeReward = window.numberToString(freeReward).split('.')[0];
             setFreeAvailableRewards(freeReward);
+            var additionalFees = ['0', '0'];
+            try {
+                var result = await lmContract.methods.calculateTradingFees(position.positionId, freeReward, fees[0], fees[1]).call();
+                additionalFees = [
+                    result[0],
+                    result[1]
+                ]
+            } catch(e) {}
             var withdrawOnly = !farmSetup.active || bNumber > parseInt(farmSetup.endBlock);
             setManageStatus({ withdrawOnly, additionalFees, free, creationBlock, positionSetupIndex, liquidityPoolAmount: liquidityPoolTokenAmount, tokensAmounts: amounts['tokensAmounts'], tokens })
         }
