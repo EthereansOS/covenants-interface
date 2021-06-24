@@ -110,7 +110,7 @@ const SetupComponentGen2 = (props) => {
             var a = window.formatNumber(tickToPrice(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(setupInfo.tickLower)).toSignificant(15));
             var b = window.formatNumber(tickToPrice(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(setupInfo.tickUpper)).toSignificant(15));
             var c = window.formatNumber(tickToPrice(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(slot.tick)).toSignificant(15));
-            var diluted = Math.abs(Math.abs(parseInt(setupInfo.tickUpper)) - Math.abs(parseInt(setupInfo.tickLower))) >= 180000;
+            var diluted = Math.abs(parseInt(setupInfo.tickUpper) - parseInt(setupInfo.tickLower)) >= 180000;
             var tickData = {
                 diluted,
                 maxPrice : tickToPrice(lpTokenInfo.uniswapTokens[1 - secondTokenIndex], lpTokenInfo.uniswapTokens[secondTokenIndex], parseInt(setupInfo.tickLower)).toSignificant(4),
@@ -140,6 +140,7 @@ const SetupComponentGen2 = (props) => {
                 tickData.tickLowerUSDPrice = window.formatNumber(tickToPrice(lpTokenInfo.uniswapTokens[1 - ethIndex], lpTokenInfo.uniswapTokens[ethIndex], parseInt(setupInfo.tickLower)).toSignificant(15)) * ethPrice;
                 tickData.tickUpperUSDPrice = window.formatNumber(tickToPrice(lpTokenInfo.uniswapTokens[1 - ethIndex], lpTokenInfo.uniswapTokens[ethIndex], parseInt(setupInfo.tickUpper)).toSignificant(15)) * ethPrice;
                 tickData.tickCurrentUSDPrice = window.formatNumber(tickToPrice(lpTokenInfo.uniswapTokens[1 - ethIndex], lpTokenInfo.uniswapTokens[ethIndex], parseInt(slot.tick)).toSignificant(15)) * ethPrice;
+                tickData.cursor = window.formatMoney(ethIndex === 1 ? 100 - tickData.cursorNumber : tickData.cursorNumber, 2);
             }
             setTickData(tickData);
         } catch(e) {
@@ -1164,15 +1165,17 @@ const SetupComponentGen2 = (props) => {
                             <div className="UniV3CurveViewCurv">
                                 <span className="CircleLeftV3Curve"></span>
                                 <span className="CircleLeftV3CurvePrice">
-                                    {tickData.tickLowerUSDPrice ? 
-                                        "$ " + (window.formatMoneyUniV3(tickData.tickLowerUSDPrice)) : 
+                                    {tickData.diluted ? "Diluted" : 
+                                        tickData.tickLowerUSDPrice ? 
+                                        ("$ " + window.formatMoneyUniV3(tickData.tickLowerUSDPrice)) : 
                                         `${window.formatMoneyUniV3(tickData.minPrice)} ${setupTokens[secondTokenIndex].symbol}`
                                     }
                                 </span>
                                 <span className="CircleRightV3Curve"></span>
                                 <span className="CircleRightV3CurvePrice">
-                                    {tickData.tickUpperUSDPrice ?
-                                        "$ " + (window.formatMoneyUniV3(tickData.tickUpperUSDPrice)) :
+                                    {tickData.diluted ? "Diluted" : 
+                                        tickData.tickUpperUSDPrice ?
+                                        ("$ " + window.formatMoneyUniV3(tickData.tickUpperUSDPrice)) :
                                         `${window.formatMoneyUniV3(tickData.maxPrice)} ${setupTokens[secondTokenIndex].symbol}`
                                     }
                                 </span>
@@ -1181,8 +1184,8 @@ const SetupComponentGen2 = (props) => {
                                         <img src={ArrowIcon}></img>
                                         <span className="CircleRightV3ActualPrice">
                                             {tickData.tickCurrentUSDPrice ?
-                                                "$ " + (window.formatMoneyUniV3(tickData.tickCurrentUSDPrice)) :
-                                                `${window.formatMoneyUniV3(tickData.currentPrice)} ${setupTokens[secondTokenIndex].symbol}`
+                                                ("$ " + window.formatMoneyUniV3(tickData.tickCurrentUSDPrice)) :
+                                                `${window.formatMoneyUniV3(tickData.currentPrice)}`
                                             }
                                         </span>
                                     </span>
