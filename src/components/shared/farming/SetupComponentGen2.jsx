@@ -76,6 +76,7 @@ const SetupComponentGen2 = (props) => {
     const [endBlockReached, setEndBlockReached] = useState(false);
     const [secondTokenIndex, setsecondTokenIndex] = useState(0);
     const [tickData, setTickData] = useState(null);
+    const [dollarPrices, setDollarPrices] = useState(['0', '0']);
 
     const [withdrawingAll, setWithdrawingAll] = useState(false);
 
@@ -235,6 +236,14 @@ const SetupComponentGen2 = (props) => {
                 var uniToken = new Token(props.dfoCore.chainId, tkAddress, decimals, symbol, name);
                 return uniToken;
             }));
+            var tokensForPrice = uniswapTokens.map(it => it.address === ethereumAddress ? window.voidEthereumAddress : it.address);
+            var res = await window.getTokenPricesInDollarsOnCoingecko(tokensForPrice, { tickToPrice, Token, Pool, Position, nearestUsableTick, TICK_SPACINGS, TickMath, maxLiquidityForAmounts });
+            tokensForPrice = [
+                res.data[tokensForPrice[0].toLowerCase()].usd || res.data[tokensForPrice[0].toLowerCase()] || 0,
+                res.data[tokensForPrice[1].toLowerCase()].usd || res.data[tokensForPrice[1].toLowerCase()] || 0
+            ];
+            console.log(tokensForPrice);
+            setDollarPrices(tokensForPrice);
             console.log("Slot", farmSetup.infoIndex, {
                 tick: slot.tick,
                 sqrtPriceX96: slot.sqrtPriceX96,
@@ -1147,13 +1156,25 @@ const SetupComponentGen2 = (props) => {
                         {!tickData ? <Loading/> : <div className="UniV3CurveView">
                             <div className="UniV3CurveViewCurv">
                                 <span className="CircleLeftV3Curve"></span>
-                                <span className="CircleLeftV3CurvePrice">{window.formatMoney(tickData.minPrice, -1)} {setupTokens[1 - secondTokenIndex].symbol}</span>
+                                <span className="CircleLeftV3CurvePrice">
+                                    {window.formatMoney(tickData.minPrice, -1)} {setupTokens[1 - secondTokenIndex].symbol}
+                                    <br/>
+                                    {dollarPrices && dollarPrices.length > 0 && dollarPrices[1 - secondTokenIndex] && (window.formatMoney(window.formatNumber(tickData.minPrice) * dollarPrices[1 - secondTokenIndex], 6) + "$")}
+                                </span>
                                 <span className="CircleRightV3Curve"></span>
-                                <span className="CircleRightV3CurvePrice">{window.formatMoney(tickData.maxPrice, -1)} {setupTokens[1 - secondTokenIndex].symbol}</span>
+                                <span className="CircleRightV3CurvePrice">
+                                    {window.formatMoney(tickData.maxPrice, -1)} {setupTokens[1 - secondTokenIndex].symbol}
+                                    <br/>
+                                    {dollarPrices && dollarPrices.length > 0 && dollarPrices[1 - secondTokenIndex] && (window.formatMoney(window.formatNumber(tickData.maxPrice) * dollarPrices[1 - secondTokenIndex], 6) + "$")}
+                                </span>
                                 <div className="CircleActualPriceV3" style={{left : `${tickData.cursor}%`}}>
                                     <span className="CircleRightV3Actual">
                                         <img src={ArrowIcon}></img>
-                                        <span className="CircleRightV3ActualPrice">{window.formatMoney(tickData.currentPrice, -1)} {setupTokens[1 - secondTokenIndex].symbol}</span>
+                                        <span className="CircleRightV3ActualPrice">
+                                            {window.formatMoney(tickData.currentPrice, -1)} {setupTokens[1 - secondTokenIndex].symbol}
+                                            <br/>
+                                            {dollarPrices && dollarPrices.length > 0 && dollarPrices[1 - secondTokenIndex] && (window.formatMoney(window.formatNumber(tickData.currentPrice) * dollarPrices[1 - secondTokenIndex], 6) + "$")}
+                                        </span>
                                     </span>
                                 </div>
                             </div>
