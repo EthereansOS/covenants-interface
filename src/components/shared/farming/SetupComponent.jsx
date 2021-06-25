@@ -544,11 +544,11 @@ const SetupComponent = (props) => {
     }
 
     const removeLiquidity = async () => {
-        if (setupInfo.free && (!removalAmount || removalAmount === 0)) return;
+        if (setupInfo.free && !manageStatus?.withdrawOnly && (!removalAmount || removalAmount === 0)) return;
         setRemoveLoading(true);
         try {
             if (setupInfo.free) {
-                const removedLiquidity = manageStatus?.withdrawOnly ? manageStatus.liquidityPoolAmount : removalAmount === 100 ? manageStatus.liquidityPoolAmount : props.dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString().split('.')[0];
+                const removedLiquidity = manageStatus?.withdrawOnly || removalAmount === 100 ? manageStatus.liquidityPoolAmount : props.dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString().split('.')[0];
                 const gasLimit = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, 0, outputType === 'to-pair', removedLiquidity).estimateGas({ from: dfoCore.address });
                 const result = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, 0, outputType === 'to-pair', removedLiquidity).send({ from: dfoCore.address, gasLimit, gas: gasLimit });
                 props.addTransaction(result);
