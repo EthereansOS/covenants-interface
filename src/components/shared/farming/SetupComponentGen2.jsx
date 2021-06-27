@@ -129,7 +129,7 @@ const SetupComponentGen2 = (props) => {
                 tickData.minPrice = maxPrice;
             }
             if(tickData.cursorNumber !== 0 && tickData.cursorNumber !== 100) {
-                tickData.cursorNumber = window.formatNumber(Math.floor((1 / ((Math.sqrt(a * b) - Math.sqrt(b * c)) / (c - Math.sqrt(b * c)) + 1)) * 100));
+                tickData.cursorNumber = (1 / ((Math.sqrt(a * b) - Math.sqrt(b * c)) / (c - Math.sqrt(b * c)) + 1)) * 100;
             }
             tickData.cursor = window.formatMoney(secondTokenIndex === 1 ? 100 - tickData.cursorNumber : tickData.cursorNumber, 2);
 
@@ -503,18 +503,36 @@ const SetupComponentGen2 = (props) => {
             var slot0 = await lpTokenInfo.contract.methods.slot0().call();
             var tick = nearestUsableTick(parseInt(slot0.tick), TICK_SPACINGS[lpTokenInfo.fee]);
             var sqrtPriceX96 = TickMath.getSqrtRatioAtTick(tick);
-            var pool = new Pool(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(lpTokenInfo.fee), sqrtPriceX96, 0, tick);
+            var pool;
+            pool = new Pool(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(lpTokenInfo.fee), parseInt(sqrtPriceX96), 0, tick);
+            try {
+                pool = new Pool(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(lpTokenInfo.fee), parseInt(slot0.sqrtPriceX96), 0, parseInt(slot0.tick));
+            } catch(e) {
+            }
             var fromAmountData = {pool, tickLower : parseInt(setupInfo.tickLower), tickUpper : parseInt(setupInfo.tickUpper), useFullPrecision : false};
             fromAmountData[`amount${index}`] = window.formatNumber(fullValue);
             var pos = Position[`fromAmount${index}`](fromAmountData);
             var liquidityPoolAmount = pos.liquidity.toString();
             console.log("Liquidity", liquidityPoolAmount);
             console.log("totalSupply", setup.totalSupply);
-            pos = pos[`amount${1 - index}`].toSignificant(18);
-            tks[1 - index] = {
-                value : window.numberToString(pos),
-                full : window.toDecimals(window.numberToString(pos), setupTokens[1 - index].decimals)
-            };
+            if(setup.objectId && setup.objectId !== '0') {
+                pos = pos[`amount${1 - index}`].toSignificant(18);
+                pos === '0' && tickData.cursorNumber !== 0 && tickData.cursorNumber !== 100 && (pos = window.fromDecimals('1', setupTokens[1 - index].decimals, true));
+                tks[1 - index] = {
+                    value : window.numberToString(pos),
+                    full : window.toDecimals(window.numberToString(pos), setupTokens[1 - index].decimals)
+                };
+            } else {
+                pos = pos.mintAmounts;
+                tks[0] = {
+                    value : window.fromDecimals(pos.amount0.toString(), setupTokens[0].decimals, true),
+                    full : pos.amount0.toString()
+                };
+                tks[1] = {
+                    value : window.fromDecimals(pos.amount1.toString(), setupTokens[1].decimals, true),
+                    full : pos.amount1.toString()
+                };
+            }
             tickData && tickData.cursorNumber === 0 && (tks[0] = {
                 value : '0',
                 full : '0'
@@ -613,6 +631,7 @@ const SetupComponentGen2 = (props) => {
                 if (!currentPosition || openPositionForAnotherWallet) {
                     const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value });
                     const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gas: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value });
+                    //const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, value });
                     props.addTransaction(result);
                 } else if (currentPosition) {
                     const gasLimit = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).estimateGas({ from: dfoCore.address, value });
@@ -756,7 +775,7 @@ const SetupComponentGen2 = (props) => {
         if (!isLp) {
             const notApprovedIndex = tokensApprovals.findIndex((value) => !value);
             if (notApprovedIndex !== -1) {
-                if(tickData.cursorNumber === 0 || tickData.cursorNumber === 0) {
+                if(tickData.cursorNumber === 0 || tickData.cursorNumber === 100) {
                     var index = tickData.cursorNumber === 100 ? 0 : 1;
                     return <ApproveButton contract={tokensContracts[index]} from={props.dfoCore.address} spender={lmContract.options.address} onApproval={() => onTokenApproval(index, false)} onError={(error) => console.error(error)} text={`Approve ${setupTokens[index].symbol}`} />
                 }
@@ -765,7 +784,6 @@ const SetupComponentGen2 = (props) => {
                 return <div />
             }
         } else {
-
             if (!lpTokenInfo.approval) {
                 return <ApproveButton contract={lpTokenInfo.contract} from={props.dfoCore.address} spender={lmContract.options.address} onApproval={() => onTokenApproval(null, true)} onError={(error) => console.error(error)} text={`Approve ${lpTokenInfo.symbol}`} />
             } else {
@@ -1112,7 +1130,7 @@ const SetupComponentGen2 = (props) => {
             <div className="FarmSetupMain">
                 <div className="SetupFarmingInstructions">
                     <div className="SetupFarmingInstructionsV3">
-                        {setupTokens.map((token, i) => <div className="TokenFarmV3InfoBox"><figure key={token.address}>{i !== 0 ? '' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />}</figure><span> {tickData && `${(i === 0 ? tickData.cursorNumber : 100 - tickData.cursorNumber)}%`} {window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>} {!window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>}</span> </div>)}
+                        {setupTokens.map((token, i) => <div className="TokenFarmV3InfoBox"><figure key={token.address}>{i !== 0 ? '' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />}</figure><span> {tickData && `${window.formatMoney(i === 0 ? tickData.cursorNumber : 100 - tickData.cursorNumber, 6)}%`} {window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>} {!window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>}</span> </div>)}
                         {!endBlockReached && 
                             <p className="BlockInfoV3B">
                             {setup.active && parseInt(setup.endBlock) > blockNumber && <span className="V3FarmStatusYEP">Active</span>}

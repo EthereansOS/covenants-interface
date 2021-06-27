@@ -548,7 +548,7 @@ window.fromDecimals = function fromDecimals(n, d, noFormat) {
         return '0';
     }
     var nts = parseFloat(window.numberToString((number / (decimals < 2 ? 1 : Math.pow(10, decimals)))));
-    nts = window.numberToString(Math.round(nts * 100) / 100);
+    nts = window.numberToString(nts);
     return noFormat === true ? nts : window.formatMoney(nts);
 };
 
@@ -563,9 +563,9 @@ window.toDecimals = function toDecimals(n, d) {
     if (symbol) {
         return window.web3.utils.toWei((typeof n).toLowerCase() === 'string' ? n : window.numberToString(n), symbol);
     }
-    var number = (typeof n).toLowerCase() === 'string' ? parseInt(n) : n;
+    var number = (typeof n).toLowerCase() === 'string' ? parseFloat(n) : n;
     if (!number || this.isNaN(number)) {
-        return 0;
+        return "0";
     }
     return window.numberToString(number * (decimals < 2 ? 1 : Math.pow(10, decimals)));
 };
