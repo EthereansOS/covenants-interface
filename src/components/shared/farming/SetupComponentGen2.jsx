@@ -777,7 +777,7 @@ const SetupComponentGen2 = (props) => {
             if (notApprovedIndex !== -1) {
                 if(tickData.cursorNumber === 0 || tickData.cursorNumber === 100) {
                     var index = tickData.cursorNumber === 100 ? 0 : 1;
-                    return <ApproveButton contract={tokensContracts[index]} from={props.dfoCore.address} spender={lmContract.options.address} onApproval={() => onTokenApproval(index, false)} onError={(error) => console.error(error)} text={`Approve ${setupTokens[index].symbol}`} />
+                    return notApprovedIndex === index && <ApproveButton contract={tokensContracts[index]} from={props.dfoCore.address} spender={lmContract.options.address} onApproval={() => onTokenApproval(index, false)} onError={(error) => console.error(error)} text={`Approve ${setupTokens[index].symbol}`} />
                 }
                 return <ApproveButton contract={tokensContracts[notApprovedIndex]} from={props.dfoCore.address} spender={lmContract.options.address} onApproval={() => onTokenApproval(notApprovedIndex, false)} onError={(error) => console.error(error)} text={`Approve ${setupTokens[notApprovedIndex].symbol}`} />
             } else {
