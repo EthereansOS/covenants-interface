@@ -244,7 +244,6 @@ const CreateOrEditFarmingSetup = (props) => {
                             }
                             <div className="FancyExplanationCreate">
                                         <h6>Reward per block</h6>
-                                        <p className="BreefRecapB">Select the duration of the setup. The selected timeband will determine the end block once the setup begins.</p>
                                 <div className="InputTokensRegular">
                                     <div className="InputTokenRegular">
                                         <Input min={0} showCoin={true} address={rewardToken.address} value={rewardPerBlock} name={rewardToken.symbol} onChange={(e) => onFreeRewardPerBlockUpdate(e.target.value)} />
@@ -291,7 +290,7 @@ const CreateOrEditFarmingSetup = (props) => {
                     </div>
                     <h6>Min Price</h6>
                     <h5>{minPrice} {liquidityPoolToken.tokens[1 - secondTokenIndex].symbol}</h5>
-                    <p>The minumum price of the curve, all position will be 100% {liquidityPoolToken.tokens[1 - secondTokenIndex].symbol} at this price and will no more earn fees.</p>
+                    <p>The minumum price of the curve, all position will be 100% {liquidityPoolToken.tokens[secondTokenIndex].symbol} at this price and will no more earn fees.</p>
                 </div>
                 <div className="generationSelector">
                     <div className="InputTokenRegular">
