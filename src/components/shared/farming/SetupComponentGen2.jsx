@@ -131,7 +131,7 @@ const SetupComponentGen2 = (props) => {
             if(tickData.cursorNumber !== 0 && tickData.cursorNumber !== 100) {
                 tickData.cursorNumber = (1 / ((Math.sqrt(a * b) - Math.sqrt(b * c)) / (c - Math.sqrt(b * c)) + 1)) * 100;
             }
-            tickData.cursor = window.formatMoney(secondTokenIndex === 1 ? 100 - tickData.cursorNumber : tickData.cursorNumber, 2);
+            tickData.cursor = window.formatMoneyUniV3(secondTokenIndex === 1 ? 100 - tickData.cursorNumber : tickData.cursorNumber, 2);
 
             var tokensForPrice = lpTokenInfo.uniswapTokens.map(it => it.address === ethereumAddress ? window.voidEthereumAddress : it.address);
             var ethIndex = tokensForPrice.indexOf(window.voidEthereumAddress);
@@ -140,7 +140,7 @@ const SetupComponentGen2 = (props) => {
                 tickData.tickLowerUSDPrice = window.formatNumber(tickToPrice(lpTokenInfo.uniswapTokens[1 - ethIndex], lpTokenInfo.uniswapTokens[ethIndex], parseInt(setupInfo.tickLower)).toSignificant(15)) * ethPrice;
                 tickData.tickUpperUSDPrice = window.formatNumber(tickToPrice(lpTokenInfo.uniswapTokens[1 - ethIndex], lpTokenInfo.uniswapTokens[ethIndex], parseInt(setupInfo.tickUpper)).toSignificant(15)) * ethPrice;
                 tickData.tickCurrentUSDPrice = window.formatNumber(tickToPrice(lpTokenInfo.uniswapTokens[1 - ethIndex], lpTokenInfo.uniswapTokens[ethIndex], parseInt(slot.tick)).toSignificant(15)) * ethPrice;
-                tickData.cursor = window.formatMoney(ethIndex === 1 ? 100 - tickData.cursorNumber : tickData.cursorNumber, 2);
+                tickData.cursor = window.formatMoneyUniV3(ethIndex === 1 ? 100 - tickData.cursorNumber : tickData.cursorNumber, 2);
             }
             setTickData(tickData);
         } catch(e) {
@@ -997,7 +997,7 @@ const SetupComponentGen2 = (props) => {
         const normalizedRewardPerBlock = parseInt(rewardPerBlock) * 10 ** (18 - rewardTokenInfo.decimals);
         const normalizedMaxStakeable = parseInt(maxStakeable) * 10 ** (18 - mainTokenInfo.decimals);
         const amount = normalizedRewardPerBlock * (1 / normalizedMaxStakeable);
-        return (canActivateSetup) ? window.formatMoney(amount * parseInt(setupInfo.blockDuration), 6) : parseInt(blockNumber) >= parseInt(setup.endBlock) ? 0 : window.formatMoney(amount * (parseInt(setup.endBlock) - parseInt(blockNumber)), 6);
+        return (canActivateSetup) ? window.formatMoneyUniV3(amount * parseInt(setupInfo.blockDuration), 6) : parseInt(blockNumber) >= parseInt(setup.endBlock) ? 0 : window.formatMoneyUniV3(amount * (parseInt(setup.endBlock) - parseInt(blockNumber)), 6);
     }
 
     const getAdvanced = () => {
@@ -1037,7 +1037,7 @@ const SetupComponentGen2 = (props) => {
         var totalSupply = window.formatNumber(window.fromDecimals(setup.totalSupply, rewardTokenInfo.decimals, true));
         var dailyEarnings = (rewardPerBlock * 6400 * liquidityPoolAmount) / totalSupply;
         dailyEarnings = window.numberToString(dailyEarnings);
-        dailyEarnings = window.formatMoney(dailyEarnings, 4);
+        dailyEarnings = window.formatMoneyUniV3(dailyEarnings, 4);
         return dailyEarnings;
         //window.fromDecimals((parseInt(setup.rewardPerBlock) * 6400 * parseInt(manageStatus.liquidityPoolAmount) / parseInt(setup.totalSupply)).toString().split('.')[0], rewardTokenInfo.decimals, true)
     }
@@ -1048,7 +1048,7 @@ const SetupComponentGen2 = (props) => {
                 <div className="FarmActions">
                     <input type="range" value={removalAmount} onChange={(e) => setRemovalAmount(parseInt(e.target.value))} className="form-control-range" id="formControlRange" />
                     <div className="Web2ActionsBTNs">
-                        <p className="BreefRecap"><b>Amount:</b> {removalAmount}% ({manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(window.fromDecimals(parseInt(manageStatus.tokensAmounts[i].full || manageStatus.tokensAmounts[i]) * removalAmount / 100, token.decimals, true), 4)} {token.symbol} </span>)})</p>
+                        <p className="BreefRecap"><b>Amount:</b> {removalAmount}% ({manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoneyUniV3(window.fromDecimals(parseInt(manageStatus.tokensAmounts[i].full || manageStatus.tokensAmounts[i]) * removalAmount / 100, token.decimals, true), 4)} {token.symbol} </span>)})</p>
                         <a className="web2ActionBTN" onClick={() => setRemovalAmount(10)} >10%</a>
                         <a className="web2ActionBTN" onClick={() => setRemovalAmount(25)} >25%</a>
                         <a className="web2ActionBTN" onClick={() => setRemovalAmount(50)} >50%</a>
@@ -1092,7 +1092,7 @@ const SetupComponentGen2 = (props) => {
                 }
                 {
                     (setupInfo.free && rewardTokenInfo && lpTokenAmount !== undefined && lpTokenAmount !== null && lpTokenAmount !== '' && lpTokenAmount !== '0' && (!lpTokenAmount.full || lpTokenAmount.full !== '0')) && <div className="DiffWallet">
-                        <p className="BreefRecap">Estimated reward per day: <br></br><b>{window.formatMoney(freeEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</b>
+                        <p className="BreefRecap">Estimated reward per day: <br></br><b>{window.formatMoneyUniV3(freeEstimatedReward, rewardTokenInfo.decimals)} {rewardTokenInfo.symbol}</b>
                         </p>
                     </div>
                 }
@@ -1130,15 +1130,15 @@ const SetupComponentGen2 = (props) => {
             <div className="FarmSetupMain">
                 <div className="SetupFarmingInstructions">
                     <div className="SetupFarmingInstructionsV3">
-                        {setupTokens.map((token, i) => <div className="TokenFarmV3InfoBox"><figure key={token.address}>{i !== 0 ? '' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />}</figure><span> {tickData && `${window.formatMoney(i === 0 ? tickData.cursorNumber : 100 - tickData.cursorNumber, 6)}%`} {window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>} {!window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>}</span> </div>)}
+                        {setupTokens.map((token, i) => <div className="TokenFarmV3InfoBox"><figure key={token.address}>{i !== 0 ? '' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />}</figure><span> {tickData && `${window.formatMoneyUniV3(i === 0 ? tickData.cursorNumber : 100 - tickData.cursorNumber, 6)}%`} {window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>} {!window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>}</span> </div>)}
                         {!endBlockReached && 
                             <p className="BlockInfoV3B">
                             {setup.active && parseInt(setup.endBlock) > blockNumber && <span className="V3FarmStatusYEP">Active</span>}
                                 {!delayedBlock && <> {(!setup.active && canActivateSetup) ? <span className="V3FarmStatusNew">{setupReady ? "new" : "Soon"}</span> : (!setup.active) ? <span className="V3FarmStatusNope">Inactive</span> : <></>} {(parseInt(setup.endBlock) <= blockNumber && parseInt(setup.endBlock) !== 0) && <span className="V3FarmStatusNopeNow">Ended</span>}</>}{delayedBlock !== 0 && <span className="V3FarmStatusNew">Soon</span>}
-                                {apy > 0 && <> <b>APY</b>: {window.formatMoney(apy, 3)}%</>}
+                                {apy > 0 && <> <b>APY</b>: {window.formatMoneyUniV3(apy, 3)}%</>}
                             </p>
                         }
-                        {rewardTokenInfo && <p className="BlockInfoV3"><b>Daily Rate</b>: {window.formatMoney(window.fromDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals, true), 4)} {rewardTokenInfo.symbol}</p>}
+                        {rewardTokenInfo && <p className="BlockInfoV3"><b>Daily Rate</b>: {window.formatMoneyUniV3(window.fromDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals, true), 4)} {rewardTokenInfo.symbol}</p>}
                         {parseInt(setup.endBlock) > 0 ? <p className="BlockInfoV3"><b>End</b>: <a className="BLKEMD" target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}block/${setup.endBlock}`}>{setup.endBlock}</a></p> : <p className="BlockInfoV3"><b>Duration</b>: {getPeriodFromDuration(setupInfo.blockDuration)}</p>}
                         {!currentPosition && (!open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Farm</a>}
                         {!currentPosition && (open) && <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>}
@@ -1175,7 +1175,7 @@ const SetupComponentGen2 = (props) => {
                         </p>
                         <p className="farmInfoCurveR">
                             <p className="PriceRangeInfoFarm">
-                                <a target="_blank" href={props.dfoCore.getContextElement("uniswapV3PoolURLTemplate").format(setupInfo.liquidityPoolTokenAddress)} className="InRangeV3 UniPoolFeeInfo">{window.formatMoney(window.numberToString(parseInt(lpTokenInfo.fee) / 10000), '2')}% Pool</a>
+                                <a target="_blank" href={props.dfoCore.getContextElement("uniswapV3PoolURLTemplate").format(setupInfo.liquidityPoolTokenAddress)} className="InRangeV3 UniPoolFeeInfo">{window.formatMoneyUniV3(window.numberToString(parseInt(lpTokenInfo.fee) / 10000), '2')}% Pool</a>
                                 {setup.objectId && setup.objectId !== '0' && <a href={props.dfoCore.getContextElement("uniswapV3NFTURLTemplate").format(setup.objectId)} target="_blank" className="UniNFTInfo">NFT</a>}
                             </p>
                         </p>
@@ -1211,7 +1211,7 @@ const SetupComponentGen2 = (props) => {
                             </div>
                         </div>}
                         <span className="UniV3TVLFIV">
-                            <b>TVL</b>: {setupTokens.map((token, index) => <span key={token.address}>{window.formatMoney(window.fromDecimals(token.liquidity, token.decimals, true), 4)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span>)}
+                            <b>TVL</b>: {setupTokens.map((token, index) => <span key={token.address}>{window.formatMoneyUniV3(window.fromDecimals(token.liquidity, token.decimals, true), 4)} {token.symbol}{index !== setupTokens.length - 1 ? ' - ' : ''}</span>)}
                         </span>
                     </div>
                 </div>
@@ -1220,7 +1220,7 @@ const SetupComponentGen2 = (props) => {
                     currentPosition &&
                     <div className="YourFarmingPositions YourFarmingPositionsFarmingFarmingFarmingChiFarmaViveComeUnPAsha">
                         <div className="FarmYou">
-                            {manageStatus && <p><b>Your Deposit</b>:<br></br> {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoney(window.fromDecimals(manageStatus.tokensAmounts[i], token.decimals, true), 3)} {token.symbol} </span>)}</p>}
+                            {manageStatus && <p><b>Your Deposit</b>:<br></br> {manageStatus.tokens.map((token, i) => <span key={token.address}> {window.formatMoneyUniV3(window.fromDecimals(manageStatus.tokensAmounts[i], token.decimals, true), 3)} {token.symbol} </span>)}</p>}
                             {!endBlockReached && <p><b>Daily Earnings</b>: {calculateDailyEarnings()} {rewardTokenInfo.symbol}</p>}
                             {(!manageStatus?.withdrawOnly && !open && parseInt(setup.endBlock) > parseInt(blockNumber)) && <a className="web2ActionBTN" onClick={() => { setOpen(true); setWithdrawOpen(false); setEdit(false); }}>Increase</a>}
                             {(open) && <a className="backActionBTN" onClick={() => { setOpen(false); setWithdrawOpen(false); setEdit(false) }}>Close</a>}
@@ -1230,8 +1230,8 @@ const SetupComponentGen2 = (props) => {
                             {withdrawingAll && <Loading/>}
                         </div>
                         <div className="Farmed">
-                                <p><b>Available</b>: <br></br>{window.formatMoney(window.fromDecimals(freeAvailableRewards, rewardTokenInfo.decimals, true), 4)} {rewardTokenInfo.symbol}</p>
-                                {manageStatus && <p><b>Fees Earned</b>: <br></br>{window.formatMoney(window.fromDecimals(manageStatus.additionalFees[0], setupTokens[0].decimals, true), 4)} {setupTokens[0].symbol} - {window.formatMoney(window.fromDecimals(manageStatus.additionalFees[1], setupTokens[1].decimals), 4)} {setupTokens[1].symbol}</p>}
+                                <p><b>Available</b>: <br></br>{window.formatMoneyUniV3(window.fromDecimals(freeAvailableRewards, rewardTokenInfo.decimals, true), 4)} {rewardTokenInfo.symbol}</p>
+                                {manageStatus && <p><b>Fees Earned</b>: <br></br>{window.formatMoneyUniV3(window.fromDecimals(manageStatus.additionalFees[0], setupTokens[0].decimals, true), 4)} {setupTokens[0].symbol} - {window.formatMoneyUniV3(window.fromDecimals(manageStatus.additionalFees[1], setupTokens[1].decimals), 4)} {setupTokens[1].symbol}</p>}
                                 {
                                     claimLoading ? <a className="Web3ActionBTN" disabled={claimLoading}>
                                         <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
