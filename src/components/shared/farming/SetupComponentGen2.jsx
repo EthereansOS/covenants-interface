@@ -1231,7 +1231,7 @@ const SetupComponentGen2 = (props) => {
                         </div>
                         <div className="Farmed">
                                 <p><b>Available</b>: <br></br>{window.formatMoneyUniV3(window.fromDecimals(freeAvailableRewards, rewardTokenInfo.decimals, true), 4)} {rewardTokenInfo.symbol}</p>
-                                {manageStatus && <p><b>Fees Earned</b>: <br></br>{window.formatMoneyUniV3(window.fromDecimals(manageStatus.additionalFees[0], setupTokens[0].decimals, true), 4)} {setupTokens[0].symbol} - {window.formatMoneyUniV3(window.fromDecimals(manageStatus.additionalFees[1], setupTokens[1].decimals), 4)} {setupTokens[1].symbol}</p>}
+                                {manageStatus && <p><b>Fees Earned</b>: <br></br>{window.formatMoneyUniV3(window.fromDecimals(manageStatus.additionalFees[0], setupTokens[0].decimals, true), 4)} {setupTokens[0].symbol} - {window.formatMoneyUniV3(window.fromDecimals(manageStatus.additionalFees[1], setupTokens[1].decimals, true), 4)} {setupTokens[1].symbol}</p>}
                                 {
                                     claimLoading ? <a className="Web3ActionBTN" disabled={claimLoading}>
                                         <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>

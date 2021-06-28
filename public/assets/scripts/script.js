@@ -1247,9 +1247,9 @@ window.dumpFunctionalities = async function dumpFunctionalities(dfo) {
     return entries.join('\n        ');
 };
 
-window.formatMoneyUniV3 = function formatMoneyUniV3(value) {
+window.formatMoneyUniV3 = function formatMoneyUniV3(value, decimals) {
     var str = window.numberToString(value).split('.');
-    if(str[1]) {
+    if(str[1] && str[1].indexOf('0') === 0) {
         var n = str[1];
         for(var i = 0; i < n.length; i++) {
             if(n[i] !== '0') {
@@ -1257,6 +1257,8 @@ window.formatMoneyUniV3 = function formatMoneyUniV3(value) {
                 break;
             }
         }
+    } else {
+        return window.formatMoney(value, decimals);
     }
     var newN = window.formatMoney(str[0]) + (str.length === 1 ? '' : ('.' + str[1]));
     return newN;
