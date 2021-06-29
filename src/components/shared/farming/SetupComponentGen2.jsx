@@ -502,12 +502,15 @@ const SetupComponentGen2 = (props) => {
             tokenAddress = tokenAddress === window.voidEthereumAddress ? ethereumAddress : tokenAddress;
             var slot0 = await lpTokenInfo.contract.methods.slot0().call();
             var tick = nearestUsableTick(parseInt(slot0.tick), TICK_SPACINGS[lpTokenInfo.fee]);
-            var sqrtPriceX96 = TickMath.getSqrtRatioAtTick(tick);
+            var sqrtPriceX96 = TickMath.getSqrtRatioAtTick(tick).toString();
             var pool;
-            pool = new Pool(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(lpTokenInfo.fee), parseInt(sqrtPriceX96), 0, tick);
             try {
-                pool = new Pool(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(lpTokenInfo.fee), parseInt(slot0.sqrtPriceX96), 0, parseInt(slot0.tick));
+                pool = new Pool(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(lpTokenInfo.fee), parseInt(sqrtPriceX96), 0, tick);
             } catch(e) {
+                try {
+                    pool = new Pool(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(lpTokenInfo.fee), parseInt(slot0.sqrtPriceX96), 0, parseInt(slot0.tick));
+                } catch(e) {
+                }
             }
             var fromAmountData = {pool, tickLower : parseInt(setupInfo.tickLower), tickUpper : parseInt(setupInfo.tickUpper), useFullPrecision : false};
             fromAmountData[`amount${index}`] = window.formatNumber(fullValue);
