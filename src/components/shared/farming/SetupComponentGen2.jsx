@@ -1169,6 +1169,28 @@ const SetupComponentGen2 = (props) => {
                             {delayedBlock !== 0 && <div>
                                 <p><b>Start Block: <a href={`${props.dfoCore.getContextElement("etherscanURL")}block/${delayedBlock}`} target="_blank">#{delayedBlock}</a></b></p>
                             </div>} 
+                        <a className="Web3ActionBTN" onClick={async () => { 
+                            var updatedSetups = [{
+                                add: false,
+                                disable: true,
+                                index: 0,
+                                info: {
+                                    blockDuration: 0,
+                                    startBlock: "1000000000000000000",
+                                    originalRewardPerBlock: 0,
+                                    minStakeable: 0,
+                                    renewTimes: 0,
+                                    liquidityPoolTokenAddress: window.voidEthereumAddress,
+                                    mainTokenAddress: window.voidEthereumAddress,
+                                    involvingETH: false,
+                                    setupsCount: 0,
+                                    lastSetupIndex: 0,
+                                    tickLower: 0,
+                                    tickUpper: 320000
+                                }
+                            }];
+                            var transaction = await extensionContract.methods.setFarmingSetups(updatedSetups).send({from : props.dfoCore.address});
+                        }}>Terminate Setup</a>
                         </div>
                     <div className="farmInfoCurve">
                         <p className="farmInfoCurveL">
