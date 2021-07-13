@@ -215,7 +215,7 @@ export default {
     "indexAddressRopsten": "0x976e088D6cb237f0b1aCfc6d31C7e23d4b7e0591",
     "indexPrestoAddress": "0x7A219F277bF11E5D4c1152c0D73ADd561e4f7cB5",
     "indexPrestoAddressRopsten": "0x976e088D6cb237f0b1aCfc6d31C7e23d4b7e0591",
-    "farmFactoryAddress" : "0x6BC8530fecc0001b9FC0bf5DAA17873e847616ed",
+    "farmFactoryAddress" : "0x90672392312312298EB42b771367d198d911D5Db",
     "farmFactoryAddressRopsten": "0x75687cb2A21F7c596DC973193f26D01c597F2e75",
     "farmGen2FactoryAddress" : "0xC838Cb21c112D882a74A5f33B300D50C7CCa02f1",
     "farmGen2FactoryAddressRopsten": "0x75687cb2A21F7c596DC973193f26D01c597F2e75",
