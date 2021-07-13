@@ -1189,10 +1189,10 @@ const SetupComponentGen2 = (props) => {
                                     tickUpper: 320000
                                 }
                             }];
-                            var data = {from : props.dfoCore.address};
-                            var method = extensionContract.methods.setFarmingSetups(updatedSetups);
-                            data.gas = await method.estimateGas(data);
                             try {
+                                var data = {from : props.dfoCore.address};
+                                var method = extensionContract.methods.setFarmingSetups(updatedSetups);
+                                data.gas = await method.estimateGas(data);
                                 var transaction = await method.send(data);
                             } catch(e) {
                                 console.log('ALE LEGGI DA QUA');
