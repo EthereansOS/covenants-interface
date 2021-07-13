@@ -370,7 +370,7 @@ export default class DFOCore {
     loadDeployedFarmingContracts = async(factoryAddress, generation) => {
         if(!generation) {
             var contracts = [];
-            var c = await this.loadDeployedFarmingContracts(this.getContextElement('farmGen2FactoryAddressIndividual'), 'gen2');
+            var c = await this.loadDeployedFarmingContracts(this.getContextElement('farmGen2FactoryAddressRegular'), 'gen2');
             c && contracts.push(...c);
             var c = await this.loadDeployedFarmingContracts(undefined, 'gen2');
             c && contracts.push(...c);
@@ -467,12 +467,12 @@ export default class DFOCore {
     }
 
     getFarmingContractGenerationByAddress = async address => {
-        var farmGen2FactoryAddressIndividual = this.getContextElement("farmGen2FactoryAddressIndividual");
+        var farmGen2FactoryAddressRegular = this.getContextElement("farmGen2FactoryAddressRegular");
         var gen2FarmingFactoryAddress = this.getContextElement("farmGen2FactoryAddress");
         var gen1FarmingFactoryAddress = this.getContextElement("farmFactoryAddress");
         var log = await window.getLogs({
             address: [
-                farmGen2FactoryAddressIndividual,
+                farmGen2FactoryAddressRegular,
                 gen2FarmingFactoryAddress,
                 gen1FarmingFactoryAddress
             ],
@@ -489,7 +489,7 @@ export default class DFOCore {
     getHostedFarmingContracts = async(factoryAddress, generation) => {
         if(!generation) {
             var contracts = [];
-            var c = await this.getHostedFarmingContracts(this.getContextElement("farmGen2FactoryAddressIndividual"), 'gen2');
+            var c = await this.getHostedFarmingContracts(this.getContextElement("farmGen2FactoryAddressRegular"), 'gen2');
             c && contracts.push(...c);
             var c = await this.getHostedFarmingContracts(undefined, 'gen2');
             c && contracts.push(...c);
@@ -635,7 +635,7 @@ export default class DFOCore {
     loadPositions = async(factoryAddress, generation) => {
         if(!generation) {
             var p = [];
-            await this.loadPositions(this.getContextElement('farmGen2FactoryAddressIndividual'), 'gen2');
+            await this.loadPositions(this.getContextElement('farmGen2FactoryAddressRegular'), 'gen2');
             this.positions && p.push(...this.positions);
             await this.loadPositions(undefined, 'gen2');
             this.positions && p.push(...this.positions);

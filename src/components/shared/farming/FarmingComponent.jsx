@@ -1,11 +1,21 @@
 import Coin from '../coin/Coin';
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { useEffect } from 'react';
+
+import Loading from '../Loading';
 
 const FarmingComponent = (props) => {
+    const [isRegular, setRegular] = useState(null);
     const { className, goBack, metadata, dfoCore, withoutBack } = props;
     const symbol = metadata.symbol;
     const name = metadata.name;
     const dailyReward = metadata.rewardPerBlock * 6400;
+
+    useEffect(async () => {
+        var contract = metadata.contract || await props.dfoCore.getContract(props.dfoCore.getContextElement("FarmMainGen2ABI"), metadata.contractAddress);
+        metadata.generation === 'gen2' && setRegular(await contract.methods._factory().call() === props.dfoCore.getContextElement('farmGen2FactoryAddressRegular'));
+    }, []);
 
     return (
         <div className={className}>
@@ -23,13 +33,13 @@ const FarmingComponent = (props) => {
                 <div className="FarmThings">
                         {(metadata.freeSetups.length + metadata.lockedSetups.length === 0 && !metadata.canActivateSetup) ? <>
                             <b className="InactiveSignalP">Inactive</b> 
-                            {metadata.generation === 'gen2' && <b className="VersionFarm">&#129412; V3</b>}
+                            {metadata.generation === 'gen2' && <b className="VersionFarm">&#129412; V3{isRegular === null ? "" : ` ${isRegular ? "Regular" : "Shared"}`}</b>}
                             {metadata.generation === 'gen1' && <b className="VersionFarmOld">Gen 1</b>}
                             </>: <>
                             <p><b>Daily Rate</b>: {window.formatMoney(dailyReward, 6)} {window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <>{metadata.name} <span className="ITEMsymbolF">({symbol})</span></>} {!window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <>{symbol} <span className="ITEMsymbolF">({metadata.name})</span></>}</p>
                             <p>
                                 <b className="InactiveSignalA">Active ({metadata.freeSetups.length + metadata.lockedSetups.length})</b>
-                                {metadata.generation === 'gen2' && <b className="VersionFarm">&#129412; V3</b>}
+                                {metadata.generation === 'gen2' && <b className="VersionFarm">&#129412; V3{isRegular === null ? "" : ` ${isRegular ? "Regular" : "Shared"}`}</b>}
                                 {metadata.generation === 'gen1' && <b className="VersionFarmOld">Gen 1</b>}
                             </p>
                         </> }
