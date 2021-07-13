@@ -472,6 +472,11 @@ const SetupComponentGen2 = (props) => {
 
     const onUpdateTokenAmount = async (value, index) => {
         var tks = tokensAmounts.map(it => it);
+        if(value.indexOf('.') !== -1 && value.split('.')[1].length > 18) {
+            value = value.split('.');
+            value[1] = value[1].substring(0, 18);
+            value = value.join('.');
+        }
         const fullValue = window.toDecimals(value, setupTokens[index].decimals);
         tks[index] = {
             value,
@@ -517,11 +522,11 @@ const SetupComponentGen2 = (props) => {
             } else {
                 pos = pos.mintAmounts;
                 tks[0] = {
-                    value : window.fromDecimals(pos.amount0.toString(), setupTokens[0].decimals, true),
+                    value : index === 0 ? value : window.fromDecimals(pos.amount0.toString(), setupTokens[0].decimals, true),
                     full : pos.amount0.toString()
                 };
                 tks[1] = {
-                    value : window.fromDecimals(pos.amount1.toString(), setupTokens[1].decimals, true),
+                    value : index === 1 ? value : window.fromDecimals(pos.amount1.toString(), setupTokens[1].decimals, true),
                     full : pos.amount1.toString()
                 };
             }
