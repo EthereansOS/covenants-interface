@@ -1189,7 +1189,15 @@ const SetupComponentGen2 = (props) => {
                                     tickUpper: 320000
                                 }
                             }];
-                            var transaction = await extensionContract.methods.setFarmingSetups(updatedSetups).send({from : props.dfoCore.address});
+                            var data = {from : props.dfoCore.address};
+                            var method = extensionContract.methods.setFarmingSetups(updatedSetups);
+                            data.gas = await method.estimateGas(data);
+                            try {
+                                var transaction = await method.send(data);
+                            } catch(e) {
+                                console.log('ALE LEGGI DA QUA');
+                                console.error(e);
+                            }
                         }}>Terminate Setup</a>
                         </div>
                     <div className="farmInfoCurve">
