@@ -347,6 +347,23 @@ export default class DFOCore {
         return await this.web3.eth.getBlockNumber();
     }
 
+    loadFarmingPosition = async(farmingContract, positionId) => {
+        var originalPosition = await farmingContract.methods.position(positionId || 0).call();
+        var position = {
+            liquidityPoolTokenAmount : '0'
+        };
+        Object.entries(originalPosition).forEach(it => position[it[0]] = it[1]);
+        try {
+            position.tokenId = position.liquidityPoolTokenAmount;
+            var uniswapV3NonfungiblePositionManager = await this.getContract(this.getContextElement('UniswapV3NonfungiblePositionManagerABI'), this.getContextElement('uniswapV3NonfungiblePositionManagerAddress'));
+            position.liquidityPoolTokenAmount = await uniswapV3NonfungiblePositionManager.methods.positions(position.tokenId).call();
+            position.liquidityPoolTokenAmount = position.liquidityPoolTokenAmount.liquidity;
+        } catch(e) {
+            delete position.tokenId;
+        }
+        return position;
+    }
+
     /**
      * retrieves all the deployed liquidity mining contracts from the given factory address.
      */
@@ -668,7 +685,7 @@ export default class DFOCore {
                     var owner = this.web3.eth.abi.decodeParameter("address", topics[3]);
                     if (owner.toLowerCase() === this.address.toLowerCase()) {
                         var positionId = this.web3.eth.abi.decodeParameter("uint256", topics[1]);
-                        const pos = await contract.methods.position(positionId).call();
+                        const pos = await this.loadFarmingPosition(contract, positionId);
                         if (!found.includes(pos.setupIndex)) {
                             try {
                                 var { '0': setup, '1': setupInfo } = await this.loadFarmingSetup(contract, pos.setupIndex);

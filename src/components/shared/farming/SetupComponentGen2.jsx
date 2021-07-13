@@ -202,7 +202,7 @@ const SetupComponentGen2 = (props) => {
             const event = events[i];
             const { topics } = event;
             var positionId = props.dfoCore.web3.eth.abi.decodeParameter("uint256", topics[1]);
-            const pos = await lmContract.methods.position(positionId).call();
+            const pos = await props.dfoCore.loadFarmingPosition(lmContract, positionId);
             if (dfoCore.isValidPosition(pos) && parseInt(pos.setupIndex) === parseInt(setupIndex)) {
                 if (farmSetupInfo.free) {
                     position = { ...pos, positionId };
@@ -295,22 +295,9 @@ const SetupComponentGen2 = (props) => {
         const contracts = [];
         var mtInfo;
         var balances = ['0', '0'];
-        try {
-            farmSetup.objectId && farmSetup.objectId !== '0' && (balances = await simulateDecreaseLiquidityAndCollect(farmSetup.objectId, lmContract.options.address));
-        } catch(e) {
-        }
         var fees = ['0', '0'];
         try {
-            var nftPosMan = await dfoCore.getEthersContract(dfoCore.getContextElement("UniswapV3NonfungiblePositionManagerABI"), dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress"));
-            var collect = await nftPosMan.callStatic.collect({
-                tokenId : farmSetup.objectId,
-                recipient: lmContract.options.address,
-                amount0Max: dfoCore.MAX_UINT128,
-                amount1Max: dfoCore.MAX_UINT128
-            }, {
-                from : lmContract.options.address
-            });
-            fees = [collect.amount0.toString(), collect.amount1.toString()];
+            farmSetup.objectId && farmSetup.objectId !== '0' && ({balances, fees} = await simulateDecreaseLiquidityAndCollect(farmSetup.objectId, lmContract.options.address));
         } catch(e) {
         }
         for (let i = 0; i < liquidityPoolTokens.length; i++) {
@@ -342,18 +329,11 @@ const SetupComponentGen2 = (props) => {
             const amounts = {
                 tokensAmounts : [0, 0]
             };
+            var additionalFees = ['0', '0'];
             try {
-                var nftPosMan = await dfoCore.getEthersContract(dfoCore.getContextElement("UniswapV3NonfungiblePositionManagerABI"), dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress"));
-                var decreaseLiquidity = await nftPosMan.callStatic.decreaseLiquidity({
-                    tokenId : farmSetup.objectId,
-                    liquidity : position.liquidityPoolTokenAmount,
-                    amount0Min: 0,
-                    amount1Min: 0,
-                    deadline : new Date().getTime() + 100000
-                }, {
-                    from : lmContract.options.address
-                });
-                amounts.tokensAmounts = [decreaseLiquidity.amount0.toString(), decreaseLiquidity.amount1.toString()];
+                var simulation = await simulateDecreaseLiquidityAndCollect(position.tokenId || farmSetup.objectId, lmContract.options.address);
+                amounts.tokensAmounts = simulation.liquidity;
+                additionalFees = simulation.fees;
             } catch(e) {
             }
             console.log(position.positionId);
@@ -365,7 +345,6 @@ const SetupComponentGen2 = (props) => {
             }
             freeReward = window.numberToString(freeReward).split('.')[0];
             setFreeAvailableRewards(freeReward);
-            var additionalFees = ['0', '0'];
             try {
                 var result = await lmContract.methods.calculateTradingFees(position.positionId, freeReward, fees[0], fees[1]).call();
                 additionalFees = [
@@ -402,7 +381,17 @@ const SetupComponentGen2 = (props) => {
             bytes, {
             from : lmContractAddress
         });
-        return props.dfoCore.web3.eth.abi.decodeParameters(["uint128", "uint128"], result[1]);
+        var liquidity = props.dfoCore.web3.eth.abi.decodeParameters(["uint128", "uint128"], result[0]); 
+        var balances = props.dfoCore.web3.eth.abi.decodeParameters(["uint128", "uint128"], result[1]);
+        var fees = [
+            props.dfoCore.web3.utils.toBN(balances[0]).sub(props.dfoCore.web3.utils.toBN(liquidity[0])).toString(),
+            props.dfoCore.web3.utils.toBN(balances[1]).sub(props.dfoCore.web3.utils.toBN(liquidity[1])).toString(),
+        ]
+        return {
+            liquidity,
+            balances,
+            fees
+        }
     }
 
     const calculateApy = async (setup, setupInfo, rewardTokenAddress, rewardTokenDecimals, setupTokens) => {
@@ -1179,7 +1168,7 @@ const SetupComponentGen2 = (props) => {
                         <p className="farmInfoCurveR">
                             <p className="PriceRangeInfoFarm">
                                 <a target="_blank" href={props.dfoCore.getContextElement("uniswapV3PoolURLTemplate").format(setupInfo.liquidityPoolTokenAddress)} className="InRangeV3 UniPoolFeeInfo">{window.formatMoneyUniV3(window.numberToString(parseInt(lpTokenInfo.fee) / 10000), '2')}% Pool</a>
-                                {setup.objectId && setup.objectId !== '0' && <a href={props.dfoCore.getContextElement("uniswapV3NFTURLTemplate").format(setup.objectId)} target="_blank" className="UniNFTInfo">NFT</a>}
+                                {((currentPosition?.tokenId && currentPosition?.tokenId !== '0') || (setup.objectId && setup.objectId !== '0')) && <a href={props.dfoCore.getContextElement("uniswapV3NFTURLTemplate").format(currentPosition?.tokenId || setup.objectId)} target="_blank" className="UniNFTInfo">NFT</a>}
                             </p>
                         </p>
                         {!tickData ? <Loading/> : <div className="UniV3CurveView">
