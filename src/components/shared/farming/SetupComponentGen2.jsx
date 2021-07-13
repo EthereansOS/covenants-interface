@@ -1169,7 +1169,7 @@ const SetupComponentGen2 = (props) => {
                             {delayedBlock !== 0 && <div>
                                 <p><b>Start Block: <a href={`${props.dfoCore.getContextElement("etherscanURL")}block/${delayedBlock}`} target="_blank">#{delayedBlock}</a></b></p>
                             </div>} 
-                        <a className="Web3ActionBTN" onClick={async () => { 
+                        {/*<a className="Web3ActionBTN" onClick={async () => { 
                             var updatedSetups = [{
                                 add: false,
                                 disable: true,
@@ -1198,7 +1198,7 @@ const SetupComponentGen2 = (props) => {
                                 console.log('ALE LEGGI DA QUA');
                                 console.error(e);
                             }
-                        }}>Terminate Setup</a>
+                        }}>Terminate Setup</a> @todo remove */}
                         </div>
                     <div className="farmInfoCurve">
                         <p className="farmInfoCurveL">
