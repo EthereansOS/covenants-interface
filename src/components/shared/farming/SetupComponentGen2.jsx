@@ -7,7 +7,7 @@ import SwitchIcon from "../../../assets/images/switch.png";
 import ArrowIcon from "../../../assets/images/arrow.png";
 import Loading from "../Loading";
 import { useRef } from 'react';
-import { tickToPrice, Pool, Position, nearestUsableTick, TICK_SPACINGS, TickMath, maxLiquidityForAmounts } from '@uniswap/v3-sdk/dist/';
+import { tickToPrice, Pool, Position, LiquidityMath, nearestUsableTick, TICK_SPACINGS, TickMath, maxLiquidityForAmounts } from '@uniswap/v3-sdk/dist/';
 import { Token } from "@uniswap/sdk-core/dist";
 
 const SetupComponentGen2 = (props) => {
@@ -297,8 +297,15 @@ const SetupComponentGen2 = (props) => {
         var balances = ['0', '0'];
         var fees = ['0', '0'];
         try {
-            farmSetup.objectId && farmSetup.objectId !== '0' && ({balances, fees} = await simulateDecreaseLiquidityAndCollect(farmSetup.objectId, lmContract.options.address));
+            ({balances, fees} = await simulateDecreaseLiquidityAndCollect(farmSetup.objectId, lmContract.options.address));
         } catch(e) {
+            if(farmSetup.totalSupply !== '0') {
+                var lpTokenEthers = await props.dfoCore.getEthersContract(props.dfoCore.getContextElement("UniswapV3PoolABI"), lpToken.options.address);
+                var data = await lpTokenEthers.callStatic.burn(farmSetupInfo.tickLower, farmSetupInfo.tickUpper, farmSetup.totalSupply, {
+                    from : props.dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress")
+                });
+                balances = [data.amount0.toString(), data.amount1.toString()];
+            }
         }
         for (let i = 0; i < liquidityPoolTokens.length; i++) {
             const address = liquidityPoolTokens[i];
@@ -628,7 +635,6 @@ const SetupComponentGen2 = (props) => {
                 if (!currentPosition || openPositionForAnotherWallet) {
                     const gasLimit = await lmContract.methods.openPosition(stake).estimateGas({ from: dfoCore.address, value });
                     const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, gas: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), gasLimit: parseInt(gasLimit * (props.dfoCore.getContextElement("farmGasMultiplier") || 1)), value });
-                    //const result = await lmContract.methods.openPosition(stake).send({ from: dfoCore.address, value });
                     props.addTransaction(result);
                 } else if (currentPosition) {
                     const gasLimit = await lmContract.methods.addLiquidity(currentPosition.positionId, stake).estimateGas({ from: dfoCore.address, value });
@@ -636,7 +642,6 @@ const SetupComponentGen2 = (props) => {
                     props.addTransaction(result);
                 }
             }
-            await getSetupMetadata();
         } catch (error) {
             console.error(error);
             if (inputType === 'add-eth' && error.code && error.code !== 4001) {
@@ -645,6 +650,7 @@ const SetupComponentGen2 = (props) => {
         } finally {
             setAddLoading(false);
         }
+        await getSetupMetadata();
     }
 
     const removeLiquidity = async () => {

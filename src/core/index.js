@@ -370,6 +370,8 @@ export default class DFOCore {
     loadDeployedFarmingContracts = async(factoryAddress, generation) => {
         if(!generation) {
             var contracts = [];
+            var c = await this.loadDeployedFarmingContracts(this.getContextElement('farmGen2FactoryAddressIndividual'), 'gen2');
+            c && contracts.push(...c);
             var c = await this.loadDeployedFarmingContracts(undefined, 'gen2');
             c && contracts.push(...c);
             c = await this.loadDeployedFarmingContracts(undefined, 'gen1');
@@ -465,10 +467,12 @@ export default class DFOCore {
     }
 
     getFarmingContractGenerationByAddress = async address => {
+        var farmGen2FactoryAddressIndividual = this.getContextElement("farmGen2FactoryAddressIndividual");
         var gen2FarmingFactoryAddress = this.getContextElement("farmGen2FactoryAddress");
         var gen1FarmingFactoryAddress = this.getContextElement("farmFactoryAddress");
         var log = await window.getLogs({
             address: [
+                farmGen2FactoryAddressIndividual,
                 gen2FarmingFactoryAddress,
                 gen1FarmingFactoryAddress
             ],
@@ -479,12 +483,14 @@ export default class DFOCore {
             fromBlock: 0,
             toBlock: 'latest'
         });
-        return log[0].address.toLowerCase() === gen2FarmingFactoryAddress.toLowerCase() ? "gen2" : "gen1";
+        return log[0].address.toLowerCase() === gen1FarmingFactoryAddress.toLowerCase() ? "gen1" : "gen2";
     }
 
     getHostedFarmingContracts = async(factoryAddress, generation) => {
         if(!generation) {
             var contracts = [];
+            var c = await this.getHostedFarmingContracts(this.getContextElement("farmGen2FactoryAddressIndividual"), 'gen2');
+            c && contracts.push(...c);
             var c = await this.getHostedFarmingContracts(undefined, 'gen2');
             c && contracts.push(...c);
             c = await this.getHostedFarmingContracts(undefined, 'gen1');
@@ -629,6 +635,8 @@ export default class DFOCore {
     loadPositions = async(factoryAddress, generation) => {
         if(!generation) {
             var p = [];
+            await this.loadPositions(this.getContextElement('farmGen2FactoryAddressIndividual'), 'gen2');
+            this.positions && p.push(...this.positions);
             await this.loadPositions(undefined, 'gen2');
             this.positions && p.push(...this.positions);
             await this.loadPositions(undefined, 'gen1');
