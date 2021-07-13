@@ -43,6 +43,7 @@ const Create = (props) => {
     const [cumulativeRewardToSend, setCumulativeRewardToSend] = useState(0);
 
     const [generation, setGeneration] = useState("");
+    const [individualNFT, setIndividualNFT] = useState(false);
 
     const genConversion = {
         gen1 : {
@@ -216,7 +217,7 @@ const Create = (props) => {
         setDeployLoading(true);
         try {
             const { setups, rewardTokenAddress, extensionAddress, extensionInitData } = deployData;
-            const factoryAddress = props.dfoCore.getContextElement(generation === 'gen2' ? "farmGen2FactoryAddress" : "farmFactoryAddress");
+            const factoryAddress = props.dfoCore.getContextElement(generation === 'gen2' ? individualNFT ? "farmGen2FactoryAddressIndividual" : "farmGen2FactoryAddress" : "farmFactoryAddress");
             const farmFactory = await props.dfoCore.getContract(props.dfoCore.getContextElement("FarmFactoryABI"), factoryAddress);
             const types = genConversion[generation].initTypes;
             console.log(deployData);
@@ -255,7 +256,7 @@ const Create = (props) => {
         try {
             const { byMint, host, deployContract } = deployData;
             if (!deployContract) {
-                const factoryAddress = props.dfoCore.getContextElement(generation === 'gen2' ? "farmGen2FactoryAddress" : "farmFactoryAddress");
+                const factoryAddress = props.dfoCore.getContextElement(generation === 'gen2' ? individualNFT ? "farmGen2FactoryAddressIndividual" : "farmGen2FactoryAddress" : "farmFactoryAddress");
                 const farmFactory = await props.dfoCore.getContract(props.dfoCore.getContextElement("FarmFactoryABI"), factoryAddress);
                 const cloneGasLimit = await farmFactory.methods.cloneFarmDefaultExtension().estimateGas({ from: props.dfoCore.address });
                 const cloneExtensionTransaction = await farmFactory.methods.cloneFarmDefaultExtension().send({ from: props.dfoCore.address, gas: cloneGasLimit });
@@ -553,12 +554,17 @@ const Create = (props) => {
                 <div className="generationSelector">
                     <h6>Gen 1</h6>
                     <p>Powered by the Covenant AMM aggregator, these contracts work with <b>Uniswap V2, Balancer V1, Mooniswap V1 and Sushiswap V1.</b></p>
-                    <a className="web2ActionBTN" href="javascript:;" onClick={() => setGeneration("gen1")}>Select</a>
+                    <a className="web2ActionBTN" href="javascript:;" onClick={() => void(setGeneration("gen1"), setIndividualNFT(false))}>Select</a>
                 </div>
                 <div className="generationSelector">
-                    <h6>Uniswap V3</h6>
+                    <h6>Uniswap V3 Shared NFT</h6>
                     <p>Designed for <b>Uniswap v3</b>, these contracts enable customizable price curves and low-cost farming by allowing farmers to pool together in shared v3 NFTs.</p>
-                    <a className="web2ActionBTN" href="javascript:;" onClick={() => setGeneration("gen2")}>Select</a>
+                    <a className="web2ActionBTN" href="javascript:;" onClick={() => void(setGeneration("gen2"), setIndividualNFT(false))}>Select</a>
+                </div>
+                <div className="generationSelector">
+                    <h6>Uniswap V3 Individual NFT</h6>
+                    <p>Designed for <b>Uniswap v3</b>, these contracts enable customizable price curves and low-cost farming by allowing farmers to pool together in shared v3 NFTs.</p>
+                    <a className="web2ActionBTN" href="javascript:;" onClick={() => void(setGeneration("gen2"), setIndividualNFT(true))}>Select</a>
                 </div>
             </div>
             <p className="OnlyMobileVersion">Use a Desktop or a tablet to build Farming Contracts</p>
