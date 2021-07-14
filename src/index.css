@@ -584,6 +584,8 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
 .FancyExplanationCreateS {width: 35%; text-align: center; display: inline-block; vertical-align: middle;}
 .web2ActionBTNFFF {margin: 10px auto;}
 .littleDisclamer {font-size: 8px !important; margin-top: -9px;}
+.FarmBannerV3 {background-color: #7474f7; color: #ffffff; padding: 30px; border-radius: 15px;}
+.FarmBannerV3 p a {color: #ffffff !important;}
 
 
 @media only screen and (max-device-width: 750px) {
@@ -721,6 +723,7 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
    .DeleteMRD {margin: 0px 9px;}
    .TokenFarmV3InfoBox {width: 48%;display: inline-block;}
    .farmInfoCurve {width: 100% !important;}
+   .FarmBannerV3 p {font-size: 10px;}
 }
 
 @media only screen and (min-device-width: 751px) and (max-device-width: 1024px) {
@@ -745,3 +748,4 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
    .page-container-wrapper, .page-container {width: 100% !important;display: inline-block !important;}
    .ApplicationMenu {position: absolute;}
 }
+.FarmBannerV3 p .BannerA {color: #ffffff !important; font-weight: bold;}

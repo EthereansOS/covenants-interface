@@ -64,6 +64,9 @@ const FarmingComponent = (props) => {
                     </div>
                 </div>
             }
+            {goBack && <div className="FarmBannerV3">
+                            <p>Please note that rewards for these farms will end at approximately 3:30pm CET (July 14 2021). This will not affect how many rewards or fees you have already earned. New BUIDL, ARTE & UniFi farms with rewards will open at block 12825553 For more information, <a className="BannerA" target="_blank" href="https://medium.com/@cd_8721/390488ff8773?source=friends_link&sk=08e1581f333801a3a5bfba812429ecc1">read this</a>.</p>
+                        </div>}
         </div>
     )
 }
