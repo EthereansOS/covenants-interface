@@ -195,6 +195,11 @@ export default {
         "0xa4d9c768e1c6cabb127a6326c0668b49235639e8": "https://gateway.ipfs.io/ipfs/QmS377M8hhRYEMrDNuko1h5htnhHAjT5gFUHWAgB2UP765",
         "0x0473f6ea742448ec9433b87ac410d79c08198abe": "https://gateway.ipfs.io/ipfs/QmeT8f6M4dgKWWKzeUXLRrxSVam5NbYA2yxsHgS3vbBAmF"
     },
+    "toEndContracts" : [
+        "0x409cc2EC86EF79a3BB6aB6CF1D80b5702a5fC2f8",
+        "0x6974D0992410F74C87c5C99fD26A215d8ea4A1F2",
+        "0xDDbA0c6683BdB534BD6d28b560951F115d526387"
+    ],
     "x2USDAddress": "0xa4d9c768e1c6cabb127a6326c0668b49235639e8",
     "x5USDAddress": "0x0473f6ea742448ec9433b87ac410d79c08198abe",
     "x2USDNoteControllerAddress": "0x88a012e4d2b8600cf82e21f0685ec2ebcf643847",
