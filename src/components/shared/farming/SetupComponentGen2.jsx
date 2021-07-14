@@ -338,7 +338,7 @@ const SetupComponentGen2 = (props) => {
             };
             var additionalFees = ['0', '0'];
             try {
-                var simulation = await simulateDecreaseLiquidityAndCollect(position.tokenId || farmSetup.objectId, lmContract.options.address);
+                var simulation = await simulateDecreaseLiquidityAndCollect(position.tokenId || farmSetup.objectId, lmContract.options.address, position.liquidityPoolTokenAmount);
                 amounts.tokensAmounts = simulation.liquidity;
                 additionalFees = simulation.fees;
             } catch(e) {
@@ -366,13 +366,13 @@ const SetupComponentGen2 = (props) => {
         setApy(await calculateApy(farmSetup, farmSetupInfo, rewardTokenAddress, rewardTokenDecimals, tokens));
     }
 
-    async function simulateDecreaseLiquidityAndCollect(objectId, lmContractAddress) {
+    async function simulateDecreaseLiquidityAndCollect(objectId, lmContractAddress, amount) {
         var nftPosManEthers = await dfoCore.getEthersContract(dfoCore.getContextElement("UniswapV3NonfungiblePositionManagerABI"), dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress"));
         var nftPosMan = await dfoCore.getContract(dfoCore.getContextElement("UniswapV3NonfungiblePositionManagerABI"), dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress"));
         var bytes = [
             nftPosMan.methods.decreaseLiquidity({
                 tokenId : objectId,
-                liquidity : (await nftPosMan.methods.positions(objectId).call()).liquidity,
+                liquidity : amount || (await nftPosMan.methods.positions(objectId).call()).liquidity,
                 amount0Min : 0,
                 amount1Min : 0,
                 deadline: new Date().getTime() + 10000
