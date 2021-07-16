@@ -718,7 +718,6 @@ input[type=range] {height: 31px;-webkit-appearance: none;margin: 10px 0;width: 1
    .Web2ActionsBTNs a {margin: 4px 4px;font-size: 12px; padding: 4px 8px;}
    .FarmContractOpen {padding: 0 3%;}
    .FarmContract .StatsLink {display: none;}
-   .farmInfoCurve {display: none !important;}
    .SetupFarmingInstructionsV3 {width: 100%;}
    .DeleteMRD {margin: 0px 9px;}
    .TokenFarmV3InfoBox {width: 48%;display: inline-block;}
