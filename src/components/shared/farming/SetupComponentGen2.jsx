@@ -7,8 +7,8 @@ import SwitchIcon from "../../../assets/images/switch.png";
 import ArrowIcon from "../../../assets/images/arrow.png";
 import Loading from "../Loading";
 import { useRef } from 'react';
-import { tickToPrice, Pool, Position, LiquidityMath, nearestUsableTick, TICK_SPACINGS, TickMath, maxLiquidityForAmounts } from '@uniswap/v3-sdk/dist/';
-import { Token } from "@uniswap/sdk-core/dist";
+import { tickToPrice, Pool, Position, nearestUsableTick, TICK_SPACINGS, TickMath, maxLiquidityForAmounts } from '@uniswap/v3-sdk/dist/';
+import { Token, Percent } from "@uniswap/sdk-core/dist";
 
 const SetupComponentGen2 = (props) => {
     let { className, dfoCore, setupIndex, lmContract, hostedBy } = props;
@@ -108,27 +108,7 @@ const SetupComponentGen2 = (props) => {
         updateEthAmount(ethAmount);
     }, [uniqueOwner, selectedAmmIndex]);
 
-    useEffect(() => {
-        if(slippage == 0) {
-            setAmountsMin(['0', '0']);
-        }
-        try {
-            var toler = 100 - slippage;
-            var amount0Min = window.formatNumber(tokensAmounts[0].full || tokensAmounts[0]);
-            var amount1Min = window.formatNumber(tokensAmounts[1].full || tokensAmounts[1]);
-            amount0Min = window.numberToString(amount0Min * toler).split('.')[0];
-            amount1Min = window.numberToString(amount1Min * toler).split('.')[0];
-            setAmountsMin([{
-                full : amount0Min,
-                value : window.fromDecimals(amount0Min, lpTokenInfo.token0decimals)
-            }, {
-                full : amount1Min,
-                value : window.fromDecimals(amount1Min, lpTokenInfo.token1decimals)
-            }]);
-        } catch(e) {
-            setAmountsMin(['0', '0']);
-        }
-    }, [slippage, tokensAmounts]);
+    useEffect(() => calculateSlippageAmounts(slippage, lpTokenAmount).then(setAmountsMin), [slippage, lpTokenAmount]);
 
     useEffect(async () => {
         try {
@@ -502,6 +482,49 @@ const SetupComponentGen2 = (props) => {
         setTokensApprovals(tokensApprovals.map((val, i) => i === index ? true : val));
     }
 
+    async function calculateSlippageAmounts(slippage, liquidity, type) {
+        if(slippage == 0) {
+            return ['0', '0'];
+        }
+        try {
+            var toler = new Percent(slippage, 100);
+            const partialPosition = new Position({
+                pool: await createPool(liquidity),
+                liquidity,
+                tickLower: parseInt(setupInfo.tickLower),
+                tickUpper: parseInt(setupInfo.tickUpper)
+            });
+            var { amount0: amount0Min, amount1: amount1Min } = partialPosition[`${type || 'mint'}AmountsWithSlippage`](toler);
+            amount0Min = amount0Min.toString().split('.')[0];
+            amount1Min = amount1Min.toString().split('.')[0];
+            return [{
+                full : amount0Min,
+                value : window.fromDecimals(amount0Min, lpTokenInfo.token0decimals)
+            }, {
+                full : amount1Min,
+                value : window.fromDecimals(amount1Min, lpTokenInfo.token1decimals)
+            }];
+        } catch(e) {
+            return ['0', '0'];
+        }
+    }
+
+    async function createPool(liquidity) {
+        liquidity = liquidity || 0;
+        var slot0 = await lpTokenInfo.contract.methods.slot0().call();
+        var tick = nearestUsableTick(parseInt(slot0.tick), TICK_SPACINGS[lpTokenInfo.fee]);
+        var sqrtPriceX96 = TickMath.getSqrtRatioAtTick(tick).toString();
+        var pool;
+        try {
+            pool = new Pool(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(lpTokenInfo.fee), parseInt(sqrtPriceX96), liquidity, tick);
+        } catch(e) {
+            try {
+                pool = new Pool(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(lpTokenInfo.fee), parseInt(slot0.sqrtPriceX96), liquidity, parseInt(slot0.tick));
+            } catch(e) {
+            }
+        }
+        return pool;
+    }
 
     const onUpdateTokenAmount = async (value, index) => {
         var tks = tokensAmounts.map(it => it);
@@ -527,18 +550,7 @@ const SetupComponentGen2 = (props) => {
         window.updateAmountTimeout = setTimeout(async function () {
             var tokenAddress = setupTokens[index].address;
             tokenAddress = tokenAddress === window.voidEthereumAddress ? ethereumAddress : tokenAddress;
-            var slot0 = await lpTokenInfo.contract.methods.slot0().call();
-            var tick = nearestUsableTick(parseInt(slot0.tick), TICK_SPACINGS[lpTokenInfo.fee]);
-            var sqrtPriceX96 = TickMath.getSqrtRatioAtTick(tick).toString();
-            var pool;
-            try {
-                pool = new Pool(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(lpTokenInfo.fee), parseInt(sqrtPriceX96), 0, tick);
-            } catch(e) {
-                try {
-                    pool = new Pool(lpTokenInfo.uniswapTokens[0], lpTokenInfo.uniswapTokens[1], parseInt(lpTokenInfo.fee), parseInt(slot0.sqrtPriceX96), 0, parseInt(slot0.tick));
-                } catch(e) {
-                }
-            }
+            var pool = await createPool();
             var fromAmountData = {pool, tickLower : parseInt(setupInfo.tickLower), tickUpper : parseInt(setupInfo.tickUpper), useFullPrecision : false};
             fromAmountData[`amount${index}`] = window.formatNumber(fullValue);
             var pos = Position[`fromAmount${index}`](fromAmountData);
@@ -684,11 +696,19 @@ const SetupComponentGen2 = (props) => {
     const removeLiquidity = async () => {
         if (setupInfo.free && (!removalAmount || removalAmount === 0)) return;
         setRemoveLoading(true);
+        async function submit(method) {
+            const gasLimit = await method.estimateGas({ from: dfoCore.address });
+            const result = await method.send({ from: dfoCore.address, gasLimit, gas : gasLimit });
+            props.addTransaction(result);
+        }
         try {
             const removedLiquidity = removalAmount === 100 ? manageStatus.liquidityPoolAmount : props.dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString().split('.')[0];
-            const gasLimit = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, removedLiquidity).estimateGas({ from: dfoCore.address });
-            const result = await lmContract.methods.withdrawLiquidity(currentPosition.positionId, removedLiquidity).send({ from: dfoCore.address, gasLimit, gas : gasLimit });
-            props.addTransaction(result);
+            var amMin = await calculateSlippageAmounts(slippage, removedLiquidity, 'burn');
+            try {
+                await submit(lmContract.methods.withdrawLiquidity(currentPosition.positionId, removedLiquidity, amMin[0].full || amMin[0], amMin[1].full || amMin[1]));
+            } catch(ex) {
+                await submit(lmContract.methods.withdrawLiquidity(currentPosition.positionId, removedLiquidity));
+            }
             await getSetupMetadata();
         } catch (error) {
             console.error(error);
@@ -699,11 +719,19 @@ const SetupComponentGen2 = (props) => {
 
     async function withdrawAll() {
         setWithdrawingAll(true);
-        try {
-            var method = lmContract.methods.withdrawLiquidity(currentPosition.positionId, manageStatus.liquidityPoolAmount);
+        async function submit(method) {
             const gasLimit = await method.estimateGas({ from: dfoCore.address });
             const result = await method.send({ from: dfoCore.address, gasLimit, gas : gasLimit });
             props.addTransaction(result);
+        }
+        try {
+            var amMin = await calculateSlippageAmounts(slippage, manageStatus.liquidityPoolAmount, 'burn');
+            try {
+                await submit(lmContract.methods.withdrawLiquidity(currentPosition.positionId, manageStatus.liquidityPoolAmount, amMin[0].full || amMin[0], amMin[1].full || amMin[1]));
+            } catch(ex) {
+                await submit(lmContract.methods.withdrawLiquidity(currentPosition.positionId, manageStatus.liquidityPoolAmount));
+            }
+            await getSetupMetadata();
         } catch(e) {
             console.error(e);
         }
