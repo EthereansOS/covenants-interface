@@ -64,7 +64,7 @@ export default class DFOCore {
                 this.chainId = await this.web3.eth.getChainId();
                 // set the address
                 const accounts = await this.web3.eth.getAccounts();
-                this.address = "0x163b5bcb30204477a4db076be11dcf3290865cd4";//accounts[0];
+                this.address = accounts[0];
                 // check for accounts changes
                 provider.on('accountsChanged', (accounts) => {
                     this.address = accounts[0] || this.voidEthereumAddress;
