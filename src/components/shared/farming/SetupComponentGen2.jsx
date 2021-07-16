@@ -682,6 +682,7 @@ const SetupComponentGen2 = (props) => {
                     props.addTransaction(result);
                 }
             }
+            await getSetupMetadata();
         } catch (error) {
             console.error(error);
             if (inputType === 'add-eth' && error.code && error.code !== 4001) {
@@ -690,7 +691,6 @@ const SetupComponentGen2 = (props) => {
         } finally {
             setAddLoading(false);
         }
-        await getSetupMetadata();
     }
 
     const removeLiquidity = async () => {
