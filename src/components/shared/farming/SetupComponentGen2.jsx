@@ -82,7 +82,7 @@ const SetupComponentGen2 = (props) => {
     const ethereumAddress = props.dfoCore.getContextElement("wethTokenAddress");
 
     const [hasSlippage, setHasSlippage] = useState(false);
-    const [slippage, setSlippage] = useState(0);
+    const [slippage, setSlippage] = useState(3);
     const [amountsMin, setAmountsMin] = useState(['0', '0']);
 
     function getFarmingPrestoAddress() {
@@ -499,10 +499,10 @@ const SetupComponentGen2 = (props) => {
             amount1Min = amount1Min.toString().split('.')[0];
             return [{
                 full : amount0Min,
-                value : window.fromDecimals(amount0Min, lpTokenInfo.token0decimals)
+                value : window.fromDecimals(amount0Min, setupTokens[0].decimals, true)
             }, {
                 full : amount1Min,
-                value : window.fromDecimals(amount1Min, lpTokenInfo.token1decimals)
+                value : window.fromDecimals(amount1Min, setupTokens[1].decimals, true)
             }];
         } catch(e) {
             return ['0', '0'];
@@ -1061,21 +1061,21 @@ const SetupComponentGen2 = (props) => {
 
     function onHasSlippageChange(e) {
         setHasSlippage(e.currentTarget.checked);
-        setSlippage(0);
+        setSlippage(3);
     };
 
     function onSlippageChange(e) {
-        var value = parseInt(e.currentTarget.value);
-        var min = parseInt(e.currentTarget.min) / 100;
-        var max = parseInt(e.currentTarget.max) / 100;
-        value = (isNaN(value) ? 0 : value) / 100;
+        var value = parseFloat(e.currentTarget.value);
+        var min = parseFloat(e.currentTarget.min);
+        var max = parseFloat(e.currentTarget.max);
+        value = isNaN(value) ? 0 : value;
         if(value < min) {
             value = min;
         }
         if(value > max) {
             value = max;
         }
-        setSlippage(value * 100);
+        setSlippage(value);
     };
 
     const getAdvanced = () => {
@@ -1120,6 +1120,21 @@ const SetupComponentGen2 = (props) => {
         //window.fromDecimals((parseInt(setup.rewardPerBlock) * 6400 * parseInt(manageStatus.liquidityPoolAmount) / parseInt(setup.totalSupply)).toString().split('.')[0], rewardTokenInfo.decimals, true)
     }
 
+    function renderSlippage() {
+        return (<>
+            <label className="OptionalThingsFarmers">
+                <p>
+                    <input type="checkbox" value={hasSlippage} onChange={onHasSlippageChange}/>
+                    Slippage: {slippage}%
+                </p>
+            </label>
+            {hasSlippage && <div className="DiffWallet">
+                <input type="number" min="0" max="99" className="TextRegular" value={slippage} onChange={onSlippageChange}/>
+                <p className="BreefExpl">Set Slippage %</p>
+            </div>}
+        </>);
+    };
+
     const getManageAdvanced = () => {
         if (withdrawOpen && currentPosition && setupInfo.free) {
             return (
@@ -1134,6 +1149,7 @@ const SetupComponentGen2 = (props) => {
                         <a className="web2ActionBTN" onClick={() => setRemovalAmount(90)} >90%</a>
                         <a className="web2ActionBTN" onClick={() => setRemovalAmount(100)} >MAX</a>
                     </div>
+                    {renderSlippage()}
                     <div className="Web2ActionsBTNs">
                         {
                             removeLoading ? <a className="Web3ActionBTN" disabled={removeLoading}>
@@ -1147,27 +1163,23 @@ const SetupComponentGen2 = (props) => {
 
         return <div className="FarmActions">
             <label className="OptionalThingsFarmers" htmlFor="openPositionWallet1">
-                <p><input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => {
+                <p>
+                    <input className="form-check-input" type="checkbox" checked={openPositionForAnotherWallet} onChange={(e) => {
                         if (!e.target.checked) {
                             setUniqueOwner("");
                         }
                         setOpenPositionForAnotherWallet(e.target.checked);
                     }} id="openPositionWallet1" />
-                    External Owner</p>
-                </label>
+                    External Owner
+                </p>
+            </label>
                 {
                     openPositionForAnotherWallet && <div className="DiffWallet">
                         <input type="text" className="TextRegular" placeholder="Position owner address" value={uniqueOwner} onChange={(e) => setUniqueOwner(e.target.value)} id="uniqueOwner" />
                         <p className="BreefExpl">This wallet will be the owner of this position and all of its assets.</p>
                     </div>
                 }
-                <>
-                    <label>
-                        <span>Set Slippage %</span>
-                        <input type="checkbox" value={hasSlippage} onChange={onHasSlippageChange}/>
-                    </label>
-                    {hasSlippage && <input type="number" min="0" max="99" value={slippage} onChange={onSlippageChange}/>}
-                </>
+            {renderSlippage()}
                 {
                     setupTokens.map((setupToken, i) => {
                         return <div key={setupToken.address} className="InputTokenRegular">
