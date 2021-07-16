@@ -67,7 +67,7 @@ const FarmingComponent = (props) => {
             {goBack && props.dfoCore.getContextElement("toEndContracts").indexOf(metadata?.contractAddress) !== -1 && <div className="FarmBannerV3">
                 <p>Please note that rewards for these farms will end at approximately 3:30pm CET (July 14 2021). This will not affect how many rewards or fees you have already earned. New BUIDL, ARTE & UniFi farms with rewards will open at block 12825553 For more information, <a className="BannerA" target="_blank" href="https://medium.com/@cd_8721/390488ff8773?source=friends_link&sk=08e1581f333801a3a5bfba812429ecc1">read this</a>.</p>
             </div>}
-            {goBack && props.dfoCore.getContextElement("toEndContracts").indexOf(metadata?.contractAddress) !== -1 && <div className="FarmBannerV3">
+            {goBack && props.dfoCore.getContextElement("toEndContracts2").indexOf(metadata?.contractAddress) !== -1 && <div className="FarmBannerV3">
                 <p>These contracts are deprecated! For more info: <a className="BannerA" target="_blank" href="https://medium.com/@cd_8721/a021a114a65c?source=friends_link&sk=c3c65c1ad149977ca7c46c1354f617c5">read this</a>.</p>
             </div>}
         </div>
