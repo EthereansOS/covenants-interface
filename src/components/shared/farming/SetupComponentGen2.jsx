@@ -707,7 +707,9 @@ const SetupComponentGen2 = (props) => {
             try {
                 await submit(lmContract.methods.withdrawLiquidity(currentPosition.positionId, removedLiquidity, amMin[0].full || amMin[0], amMin[1].full || amMin[1]));
             } catch(ex) {
-                await submit(lmContract.methods.withdrawLiquidity(currentPosition.positionId, removedLiquidity));
+                if((ex.message || ex).toLowerCase().indexOf('user denied') === -1) {
+                    await submit(lmContract.methods.withdrawLiquidity(currentPosition.positionId, removedLiquidity));
+                }
             }
             await getSetupMetadata();
         } catch (error) {
@@ -729,7 +731,9 @@ const SetupComponentGen2 = (props) => {
             try {
                 await submit(lmContract.methods.withdrawLiquidity(currentPosition.positionId, manageStatus.liquidityPoolAmount, amMin[0].full || amMin[0], amMin[1].full || amMin[1]));
             } catch(ex) {
-                await submit(lmContract.methods.withdrawLiquidity(currentPosition.positionId, manageStatus.liquidityPoolAmount));
+                if((ex.message || ex).toLowerCase().indexOf('user denied') === -1) {
+                    await submit(lmContract.methods.withdrawLiquidity(currentPosition.positionId, manageStatus.liquidityPoolAmount));
+                }
             }
             await getSetupMetadata();
         } catch(e) {
