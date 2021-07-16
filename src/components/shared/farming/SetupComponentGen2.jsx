@@ -81,6 +81,10 @@ const SetupComponentGen2 = (props) => {
 
     const ethereumAddress = props.dfoCore.getContextElement("wethTokenAddress");
 
+    const [hasSlippage, setHasSlippage] = useState(false);
+    const [slippage, setSlippage] = useState(0);
+    const [amountsMin, setAmountsMin] = useState(['0', '0']);
+
     function getFarmingPrestoAddress() {
         var prestoAddress = props.dfoCore.getContextElement("farmingPrestoAddress");
         var oldPrestoAddress = props.dfoCore.getContextElement("farmingPrestoAddressOld");
@@ -103,6 +107,28 @@ const SetupComponentGen2 = (props) => {
     useEffect(() => {
         updateEthAmount(ethAmount);
     }, [uniqueOwner, selectedAmmIndex]);
+
+    useEffect(() => {
+        if(slippage == 0) {
+            setAmountsMin(['0', '0']);
+        }
+        try {
+            var toler = 100 - slippage;
+            var amount0Min = window.formatNumber(tokensAmounts[0].full || tokensAmounts[0]);
+            var amount1Min = window.formatNumber(tokensAmounts[1].full || tokensAmounts[1]);
+            amount0Min = window.numberToString(amount0Min * toler).split('.')[0];
+            amount1Min = window.numberToString(amount1Min * toler).split('.')[0];
+            setAmountsMin([{
+                full : amount0Min,
+                value : window.fromDecimals(amount0Min, lpTokenInfo.token0decimals)
+            }, {
+                full : amount1Min,
+                value : window.fromDecimals(amount1Min, lpTokenInfo.token1decimals)
+            }]);
+        } catch(e) {
+            setAmountsMin(['0', '0']);
+        }
+    }, [slippage, tokensAmounts]);
 
     useEffect(async () => {
         try {
@@ -623,6 +649,8 @@ const SetupComponentGen2 = (props) => {
             var value = setupInfo.involvingETH && !stake.amountIsLiquidityPool ? ethTokenValue : "0";
             stake.amount0 = tokensAmounts[0].full || tokensAmounts[0];
             stake.amount1 = tokensAmounts[1].full || tokensAmounts[1];
+            stake.amount0Min = amountsMin[0].full || amountsMin[0];
+            stake.amount1Min = amountsMin[1].full || amountsMin[1];
             if (prestoData) {
                 console.log('using presto!')
                 var sendingOptions = { from: dfoCore.address, value: prestoData.ethValue, gasLimit: 9999999 };
@@ -1003,6 +1031,25 @@ const SetupComponentGen2 = (props) => {
         return (canActivateSetup) ? window.formatMoneyUniV3(amount * parseInt(setupInfo.blockDuration), 6) : parseInt(blockNumber) >= parseInt(setup.endBlock) ? 0 : window.formatMoneyUniV3(amount * (parseInt(setup.endBlock) - parseInt(blockNumber)), 6);
     }
 
+    function onHasSlippageChange(e) {
+        setHasSlippage(e.currentTarget.checked);
+        setSlippage(0);
+    };
+
+    function onSlippageChange(e) {
+        var value = parseInt(e.currentTarget.value);
+        var min = parseInt(e.currentTarget.min) / 100;
+        var max = parseInt(e.currentTarget.max) / 100;
+        value = (isNaN(value) ? 0 : value) / 100;
+        if(value < min) {
+            value = min;
+        }
+        if(value > max) {
+            value = max;
+        }
+        setSlippage(value * 100);
+    };
+
     const getAdvanced = () => {
         return !edit ? getManageAdvanced() : getEdit();
     }
@@ -1086,6 +1133,13 @@ const SetupComponentGen2 = (props) => {
                         <p className="BreefExpl">This wallet will be the owner of this position and all of its assets.</p>
                     </div>
                 }
+                <>
+                    <label>
+                        <span>Set Slippage %</span>
+                        <input type="checkbox" value={hasSlippage} onChange={onHasSlippageChange}/>
+                    </label>
+                    {hasSlippage && <input type="number" min="0" max="99" value={slippage} onChange={onSlippageChange}/>}
+                </>
                 {
                     setupTokens.map((setupToken, i) => {
                         return <div key={setupToken.address} className="InputTokenRegular">
