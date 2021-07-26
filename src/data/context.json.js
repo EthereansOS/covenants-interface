@@ -177,7 +177,7 @@ export default {
     "WUSDAddressRopsten": "0xcb7b92387e9d70D18c138e669F67db3d3E48d79d",
     "WUSDPrestoAddress" : "0x1a0107aC208775820B14B998460F1333a145A854",
     "WUSDPrestoAddressRopsten" : "0x7c974104df9dd7fb91205ab3d66d15aff1049de8",
-    "WUSDFarmMainAddress": "0xaB1f7013Ae40Ffd2628B8450cCa4B7b81b70d5a3",
+    "WUSDFarmMainAddress": "0x015B47ab519851018F588A8f090a467b97988C4C",
     "prestoAddress" : "0x3660c73E030C497cccbE8aaabdc7431fAEB6E495",
     "prestoAddressRopsten" : "0x091b8Af4F3728506c8BcA29D38C41253286B802b",
     "farmingPrestoAddressOld" : "0x8c41e3d4eafd8fe623e4d4325f7c0a4db1ae4f65",
