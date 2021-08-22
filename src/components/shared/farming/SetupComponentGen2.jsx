@@ -321,7 +321,7 @@ const SetupComponentGen2 = (props) => {
             const balance = token ? await token.methods.balanceOf(dfoCore.address).call() : await dfoCore.web3.eth.getBalance(dfoCore.address);
             const approval = token ? await token.methods.allowance(dfoCore.address, lmContract.options.address).call() : true;
             approvals.push(parseInt(approval) !== 0 && (parseInt(approval) >= parseInt(balance) || !token));
-            tokens.push({ amount: 0, balance: dfoCore.toDecimals(dfoCore.toFixed(balance), decimals), liquidity: balances[i], decimals, address: token ? address : dfoCore.voidEthereumAddress, symbol });
+            tokens.push({ amount: 0, balance: balance, liquidity: balances[i], decimals, address: token ? address : dfoCore.voidEthereumAddress, symbol });
             contracts.push(token);
             if (address.toLowerCase() === farmSetupInfo.mainTokenAddress.toLowerCase()) {
                 mtInfo = { approval: parseInt(approval) !== 0 && (parseInt(approval) >= parseInt(balance) || !token), decimals, contract: token, address: token ? address : dfoCore.voidEthereumAddress, symbol };
@@ -526,19 +526,22 @@ const SetupComponentGen2 = (props) => {
         return pool;
     }
 
-    const onUpdateTokenAmount = async (value, index) => {
+    const onUpdateTokenAmount = async (value, index, isFull) => {
+        if(value === undefined || value === null) {
+            value = '0';
+        }
         var tks = tokensAmounts.map(it => it);
         if(value.indexOf('.') !== -1 && value.split('.')[1].length > 18) {
             value = value.split('.');
             value[1] = value[1].substring(0, 18);
             value = value.join('.');
         }
-        const fullValue = window.toDecimals(value, setupTokens[index].decimals);
+        const fullValue = isFull ? value :window.toDecimals(value, setupTokens[index].decimals);
         tks[index] = {
-            value,
+            value : isFull ? window.fromDecimals(value, setupTokens[index].decimals, true) : value,
             full : fullValue
         }
-        //setTokensAmount(tks.map(it => it));
+        isFull && setTokensAmount(tks.map(it => it));
         window.updateAmountTimeout && clearTimeout(window.updateAmountTimeout);
         setLpTokenAmount(null);
         if (!value) {
@@ -567,11 +570,11 @@ const SetupComponentGen2 = (props) => {
             } else {
                 pos = pos.mintAmounts;
                 tks[0] = {
-                    value : index === 0 ? value : window.fromDecimals(pos.amount0.toString(), setupTokens[0].decimals, true),
+                    value : index === 0 && !isFull ? value : window.fromDecimals(pos.amount0.toString(), setupTokens[0].decimals, true),
                     full : pos.amount0.toString()
                 };
                 tks[1] = {
-                    value : index === 1 ? value : window.fromDecimals(pos.amount1.toString(), setupTokens[1].decimals, true),
+                    value : index === 1 && !isFull ? value : window.fromDecimals(pos.amount1.toString(), setupTokens[1].decimals, true),
                     full : pos.amount1.toString()
                 };
             }
@@ -1187,7 +1190,7 @@ const SetupComponentGen2 = (props) => {
                 {
                     setupTokens.map((setupToken, i) => {
                         return <div key={setupToken.address} className="InputTokenRegular">
-                            {(i === 1 ? tickData.cursorNumber !== 100 : tickData.cursorNumber !== 0) && <Input showMax={true} address={setupToken.address} value={tokensAmounts[i].value || window.fromDecimals(tokensAmounts[i], setupToken.decimals, true)} balance={setupToken.balance} min={0} onChange={(e) => onUpdateTokenAmount(e.target.value, i)} showCoin={true} showBalance={true} name={setupToken.symbol} />}
+                            {(i === 1 ? tickData.cursorNumber !== 100 : tickData.cursorNumber !== 0) && <Input showMax={true} address={setupToken.address} value={tokensAmounts[i].value || window.fromDecimals(tokensAmounts[i], setupToken.decimals, true)} balance={setupToken.balance} decimals={setupToken.decimals} min={0} onChange={(e) => onUpdateTokenAmount(e.target.value, i, e.target.isFull)} showCoin={true} showBalance={true} name={setupToken.symbol} />}
                         </div>
                     })
                 }

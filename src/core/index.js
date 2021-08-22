@@ -211,7 +211,7 @@ export default class DFOCore {
             try {
                 var interoperable = await this.getContract(this.getContextElement("IEthItemInteroperableInterfaceABI"), address);
                 this.contracts[key].mainInterface = await interoperable.methods.mainInterface().call();
-                this.contracts[key].isItem = true;
+                this.contracts[key].isItem = interoperable.options.address !== this.web3.utils.toChecksumAddress(this.getContextElement("osTokenAddress"));
             } catch(e) {}
         }
         this.isItemDictionary = this.isItemDictionary || {};
