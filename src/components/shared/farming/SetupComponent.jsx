@@ -1180,7 +1180,7 @@ const SetupComponent = (props) => {
                     {setupInfo.free && rewardTokenInfo && !endBlockReached && <p><b>Daily Rate</b>: {window.formatMoney(window.fromDecimals(parseInt(setup.rewardPerBlock) * 6400, rewardTokenInfo.decimals, true), 6)} {rewardTokenInfo.symbol}</p>}
                 </aside>
                 <div className="SetupFarmingInstructions SetupFarmingInstructionsOMLYG1">
-                    <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />} </figure>)} {!endBlockReached && <> {apy > 0 && <> <b> APY</b>: {window.formatMoney(apy, 3)}%</>}</>}</p>
+                    <p>{setupTokens.map((token, i) => <figure key={token.address}>{i !== 0 ? '+ ' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />} </figure>)} {!endBlockReached && <> {apy > 0 && <> <b> APR</b>: {window.formatMoney(apy, 3)}%</>}</>}</p>
                 </div>
                 {!currentPosition &&
                 <div className="ActionButtonV1">
