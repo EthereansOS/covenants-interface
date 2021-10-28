@@ -108,7 +108,7 @@ export default {
     },
     "wellKnownTokens" : {
         "0x0000000000000000000000000000000000000000" : "https://raw.githubusercontent.com/EthereansOS/covenants-interface/main/src/assets/images/eth.png",
-        "0xFdB29741F239a2406AE287913Ef12415160378d3" : "https://ipfs.io/ipfs/QmUXjopcK6DyvwNdBqfUGKbzGFMnUxHJm9pUR2mnhJVJp1"
+        "0x6100dd79fCAA88420750DceE3F735d168aBcB771" : "https://gateway.pinata.cloud/ipfs/QmcDCvp5kMzVcWkRw2Fb72Zqu479NC22BHCwox6JZTN2LQ"
     },
     "osTokenAddress": "0xFdB29741F239a2406AE287913Ef12415160378d3",
     "indexesURL": "https://raw.githubusercontent.com/EthereansOS/Organizations-Interface/master/bazar-tokens-list/dist/indexes.json",
