@@ -708,10 +708,10 @@ const SetupComponentGen2 = (props) => {
             const removedLiquidity = removalAmount === 100 ? manageStatus.liquidityPoolAmount : props.dfoCore.toFixed(parseInt(manageStatus.liquidityPoolAmount) * removalAmount / 100).toString().split('.')[0];
             var amMin = await calculateSlippageAmounts(slippage, removedLiquidity, 'burn');
             try {
-                await submit(lmContract.methods.withdrawLiquidity(currentPosition.positionId, removedLiquidity, amMin[0].full || amMin[0], amMin[1].full || amMin[1]));
+                await submit(lmContract.methods.withdrawLiquidity(currentPosition.positionId, removedLiquidity, amMin[0].full || amMin[0], amMin[1].full || amMin[1], props.dfoCore.web3.eth.abi.encodeParameter("bytes", props.dfoCore.web3.eth.abi.encodeParameters(["bool", "bytes"], ["false", "0x"]))));
             } catch(ex) {
                 if((ex.message || ex).toLowerCase().indexOf('user denied') === -1) {
-                    await submit(lmContract.methods.withdrawLiquidity(currentPosition.positionId, removedLiquidity));
+                    await submit(lmContract.methods.withdrawLiquidity(currentPosition.positionId, removedLiquidity, props.dfoCore.web3.eth.abi.encodeParameter("bytes", props.dfoCore.web3.eth.abi.encodeParameters(["bool", "bytes"], ["false", "0x"]))));
                 }
             }
             await getSetupMetadata();
@@ -732,10 +732,10 @@ const SetupComponentGen2 = (props) => {
         try {
             var amMin = await calculateSlippageAmounts(slippage, manageStatus.liquidityPoolAmount, 'burn');
             try {
-                await submit(lmContract.methods.withdrawLiquidity(currentPosition.positionId, manageStatus.liquidityPoolAmount, amMin[0].full || amMin[0], amMin[1].full || amMin[1]));
+                await submit(lmContract.methods.withdrawLiquidity(currentPosition.positionId, manageStatus.liquidityPoolAmount, amMin[0].full || amMin[0], amMin[1].full || amMin[1], props.dfoCore.web3.eth.abi.encodeParameter("bytes", props.dfoCore.web3.eth.abi.encodeParameters(["bool", "bytes"], ["false", "0x"]))));
             } catch(ex) {
                 if((ex.message || ex).toLowerCase().indexOf('user denied') === -1) {
-                    await submit(lmContract.methods.withdrawLiquidity(currentPosition.positionId, manageStatus.liquidityPoolAmount));
+                    await submit(lmContract.methods.withdrawLiquidity(currentPosition.positionId, manageStatus.liquidityPoolAmount, props.dfoCore.web3.eth.abi.encodeParameter("bytes", props.dfoCore.web3.eth.abi.encodeParameters(["bool", "bytes"], ["false", "0x"]))));
                 }
             }
             await getSetupMetadata();
