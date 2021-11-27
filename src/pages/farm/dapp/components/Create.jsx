@@ -344,12 +344,12 @@ const Create = (props) => {
         return window.isEthereumAddress(hostDeployedContract);
     }
 
-    const [rewardTokenCheck, setRewardTokenCheck] = useState("eth")
+    const [rewardTokenCheck, setRewardTokenCheck] = useState(null)
 
     function onRewardTokenChange(e) {
         var value = e.currentTarget.value
         setRewardTokenCheck(value)
-        setSelectedRewardToken(value === 'eth' ? props.dfoCore.voidEthereumAddress : null)
+        setSelectedRewardToken(value === 'eth' ? { address: props.dfoCore.voidEthereumAddress, symbol : 'ETH', decimals : '18'} : null)
     }
 
     const getCreationComponent = () => {

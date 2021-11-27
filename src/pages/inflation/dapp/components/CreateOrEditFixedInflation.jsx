@@ -9,7 +9,7 @@ import { Coin } from "../../../../components/shared";
 
 const CreateOrEditFixedInflation = (props) => {
 
-    var fixedInflationFactory = window.newContract(props.dfoCore.getContextElement("FixedInflationFactoryABI"), props.dfoCore.getContextElement("fixedInflationFactoryAddress"));
+    var fixedInflationFactory = window.newContract(props.dfoCore.getContextElement("NewFactoryABI"), props.dfoCore.getContextElement("fixedInflationFactoryAddress"));
 
     var paths = useLocation().pathname.split('/');
     var fixedInflationContractAddress = props.fixedInflationContractAddress || paths[paths.length - 1];
@@ -37,7 +37,7 @@ const CreateOrEditFixedInflation = (props) => {
                 operations: []
             });
         }
-        var fixedInflationContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('FixedInflationABI'), fixedInflationContractAddress);
+        var fixedInflationContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('NewFixedInflationABI'), fixedInflationContractAddress);
         setExtensionAddress(await fixedInflationContract.methods.extension().call());
         var entry = await fixedInflationContract.methods.entry().call();
         var clonedEntry = {};
@@ -123,14 +123,13 @@ const CreateOrEditFixedInflation = (props) => {
         async address() {
             setDeployMessage("1/3 - Deploying Extension...");
             var sendingOptions = { from: props.dfoCore.address };
-            var method = fixedInflationFactory.methods.cloneFixedInflationDefaultExtension();
+            var method = fixedInflationFactory.methods.cloneDefaultExtension();
             var gasLimit = await method.estimateGas(sendingOptions);
             sendingOptions.gasLimit = gasLimit;
             sendingOptions.gas = gasLimit;
             var transaction = await method.send(sendingOptions);
-            var receipt = await window.web3.eth.getTransactionReceipt(transaction.transactionHash);
-            var fixedInflationExtensionAddress = window.web3.eth.abi.decodeParameter("address", receipt.logs.filter(it => it.topics[0] === window.web3.utils.sha3('ExtensionCloned(address)'))[0].topics[1]);
-
+            var fixedInflationExtensionAddress = await method.call(sendingOptions, transaction.blockNumber - 1);
+            console.log({fixedInflationExtensionAddress});
             setExtensionType("deployedContract");
             setExtensionAddress(fixedInflationExtensionAddress);
 
@@ -154,12 +153,12 @@ const CreateOrEditFixedInflation = (props) => {
             setDeployMessage(`${preDeployedContract ? "2/3" : "1/2"} - Deploying Liqudity Mining Contract...`);
             var elaboratedEntry = elaborateEntry(entry);
 
-            var data = window.newContract(props.dfoCore.getContextElement("FixedInflationABI")).methods.init(
+            var data = "0x" + (window.newContract(props.dfoCore.getContextElement("FixedInflationABI")).methods.init(
                 preDeployedContract || extensionAddress,
                 builtPayload || payload || "0x",
                 elaboratedEntry,
                 elaboratedEntry.operations
-            ).encodeABI();
+            ).encodeABI()).substring(11);
 
             var sendingOptions = { from: props.dfoCore.address };
             var method = fixedInflationFactory.methods.deploy(data);
@@ -167,8 +166,11 @@ const CreateOrEditFixedInflation = (props) => {
             sendingOptions.gasLimit = gasLimit;
             sendingOptions.gas = sendingOptions.gasLimit;
             var transaction = await method.send(sendingOptions);
-            var receipt = await window.web3.eth.getTransactionReceipt(transaction.transactionHash);
-            var fixedInflationAddress = window.web3.eth.abi.decodeParameter("address", receipt.logs.filter(it => it.topics[0] === window.web3.utils.sha3('FixedInflationDeployed(address,address,bytes)'))[0].topics[1]);
+            var fixedInflationAddress = await method.call(sendingOptions, transaction.blockNumber - 1)
+            fixedInflationAddress = fixedInflationAddress[0]
+            console.log({fixedInflationAddress})
+            //var receipt = await window.web3.eth.getTransactionReceipt(transaction.transactionHash);
+            //var fixedInflationAddress = window.web3.eth.abi.decodeParameter("address", receipt.logs.filter(it => it.topics[0] === window.web3.utils.sha3('FixedInflationDeployed(address,address,bytes)'))[0].topics[1]);
 
             setDeployMessage(`${preDeployedContract ? "3/3" : "2/2"} - Enabling Extension...`);
 
@@ -226,7 +228,7 @@ const CreateOrEditFixedInflation = (props) => {
         setRecap(finalRecap);
     }
 
-    
+
 
     function elaborateEntry(entry) {
         var elaboratedEntry = {
@@ -414,16 +416,16 @@ const CreateOrEditFixedInflation = (props) => {
                 <p><b>Before attempting to execute the FI remember to send the amount of token needed to the FI extension address: {extensionAddress}</b></p>
                 <p className="SuccessTextLink"><a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}/address/${extensionAddress}`}>Etherscan</a></p>
                 <p className="Disclamerfinish">The first time the FI will fail the execution due to insufficient funds in the extension address, this contract will be automatically deactivated until editing from the host and reactivation manually.<br></br>For more info about hosting a Fixed Inflation contract: <a className="SuccessTextLink" target="_blank" href="https://docs.ethos.wiki/covenants/protocols/inflation">Documentation</a></p>
-                </> : <> 
+                </> : <>
                 {/*If not choosen by wallet (custom extension contract)*/}
                 <p>Before attempting to execute the FI <b>you first need to do do all of the actions needed to send the amount of token needed to the FI extension address: {extensionAddress}</b></p>
                 <p className="SuccessTextLink"><a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}/address/${extensionAddress}`}>Etherscan</a></p>
                 <p>If you rule the extension via a DFO or a DAO, be sure to vote to grant permissions from its Treasury.</p>
                 <p className="Disclamerfinish">The first time the FI will fail the execution due to insufficient funds in the extension address, this contract will be automatically deactivated until editing from the host and reactivation manually.<br></br>For more info about hosting a Fixed Inflation contract: <a className="SuccessTextLink" target="_blank" href="https://docs.ethos.wiki/covenants/protocols/inflation">Documentation</a></p>
-                </>} 
+                </>}
             <p>Fixed Inflation Contract Address: {fixedInflationAddress} <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}/address/${fixedInflationAddress}`}>(Etherscan)</a></p>
             <p className="SuccessTextLink"><a target="_blank" href={"https://covenants.eth.link/#/inflation/dapp/" + fixedInflationAddress}>Fixed Inflation Link</a></p>
-                
+
             </div>
         </>
     }

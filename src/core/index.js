@@ -411,11 +411,10 @@ export default class DFOCore {
     loadDeployedFixedInflationContracts = async(factoryAddress) => {
         try {
             if (!factoryAddress) factoryAddress = this.getContextElement("fixedInflationFactoryAddress");
-            const factoryContract = await this.getContract(this.getContextElement("FixedInflationFactoryABI"), factoryAddress);
             const events = await window.getLogs({
                 address: factoryAddress,
                 topics: [
-                    this.web3.utils.sha3('FixedInflationDeployed(address,address,bytes)')
+                    this.web3.utils.sha3('Deployed(address,address,address,bytes)')
                 ],
                 fromBlock: 0,
                 toBlock: 'latest'
@@ -423,9 +422,9 @@ export default class DFOCore {
             this.deployedFixedInflationContracts = [];
             for (let i = 0; i < events.length; i++) {
                 const event = events[i];
-                const fixedInflationAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
-                const contract = await this.getContract(this.getContextElement("FixedInflationABI"), fixedInflationAddress);
-                const extensionAddress = await contract.methods.extension().call();
+                const fixedInflationAddress = window.web3.eth.abi.decodeParameter("address", event.topics[2]);
+                const contract = await this.getContract(this.getContextElement("NewFixedInflationABI"), fixedInflationAddress);
+                const extensionAddress = await contract.methods.host().call();
                 const extensionContract = await this.getContract(this.getContextElement("FixedInflationExtensionABI"), extensionAddress);
                 const { host } = await extensionContract.methods.data().call();
                 this.deployedFixedInflationContracts.push({ address: fixedInflationAddress, sender: host });

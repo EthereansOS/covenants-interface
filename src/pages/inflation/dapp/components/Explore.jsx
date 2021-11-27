@@ -38,9 +38,9 @@ const Explore = (props) => {
             const mappedEntries = [];
             await Promise.all(
                 props.dfoCore.deployedFixedInflationContracts.map(async (contract) => {
-                    const fiContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('FixedInflationABI'), contract.address);
+                    const fiContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('NewFixedInflationABI'), contract.address);
                     const result = manipulateResult(await fiContract.methods.entry().call(), contract.address);
-                    var extensionContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("FixedInflationExtensionABI"), await fiContract.methods.extension().call());
+                    var extensionContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("FixedInflationExtensionABI"), await fiContract.methods.host().call());
                     var active = true;
                     try {
                         active = await extensionContract.methods.active().call();

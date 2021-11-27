@@ -15,6 +15,7 @@ const ExploreInflationContract = (props) => {
     const [metadata, setMetadata] = useState(null);
     const [executing, setExecuting] = useState(false);
     const [earnByInput, setEarnByInput] = useState(false);
+    const [minInputs, setMinInputs] = useState([]);
 
     var paths = useLocation().pathname.split('/');
 
@@ -25,7 +26,7 @@ const ExploreInflationContract = (props) => {
     const getContractMetadata = async () => {
         try {
             var contractAddress = paths[paths.length - 1];
-            var contract = await props.dfoCore.getContract(props.dfoCore.getContextElement("FixedInflationABI"), contractAddress);
+            var contract = await props.dfoCore.getContract(props.dfoCore.getContextElement("NewFixedInflationABI"), contractAddress);
             setContract(contract);
             var result = await contract.methods.entry().call();
             var entry = result[0];
@@ -34,6 +35,7 @@ const ExploreInflationContract = (props) => {
                 Object.entries(it).forEach(entry => copy[entry[0]] = entry[1]);
                 return copy;
             });
+            setMinInputs(operations.map(it => 0))
             for (var operation of operations) {
                 if (operation.ammPlugin !== window.voidEthereumAddress) {
                     var ammContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("AMMABI"), operation.ammPlugin);
@@ -75,7 +77,7 @@ const ExploreInflationContract = (props) => {
             const executorReward = (entry.callerRewardPercentage / oneHundred) * 100;
             var blockNumber = parseInt(await window.web3.eth.getBlockNumber());
             var nextBlock = parseInt(entry.lastBlock) + parseInt(entry.blockInterval);
-            var extensionContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("FixedInflationExtensionABI"), await contract.methods.extension().call());
+            var extensionContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("FixedInflationExtensionABI"), await contract.methods.host().call());
             var active = true;
             try {
                 active = await extensionContract.methods.active().call();
@@ -87,7 +89,7 @@ const ExploreInflationContract = (props) => {
                 period: period[0],
                 executorReward,
                 operations,
-                extension: await contract.methods.extension().call(),
+                extension: await contract.methods.host().call(),
                 contractAddress: contract.options.address,
                 executable: active && blockNumber >= nextBlock,
                 active,
@@ -104,8 +106,9 @@ const ExploreInflationContract = (props) => {
         setExecuting(true);
         var error;
         try {
+            var mi = minInputs.map(it => window.toDecimals(it, 18))
             var sendingOptions = { from: props.dfoCore.address };
-            var method = contract.methods.execute(earnByInput);
+            var method = contract.methods.executeWithMinAmounts(earnByInput, mi);
             var gasLimit = await method.estimateGas(sendingOptions);
             sendingOptions.gasLimit = gasLimit;
             sendingOptions.gas = gasLimit;
@@ -153,6 +156,16 @@ const ExploreInflationContract = (props) => {
                         })}
                         <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}address/${metadata.extension}`}>Sender</a>
                     </div>
+                    {operation.swapTokens && operation.swapTokens.length > 0 && <div>
+                        <label>
+                            <span>Minimum amount for slippage:</span>
+                            <input type="number" value={minInputs[i]} onChange={e => {
+                                var mi = minInputs.map(it => it)
+                                mi[i] = e.target.value
+                                setMinInputs(mi)
+                            }}/>
+                        </label>
+                    </div>}
                     <p><b>{operation.inputTokenAmountIsByMint ? "Mint " : "Transfer "}</b> {window.formatMoney(amount) != '0' ? window.formatMoney(amount) : amount} {operation.inputTokenAmountIsPercentage ? "% of " : " "} {operation.inputToken.symbol} <Coin address={operation.inputToken.address} /> {operation.inputTokenAmountIsPercentage ? " Supply " : ""}
                         {operation.ammPlugin !== window.voidEthereumAddress && <>
                             and <b>swap</b><span> {" > "} </span>

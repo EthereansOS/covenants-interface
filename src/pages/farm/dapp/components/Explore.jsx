@@ -17,6 +17,116 @@ const Explore = (props) => {
         }
     }, []);
 
+    const ethRewardToken = {
+        name: "Ethereum",
+        symbol: "ETH",
+        address: props.dfoCore.voidEthereumAddress,
+        decimals: "18",
+        image: `${process.env.PUBLIC_URL}/img/eth_logo.png`,
+        contract: {
+            options : {
+                address : props.dfoCore.voidEthereumAddress
+            },
+            methods: {
+                balanceOf(subject) {
+                    return {
+                        call(_, blockNumber) {
+                            return props.dfoCore.web3.eth.getBalance(subject, blockNumber || null)
+                        },
+                        _parent : {
+                            options : {
+                                address : props.dfoCore.voidEthereumAddress
+                            },
+                            currentProvider : props.dfoCore.web3.currentProvider
+                        },
+                        _method : {
+                            stateMutability : 'view'
+                        },
+                        encodeABI() {
+                            return props.dfoCore.web3.utils.sha3('balanceOf(address)').substring(0, 10) + (props.dfoCore.web3.eth.abi.encodeParameter('address', subject).substring(2))
+                        }
+                    }
+                },
+                allowance(owner, spender) {
+                    return {
+                        async call() {
+                            return window.numberToString(parseInt('0xfffffffffffffffffffffffffffffffffffffffffffffff'))
+                        },
+                        _parent : {
+                            options : {
+                                address : props.dfoCore.voidEthereumAddress
+                            },
+                            currentProvider : props.dfoCore.web3.currentProvider
+                        },
+                        _method : {
+                            stateMutability : 'view'
+                        },
+                        encodeABI() {
+                            return props.dfoCore.web3.utils.sha3('allowance(address,address)').substring(0, 10) + (props.dfoCore.web3.eth.abi.encodeParameters(['address', 'address'], [owner, spender || props.dfoCore.voidEthereumAddress]).substring(2))
+                        }
+                    }
+                },
+                name() {
+                    return {
+                        async call() {
+                            return "Ethereum"
+                        },
+                        _parent : {
+                            options : {
+                                address : props.dfoCore.voidEthereumAddress
+                            },
+                            currentProvider : props.dfoCore.web3.currentProvider
+                        },
+                        _method : {
+                            stateMutability : 'view'
+                        },
+                        encodeABI() {
+                            return props.dfoCore.web3.utils.sha3('name()').substring(0, 10)
+                        }
+                    }
+                },
+                symbol() {
+                    return {
+                        async call() {
+                            return "ETH"
+                        },
+                        _parent : {
+                            options : {
+                                address : props.dfoCore.voidEthereumAddress
+                            },
+                            currentProvider : props.dfoCore.web3.currentProvider
+                        },
+                        _method : {
+                            stateMutability : 'view'
+                        },
+                        encodeABI() {
+                            return props.dfoCore.web3.utils.sha3('symbol()').substring(0, 10)
+                        }
+                    }
+                },
+                decimals() {
+                    return {
+                        async call() {
+                            return "18"
+                        },
+                        _parent : {
+                            options : {
+                                address : props.dfoCore.voidEthereumAddress
+                            },
+                            currentProvider : props.dfoCore.web3.currentProvider
+                        },
+                        _method : {
+                            stateMutability : 'view'
+                        },
+                        encodeABI() {
+                            return props.dfoCore.web3.utils.sha3('decimals()').substring(0, 10)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     const getDeployedContracts = async () => {
         setLoading(true);
         try {
@@ -27,7 +137,7 @@ const Explore = (props) => {
                         const contract = await dfoCore.getContract(dfoCore.getContextElement(c.generation === 'gen2' ? "FarmMainGen2ABI" : 'FarmMainGen1ABI'), c.address)
                         const rewardTokenAddress = await contract.methods._rewardTokenAddress().call();
                         const rewardTokenIsEth = rewardTokenAddress === dfoCore.voidEthereumAddress;
-                        const rewardToken = !rewardTokenIsEth ? await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), rewardTokenAddress) : null;
+                        const rewardToken = !rewardTokenIsEth ? await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), rewardTokenAddress) : ethRewardToken.contract;
                         const name = !rewardTokenIsEth ? await rewardToken.methods.name().call() : 'Ethereum';
                         const symbol = !rewardTokenIsEth ? await rewardToken.methods.symbol().call() : 'ETH';
                         const decimals = !rewardTokenIsEth ? await rewardToken.methods.decimals().call() : 18;
@@ -80,7 +190,7 @@ const Explore = (props) => {
                             name,
                             symbol,
                             contractAddress: contract.options.address,
-                            rewardTokenAddress: rewardToken.options.address,
+                            rewardTokenAddress: rewardTokenAddress,
                             rewardPerBlock: dfoCore.toDecimals(dfoCore.toFixed(rewardPerBlock).toString(), decimals),
                             byMint,
                             extension: `${extensionAddress.substring(0, 5)}...${extensionAddress.substring(extensionAddress.length - 3, extensionAddress.length)}`,

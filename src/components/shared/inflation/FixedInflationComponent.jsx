@@ -24,7 +24,7 @@ const FixedInflationComponent = (props) => {
             var blockNumber = parseInt(await window.web3.eth.getBlockNumber());
             var nextBlock = parseInt(entry.lastBlock);
             nextBlock += nextBlock <= blockNumber ? parseInt(entry.blockInterval) : 0;
-            var extensionContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("FixedInflationExtensionABI"), await contract.methods.extension().call());
+            var extensionContract = await props.dfoCore.getContract(props.dfoCore.getContextElement("FixedInflationExtensionABI"), await contract.methods.host().call());
             var extensionContractData = await extensionContract.methods.data().call();
             var active = true;
             try {
@@ -37,7 +37,7 @@ const FixedInflationComponent = (props) => {
                 period: period[0],
                 executorReward,
                 operations,
-                extension: await contract.methods.extension().call(),
+                extension: await contract.methods.host().call(),
                 contractAddress: contract.options.address,
                 executable : active && blockNumber >= nextBlock,
                 active,
@@ -55,7 +55,7 @@ const FixedInflationComponent = (props) => {
         var error;
         try {
             var sendingOptions = {from : props.dfoCore.address};
-            var method = contract.methods.execute([entry.id], [earnByInput]);
+            var method = contract.methods.execute(earnByInput);
             var gasLimit = await method.estimateGas(sendingOptions);
             sendingOptions.gasLimit = gasLimit;
             sendingOptions.gas = gasLimit;

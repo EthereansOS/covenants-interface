@@ -121,6 +121,7 @@ export default {
     "itemsListURL" : "https://raw.githubusercontent.com/EthereansOS/ITEMS-Swap/master/src/constants/ethItemLists/dist/tokensList.json",
     "itemsContextURL" : "https://raw.githubusercontent.com/EthereansOS/ITEMS-Interface/main/data/context.json",
     "blockIntervals" : {
+      "7 Mins" : 32,
       "30 Mins" : 135,
       "1 Hour" : 270,
       "6 Hours" : 1600,
@@ -170,6 +171,7 @@ export default {
     "uniswapV2RouterAddress" : "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
     "uniswapV2FactoryAddress" : "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
     "wethTokenAddress" : "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "wethTokenAddressRinkeby" : "0xc778417e063141139fce010982780140aa0cd5ab",
     "buidlTokenAddress" : "0x7b123f53421b1bf8533339bfbdc7c98aa94163db",
     "usdcTokenAddress" : "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
     "usdtTokenAddress" : "0xdAC17F958D2ee523a2206206994597C13D831ec7",
@@ -222,6 +224,7 @@ export default {
     "ammAggregatorAddressRopsten" : "0x69BfA39E408B91DC8cB85C94EB824b37038c0aAA",
     "fixedInflationFactoryAddress": "0x285427916a9d2e991039A8F1611F575D0a6cf237",
     "fixedInflationFactoryAddressRopsten" : "0x614D37ce2152B55Db86208E30BBe607B024510d0",
+    "fixedInflationFactoryAddressRinkeby" : "0x7bAc4Eb58A095f660D685D14C763d60430A54A9F",
     "liquidityMiningFactoryAddress": "0x9df4e915D093f03169270857CF9a0A5d1ef26388",
     "WUSDExtensionControllerAddress": "0xc6749132243dA6B174BF502E7a85f5cEdD74A753",
     "WUSDExtensionControllerAddressRopsten": "0xb0b0E8d28493b3D65157b40d81BB9365B9243c3a",
