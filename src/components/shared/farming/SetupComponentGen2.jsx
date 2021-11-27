@@ -224,7 +224,7 @@ const SetupComponentGen2 = (props) => {
             setOpen(false);
             setWithdrawOpen(false);
         }
-        const extensionAddress = await lmContract.methods._extension().call();
+        const extensionAddress = await lmContract.methods.host().call();
         const extContract = await dfoCore.getContract(dfoCore.getContextElement("FarmExtensionGen2ABI"), extensionAddress);
         reset && setExtensionContract(extContract);
         const rewardTokenAddress = await lmContract.methods._rewardTokenAddress().call();
@@ -394,7 +394,7 @@ const SetupComponentGen2 = (props) => {
             bytes, {
             from : lmContractAddress
         });
-        var liquidity = props.dfoCore.web3.eth.abi.decodeParameters(["uint128", "uint128"], result[0]); 
+        var liquidity = props.dfoCore.web3.eth.abi.decodeParameters(["uint128", "uint128"], result[0]);
         var balances = props.dfoCore.web3.eth.abi.decodeParameters(["uint128", "uint128"], result[1]);
         var fees = [
             props.dfoCore.web3.utils.toBN(balances[0]).sub(props.dfoCore.web3.utils.toBN(liquidity[0])).toString(),
@@ -805,7 +805,7 @@ const SetupComponentGen2 = (props) => {
                 setLoading(false);
             }
         }
-    
+
         const disableSetup = async () => {
             setLoading(true);
             try {
@@ -1235,7 +1235,7 @@ const SetupComponentGen2 = (props) => {
                 <div className="SetupFarmingInstructions">
                     <div className="SetupFarmingInstructionsV3">
                         {setupTokens.map((token, i) => <div className="TokenFarmV3InfoBox"><figure key={token.address}>{i !== 0 ? '' : ''}{token.address !== props.dfoCore.voidEthereumAddress ? <a target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}token/${token.address}`}><Coin address={token.address} /></a> : <Coin address={token.address} />}</figure><span> {tickData && `${window.formatMoneyUniV3(i === 0 ? tickData.cursorNumber : 100 - tickData.cursorNumber, 2)}%`} {window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>} {!window.dfoCore.isItemSync(token.address) && <span className="Spannino">{token.symbol}</span>}</span> </div>)}
-                        {!endBlockReached && 
+                        {!endBlockReached &&
                             <p className="BlockInfoV3B">
                             {setup.active && parseInt(setup.endBlock) > blockNumber && <span className="V3FarmStatusYEP">Active</span>}
                                 {!delayedBlock && <> {(!setup.active && canActivateSetup) ? <span className="V3FarmStatusNew">{setupReady ? "new" : "Soon"}</span> : (!setup.active) ? <span className="V3FarmStatusNope">Inactive</span> : <></>} {(parseInt(setup.endBlock) <= blockNumber && parseInt(setup.endBlock) !== 0) && <span className="V3FarmStatusNopeNow">Ended</span>}</>}{delayedBlock !== 0 && <span className="V3FarmStatusNew">Soon</span>}
@@ -1254,7 +1254,7 @@ const SetupComponentGen2 = (props) => {
                                                 activateLoading ? <a className="Web3ActionBTN" disabled={activateLoading}>
                                                     <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                                 </a> : <>
-                                                    <a className="web2ActionBTN" onClick={() => void(setOpen(true), setWithdrawOpen(false), setEdit(false))}>Farm</a> 
+                                                    <a className="web2ActionBTN" onClick={() => void(setOpen(true), setWithdrawOpen(false), setEdit(false))}>Farm</a>
                                                     <p className="littleDisclamer">You're the first farmer on this setup, you'll spend more gas, but all of the initial block rewards are yours! </p>
                                                 </>
                                             }
@@ -1269,8 +1269,8 @@ const SetupComponentGen2 = (props) => {
                             }
                             {delayedBlock !== 0 && <div>
                                 <p><b>Start Block: <a href={`${props.dfoCore.getContextElement("etherscanURL")}block/${delayedBlock}`} target="_blank">#{delayedBlock}</a></b></p>
-                            </div>} 
-                        {/*<a className="Web3ActionBTN" onClick={async () => { 
+                            </div>}
+                        {/*<a className="Web3ActionBTN" onClick={async () => {
                             var updatedSetups = [{
                                 add: false,
                                 disable: true,
@@ -1317,15 +1317,15 @@ const SetupComponentGen2 = (props) => {
                             <div className="UniV3CurveViewCurv">
                                 <span className="CircleLeftV3Curve"></span>
                                 <span className="CircleLeftV3CurvePrice">
-                                    {tickData.diluted ? "Diluted" : 
-                                        tickData.tickLowerUSDPrice ? 
-                                        ("$" + window.formatMoneyUniV3(tickData.tickLowerUSDPrice)) : 
+                                    {tickData.diluted ? "Diluted" :
+                                        tickData.tickLowerUSDPrice ?
+                                        ("$" + window.formatMoneyUniV3(tickData.tickLowerUSDPrice)) :
                                         `${window.formatMoneyUniV3(tickData.minPrice)} ${setupTokens[secondTokenIndex].symbol}`
                                     }
                                 </span>
                                 <span className="CircleRightV3Curve"></span>
                                 <span className="CircleRightV3CurvePrice">
-                                    {tickData.diluted ? "Diluted" : 
+                                    {tickData.diluted ? "Diluted" :
                                         tickData.tickUpperUSDPrice ?
                                         ("$" + window.formatMoneyUniV3(tickData.tickUpperUSDPrice)) :
                                         `${window.formatMoneyUniV3(tickData.maxPrice)} ${setupTokens[secondTokenIndex].symbol}`

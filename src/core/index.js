@@ -384,16 +384,16 @@ export default class DFOCore {
             const events = await window.getLogs({
                 address: factoryAddress,
                 topics: [
-                    this.web3.utils.sha3('FarmMainDeployed(address,address,bytes)')
+                    this.web3.utils.sha3('Deployed(address,address,address,bytes)')
                 ],
                 fromBlock: this.getContextElement('deploySearchStart'),
                 toBlock : 'latest'
             });
             for (let i = 0; i < events.length; i++) {
                 const event = events[i];
-                const farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
-                const contract = await this.getContract(this.getContextElement(generation === 'gen2' ? "FarmMainGen2ABI" : "FarmMainGen1ABI"), farmMainAddress);
-                const extensionAddress = await contract.methods._extension().call();
+                const farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[2]);
+                const contract = await this.getContract(this.getContextElement(generation === 'gen2' ? "NewFarmingABI" : "FarmMainGen1ABI"), farmMainAddress);
+                const extensionAddress = await contract.methods.host().call();
                 const extensionContract = await this.getContract(this.getContextElement(generation === 'gen2' ? "FarmExtensionGen2ABI" : "FarmExtensionGen1ABI"), extensionAddress);
                 const { host } = await extensionContract.methods.data().call();
                 deployedFarmingContracts.push({ address: farmMainAddress, sender: host, generation });
@@ -477,7 +477,8 @@ export default class DFOCore {
                 gen1FarmingFactoryAddress
             ],
             topics: [
-                this.web3.utils.sha3('FarmMainDeployed(address,address,bytes)'),
+                this.web3.utils.sha3('Deployed(address,address,address,bytes)'),
+                [],
                 this.web3.eth.abi.encodeParameter("address", address)
             ],
             fromBlock: 0,
@@ -503,16 +504,16 @@ export default class DFOCore {
             const events = await window.getLogs({
                 address: factoryAddress,
                 topics: [
-                    this.web3.utils.sha3('FarmMainDeployed(address,address,bytes)')
+                    this.web3.utils.sha3('Deployed(address,address,address,bytes)')
                 ],
                 fromBlock: 0,
                 toBlock: 'latest'
             });
             for (let i = 0; i < events.length; i++) {
                 const event = events[i];
-                const farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
-                const contract = await this.getContract(this.getContextElement(generation === 'gen2' ? "FarmMainGen2ABI" : "FarmMainGen1ABI"), farmMainAddress);
-                const extensionAddress = await contract.methods._extension().call();
+                const farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[2]);
+                const contract = await this.getContract(this.getContextElement(generation === 'gen2' ? "NewFarmingABI" : "FarmMainGen1ABI"), farmMainAddress);
+                const extensionAddress = await contract.methods.host().call();
                 const extensionContract = await this.getContract(this.getContextElement(generation === 'gen2' ? "FarmExtensionGen2ABI" : "FarmExtensionGen1ABI"), extensionAddress);
                 const { host } = await extensionContract.methods.data().call();
                 deployedFarmingContracts.push({ address: farmMainAddress, sender: host, generation });
@@ -649,17 +650,17 @@ export default class DFOCore {
             const events = await window.getLogs({
                 address: factoryAddress,
                 topics: [
-                    this.web3.utils.sha3('FarmMainDeployed(address,address,bytes)')
+                    this.web3.utils.sha3('Deployed(address,address,address,bytes)')
                 ],
                 fromBlock: this.getContextElement('deploySearchStart'),
                 toBlock: 'latest'
             });
             for (let i = 0; i < events.length; i++) {
                 const event = events[i];
-                const farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[1]);
+                const farmMainAddress = window.web3.eth.abi.decodeParameter("address", event.topics[2]);
                 try {
-                    const contract = await this.getContract(this.getContextElement(generation === 'gen2' ? "FarmMainGen2ABI" : "FarmMainGen1ABI"), farmMainAddress);
-                    const extensionAddress = await contract.methods._extension().call();
+                    const contract = await this.getContract(this.getContextElement(generation === 'gen2' ? "NewFarmingABI" : "FarmMainGen1ABI"), farmMainAddress);
+                    const extensionAddress = await contract.methods.host().call();
                     const extensionContract = await this.getContract(this.getContextElement(generation === 'gen2' ? "FarmExtensionGen2ABI" : "FarmExtensionGen1ABI"), extensionAddress);
                     const { host } = await extensionContract.methods.data().call();
                     deployedFarmingContracts.push({ contract, address: farmMainAddress, sender: host, generation });

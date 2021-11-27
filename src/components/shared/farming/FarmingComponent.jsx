@@ -14,7 +14,7 @@ const FarmingComponent = (props) => {
 
     useEffect(async () => {
         var contract = metadata.contract || await props.dfoCore.getContract(props.dfoCore.getContextElement("FarmMainGen2ABI"), metadata.contractAddress);
-        metadata.generation === 'gen2' && setRegular(await contract.methods._factory().call() === props.dfoCore.getContextElement('farmGen2FactoryAddressRegular'));
+        metadata.generation === 'gen2' && setRegular(await contract.methods.initializer().call() === props.dfoCore.getContextElement('farmGen2FactoryAddressRegular'));
     }, []);
 
     return (
@@ -32,7 +32,7 @@ const FarmingComponent = (props) => {
                 </div>
                 <div className="FarmThings">
                         {(metadata.freeSetups.length + metadata.lockedSetups.length === 0 && !metadata.canActivateSetup) ? <>
-                            <b className="InactiveSignalP">Inactive</b> 
+                            <b className="InactiveSignalP">Inactive</b>
                             {metadata.generation === 'gen2' && <b className="VersionFarm">&#129412; V3{isRegular === null ? "" : ` ${isRegular ? "Regular" : "Shared"}`}</b>}
                             {metadata.generation === 'gen1' && <b className="VersionFarmOld">Gen 1</b>}
                             </>: <>
@@ -55,7 +55,7 @@ const FarmingComponent = (props) => {
                 </div>
                 {goBack && <>
                     <div className="FarmThings">
-                        
+
                     </div>
                 </>}
                 </> : <div className="col-12 justify-content-center">

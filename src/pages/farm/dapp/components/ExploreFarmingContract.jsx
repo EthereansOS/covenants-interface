@@ -50,7 +50,7 @@ const ExploreFarmingContract = (props) => {
             const rewardTokenSymbol = await rewardToken.methods.symbol().call();
             const rewardTokenDecimals = await rewardToken.methods.decimals().call();
             setToken({ name: rewardTokenName, symbol: rewardTokenSymbol, address: rewardTokenAddress, decimals: rewardTokenDecimals });
-            const extensionAddress = await lmContract.methods._extension().call();
+            const extensionAddress = await lmContract.methods.host().call();
             const extensionContract = await dfoCore.getContract(dfoCore.getContextElement(generation === 'gen2' ? "FarmExtensionGen2ABI" : 'FarmExtensionGen1ABI'), extensionAddress);
             setExtension(extensionContract);
             const { host, byMint } = await extensionContract.methods.data().call();

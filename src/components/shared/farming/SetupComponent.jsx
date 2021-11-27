@@ -198,7 +198,7 @@ const SetupComponent = (props) => {
             setOpen(false);
             setWithdrawOpen(false);
         }
-        const extensionAddress = await lmContract.methods._extension().call();
+        const extensionAddress = await lmContract.methods.host().call();
         const extContract = await dfoCore.getContract(dfoCore.getContextElement(props.generation === 'gen2' ? "FarmExtensionGen2ABI" : "FarmExtensionGen1ABI"), extensionAddress);
         reset && setExtensionContract(extContract);
         const rewardTokenAddress = await lmContract.methods._rewardTokenAddress().call();
@@ -625,7 +625,7 @@ const SetupComponent = (props) => {
                 setLoading(false);
             }
         }
-    
+
         const disableSetup = async () => {
             setLoading(true);
             try {
@@ -1172,7 +1172,7 @@ const SetupComponent = (props) => {
                     {parseInt(setup.endBlock) > 0 ? <p><b>block end</b>: <a className="BLKEMD" target="_blank" href={`${props.dfoCore.getContextElement("etherscanURL")}block/${setup.endBlock}`}>{setup.endBlock}</a></p> : <p><b>Duration</b>: {getPeriodFromDuration(setupInfo.blockDuration)}</p>}
                     {setupInfo.minStakeable > 0 && <p><b>Min to Farm</b>: {window.formatMoney(window.fromDecimals(setupInfo.minStakeable, mainTokenInfo.decimals, true), 6)} {mainTokenInfo.symbol}</p>}
                     {!setupInfo.free && !endBlockReached && <> <p><b>Available to Farm</b>: {window.fromDecimals(parseInt(setupInfo.maxStakeable) - parseInt(setup.totalSupply), mainTokenInfo.decimals)} {mainTokenInfo.symbol}</p>
-                            <p><b>Rate</b>: {calculateLockedFixedValue()} {rewardTokenInfo.symbol} (fixed) (for every {mainTokenInfo.symbol} locked until the end block)</p> 
+                            <p><b>Rate</b>: {calculateLockedFixedValue()} {rewardTokenInfo.symbol} (fixed) (for every {mainTokenInfo.symbol} locked until the end block)</p>
                             <p><b>Limit</b>: {props.dfoCore.toDecimals(setupInfo.maxStakeable, mainTokenInfo.decimals)} {mainTokenInfo.symbol}</p>
                             <p><b>Penalty fee</b>: {parseInt(setupInfo.penaltyFee) === 0 ? `0` : props.dfoCore.formatMoney(props.dfoCore.toDecimals(props.dfoCore.toFixed(setupInfo.penaltyFee), 18) * 100, 18)}%</p>
                         </>
@@ -1216,7 +1216,7 @@ const SetupComponent = (props) => {
             </div>
                 {currentPosition && <>
                     <div className="PositionInfoFarmingBigMoney">
-                    {setupInfo.free && <> 
+                    {setupInfo.free && <>
                         <div className="FarmYou FarmYouFARMFARMFARM">
                             {manageStatus && <>
                                     <p>
@@ -1233,7 +1233,7 @@ const SetupComponent = (props) => {
                             <div className="Farmed">
                                 {!endBlockReached && <p><b>Daily Earnings</b>: {calculateDailyEarnings()} {rewardTokenInfo.symbol}</p>}
                                 <p><b>Available</b>: {window.fromDecimals(freeAvailableRewards, rewardTokenInfo.decimals, true)} {rewardTokenInfo.symbol}</p>
-                                
+
                                 {
                                     claimLoading ? <a className="Web3ActionBTN" disabled={claimLoading}>
                                         <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -1243,7 +1243,7 @@ const SetupComponent = (props) => {
                         </> }
                     </div>
                 </> }
-                        { !setupInfo.free &&  
+                        { !setupInfo.free &&
                         <div className="V1TokenLP">
                             {parseInt(farmTokenBalance) > 0 && <>
                             <div className="LockedFarmTokensPosition">
@@ -1252,7 +1252,7 @@ const SetupComponent = (props) => {
                                 <a className="MetamaskAddButton specialITEMlink" target="_blank" href={props.dfoCore.getContextElement("itemURLTemplate").format(farmTokenERC20Address)}>ITEM</a>
                                 <a className="MetamaskAddButton specialMETAlink" onClick={() => props.dfoCore.addTokenToMetamask(farmTokenERC20Address, "fLP", farmTokenDecimals, "https://ipfs.io/ipfs/Qmec5J1qui78ui9exoJmGdkYeyvvc8F45y86Wz2TfaXzhS")}>Add to Metamask</a>
                             </div>
-                            </>} 
+                            </>}
                             {
                                 (parseInt(blockNumber) >= parseInt(setup.endBlock) && parseInt(farmTokenBalance) > 0) && <>
                                     <div className="QuestionRegular QuestionRegularFarmTokenRem">
@@ -1271,7 +1271,7 @@ const SetupComponent = (props) => {
                                         }
                                     </div>
                                 </>
-                            } 
+                            }
                         </div>}
                         {
                             lockedPositions.length > 0 && <>

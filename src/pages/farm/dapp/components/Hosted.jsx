@@ -27,7 +27,7 @@ const Hosted = (props) => {
                         const rewardToken = await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), rewardTokenAddress);
                         const symbol = await rewardToken.methods.symbol().call();
                         const decimals = await rewardToken.methods.decimals().call();
-                        const extensionAddress = await contract.methods._extension().call();
+                        const extensionAddress = await contract.methods.host().call();
                         const extensionContract = await dfoCore.getContract(dfoCore.getContextElement(c.generation === 'gen2' ? "FarmExtensionGen2ABI" : 'FarmExtensionGen1ABI'), extensionAddress);
                         const { host, byMint } = await extensionContract.methods.data().call();
                         const blockNumber = await dfoCore.getBlockNumber();

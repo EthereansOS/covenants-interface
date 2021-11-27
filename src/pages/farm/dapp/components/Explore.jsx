@@ -26,12 +26,12 @@ const Explore = (props) => {
                     try {
                         const contract = await dfoCore.getContract(dfoCore.getContextElement(c.generation === 'gen2' ? "FarmMainGen2ABI" : 'FarmMainGen1ABI'), c.address)
                         const rewardTokenAddress = await contract.methods._rewardTokenAddress().call();
-                        const rewardTokenIsEth = rewardTokenAddress === dfoCore.voidEthereumAddress; 
+                        const rewardTokenIsEth = rewardTokenAddress === dfoCore.voidEthereumAddress;
                         const rewardToken = !rewardTokenIsEth ? await dfoCore.getContract(dfoCore.getContextElement('ERC20ABI'), rewardTokenAddress) : null;
                         const name = !rewardTokenIsEth ? await rewardToken.methods.name().call() : 'Ethereum';
                         const symbol = !rewardTokenIsEth ? await rewardToken.methods.symbol().call() : 'ETH';
                         const decimals = !rewardTokenIsEth ? await rewardToken.methods.decimals().call() : 18;
-                        const extensionAddress = await contract.methods._extension().call();
+                        const extensionAddress = await contract.methods.host().call();
                         const extensionContract = await dfoCore.getContract(dfoCore.getContextElement(c.generation === 'gen2' ? "FarmExtensionGen2ABI" : 'FarmExtensionGen1ABI'), extensionAddress);
                         const extensionBalance = !rewardTokenIsEth ? await rewardToken.methods.balanceOf(extensionAddress).call() : await dfoCore.web3.eth.getBalance(extensionAddress);
                         const { host, byMint } = await extensionContract.methods.data().call();
@@ -41,7 +41,7 @@ const Explore = (props) => {
                         const lockedSetups = [];
                         let totalFreeSetups = 0;
                         let totalLockedSetups = 0;
-                
+
                         let rewardPerBlock = 0;
                         let canActivateSetup = false;
                         let fromDfo = false;
@@ -188,14 +188,14 @@ const Explore = (props) => {
                 </div>
             </div>
             {
-                loading ? 
+                loading ?
                 <div className="row mt-4">
                     <div className="col-12 justify-content-center">
                         <div className="spinner-border text-secondary" role="status">
                             <span className="visually-hidden"></span>
                         </div>
                     </div>
-                </div> : 
+                </div> :
                 <div className="ListOfThings">
                     {
                         farmingContracts.length === 0 && <div className="col-12 text-left">

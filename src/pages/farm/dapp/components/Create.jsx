@@ -90,7 +90,6 @@ const Create = (props) => {
                 "address",
                 "bytes",
                 "address",
-                "address",
                 "bytes",
             ], async parseSetup(setup) {
                 var mainTokenAddress = setup.liquidityPoolToken.tokens[0].address;
@@ -113,7 +112,7 @@ const Create = (props) => {
                 ];
                 return parsedSetup;
             }, getInitArray(extensionAddress, extensionInitData, rewardTokenAddress, encodedSetups) {
-                return  [props.dfoCore.web3.utils.toChecksumAddress(extensionAddress ? extensionAddress : hostDeployedContract), extensionPayload || extensionInitData || "0x", props.dfoCore.getContextElement("uniswapV3NonfungiblePositionManagerAddress"), rewardTokenAddress, encodedSetups || 0];
+                return  [props.dfoCore.web3.utils.toChecksumAddress(extensionAddress ? extensionAddress : hostDeployedContract), extensionPayload || extensionInitData || "0x", rewardTokenAddress, encodedSetups || 0];
             }
         }
     };
@@ -169,10 +168,14 @@ const Create = (props) => {
     const onSelectRewardToken = async (address) => {
         setLoading(true);
         try {
-            const rewardToken = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), address);
-            const symbol = await rewardToken.methods.symbol().call();
-            const decimals = await rewardToken.methods.decimals().call();
-            setSelectedRewardToken({ symbol, address, decimals });
+            if(address === props.dfoCore.voidEthereumAddress) {
+                setSelectedRewardToken({ symbol : "ETH", address, decimals : "18" });
+            } else {
+                const rewardToken = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), address);
+                const symbol = await rewardToken.methods.symbol().call();
+                const decimals = await rewardToken.methods.decimals().call();
+                setSelectedRewardToken({ symbol, address, decimals });
+            }
         } catch (error) {
             console.error(error);
             setSelectedRewardToken(null);
@@ -218,7 +221,7 @@ const Create = (props) => {
         try {
             const { setups, rewardTokenAddress, extensionAddress, extensionInitData } = deployData;
             const factoryAddress = props.dfoCore.getContextElement(generation === 'gen2' ? regularNFT ? "farmGen2FactoryAddressRegular" : "farmGen2FactoryAddress" : "farmFactoryAddress");
-            const farmFactory = await props.dfoCore.getContract(props.dfoCore.getContextElement("FarmFactoryABI"), factoryAddress);
+            const farmFactory = await props.dfoCore.getContract(props.dfoCore.getContextElement("NewFactoryABI"), factoryAddress);
             const types = genConversion[generation].initTypes;
             console.log(deployData);
             const encodedSetups = abi.encode([`tuple(${genConversion[generation].setupInfoTypes.join(',')})[]`], [setups]);
@@ -227,12 +230,16 @@ const Create = (props) => {
             console.log(extensionInitData);
             console.log(extensionPayload);
             console.log(extensionAddress);
-            const payload = props.dfoCore.web3.utils.sha3(`init(${types.join(',')})`).substring(0, 10) + (props.dfoCore.web3.eth.abi.encodeParameters(types, params).substring(2));
+            var payload = (props.dfoCore.web3.eth.abi.encodeParameters(types, params));
+
             console.log(payload);
             const gas = await farmFactory.methods.deploy(payload).estimateGas({ from: props.dfoCore.address });
-            deployTransaction = await farmFactory.methods.deploy(payload).send({ from: props.dfoCore.address, gas });
-            deployTransaction = await props.dfoCore.web3.eth.getTransactionReceipt(deployTransaction.transactionHash);
-            var farmMainContractAddress = props.dfoCore.web3.eth.abi.decodeParameter("address", deployTransaction.logs.filter(it => it.topics[0] === props.dfoCore.web3.utils.sha3("FarmMainDeployed(address,address,bytes)"))[0].topics[1]);
+            deployTransaction = await farmFactory.methods.deploy(payload).send({ from: props.dfoCore.address, gasLimit : gas });
+            var farmMainContractAddress = await farmFactory.methods.deploy(payload).call({ from: props.dfoCore.address, gasLimit : gas }, deployTransaction.blockNumber - 1);
+            farmMainContractAddress = farmMainContractAddress[0]
+            console.log({farmMainContractAddress})
+            //deployTransaction = await props.dfoCore.web3.eth.getTransactionReceipt(deployTransaction.transactionHash);
+            //var farmMainContractAddress = props.dfoCore.web3.eth.abi.decodeParameter("address", deployTransaction.logs.filter(it => it.topics[0] === props.dfoCore.web3.utils.sha3("FarmMainDeployed(address,address,bytes)"))[0].topics[1]);
             setFarmingContract(farmMainContractAddress);
         } catch (error) {
             console.error(error);
@@ -257,11 +264,13 @@ const Create = (props) => {
             const { byMint, host, deployContract } = deployData;
             if (!deployContract) {
                 const factoryAddress = props.dfoCore.getContextElement(generation === 'gen2' ? regularNFT ? "farmGen2FactoryAddressRegular" : "farmGen2FactoryAddress" : "farmFactoryAddress");
-                const farmFactory = await props.dfoCore.getContract(props.dfoCore.getContextElement("FarmFactoryABI"), factoryAddress);
-                const cloneGasLimit = await farmFactory.methods.cloneFarmDefaultExtension().estimateGas({ from: props.dfoCore.address });
-                const cloneExtensionTransaction = await farmFactory.methods.cloneFarmDefaultExtension().send({ from: props.dfoCore.address, gas: cloneGasLimit });
-                const cloneExtensionReceipt = await props.dfoCore.web3.eth.getTransactionReceipt(cloneExtensionTransaction.transactionHash);
-                const extensionAddress = props.dfoCore.web3.eth.abi.decodeParameter("address", cloneExtensionReceipt.logs.filter(it => it.topics[0] === props.dfoCore.web3.utils.sha3('ExtensionCloned(address)'))[0].topics[1])
+                const farmFactory = await props.dfoCore.getContract(props.dfoCore.getContextElement("NewFactoryABI"), factoryAddress);
+                const cloneGasLimit = await farmFactory.methods.cloneDefaultExtension().estimateGas({ from: props.dfoCore.address });
+                const cloneExtensionTransaction = await farmFactory.methods.cloneDefaultExtension().send({ from: props.dfoCore.address, gas: cloneGasLimit });
+                const extensionAddress = await farmFactory.methods.cloneDefaultExtension().call({ from: props.dfoCore.address, gas: cloneGasLimit}, cloneExtensionTransaction.blockNumber - 1);
+                console.log({extensionAddress})
+                /*const cloneExtensionReceipt = await props.dfoCore.web3.eth.getTransactionReceipt(cloneExtensionTransaction.transactionHash);
+                const extensionAddress = props.dfoCore.web3.eth.abi.decodeParameter("address", cloneExtensionReceipt.logs.filter(it => it.topics[0] === props.dfoCore.web3.utils.sha3('ExtensionCloned(address)'))[0].topics[1])*/
                 const farmExtension = new props.dfoCore.web3.eth.Contract(props.dfoCore.getContextElement(generation === 'gen2' ? "FarmExtensionGen2ABI" : "FarmExtensionGen1ABI"), extensionAddress);
                 const extensionInitData = farmExtension.methods.init(byMint, host, treasuryAddress || props.dfoCore.voidEthereumAddress).encodeABI();
                 setDeployData({ ...deployData, extensionAddress, extensionInitData });
@@ -335,13 +344,33 @@ const Create = (props) => {
         return window.isEthereumAddress(hostDeployedContract);
     }
 
+    const [rewardTokenCheck, setRewardTokenCheck] = useState("eth")
+
+    function onRewardTokenChange(e) {
+        var value = e.currentTarget.value
+        setRewardTokenCheck(value)
+        setSelectedRewardToken(value === 'eth' ? props.dfoCore.voidEthereumAddress : null)
+    }
+
     const getCreationComponent = () => {
         return <div className="CheckboxQuestions uuuuTokenLoad">
             <div className="FancyExplanationCreate">
                 <h6>Reward token address</h6>
                 <p className="BreefRecapB">The reward token is the token chosen to reward farmers and can be one per contract.</p>
             </div>
-            <TokenInput placeholder={"Reward token"} onClick={onSelectRewardToken} tokenAddress={(selectedRewardToken && selectedRewardToken.address) || ""} text={"Load"} />
+            <div className="row justify-content-center">
+                <label>
+                    <span>ETH</span>
+                    {'\u00a0'}
+                    <input type="radio" name="rewad_token" value="eth" checked={rewardTokenCheck === 'eth'} onClick={onRewardTokenChange}/>
+                </label>
+                <label>
+                    <span>ERC-20 Token</span>
+                    {'\u00a0'}
+                    <input type="radio" name="rewad_token" value="token" checked={rewardTokenCheck === 'token'} onClick={onRewardTokenChange}/>
+                </label>
+            </div>
+            {rewardTokenCheck === 'token' && <TokenInput placeholder={"Reward token"} onClick={onSelectRewardToken} tokenAddress={(selectedRewardToken && selectedRewardToken.address) || ""} text={"Load"} />}
             {
                 loading ? <div className="row justify-content-center">
                     <div className="spinner-border text-secondary" role="status">
@@ -350,14 +379,14 @@ const Create = (props) => {
                 </div> : <>
                     {selectedRewardToken && <div className="CheckboxQuestions uuuuTokenLoad">
                         <p><Coin address={selectedRewardToken.address} /> {selectedRewardToken.symbol}</p>
-                        <div className="FancyExplanationCreate">
+                        {rewardTokenCheck === 'token' && <div className="FancyExplanationCreate">
                             <p className="BreefRecapB"> If “by reserve” is selected, the input token will be sent from a wallet. If “by mint” is selected, it will be minted and then sent. The logic of this action must be carefully coded into the extension! To learn more, read the <a target="_blank" href="https://docs.ethos.wiki/covenants/">Documentation</a></p>
-                        </div>
-                        <select value={byMint === true ? "true" : "false"} onChange={e => setByMint(e.target.value === 'true')} className="SelectRegular">
+                        </div>}
+                        {rewardTokenCheck === 'token' && <select value={byMint === true ? "true" : "false"} onChange={e => setByMint(e.target.value === 'true')} className="SelectRegular">
                             <option value="">Select method</option>
                             {/*!enterInETH &&*/ <option value="true">By mint</option>}
                             <option value="false">By reserve</option>
-                        </select>
+                        </select>}
                     </div>}
                     <div className="Web2ActionsBTNs">
                         <a className="backActionBTN mr-4" href="javascript:;" onClick={() => setGeneration("")}>Back</a>
@@ -551,21 +580,21 @@ const Create = (props) => {
         return (<div>
             <div className="NUUUMobileVersion SelectGenFarm">
                 <p className="GenerationTime"><b>Build a farming contract with multiple customizable setups.</b> Covenants farming contracts can be extended and governed by a wallet, an automated contract, a DAO or a DFO.</p>
-                <div className="generationSelector">
+                {false && <div className="generationSelector">
                     <h6>Gen 1</h6>
                     <p>Powered by the AMM aggregator, these contracts work with <b>Uniswap V2, Balancer V1, Mooniswap V1 and Sushiswap V1.</b></p>
                     <a className="web2ActionBTN" href="javascript:;" onClick={() => void(setGeneration("gen1"), setRegularNFT(false))}>Select</a>
-                </div>
+                </div>}
                 <div className="generationSelector">
                     <h6>Uniswap V3 Regular</h6>
                     <p>Designed for <b>Uniswap v3</b>, these contracts enable secure farming and customizable price curves.</p>
                     <a className="web2ActionBTN" href="javascript:;" onClick={() => void(setGeneration("gen2"), setRegularNFT(true))}>Select</a>
                 </div>
-                <div className="generationSelector generationSelectorB">
+                {false && <div className="generationSelector generationSelectorB">
                     <h6>Uniswap V3 Shared</h6>
                     <p>Designed for <b>Uniswap v3</b>, these contracts enable customizable price curves and low-cost farming, but more impernanet losses in trading fees by allowing farmers to pool together in shared v3 NFTs.</p>
                     <a className="web2ActionBTN" href="javascript:;" onClick={() => void(setGeneration("gen2"), setRegularNFT(false))}>Select</a>
-                </div>
+                </div>}
             </div>
             <p className="OnlyMobileVersion">Use a Desktop or a tablet to build Farming Contracts</p>
         </div>);
