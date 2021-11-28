@@ -585,12 +585,12 @@ const Create = (props) => {
                     <p>Powered by the AMM aggregator, these contracts work with <b>Uniswap V2, Balancer V1, Mooniswap V1 and Sushiswap V1.</b></p>
                     <a className="web2ActionBTN" href="javascript:;" onClick={() => void(setGeneration("gen1"), setRegularNFT(false))}>Select</a>
                 </div>}
-                {false && <div className="generationSelector">
+                {true && <div className="generationSelector">
                     <h6>Uniswap V3 Regular</h6>
                     <p>Designed for <b>Uniswap v3</b>, these contracts enable secure farming and customizable price curves.</p>
                     <a className="web2ActionBTN" href="javascript:;" onClick={() => void(setGeneration("gen2"), setRegularNFT(true))}>Select</a>
                 </div>}
-                {true && <div className="generationSelector generationSelectorB">
+                {false && <div className="generationSelector generationSelectorB">
                     <h6>Uniswap V3 Shared</h6>
                     <p>Designed for <b>Uniswap v3</b>, these contracts enable customizable price curves and low-cost farming, but more impernanet losses in trading fees by allowing farmers to pool together in shared v3 NFTs.</p>
                     <a className="web2ActionBTN" href="javascript:;" onClick={() => void(setGeneration("gen2"), setRegularNFT(false))}>Select</a>
