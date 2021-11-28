@@ -92,7 +92,7 @@ const Create = (props) => {
                 "address",
                 "bytes",
             ], async parseSetup(setup) {
-                var mainTokenAddress = setup.liquidityPoolToken.tokens[0].address;
+                var mainTokenAddress = setup.liquidityPoolToken.tokens[setup.mainTokenIndex].address;
                 const mainTokenContract = await props.dfoCore.getContract(props.dfoCore.getContextElement('ERC20ABI'), mainTokenAddress);
                 const mainTokenDecimals = mainTokenAddress === window.voidEthereumAddress ? 18 : await mainTokenContract.methods.decimals().call();
 
