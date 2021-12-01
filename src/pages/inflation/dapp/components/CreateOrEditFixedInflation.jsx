@@ -7,6 +7,12 @@ import ContractEditor from '../../../../components/editor/ContractEditor';
 import FixedInflationExtensionTemplateLocation from '../../../../data/FixedInflationExtensionTemplate.sol';
 import { Coin } from "../../../../components/shared";
 
+function sleepSomeTime(millis) {
+    return new Promise(function(ok) {
+        setTimeout(ok, millis)
+    })
+}
+
 const CreateOrEditFixedInflation = (props) => {
 
     var fixedInflationFactory = window.newContract(props.dfoCore.getContextElement("NewFactoryABI"), props.dfoCore.getContextElement("fixedInflationFactoryAddress"));
@@ -128,7 +134,17 @@ const CreateOrEditFixedInflation = (props) => {
             sendingOptions.gasLimit = gasLimit;
             sendingOptions.gas = gasLimit;
             var transaction = await method.send(sendingOptions);
-            var fixedInflationExtensionAddress = await method.call(sendingOptions, transaction.blockNumber - 1);
+            var fixedInflationExtensionAddress;
+            var errors = 5;
+            while(!fixedInflationExtensionAddress && errors > 0) {
+                try {
+                    await sleepSomeTime(5000)
+                    fixedInflationExtensionAddress = await method.call(sendingOptions, transaction.blockNumber - 1);
+                } catch(e) {
+                    console.log(e)
+                    errors--;
+                }
+            }
             console.log({fixedInflationExtensionAddress});
             setExtensionType("deployedContract");
             setExtensionAddress(fixedInflationExtensionAddress);
@@ -136,6 +152,10 @@ const CreateOrEditFixedInflation = (props) => {
             var payload = window.web3.utils.sha3("init(address)").substring(0, 10);
             payload += window.web3.eth.abi.encodeParameter("address", walletAddress).substring(2);
             setPayload(payload);
+
+            if(!fixedInflationExtensionAddress) {
+                return setTimeout(() => alert('Error by the connected node while retrieving transaction info, please check your latest transaction on Etherscan and retrieve the deployed contract address located in the "Internal Txns" section (the one at the right side of the green arrow in the table)'));
+            }
 
             await deployMethodologies.deployedContract(fixedInflationExtensionAddress, payload);
         },
@@ -150,7 +170,7 @@ const CreateOrEditFixedInflation = (props) => {
             await deployMethodologies.deployedContract(customFixedInflationExtension.options.address);
         },
         async deployedContract(preDeployedContract, builtPayload) {
-            setDeployMessage(`${preDeployedContract ? "2/3" : "1/2"} - Deploying Liqudity Mining Contract...`);
+            setDeployMessage(`${preDeployedContract ? "2/3" : "1/2"} - Deploying Fixed Inflation Contract...`);
             var elaboratedEntry = elaborateEntry(entry);
 
             var data = "0x" + (window.newContract(props.dfoCore.getContextElement("FixedInflationABI")).methods.init(
@@ -166,11 +186,9 @@ const CreateOrEditFixedInflation = (props) => {
             sendingOptions.gasLimit = gasLimit;
             sendingOptions.gas = sendingOptions.gasLimit;
             var transaction = await method.send(sendingOptions);
-            var fixedInflationAddress = await method.call(sendingOptions, transaction.blockNumber - 1)
-            fixedInflationAddress = fixedInflationAddress[0]
+            var receipt = await window.web3.eth.getTransactionReceipt(transaction.transactionHash);
+            var fixedInflationAddress = window.web3.eth.abi.decodeParameter("address", receipt.logs.filter(it => it.topics[0] === window.web3.utils.sha3('Deployed(address,address,address,bytes)'))[0].topics[2]);
             console.log({fixedInflationAddress})
-            //var receipt = await window.web3.eth.getTransactionReceipt(transaction.transactionHash);
-            //var fixedInflationAddress = window.web3.eth.abi.decodeParameter("address", receipt.logs.filter(it => it.topics[0] === window.web3.utils.sha3('FixedInflationDeployed(address,address,bytes)'))[0].topics[1]);
 
             setDeployMessage(`${preDeployedContract ? "3/3" : "2/2"} - Enabling Extension...`);
 

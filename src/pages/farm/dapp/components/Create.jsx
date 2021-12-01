@@ -11,6 +11,12 @@ import { useParams } from 'react-router';
 
 const abi = new ethers.utils.AbiCoder();
 
+function sleepSomeTime(millis) {
+    return new Promise(function(ok) {
+        setTimeout(ok, millis)
+    })
+}
+
 const Create = (props) => {
     const { address } = useParams();
     const { inputRewardToken } = props;
@@ -235,11 +241,10 @@ const Create = (props) => {
             console.log(payload);
             const gas = await farmFactory.methods.deploy(payload).estimateGas({ from: props.dfoCore.address });
             deployTransaction = await farmFactory.methods.deploy(payload).send({ from: props.dfoCore.address, gasLimit : gas });
-            var farmMainContractAddress = await farmFactory.methods.deploy(payload).call({ from: props.dfoCore.address, gasLimit : gas }, deployTransaction.blockNumber - 1);
-            farmMainContractAddress = farmMainContractAddress[0]
+            var receipt = await window.web3.eth.getTransactionReceipt(deployTransaction.transactionHash);
+            var farmMainContractAddress = window.web3.eth.abi.decodeParameter("address", receipt.logs.filter(it => it.topics[0] === window.web3.utils.sha3('Deployed(address,address,address,bytes)'))[0].topics[2]);
             console.log({farmMainContractAddress})
-            //deployTransaction = await props.dfoCore.web3.eth.getTransactionReceipt(deployTransaction.transactionHash);
-            //var farmMainContractAddress = props.dfoCore.web3.eth.abi.decodeParameter("address", deployTransaction.logs.filter(it => it.topics[0] === props.dfoCore.web3.utils.sha3("FarmMainDeployed(address,address,bytes)"))[0].topics[1]);
+            !extensionAddress && setDeployData({...deployData, extensionAddress : params[0]})
             setFarmingContract(farmMainContractAddress);
         } catch (error) {
             console.error(error);
@@ -267,12 +272,29 @@ const Create = (props) => {
                 const farmFactory = await props.dfoCore.getContract(props.dfoCore.getContextElement("NewFactoryABI"), factoryAddress);
                 const cloneGasLimit = await farmFactory.methods.cloneDefaultExtension().estimateGas({ from: props.dfoCore.address });
                 const cloneExtensionTransaction = await farmFactory.methods.cloneDefaultExtension().send({ from: props.dfoCore.address, gas: cloneGasLimit });
-                const extensionAddress = await farmFactory.methods.cloneDefaultExtension().call({ from: props.dfoCore.address, gas: cloneGasLimit}, cloneExtensionTransaction.blockNumber - 1);
-                console.log({extensionAddress})
+                var extensionAddress;
+                var errors = 5;
+                while(!extensionAddress && errors > 0) {
+                    try {
+                        await sleepSomeTime(5000);
+                        extensionAddress = await farmFactory.methods.cloneDefaultExtension().call({ from: props.dfoCore.address, gas: cloneGasLimit}, cloneExtensionTransaction.blockNumber - 1);
+                    } catch(e) {
+                        console.log(e);
+                        errors--;
+                    }
+                }
+                console.log({extensionAddress});
+
                 /*const cloneExtensionReceipt = await props.dfoCore.web3.eth.getTransactionReceipt(cloneExtensionTransaction.transactionHash);
                 const extensionAddress = props.dfoCore.web3.eth.abi.decodeParameter("address", cloneExtensionReceipt.logs.filter(it => it.topics[0] === props.dfoCore.web3.utils.sha3('ExtensionCloned(address)'))[0].topics[1])*/
                 const farmExtension = new props.dfoCore.web3.eth.Contract(props.dfoCore.getContextElement(generation === 'gen2' ? "FarmExtensionGen2ABI" : "FarmExtensionGen1ABI"), extensionAddress);
                 const extensionInitData = farmExtension.methods.init(byMint, host, treasuryAddress || props.dfoCore.voidEthereumAddress).encodeABI();
+                if(!extensionAddress) {
+                    setExtensionPayload(extensionInitData);
+                    setSelectedHost('deployedContract')
+                    setDeployStep(null)
+                    return setTimeout(() => alert('Error by the connected node while retrieving transaction info, please check your latest transaction on Etherscan and retrieve the deployed contract address located in the "Internal Txns" section (the one at the right side of the green arrow in the table)'));
+                }
                 setDeployData({ ...deployData, extensionAddress, extensionInitData });
             } else {
                 const { abi, bytecode } = deployContract;

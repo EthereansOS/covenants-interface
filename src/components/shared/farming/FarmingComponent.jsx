@@ -36,7 +36,7 @@ const FarmingComponent = (props) => {
                             {metadata.generation === 'gen2' && <b className="VersionFarm">&#129412; V3{isRegular === null ? "" : ` ${isRegular ? "Regular" : "Shared"}`}</b>}
                             {metadata.generation === 'gen1' && <b className="VersionFarmOld">Gen 1</b>}
                             </>: <>
-                            <p><b>Daily Rate</b>: {window.formatMoney(dailyReward, 6)} {window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <>{metadata.name} <span className="ITEMsymbolF">({symbol})</span></>} {!window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <>{symbol} <span className="ITEMsymbolF">({metadata.name})</span></>}</p>
+                            {dailyReward !== 0 && <p><b>Daily Rate</b>: {window.formatMoney(dailyReward, 6)} {window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <>{metadata.name} <span className="ITEMsymbolF">({symbol})</span></>} {!window.dfoCore.isItemSync(metadata.rewardTokenAddress) && <>{symbol} <span className="ITEMsymbolF">({metadata.name})</span></>}</p>}
                             <p>
                                 <b className="InactiveSignalA">Active ({metadata.freeSetups.length + metadata.lockedSetups.length})</b>
                                 {metadata.generation === 'gen2' && <b className="VersionFarm">&#129412; V3{isRegular === null ? "" : ` ${isRegular ? "Regular" : "Shared"}`}</b>}
