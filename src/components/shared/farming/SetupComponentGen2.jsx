@@ -536,7 +536,7 @@ const SetupComponentGen2 = (props) => {
             value[1] = value[1].substring(0, 18);
             value = value.join('.');
         }
-        const fullValue = isFull ? value :window.toDecimals(value, setupTokens[index].decimals);
+        const fullValue = isFull ? value : window.toDecimals(value, setupTokens[index].decimals);
         tks[index] = {
             value : isFull ? window.fromDecimals(value, setupTokens[index].decimals, true) : value,
             full : fullValue
@@ -551,33 +551,43 @@ const SetupComponentGen2 = (props) => {
             return;
         }
         window.updateAmountTimeout = setTimeout(async function () {
-            var tokenAddress = setupTokens[index].address;
-            tokenAddress = tokenAddress === window.voidEthereumAddress ? ethereumAddress : tokenAddress;
-            var pool = await createPool();
-            var fromAmountData = {pool, tickLower : parseInt(setupInfo.tickLower), tickUpper : parseInt(setupInfo.tickUpper), useFullPrecision : false};
-            fromAmountData[`amount${index}`] = window.formatNumber(fullValue);
-            var pos = Position[`fromAmount${index}`](fromAmountData);
-            var liquidityPoolAmount = pos.liquidity.toString();
+            var liquidityPoolAmount;
+            var surplus = 0;
+            async function elaborateValue() {
+                var tokenAddress = setupTokens[index].address;
+                tokenAddress = tokenAddress === window.voidEthereumAddress ? ethereumAddress : tokenAddress;
+                var pool = await createPool();
+                var fromAmountData = {pool, tickLower : parseInt(setupInfo.tickLower), tickUpper : parseInt(setupInfo.tickUpper), useFullPrecision : false};
+                fromAmountData[`amount${index}`] = window.formatNumber(fullValue) + surplus;
+                var pos = Position[`fromAmount${index}`](fromAmountData);
+                liquidityPoolAmount = pos.liquidity.toString();
+                if(setup.objectId && setup.objectId !== '0') {
+                    pos = pos[`amount${1 - index}`].toSignificant(18);
+                    pos === '0' && tickData.cursorNumber !== 0 && tickData.cursorNumber !== 100 && (pos = window.fromDecimals('1', setupTokens[1 - index].decimals, true));
+                    tks[1 - index] = {
+                        value : window.numberToString(pos),
+                        full : window.toDecimals(window.numberToString(pos), setupTokens[1 - index].decimals)
+                    };
+                } else {
+                    pos = pos.mintAmounts;
+                    tks[0] = {
+                        value : index === 0 && !isFull ? value : window.fromDecimals(pos.amount0.toString(), setupTokens[0].decimals, true),
+                        full : pos.amount0.toString()
+                    };
+                    tks[1] = {
+                        value : index === 1 && !isFull ? value : window.fromDecimals(pos.amount1.toString(), setupTokens[1].decimals, true),
+                        full : pos.amount1.toString()
+                    };
+                }
+            }
+            await elaborateValue()
+            while(props.dfoCore.web3.utils.toBN(tks[index].full).lt(props.dfoCore.web3.utils.toBN(fullValue))) {
+                await elaborateValue(surplus += 999999)
+            }
             console.log("Liquidity", liquidityPoolAmount);
             console.log("totalSupply", setup.totalSupply);
-            if(setup.objectId && setup.objectId !== '0') {
-                pos = pos[`amount${1 - index}`].toSignificant(18);
-                pos === '0' && tickData.cursorNumber !== 0 && tickData.cursorNumber !== 100 && (pos = window.fromDecimals('1', setupTokens[1 - index].decimals, true));
-                tks[1 - index] = {
-                    value : window.numberToString(pos),
-                    full : window.toDecimals(window.numberToString(pos), setupTokens[1 - index].decimals)
-                };
-            } else {
-                pos = pos.mintAmounts;
-                tks[0] = {
-                    value : index === 0 && !isFull ? value : window.fromDecimals(pos.amount0.toString(), setupTokens[0].decimals, true),
-                    full : pos.amount0.toString()
-                };
-                tks[1] = {
-                    value : index === 1 && !isFull ? value : window.fromDecimals(pos.amount1.toString(), setupTokens[1].decimals, true),
-                    full : pos.amount1.toString()
-                };
-            }
+            console.log({value0: tks[0].full})
+            console.log({value1: tks[1].full})
             tickData && tickData.cursorNumber === 0 && (tks[0] = {
                 value : '0',
                 full : '0'
