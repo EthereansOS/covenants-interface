@@ -6,6 +6,9 @@ import Loading from '../Loading';
 import { connect } from 'react-redux';
 
 const Coin = (props) => {
+    if(props.address.toLowerCase() === '0x654DB5B6b1E7E5359eA3e256941301fA54691B9A'.toLowerCase()) {
+        props = {...props, forcedImage : '//gateway.ipfs.io/ipfs/QmVccKU4exWeDcyJvjnXCUKosUHN5yVZVHGMkZMM5C4d56'}
+    }
     const { forcedImage, address } = props;
     const [image, setImage] = useState(props.dfoCore.getContextElement('trustwalletImgURLTemplate').split('{0}').join(window.web3.utils.toChecksumAddress(props.address)));
     const { icons } = require('../../../data/context.json').default;
@@ -38,7 +41,7 @@ const Coin = (props) => {
         image === defaultLogoImage ? tokenSymbol ? <span className="TokenCoolFancy"><span>{window.shortenWord(tokenSymbol, 4, true)}</span></span> :
         <Loading/> :
         <img className={props.className} src={forcedImage || imageLink} onError={onImageError}/>
-    ); 
+    );
 }
 
 Coin.propTypes = {
